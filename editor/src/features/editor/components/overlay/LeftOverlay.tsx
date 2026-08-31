@@ -1,0 +1,185 @@
+/*Purpose:
+Displays the currently selected editor panel and renders its items on the screen.
+
+What it does:
+
+Gets activePanel from useEditor().
+Determines which panel is currently active.
+Gets the corresponding items from PANEL_DATA.
+Gets the panel title and description.
+Renders the panel header.
+Renders each tool as a button with its icon, title, and description.
+Handles closing the left panel using setLeftPanelOpen(false).
+
+In simple words:
+
+LeftOverlay.tsx decides how the panel looks and displays the data.
+
+It is responsible mainly for UI + interaction.*/
+
+import { X } from "lucide-react";
+
+import { useEditor } from "../../hooks/useEditor";
+
+import { PANEL_DATA } from "./panelData";
+import type { PanelType } from "./panelData";
+
+const PANEL_TITLES: Partial<Record<PanelType, string>> = {
+  writing: "Writing",
+  links: "Links",
+  styles: "Styles",
+  tables: "Tables",
+  figures: "Figures",
+  references: "References",
+  symbols: "Symbols",
+  templates: "Templates",
+  document: "Document",
+  settings: "Settings",
+};
+
+const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
+  writing: "Writing and formatting tools",
+  links: "Internal, external & cross references",
+  styles: "Document styles",
+  tables: "Insert and manage tables",
+  figures: "Images and figures",
+  references: "References and citations",
+  symbols: "Special symbols",
+  templates: "Document templates",
+  document: "Document tools",
+  settings: "Editor settings",
+};
+
+export default function LeftOverlay() {
+  const {
+    activePanel,
+    setLeftPanelOpen,
+  } = useEditor();
+
+  const panelKey =
+    (activePanel as PanelType) ?? "writing";
+
+  const items =
+    PANEL_DATA[panelKey] ??
+    PANEL_DATA.writing;
+
+  const title =
+    PANEL_TITLES[panelKey];
+
+  const description =
+    PANEL_DESCRIPTIONS[panelKey];
+
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-background">
+
+      {/* HEADER */}
+      <div
+        className="
+          flex
+          h-[74px]
+          shrink-0
+          items-center
+          justify-between
+          border-b
+          border-slate-200
+          px-5
+        "
+      >
+        <div>
+          <h2 className="text-sm font-semibold">
+            {title}
+          </h2>
+
+          <p className="text-xs text-muted-foreground">
+            {description}
+          </p>
+        </div>
+
+        {/* CLOSE */}
+        <button
+          type="button"
+          onClick={() => setLeftPanelOpen(false)}
+          className="
+            flex
+            h-8
+            w-8
+            items-center
+            justify-center
+            rounded-md
+            text-slate-500
+            transition-colors
+            hover:bg-slate-100
+            hover:text-slate-900
+          "
+          aria-label="Close panel"
+          title="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* DYNAMIC CONTENT */}
+      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+
+        <div className="space-y-2">
+
+          {items.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className="
+                  flex
+                  w-full
+                  items-center
+                  gap-3
+                  rounded-lg
+                  border
+                  border-slate-200
+                  bg-white
+                  p-3
+                  text-left
+                  transition-colors
+                  hover:bg-slate-50
+                  hover:border-blue-200
+                "
+              >
+                <div
+                  className="
+                    flex
+                    h-9
+                    w-9
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-md
+                    bg-slate-100
+                    text-slate-600
+                  "
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-800">
+                    {item.title}
+                  </p>
+
+                  {item.description && (
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
