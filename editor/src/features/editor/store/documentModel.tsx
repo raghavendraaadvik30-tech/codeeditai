@@ -198,6 +198,8 @@ revertStyleOverride: (
     documentId: string
   ) => void;
 
+  resetDocument: () => void;
+
   refreshHistory: () => void;
 }
 
@@ -663,6 +665,23 @@ const restore = useCallback((documentId: string) => {
 }, []);
 
 /* ============================================================
+   Reset / Delete Document
+============================================================ */
+
+const resetDocument = useCallback(() => {
+  const fresh = createEmptyDocument();
+  setModel(fresh);
+  if (fresh.pages.length) {
+    setActivePage(fresh.pages[0].id);
+  }
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}, []);
+
+/* ============================================================
    Provider
 ============================================================ */
 
@@ -698,6 +717,8 @@ return (
       saveAs,
 
       restore,
+
+      resetDocument,
 
       refreshHistory,
     }}

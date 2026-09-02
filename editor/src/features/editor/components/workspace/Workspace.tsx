@@ -336,6 +336,6 @@ function DocumentPage({
   );
 }
 
-function getHeaderText(pageNumber: number) {
+function getHeaderText(_pageNumber: number) {
   return "CSR-2024-PXL-0921 · Confidential";
 }

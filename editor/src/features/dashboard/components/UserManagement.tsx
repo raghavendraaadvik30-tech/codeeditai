@@ -128,7 +128,7 @@ import {
 interface AddUserFormInput {
   fullName: string;
   email: string;
-  role: "Admin" | "Author" ;
+  role: "Admin" | "Author" | "Reviewer";
 }
 
 
@@ -140,7 +140,7 @@ interface EditUserFormInput {
   fullName: string;
   email: string;
   phone?: string;
-  role: "Admin" | "Author" ;
+  role: "Admin" | "Author" | "Reviewer";
 }
 
 
@@ -164,7 +164,7 @@ const addUserFormSchema = z.object({
       message: "Provide a valid email address",
     }),
 
-  role: z.enum(["Admin", "Author"]),
+  role: z.enum(["Admin", "Author", "Reviewer"]),
 });
 
 
@@ -190,7 +190,7 @@ const editUserFormSchema = z.object({
 
   phone: z.string().optional(),
 
-  role: z.enum(["Admin", "Author"]),
+  role: z.enum(["Admin", "Author", "Reviewer"]),
 });
 
 

@@ -1,0 +1,495 @@
+/**
+ * --------------------------------------------------------
+ * Module: Document
+ * Feature: Document Page / Main Document Management Panel
+ * Description:
+ * Primary presentation container for document management, displaying
+ * document search, all documents list, active document selector,
+ * and collapsible accordions for breaks, navigation, and document utilities.
+ * --------------------------------------------------------
+ */
+
+import { useState, useMemo } from "react";
+import {
+  Search,
+  Plus,
+  ChevronRight,
+  FileText,
+  List,
+  CornerDownLeft,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { useEditor } from "@/features/editor/context/EditorContext";
+import { useDocumentModel } from "@/features/editor/store/documentModel";
+import { cn } from "@/lib/utils";
+
+interface DocItem {
+  id: string;
+  title: string;
+  pagesCount: number;
+  savedTime?: string;
+  isUnsaved?: boolean;
+}
+
+export default function DocumentPage() {
+  const { insertHTML, editorRef } = useEditor();
+  const { model, updateTitle } = useDocumentModel();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeDocId, setActiveDocId] = useState<string>("doc_untitled");
+
+  // Accordion state
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    breaks: false,
+    navigation: false,
+    utilities: false,
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  // Documents list matching the screenshot
+  const [docList, setDocList] = useState<DocItem[]>([
+    {
+      id: "doc_banking",
+      title: "Banking_Practice_Paper_Solved",
+      pagesCount: 2,
+      savedTime: "03:25 pm",
+      isUnsaved: false,
+    },
+    {
+      id: "doc_untitled",
+      title: model.title || "Untitled Document",
+      pagesCount: model.pages.length || 1,
+      isUnsaved: true,
+    },
+  ]);
+
+  const filteredDocs = useMemo(() => {
+    if (!searchQuery.trim()) return docList;
+    return docList.filter((d) =>
+      d.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [docList, searchQuery]);
+
+  const handleCreateDoc = () => {
+    const newDoc: DocItem = {
+      id: `doc_${Date.now()}`,
+      title: "New Document",
+      pagesCount: 1,
+      isUnsaved: true,
+    };
+    setDocList((prev) => [newDoc, ...prev]);
+    setActiveDocId(newDoc.id);
+    updateTitle("New Document");
+  };
+
+  const handleSelectDoc = (doc: DocItem) => {
+    setActiveDocId(doc.id);
+    updateTitle(doc.title);
+  };
+
+  const handleDeleteDoc = (e: React.MouseEvent, docId: string) => {
+    e.stopPropagation();
+    const nextList = docList.filter((d) => d.id !== docId);
+    if (nextList.length === 0) {
+      const defaultDoc: DocItem = {
+        id: `doc_${Date.now()}`,
+        title: "Untitled Document",
+        pagesCount: 1,
+        isUnsaved: true,
+      };
+      setDocList([defaultDoc]);
+      setActiveDocId(defaultDoc.id);
+      updateTitle("Untitled Document");
+    } else {
+      setDocList(nextList);
+      if (activeDocId === docId) {
+        setActiveDocId(nextList[0].id);
+        updateTitle(nextList[0].title);
+      }
+    }
+  };
+
+  // Breaks Actions
+  const insertColumnBreak = () => {
+    insertHTML?.(
+      `<div class="column-break" contenteditable="false" data-cb="1" style="break-before:column;page-break-before:column;border-top:1px dotted #888;margin:24px 0;text-align:center;color:#888;font-size:10pt">- Column Break -</div><p><br/></p>`
+    );
+  };
+
+  const insertLineBreak = () => {
+    insertHTML?.(`<br/>`);
+  };
+
+  const insertPageBreak = () => {
+    insertHTML?.(
+      `<div class="page-break" contenteditable="false" style="break-before:page;page-break-before:always;border-top:1px dashed #94a3b8;margin:24px 0;text-align:center;color:#94a3b8;font-size:10pt;user-select:none;">— Page Break —</div><p><br/></p>`
+    );
+  };
+
+  // Find & Replace State
+  const [findText, setFindText] = useState("");
+  const [replaceText, setReplaceText] = useState("");
+
+  const handleFind = () => {
+    if (!findText || !editorRef.current) return;
+    const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT);
+    let n: Node | null;
+    while ((n = walker.nextNode())) {
+      if (n.nodeValue && n.nodeValue.toLowerCase().includes(findText.toLowerCase())) {
+        const parent = n.parentElement;
+        parent?.scrollIntoView({ behavior: "smooth", block: "center" });
+        break;
+      }
+    }
+  };
+
+  const handleReplace = () => {
+    if (!findText || !editorRef.current) return;
+    const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT);
+    let n: Node | null;
+    while ((n = walker.nextNode())) {
+      if (n.nodeValue && n.nodeValue.includes(findText)) {
+        n.nodeValue = n.nodeValue.replace(findText, replaceText);
+        break;
+      }
+    }
+  };
+
+  // Document Statistics calculation
+  const stats = useMemo(() => {
+    let words = 0;
+    let characters = 0;
+    let charactersNoSpaces = 0;
+    let paragraphs = 0;
+
+    if (typeof window === "undefined" || typeof DOMParser === "undefined") {
+      return { words: 0, characters: 0, charactersNoSpaces: 0, paragraphs: 0, pages: 1, tables: 0, images: 0, sections: 1 };
+    }
+
+    const parser = new DOMParser();
+    Object.values(model.pageHtml || {}).forEach((html) => {
+      if (!html) return;
+      const doc = parser.parseFromString(html, "text/html");
+      const text = doc.body.textContent || "";
+      const trimmed = text.trim();
+      words += trimmed ? trimmed.split(/\s+/).filter(Boolean).length : 0;
+      characters += text.length;
+      charactersNoSpaces += text.replace(/\s+/g, "").length;
+
+      const nodes = doc.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6");
+      nodes.forEach((n) => {
+        if ((n.textContent || "").trim().length > 0) paragraphs++;
+      });
+    });
+
+    return {
+      words,
+      characters,
+      charactersNoSpaces,
+      paragraphs,
+      pages: model.pages.length || 1,
+      tables: 0,
+      images: 0,
+      sections: model.sections?.length || 1,
+    };
+  }, [model.pageHtml, model.pages, model.sections]);
+
+  return (
+    <div className="flex h-full w-full flex-col select-none overflow-hidden bg-background text-foreground">
+      {/* 1. TOP HEADER: DOCUMENT MANAGER & NEW BUTTON */}
+      <div className="border-b border-slate-200/80 p-3.5 space-y-3 dark:border-slate-800/80">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">
+            Document Manager
+          </h3>
+          <button
+            type="button"
+            onClick={handleCreateDoc}
+            className="flex h-7 items-center gap-1 rounded-md bg-[#0078d4] px-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#005a9e]"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New
+          </button>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search documents..."
+            className="h-8 w-full rounded-md border border-slate-200 bg-slate-50/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-slate-400 focus:border-[#0078d4] dark:border-slate-800 dark:bg-[#07131E] dark:text-slate-200"
+          />
+        </div>
+      </div>
+
+      {/* 2. SCROLLABLE SIDEBAR BODY */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+        {/* ALL DOCUMENTS */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">
+              All Documents
+            </h3>
+            <span className="rounded-full bg-slate-200/70 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+              {filteredDocs.length}
+            </span>
+          </div>
+
+          {/* Document Cards List */}
+          <div className="space-y-1.5">
+            {filteredDocs.map((doc) => {
+              const isActive = activeDocId === doc.id;
+              return (
+                <div
+                  key={doc.id}
+                  onClick={() => handleSelectDoc(doc)}
+                  className={cn(
+                    "group flex cursor-pointer items-center justify-between rounded-xl border p-2.5 transition-all",
+                    isActive
+                      ? "border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4]"
+                      : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800/80 dark:bg-[#091524] dark:hover:border-slate-700"
+                  )}
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                    <div
+                      className={cn(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                        isActive
+                          ? "bg-[#0078d4]/20 text-[#0078d4]"
+                          : "bg-slate-100 text-slate-400 dark:bg-slate-800/80 dark:text-slate-500"
+                      )}
+                    >
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className={cn(
+                          "truncate text-xs font-semibold leading-tight",
+                          isActive
+                            ? "text-[#0078d4]"
+                            : "text-slate-900 dark:text-slate-100"
+                        )}
+                      >
+                        {doc.title}
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                        <span>
+                          {doc.pagesCount}{" "}
+                          {doc.pagesCount === 1 ? "page" : "pages"}
+                        </span>
+                        <span>·</span>
+                        {doc.savedTime ? (
+                          <span className="text-emerald-500 font-medium">
+                            Saved {doc.savedTime}
+                          </span>
+                        ) : (
+                          <span className="text-amber-500 font-medium">
+                            Unsaved
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Delete Button matching screenshot */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteDoc(e, doc.id)}
+                    title="Delete Document"
+                    className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-100/80 text-red-500 hover:bg-red-200 hover:text-red-700 dark:bg-red-950/60 dark:text-red-400 dark:hover:bg-red-900/80 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 3. COLLAPSIBLE ACCORDIONS */}
+        <div className="space-y-2 border-t border-slate-200/80 pt-3 dark:border-slate-800/80">
+          {/* BREAKS ACCORDION */}
+          <div className="border-b border-slate-100 pb-1 dark:border-slate-800/60">
+            <button
+              type="button"
+              onClick={() => toggleSection("breaks")}
+              className="flex w-full items-center gap-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 transition-colors hover:text-slate-900 focus:outline-none dark:text-slate-300 dark:hover:text-white"
+            >
+              <ChevronRight
+                className={cn(
+                  "h-3.5 w-3.5 text-slate-500 transition-transform duration-200",
+                  openSections.breaks && "rotate-90"
+                )}
+              />
+              Breaks
+            </button>
+            {openSections.breaks && (
+              <div className="mt-2 space-y-1.5 pl-5">
+                <button
+                  type="button"
+                  onClick={insertColumnBreak}
+                  className="flex w-full items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/70 p-2 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 dark:border-slate-800 dark:bg-[#111D29] dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <List className="h-4 w-4 text-slate-500" />
+                  Column Break
+                </button>
+                <button
+                  type="button"
+                  onClick={insertLineBreak}
+                  className="flex w-full items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/70 p-2 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 dark:border-slate-800 dark:bg-[#111D29] dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <CornerDownLeft className="h-4 w-4 text-slate-500" />
+                  Line Break
+                </button>
+                <button
+                  type="button"
+                  onClick={insertPageBreak}
+                  className="flex w-full items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/70 p-2 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 dark:border-slate-800 dark:bg-[#111D29] dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <FileText className="h-4 w-4 text-slate-500" />
+                  Page Break
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* NAVIGATION ACCORDION */}
+          <div className="border-b border-slate-100 pb-1 dark:border-slate-800/60">
+            <button
+              type="button"
+              onClick={() => toggleSection("navigation")}
+              className="flex w-full items-center gap-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 transition-colors hover:text-slate-900 focus:outline-none dark:text-slate-300 dark:hover:text-white"
+            >
+              <ChevronRight
+                className={cn(
+                  "h-3.5 w-3.5 text-slate-500 transition-transform duration-200",
+                  openSections.navigation && "rotate-90"
+                )}
+              />
+              Navigation
+            </button>
+            {openSections.navigation && (
+              <div className="mt-2 space-y-2.5 pl-5">
+                {/* Find & Replace */}
+                <div className="rounded-lg border border-slate-200 bg-white p-2.5 space-y-2 dark:border-slate-800 dark:bg-[#0E1A29]">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <Search className="h-3.5 w-3.5 text-blue-500" />
+                    Find & Replace
+                  </div>
+                  <input
+                    type="text"
+                    value={findText}
+                    onChange={(e) => setFindText(e.target.value)}
+                    placeholder="Find text..."
+                    className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
+                  />
+                  <input
+                    type="text"
+                    value={replaceText}
+                    onChange={(e) => setReplaceText(e.target.value)}
+                    placeholder="Replace with..."
+                    className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
+                  />
+                  <div className="flex gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={handleFind}
+                      className="flex-1 rounded bg-[#0078d4] py-1 text-[11px] font-semibold text-white hover:bg-[#005a9e]"
+                    >
+                      Find
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReplace}
+                      className="flex-1 rounded border border-slate-200 bg-slate-100 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      Replace
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* DOCUMENT UTILITIES ACCORDION */}
+          <div className="border-b border-slate-100 pb-1 dark:border-slate-800/60">
+            <button
+              type="button"
+              onClick={() => toggleSection("utilities")}
+              className="flex w-full items-center gap-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 transition-colors hover:text-slate-900 focus:outline-none dark:text-slate-300 dark:hover:text-white"
+            >
+              <ChevronRight
+                className={cn(
+                  "h-3.5 w-3.5 text-slate-500 transition-transform duration-200",
+                  openSections.utilities && "rotate-90"
+                )}
+              />
+              Document Utilities
+            </button>
+            {openSections.utilities && (
+              <div className="mt-2 space-y-2.5 pl-5">
+                {/* Statistics Card */}
+                <div className="rounded-lg border border-slate-200 bg-white p-2.5 space-y-2 text-xs dark:border-slate-800 dark:bg-[#0E1A29]">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <Sparkles className="h-3.5 w-3.5 text-blue-500" />
+                    Word & Document Statistics
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 border-b border-slate-100 pb-2 text-[11px] dark:border-slate-800">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Words:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.words}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Characters:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.characters}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">No spaces:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.charactersNoSpaces}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Paragraphs:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.paragraphs}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Total Pages:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.pages}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Sections:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.sections}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

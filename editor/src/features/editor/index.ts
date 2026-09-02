@@ -39,6 +39,7 @@ export * from "./components/sidebar/SidebarItem";
 
 // Workspace
 export * from "./components/workspace/Workspace";
+export * from "./components/workspace/Panel";
 export * from "./components/workspace/WorkspacePanel";
 export * from "./components/workspace/WorkspacePanelHeader";
 export * from "./components/workspace/WorkspaceSidebar";

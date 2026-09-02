@@ -5,22 +5,22 @@ What it does:
 
 Gets activePanel from useEditor().
 Determines which panel is currently active.
-Gets the corresponding items from PANEL_DATA.
-Gets the panel title and description.
+Uses panelMap to open the appropriate Panel component.
+Falls back to PANEL_DATA for panels that do not yet have custom components.
 Renders the panel header.
-Renders each tool as a button with its icon, title, and description.
 Handles closing the left panel using setLeftPanelOpen(false).
 
-In simple words:
+Flow:
+User clicks an icon -> LeftOverlay.tsx -> panelMap -> Panel.tsx -> modules/<module-name>/index.ts
+*/
 
-LeftOverlay.tsx decides how the panel looks and displays the data.
-
-It is responsible mainly for UI + interaction.*/
-
-import { X } from "lucide-react";
+import type { ComponentType } from "react";
+import { X, FileText, Palette, Edit3, Link2 } from "lucide-react";
 
 import { useEditor } from "../../hooks/useEditor";
+import type { ModuleId } from "../../data/workspaceModules";
 
+import Panel from "./Panel";
 import { PANEL_DATA } from "./panelData";
 import type { PanelType } from "./panelData";
 
@@ -33,7 +33,7 @@ const PANEL_TITLES: Partial<Record<PanelType, string>> = {
   references: "References",
   symbols: "Symbols",
   templates: "Templates",
-  document: "Document",
+  document: "Documents",
   settings: "Settings",
 };
 
@@ -46,8 +46,25 @@ const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
   references: "References and citations",
   symbols: "Special symbols",
   templates: "Document templates",
-  document: "Document tools",
+  document: "Manage clinical documents & records",
   settings: "Editor settings",
+};
+
+const PANEL_ICONS: Partial<Record<PanelType, typeof FileText>> = {
+  document: FileText,
+  styles: Palette,
+  writing: Edit3,
+  links: Link2,
+};
+
+/* --------------------------------
+   PANEL MAPPING
+-------------------------------- */
+const panelMap: Partial<Record<PanelType, ComponentType<{ moduleId: ModuleId }>>> = {
+  styles: Panel,
+  writing: Panel,
+  links: Panel,
+  document: Panel,
 };
 
 export default function LeftOverlay() {
@@ -69,6 +86,9 @@ export default function LeftOverlay() {
   const description =
     PANEL_DESCRIPTIONS[panelKey];
 
+  const ActivePanel = panelMap[panelKey];
+  const HeaderIcon = PANEL_ICONS[panelKey] ?? FileText;
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
 
@@ -82,17 +102,23 @@ export default function LeftOverlay() {
           justify-between
           border-b
           border-slate-200
+          dark:border-slate-800
           px-5
         "
       >
-        <div>
-          <h2 className="text-sm font-semibold">
-            {title}
-          </h2>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600/10 text-blue-500 dark:bg-[#0078d4]/20 dark:text-[#0078d4]">
+            <HeaderIcon className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+              {title}
+            </h2>
 
-          <p className="text-xs text-muted-foreground">
-            {description}
-          </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {description}
+            </p>
+          </div>
         </div>
 
         {/* CLOSE */}
@@ -119,66 +145,68 @@ export default function LeftOverlay() {
       </div>
 
       {/* DYNAMIC CONTENT */}
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
+        {ActivePanel ? (
+          <ActivePanel moduleId={panelKey as ModuleId} />
+        ) : (
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div className="space-y-2">
+              {items.map((item) => {
+                const Icon = item.icon;
 
-        <div className="space-y-2">
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className="
+                      flex
+                      w-full
+                      items-center
+                      gap-3
+                      rounded-lg
+                      border
+                      border-slate-200
+                      bg-white
+                      p-3
+                      text-left
+                      transition-colors
+                      hover:bg-slate-50
+                      hover:border-blue-200
+                    "
+                  >
+                    <div
+                      className="
+                        flex
+                        h-9
+                        w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-md
+                        bg-slate-100
+                        text-slate-600
+                      "
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
 
-          {items.map((item) => {
-            const Icon = item.icon;
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-slate-800">
+                        {item.title}
+                      </p>
 
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className="
-                  flex
-                  w-full
-                  items-center
-                  gap-3
-                  rounded-lg
-                  border
-                  border-slate-200
-                  bg-white
-                  p-3
-                  text-left
-                  transition-colors
-                  hover:bg-slate-50
-                  hover:border-blue-200
-                "
-              >
-                <div
-                  className="
-                    flex
-                    h-9
-                    w-9
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-md
-                    bg-slate-100
-                    text-slate-600
-                  "
-                >
-                  <Icon className="h-4 w-4" />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-800">
-                    {item.title}
-                  </p>
-
-                  {item.description && (
-                    <p className="mt-0.5 text-xs text-slate-500">
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-
-        </div>
-
+                      {item.description && (
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

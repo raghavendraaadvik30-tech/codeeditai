@@ -29,8 +29,6 @@ import {
 
 import type { ComponentType } from "react";
 
-import { StylesPanel } from "../../modules/styles";
-
 /* --------------------------------
    PANEL TYPES
 -------------------------------- */

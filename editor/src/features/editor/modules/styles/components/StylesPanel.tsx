@@ -20,13 +20,6 @@ import {
   StyleModifyModal,
 } from "./ui/StyleModifyModal";
 
-import {
-  DEFAULT_STYLE_TOKENS,
-} from "../constants/styles.constants";
-
-import {
-  useStyleGallery,
-} from "../hooks/useStyleGallery";
 
 import {
   useEditor,
@@ -69,14 +62,14 @@ export function StylesPanel() {
    const gallery = {
     styles,
     visibleStyles,
-    removedStyle,
+    removedStyles,
     query,
     setQuery,
     openStyle,
     setOpenStyle,
     removeStyle,
-    restoreStyle
-   }
+    restoreStyle,
+   };
    
 
   const [

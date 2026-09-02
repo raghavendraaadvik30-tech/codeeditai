@@ -36,6 +36,7 @@ export interface EditorContextType {
   setSelection: React.Dispatch<React.SetStateAction<Selection | null>>;
 
   focusEditor: () => void;
+  insertHTML: (html: string) => void;
 }
 
 export const EditorContext =
@@ -176,6 +177,11 @@ export function EditorProvider({
     editorRef.current?.focus();
   };
 
+  const insertHTML = (html: string) => {
+    editorRef.current?.focus();
+    document.execCommand("insertHTML", false, html);
+  };
+
   const value: EditorContextType = {
     activePanel,
     setActivePanel,
@@ -200,6 +206,7 @@ export function EditorProvider({
     setSelection,
 
     focusEditor,
+    insertHTML,
   };
 
   return (
