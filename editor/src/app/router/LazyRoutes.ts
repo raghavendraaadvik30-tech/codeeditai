@@ -36,9 +36,7 @@ export const DashboardHome = lazy(() =>
 
 
 export const UsersPage = lazy(() =>
-  import("../../features/dashboard/index").then((module) => ({
-    default: module.Dashboard,
-  }))
+  import("../../features/dashboard/components/UserManagement")
 );
 
 export const EditorPage = lazy(() =>
