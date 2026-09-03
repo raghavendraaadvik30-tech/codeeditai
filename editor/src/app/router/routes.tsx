@@ -100,13 +100,9 @@ import {
 // 2. The user's role.
 
 const RootRedirector: React.FC = () => {
+  const { isAuthenticated } = useAuth();
 
-  // Get current authentication state.isAuthenticated:-> true if user has a valid authenticated session.
-  // user: -> Current authenticated user.
-const { isAuthenticated, user } = useAuth();
-
-
-  // USER IS NOT LOGGED IN  Send the user to Login.
+  // USER IS NOT LOGGED IN -> Send the user to Login.
   if (!isAuthenticated) {
     return (
       <Navigate
@@ -116,39 +112,13 @@ const { isAuthenticated, user } = useAuth();
     );
   }
 
-  // USER IS AUTHENTICATED --> Decide where the user should go based on their role.
-  switch (user?.role) 
-  {
-     // Admin users go to Dashboard.
-    case Role.Admin:
-      return (
-        <Navigate
-          to={ROUTE_PATHS.DASHBOARD}
-          replace
-        />
-      );
-
-
-    // Author users go to Editor.
-    case Role.Author:
-      return (
-        <Navigate
-          to={ROUTE_PATHS.EDITOR}
-          replace
-        />
-      );
-
-
-    
-    // UNKNOWN / INVALID ROLE -> If no valid role is found, send the user to Login.
-    default:
-      return (
-        <Navigate
-          to={ROUTE_PATHS.LOGIN}
-          replace
-        />
-      );
-  }
+  // USER IS AUTHENTICATED -> Always navigate directly to the document editor page.
+  return (
+    <Navigate
+      to={ROUTE_PATHS.EDITOR}
+      replace
+    />
+  );
 };
 
 
@@ -312,9 +282,9 @@ export const routes: RouteObject[] = [
 
             element: (
 
-              // Only Author role is allowed.
+              // Allow Admin and Author roles
               <RoleGuard
-                allowedRoles={[Role.Author]}
+                allowedRoles={[Role.Admin, Role.Author]}
               >
 
                 <EditorPage />

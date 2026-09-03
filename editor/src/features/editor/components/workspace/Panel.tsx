@@ -9,6 +9,8 @@ import { Search } from "lucide-react";
 import type { ModuleId } from "../../data/workspaceModules";
 import { StylesPage } from "../../modules/styles";
 import { DocumentPage } from "../../modules/document";
+import { TablesPage } from "../../modules/tables";
+import { SettingsPage } from "../../modules/settings";
 
 export interface PanelProps {
   moduleId: ModuleId;
@@ -17,6 +19,8 @@ export interface PanelProps {
 export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
   styles: StylesPage,
   document: DocumentPage,
+  tables: TablesPage,
+  settings: SettingsPage,
   writing: WritingPanel,
   links: LinksPanel,
 };
@@ -24,7 +28,7 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
 export default function Panel({ moduleId }: PanelProps) {
   const ActiveComponent = PANEL_MAP[moduleId];
 
-  if (moduleId === "document" || moduleId === "styles") {
+  if (moduleId === "document" || moduleId === "styles" || moduleId === "tables" || moduleId === "settings") {
     return ActiveComponent ? <ActiveComponent /> : <GenericPanel title={moduleId} />;
   }
 

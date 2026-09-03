@@ -22,10 +22,11 @@
 **In short:**
 `Workspace.tsx` is the **central document canvas** where users view and edit pages. It connects the **document model + editor state + editable pages + zoom + AI Assistant** into one workspace.
 */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useEditor } from "../../context/EditorContext";
 import { useDocumentModel } from "../../store/documentModel";
+import { TableControlsOverlay } from "../../modules/tables/components";
 
 export default function Workspace() {
   const {
@@ -73,20 +74,31 @@ export default function Workspace() {
           pb-16
         "
       >
-        {model.pages.map((page, index) => (
-          <DocumentPage
-            key={page.id}
-            pageId={page.id}
-            pageNumber={index + 1}
-            html={model.pageHtml[page.id] ?? ""}
-            active={activePage === page.id}
-            editable={isEditable}
-            editorRef={editorRef}
-            onActivate={() => setActivePage(page.id)}
-            onChange={(html) => setPageHtml(page.id, html)}
-            zoom={zoom}
-          />
-        ))}
+        {model.pages.map((page, index) => {
+          const section =
+            model.sections.find((s) => s.id === page.sectionId) ??
+            model.sections[0];
+          const isEffectiveActive = activePage
+            ? activePage === page.id
+            : index === 0;
+
+          return (
+            <DocumentPage
+              key={page.id}
+              pageId={page.id}
+              pageNumber={index + 1}
+              headerText={section?.header || ""}
+              footerText={section?.footer || "Parexel Smart Authoring Suite"}
+              html={model.pageHtml[page.id] ?? ""}
+              active={isEffectiveActive}
+              editable={isEditable}
+              editorRef={editorRef}
+              onActivate={() => setActivePage(page.id)}
+              onChange={(html) => setPageHtml(page.id, html)}
+              zoom={zoom}
+            />
+          );
+        })}
       </div>
 
       {/* AI FLOATING BUTTON
@@ -144,6 +156,8 @@ export default function Workspace() {
 interface DocumentPageProps {
   pageId: string;
   pageNumber: number;
+  headerText: string;
+  footerText: string;
   html: string;
   active: boolean;
   editable: boolean;
@@ -156,6 +170,8 @@ interface DocumentPageProps {
 function DocumentPage({
   pageId,
   pageNumber,
+  headerText,
+  footerText,
   html,
   active,
   editable,
@@ -165,27 +181,82 @@ function DocumentPage({
   zoom,
 }: DocumentPageProps) {
   const localEditorRef = useRef<HTMLDivElement | null>(null);
+  const lastHtmlRef = useRef<string>(html);
+
+  const [activeTable, setActiveTable] = useState<HTMLTableElement | null>(null);
+
+  // Track active table inside this page's editor container
+  useEffect(() => {
+    const handleSelectionOrFocus = () => {
+      const container = localEditorRef.current;
+      if (!container) return;
+
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const anchor = sel.anchorNode;
+        const el = anchor?.nodeType === Node.ELEMENT_NODE ? (anchor as HTMLElement) : anchor?.parentElement;
+        if (el && container.contains(el)) {
+          const table = el.closest("table") as HTMLTableElement | null;
+          setActiveTable(table);
+          return;
+        }
+      }
+
+      if (document.activeElement && container.contains(document.activeElement)) {
+        const table = document.activeElement.closest("table") as HTMLTableElement | null;
+        setActiveTable(table);
+        return;
+      }
+
+      setActiveTable(null);
+    };
+
+    document.addEventListener("selectionchange", handleSelectionOrFocus);
+    document.addEventListener("pointerdown", handleSelectionOrFocus);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionOrFocus);
+      document.removeEventListener("pointerdown", handleSelectionOrFocus);
+    };
+  }, []);
 
   /*
    * Keep the page HTML synchronized
-   * with the document model.
+   * with the document model only when external updates occur.
    */
   useEffect(() => {
     const element = localEditorRef.current;
-
     if (!element) return;
+
+    // If active element is inside this editor, avoid destroying the user's cursor
+    if (element === document.activeElement || element.contains(document.activeElement)) {
+      if (lastHtmlRef.current === html) {
+        return;
+      }
+    }
 
     if (element.innerHTML !== html) {
       element.innerHTML = html;
+      lastHtmlRef.current = html;
     }
   }, [html]);
 
+  // Auto-focus the editor when page is activated
+  useEffect(() => {
+    if (active && editable && localEditorRef.current) {
+      const el = localEditorRef.current;
+      if (document.activeElement !== el && !el.contains(document.activeElement)) {
+        el.focus();
+      }
+    }
+  }, [active, pageId, editable]);
+
   const handleInput = () => {
     const element = localEditorRef.current;
-
     if (!element) return;
-
-    onChange(element.innerHTML);
+    const currentHtml = element.innerHTML;
+    lastHtmlRef.current = currentHtml;
+    onChange(currentHtml);
   };
 
   const handleFocus = () => {
@@ -248,7 +319,7 @@ function DocumentPage({
           text-slate-500
         "
       >
-        {getHeaderText(pageNumber)}
+        {headerText}
       </div>
 
       {/* EDITABLE DOCUMENT */}
@@ -303,16 +374,45 @@ function DocumentPage({
           [&_table]:my-4
           [&_table]:w-full
           [&_table]:max-w-full
+          [&_table]:border-collapse
+          [&_table]:table-fixed
 
           [&_td]:border
           [&_td]:border-slate-300
-          [&_td]:p-2
+          [&_td]:p-2.5
+          [&_td]:text-left
+          [&_td]:align-top
+          [&_td]:min-w-[48px]
+          [&_td]:break-words
+          [&_td]:whitespace-normal
 
           [&_th]:border
           [&_th]:border-slate-300
-          [&_th]:p-2
+          [&_th]:p-2.5
+          [&_th]:text-left
+          [&_th]:align-top
+          [&_th]:font-semibold
+          [&_th]:min-w-[48px]
+          [&_th]:break-words
+          [&_th]:whitespace-normal
         "
       />
+
+      {/* WORD-STYLE TABLE MOVE & RESIZE OVERLAY (Editor UI only, not in saved document) */}
+      {editable && activeTable && localEditorRef.current && (
+        <TableControlsOverlay
+          table={activeTable}
+          container={localEditorRef.current}
+          zoom={zoom}
+          onUpdate={() => {
+            if (localEditorRef.current) {
+              const updatedHtml = localEditorRef.current.innerHTML;
+              lastHtmlRef.current = updatedHtml;
+              onChange(updatedHtml);
+            }
+          }}
+        />
+      )}
 
       {/* DOCUMENT FOOTER */}
       <div
@@ -326,7 +426,7 @@ function DocumentPage({
           text-slate-400
         "
       >
-        Parexel Smart Authoring Suite
+        {footerText}
 
         <span className="float-right">
           Page {pageNumber}
@@ -334,8 +434,4 @@ function DocumentPage({
       </div>
     </section>
   );
-}
-
-function getHeaderText(_pageNumber: number) {
-  return "CSR-2024-PXL-0921 · Confidential";
 }

@@ -32,8 +32,6 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -82,10 +80,10 @@ export interface HistoryEntry {
 ============================================================ */
 
 const uid = () =>
-  Math.random().toString(36).substring(2, 10);
+  Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 8);
 
 const STORAGE_KEY = "editor_document";
-
+const SAVED_DOCS_KEY = "editor_saved_documents";
 const HISTORY_KEY = "editor_document_history";
 
 const DEFAULT_HTML = `
@@ -96,23 +94,14 @@ const createDefaultSection = (
   id = "section_1"
 ): SectionModel => ({
   id,
-
-  header: "CSR-2024-PXL-0921",
-
+  header: "",
   footer: "Parexel Smart Authoring Suite",
-
   differentFirstPage: false,
-
   differentOddEven: false,
-
   firstHeader: "",
-
   firstFooter: "",
-
   evenHeader: "",
-
   evenFooter: "",
-
   showPageNumbers: true,
 });
 
@@ -126,18 +115,92 @@ function createEmptyDocument(): DocumentModel {
 
   return {
     id: "doc_" + uid(),
-
-    title: "CSR-2024-PXL-0921",
-
+    title: "Untitled Document",
     pages: [page],
-
     sections: [section],
-
     pageHtml: {
       [page.id]: DEFAULT_HTML,
     },
-    styleOverrides : {},
+    styleOverrides: {},
   };
+}
+
+function isDocEmpty(doc?: DocumentModel | null): boolean {
+  if (!doc || !Array.isArray(doc.pages) || doc.pages.length === 0) return true;
+  if (doc.pages.length > 1) return false;
+  const firstPageId = doc.pages[0]?.id || "";
+  const html = doc.pageHtml?.[firstPageId] || "";
+  const clean = html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+  return clean === "";
+}
+
+function getStoredSavedDocuments(): DocumentModel[] {
+  try {
+    const raw = localStorage.getItem(SAVED_DOCS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const seen = new Set<string>();
+        const unique: DocumentModel[] = [];
+        for (const doc of parsed) {
+          if (doc && doc.id && !seen.has(doc.id)) {
+            seen.add(doc.id);
+            unique.push(doc);
+          }
+        }
+        return unique;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function getInitialDocument(): DocumentModel {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as DocumentModel;
+      if (parsed && Array.isArray(parsed.pages) && parsed.pages.length > 0) {
+        if (!parsed.title) {
+          parsed.title = "Untitled Document";
+        }
+        return parsed;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  const savedDocs = getStoredSavedDocuments();
+  if (savedDocs.length > 0) {
+    const firstDoc = savedDocs[0];
+    if (!firstDoc.title) {
+      firstDoc.title = "Untitled Document";
+    }
+    return firstDoc;
+  }
+  const fresh = createEmptyDocument();
+  try {
+    localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify([fresh]));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+  } catch {
+    // ignore
+  }
+  return fresh;
+}
+
+function getInitialHistory(): HistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return [];
 }
 
 /* ============================================================
@@ -146,60 +209,52 @@ function createEmptyDocument(): DocumentModel {
 
 interface DocumentContextType {
   model: DocumentModel;
-
   activePage: string | null;
-
   history: HistoryEntry[];
-
+  savedDocuments: DocumentModel[];
   setActivePage: (id: string | null) => void;
-
   setPageHtml: (
     pageId: string,
     html: string
   ) => void;
-
   updateStyleOverride: (
-  styleId: string,
-  update: Partial<StyleOverride>
-) => void; 
-
-revertStyleOverride: (
-  styleId:string,
-)=>void;
-
+    styleId: string,
+    update: Partial<StyleOverride>
+  ) => void; 
+  revertStyleOverride: (
+    styleId: string
+  ) => void;
   updateTitle: (
     title: string
   ) => void;
-
   addPage: (
     afterPageId?: string
   ) => string;
-
   removePage: (
     pageId: string
   ) => void;
-
   addSection: (
     afterPageId?: string
   ) => void;
-
   updateSection: (
     sectionId: string,
     patch: Partial<SectionModel>
   ) => void;
-
-  save: () => void;
-
+  save: (customTitle?: string) => void;
   saveAs: (
     title: string
   ) => void;
-
   restore: (
     documentId: string
   ) => void;
-
+  loadDocument: (
+    documentId: string
+  ) => void;
+  deleteDocument: (
+    documentId: string
+  ) => void;
+  createNewDocument: (title?: string) => void;
   resetDocument: () => void;
-
   refreshHistory: () => void;
 }
 
@@ -207,7 +262,6 @@ const DocumentContext =
   createContext<DocumentContextType | null>(
     null
   );
-
 
 /* ============================================================
    Provider
@@ -218,28 +272,21 @@ export function DocumentModelProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [model, setModel] =
-    useState<DocumentModel>(
-      createEmptyDocument
-    );
+  const [model, setModel] = useState<DocumentModel>(getInitialDocument);
+  const [activePage, setActivePage] = useState<string | null>(
+    () => model.pages[0]?.id ?? null
+  );
+  const [history, setHistory] = useState<HistoryEntry[]>(getInitialHistory);
+  const [savedDocuments, setSavedDocuments] = useState<DocumentModel[]>(getStoredSavedDocuments);
 
-  const [activePage, setActivePage] =
-    useState<string | null>(null);
-
-  const [history, setHistory] =
-    useState<HistoryEntry[]>([]);
-
-  const restored = useRef(false);
-
-
-    /* ============================================================
+  /* ============================================================
      Style Overrides
   ============================================================ */
 
   const updateStyleOverride = useCallback(
     (
       styleId: string,
-      update: StyleOverride,
+      update: Partial<StyleOverride>,
     ) => {
       setModel((prev) => ({
         ...prev,
@@ -273,459 +320,536 @@ export function DocumentModelProvider({
     [],
   );
 
+  /* ============================================================
+     Refresh History & Saved Docs
+  ============================================================ */
 
-  useEffect(() => {
-    if (restored.current) return;
-
-    restored.current = true;
-
-    try {
-      const raw =
-        localStorage.getItem(STORAGE_KEY);
-
-      if (raw) {
-        const parsed =
-          JSON.parse(raw) as DocumentModel;
-
-        if (parsed.pages.length) {
-          setModel(parsed);
-        }
-      }
-
-      const historyRaw =
-        localStorage.getItem(HISTORY_KEY);
-
-      if (historyRaw) {
-        setHistory(JSON.parse(historyRaw));
-      }
-    } catch {
-      // ignore corrupted storage
-    }
+  const refreshHistory = useCallback(() => {
+    setHistory(getInitialHistory());
+    setSavedDocuments(getStoredSavedDocuments());
   }, []);
 
-/* ============================================================
-   Refresh History
-============================================================ */
+  /* ============================================================
+     Update Page HTML
+  ============================================================ */
 
-  const refreshHistory =
-    useCallback(() => {
-      try {
-        const raw =
-          localStorage.getItem(
-            HISTORY_KEY
-          );
+  const setPageHtml = useCallback(
+    (pageId: string, html: string) => {
+      setModel((prev) => {
+        if (prev.pageHtml[pageId] === html) {
+          return prev;
+        }
 
-        setHistory(
-          raw ? JSON.parse(raw) : []
-        );
-      } catch {
-        setHistory([]);
-      }
-    }, []);
-    /* ============================================================
-   Update Page HTML
-============================================================ */
+        return {
+          ...prev,
+          pageHtml: {
+            ...prev.pageHtml,
+            [pageId]: html,
+          },
+        };
+      });
+    },
+    []
+  );
 
-const setPageHtml = useCallback(
-  (pageId: string, html: string) => {
-    setModel((prev) => {
-      if (prev.pageHtml[pageId] === html) {
-        return prev;
-      }
+  /* ============================================================
+     Update Title
+  ============================================================ */
 
-      return {
-        ...prev,
-        pageHtml: {
-          ...prev.pageHtml,
-          [pageId]: html,
-        },
-      };
-    });
-  },
-  []
-);
-
-/* ============================================================
-   Update Title
-============================================================ */
-
-const updateTitle = useCallback((title: string) => {
-  setModel((prev) => ({
-    ...prev,
-    title,
-  }));
-}, []);
-
-/* ============================================================
-   Add Page
-============================================================ */
-
-const addPage = useCallback(
-  (afterPageId?: string) => {
-    const newPageId = "page_" + uid();
-
-    setModel((prev) => {
-      const index = afterPageId
-        ? prev.pages.findIndex(
-            (p) => p.id === afterPageId
-          )
-        : prev.pages.length - 1;
-
-      const insertIndex =
-        index >= 0 ? index : prev.pages.length - 1;
-
-      const sectionId =
-        prev.pages[insertIndex]?.sectionId ??
-        prev.sections[0].id;
-
-      const newPage: PageModel = {
-        id: newPageId,
-        sectionId,
-      };
-
-      return {
-        ...prev,
-
-        pages: [
-          ...prev.pages.slice(0, insertIndex + 1),
-          newPage,
-          ...prev.pages.slice(insertIndex + 1),
-        ],
-
-        pageHtml: {
-          ...prev.pageHtml,
-          [newPageId]: DEFAULT_HTML,
-        },
-      };
-    });
-
-    return newPageId;
-  },
-  []
-);
-
-/* ============================================================
-   Remove Page
-============================================================ */
-
-const removePage = useCallback(
-  (pageId: string) => {
-    setModel((prev) => {
-      if (prev.pages.length <= 1) {
-        return prev;
-      }
-
-      const nextPages = prev.pages.filter(
-        (page) => page.id !== pageId
-      );
-
-      const nextHtml = {
-        ...prev.pageHtml,
-      };
-
-      delete nextHtml[pageId];
-
-      return {
-        ...prev,
-        pages: nextPages,
-        pageHtml: nextHtml,
-      };
-    });
-  },
-  []
-);
-
-/* ============================================================
-   Add Section
-============================================================ */
-
-const addSection = useCallback(
-  (afterPageId?: string) => {
-    setModel((prev) => {
-      const sectionId = "section_" + uid();
-
-      const pageId = "page_" + uid();
-
-      const index = afterPageId
-        ? prev.pages.findIndex(
-            (page) => page.id === afterPageId
-          )
-        : prev.pages.length - 1;
-
-      const insertIndex =
-        index >= 0 ? index : prev.pages.length - 1;
-
-      const section =
-        createDefaultSection(sectionId);
-
-      section.header =
-        "Section " +
-        (prev.sections.length + 1);
-
-      section.footer = "";
-
-      const page: PageModel = {
-        id: pageId,
-        sectionId,
-      };
-
-      return {
-        ...prev,
-
-        sections: [
-          ...prev.sections,
-          section,
-        ],
-
-        pages: [
-          ...prev.pages.slice(0, insertIndex + 1),
-          page,
-          ...prev.pages.slice(insertIndex + 1),
-        ],
-
-        pageHtml: {
-          ...prev.pageHtml,
-          [pageId]: DEFAULT_HTML,
-        },
-      };
-    });
-  },
-  []
-);
-
-/* ============================================================
-   Update Section
-============================================================ */
-
-const updateSection = useCallback(
-  (
-    sectionId: string,
-    patch: Partial<SectionModel>
-  ) => {
+  const updateTitle = useCallback((title: string) => {
     setModel((prev) => ({
       ...prev,
-
-      sections: prev.sections.map(
-        (section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                ...patch,
-              }
-            : section
-      ),
-    }));
-  },
-  []
-);
-
-/* ============================================================
-   Save
-============================================================ */
-
-const save = useCallback(() => {
-  try {
-    const saved: DocumentModel = {
-      ...model,
-      savedAt: Date.now(),
-    };
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(saved)
-    );
-
-    localStorage.setItem(
-      `editor_snapshot.${saved.id}.${saved.savedAt}`,
-      JSON.stringify(saved)
-    );
-
-    const historyRaw =
-      localStorage.getItem(HISTORY_KEY);
-
-    const historyItems: HistoryEntry[] =
-      historyRaw
-        ? JSON.parse(historyRaw)
-        : [];
-
-    historyItems.unshift({
-      id: saved.id,
-      title: saved.title,
-      savedAt: saved.savedAt!,
-    });
-
-    const latest =
-      historyItems.slice(0, 50);
-
-    localStorage.setItem(
-      HISTORY_KEY,
-      JSON.stringify(latest)
-    );
-
-    setHistory(latest);
-
-    setModel(saved);
-  } catch {
-    // ignore
-  }
-}, [model]);
-
-/* ============================================================
-   Save As
-============================================================ */
-
-const saveAs = useCallback(
-  (title: string) => {
-    const saved: DocumentModel = {
-      ...model,
-      id: "doc_" + uid(),
       title,
-      savedAt: Date.now(),
-    };
+    }));
+  }, []);
 
-    setModel(saved);
+  /* ============================================================
+     Add Page
+  ============================================================ */
 
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(saved)
-      );
+  const addPage = useCallback(
+    (afterPageId?: string) => {
+      const newPageId = "page_" + uid();
 
-      const historyRaw =
-        localStorage.getItem(HISTORY_KEY);
+      setModel((prev) => {
+        const index = afterPageId
+          ? prev.pages.findIndex((p) => p.id === afterPageId)
+          : prev.pages.length - 1;
 
-      const historyItems: HistoryEntry[] =
-        historyRaw
-          ? JSON.parse(historyRaw)
-          : [];
+        const insertIndex =
+          index >= 0 ? index : prev.pages.length - 1;
 
-      historyItems.unshift({
-        id: saved.id,
-        title: saved.title,
-        savedAt: saved.savedAt!,
+        const sectionId =
+          prev.pages[insertIndex]?.sectionId ??
+          prev.sections[0]?.id ??
+          "section_1";
+
+        const newPage: PageModel = {
+          id: newPageId,
+          sectionId,
+        };
+
+        return {
+          ...prev,
+          pages: [
+            ...prev.pages.slice(0, insertIndex + 1),
+            newPage,
+            ...prev.pages.slice(insertIndex + 1),
+          ],
+          pageHtml: {
+            ...prev.pageHtml,
+            [newPageId]: DEFAULT_HTML,
+          },
+        };
       });
 
-      localStorage.setItem(
-        HISTORY_KEY,
-        JSON.stringify(
-          historyItems.slice(0, 50)
-        )
-      );
+      setActivePage(newPageId);
+      return newPageId;
+    },
+    []
+  );
 
-      refreshHistory();
-    } catch {
-      // ignore
-    }
-  },
-  [model, refreshHistory]
-);
-/* ============================================================
-   Restore Document
-============================================================ */
+  /* ============================================================
+     Remove Page
+  ============================================================ */
 
-const restore = useCallback((documentId: string) => {
-  try {
-    let latest: DocumentModel | null = null;
+  const removePage = useCallback(
+    (pageId: string) => {
+      setModel((prev) => {
+        if (prev.pages.length <= 1) {
+          return prev;
+        }
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
+        const nextPages = prev.pages.filter(
+          (page) => page.id !== pageId
+        );
 
-      if (
-        !key ||
-        !key.startsWith(`editor_snapshot.${documentId}.`)
-      ) {
-        continue;
+        const nextHtml = {
+          ...prev.pageHtml,
+        };
+
+        delete nextHtml[pageId];
+
+        return {
+          ...prev,
+          pages: nextPages,
+          pageHtml: nextHtml,
+        };
+      });
+
+      setActivePage((prev) => (prev === pageId ? null : prev));
+    },
+    []
+  );
+
+  /* ============================================================
+     Add Section
+  ============================================================ */
+
+  const addSection = useCallback(
+    (afterPageId?: string) => {
+      setModel((prev) => {
+        const sectionId = "section_" + uid();
+        const pageId = "page_" + uid();
+
+        const index = afterPageId
+          ? prev.pages.findIndex(
+              (page) => page.id === afterPageId
+            )
+          : prev.pages.length - 1;
+
+        const insertIndex =
+          index >= 0 ? index : prev.pages.length - 1;
+
+        const section =
+          createDefaultSection(sectionId);
+
+        section.header =
+          "Section " +
+          (prev.sections.length + 1);
+
+        section.footer = "";
+
+        const page: PageModel = {
+          id: pageId,
+          sectionId,
+        };
+
+        return {
+          ...prev,
+          sections: [
+            ...prev.sections,
+            section,
+          ],
+          pages: [
+            ...prev.pages.slice(0, insertIndex + 1),
+            page,
+            ...prev.pages.slice(insertIndex + 1),
+          ],
+          pageHtml: {
+            ...prev.pageHtml,
+            [pageId]: DEFAULT_HTML,
+          },
+        };
+      });
+    },
+    []
+  );
+
+  /* ============================================================
+     Update Section
+  ============================================================ */
+
+  const updateSection = useCallback(
+    (
+      sectionId: string,
+      patch: Partial<SectionModel>
+    ) => {
+      setModel((prev) => ({
+        ...prev,
+        sections: prev.sections.map(
+          (section) =>
+            section.id === sectionId
+              ? {
+                  ...section,
+                  ...patch,
+                }
+              : section
+        ),
+      }));
+    },
+    []
+  );
+
+  /* ============================================================
+     Save
+  ============================================================ */
+
+  const save = useCallback(
+    (customTitle?: string) => {
+      setModel((currentModel) => {
+        const titleToSave =
+          customTitle !== undefined && customTitle.trim() !== ""
+            ? customTitle.trim()
+            : currentModel.title || "Untitled Document";
+
+        const saved: DocumentModel = {
+          ...currentModel,
+          title: titleToSave,
+          savedAt: Date.now(),
+        };
+
+        try {
+          // 1. Save active document
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(saved)
+          );
+
+          // 2. Snapshot
+          localStorage.setItem(
+            `editor_snapshot.${saved.id}.${saved.savedAt}`,
+            JSON.stringify(saved)
+          );
+
+          // 3. Update saved documents list without duplicates
+          const existingSaved = getStoredSavedDocuments();
+          const docIndex = existingSaved.findIndex((d) => d.id === saved.id);
+          let nextSaved: DocumentModel[];
+          if (docIndex >= 0) {
+            nextSaved = [
+              ...existingSaved.slice(0, docIndex),
+              saved,
+              ...existingSaved.slice(docIndex + 1),
+            ];
+          } else {
+            nextSaved = [saved, ...existingSaved];
+          }
+
+          localStorage.setItem(
+            SAVED_DOCS_KEY,
+            JSON.stringify(nextSaved)
+          );
+          setSavedDocuments(nextSaved);
+
+          // 4. Update history without duplicate IDs
+          const historyItems = getInitialHistory().filter((h) => h.id !== saved.id);
+          historyItems.unshift({
+            id: saved.id,
+            title: saved.title,
+            savedAt: saved.savedAt!,
+          });
+
+          const latest = historyItems.slice(0, 50);
+          localStorage.setItem(
+            HISTORY_KEY,
+            JSON.stringify(latest)
+          );
+          setHistory(latest);
+        } catch {
+          // ignore
+        }
+
+        return saved;
+      });
+    },
+    []
+  );
+
+  /* ============================================================
+     Save As
+  ============================================================ */
+
+  const saveAs = useCallback(
+    (title: string) => {
+      setModel((currentModel) => {
+        const saved: DocumentModel = {
+          ...currentModel,
+          id: "doc_" + uid(),
+          title: title.trim() || "Untitled Document",
+          savedAt: Date.now(),
+        };
+
+        try {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(saved)
+          );
+
+          localStorage.setItem(
+            `editor_snapshot.${saved.id}.${saved.savedAt}`,
+            JSON.stringify(saved)
+          );
+
+          const existingSaved = getStoredSavedDocuments();
+          const nextSaved = [saved, ...existingSaved];
+          localStorage.setItem(
+            SAVED_DOCS_KEY,
+            JSON.stringify(nextSaved)
+          );
+          setSavedDocuments(nextSaved);
+
+          const historyItems = getInitialHistory();
+          historyItems.unshift({
+            id: saved.id,
+            title: saved.title,
+            savedAt: saved.savedAt!,
+          });
+
+          const latest = historyItems.slice(0, 50);
+          localStorage.setItem(
+            HISTORY_KEY,
+            JSON.stringify(latest)
+          );
+          setHistory(latest);
+        } catch {
+          // ignore
+        }
+
+        return saved;
+      });
+    },
+    []
+  );
+
+  /* ============================================================
+     Load Document
+  ============================================================ */
+
+  const loadDocument = useCallback((documentId: string) => {
+    setModel((currentModel) => {
+      try {
+        const savedList = getStoredSavedDocuments();
+        const isCurrentEmpty = isDocEmpty(currentModel);
+
+        // 1. Preserve current active model in list before switching only if it has content or was saved
+        let nextSaved: DocumentModel[];
+        if (currentModel.savedAt || !isCurrentEmpty) {
+          const existingIdx = savedList.findIndex((d) => d.id === currentModel.id);
+          if (existingIdx >= 0) {
+            nextSaved = [...savedList];
+            nextSaved[existingIdx] = currentModel;
+          } else {
+            nextSaved = [currentModel, ...savedList];
+          }
+        } else {
+          nextSaved = savedList.filter((d) => d.id !== currentModel.id);
+        }
+
+        localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
+        setSavedDocuments(nextSaved);
+
+        // 2. Find target document
+        const target = nextSaved.find((d) => d.id === documentId);
+        if (target) {
+          setActivePage(target.pages[0]?.id ?? null);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(target));
+          return target;
+        }
+
+        // 3. Fallback to snapshots
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith(`editor_snapshot.${documentId}.`)) continue;
+          const raw = localStorage.getItem(key);
+          if (!raw) continue;
+          const snapshot = JSON.parse(raw) as DocumentModel;
+          setActivePage(snapshot.pages[0]?.id ?? null);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+          return snapshot;
+        }
+      } catch {
+        // ignore
+      }
+      return currentModel;
+    });
+  }, []);
+
+  /* ============================================================
+     Restore Document
+  ============================================================ */
+
+  const restore = useCallback((documentId: string) => {
+    loadDocument(documentId);
+  }, [loadDocument]);
+
+  /* ============================================================
+     Create New Document (Temporary / Unsaved)
+  ============================================================ */
+
+  const createNewDocument = useCallback((customTitle?: string) => {
+    setModel((currentModel) => {
+      const fresh = createEmptyDocument();
+      fresh.title = customTitle && customTitle.trim() ? customTitle.trim() : "Untitled Document";
+
+      try {
+        const savedList = getStoredSavedDocuments();
+        const isCurrentEmpty = isDocEmpty(currentModel);
+
+        let nextSaved: DocumentModel[];
+        // If the current document has content or was saved, preserve it in the list!
+        if (currentModel.savedAt || !isCurrentEmpty) {
+          const existingIdx = savedList.findIndex((d) => d.id === currentModel.id);
+          if (existingIdx >= 0) {
+            nextSaved = [...savedList];
+            nextSaved[existingIdx] = currentModel;
+          } else {
+            nextSaved = [currentModel, ...savedList];
+          }
+        } else {
+          // If current document is empty and unsaved, discard the empty placeholder so only 1 new document is created
+          nextSaved = savedList.filter((d) => d.id !== currentModel.id);
+        }
+
+        // Add exactly one fresh document to the top of list
+        nextSaved = [fresh, ...nextSaved.filter((d) => d.id !== fresh.id)];
+
+        localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
+        setSavedDocuments(nextSaved);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+      } catch {
+        // ignore
       }
 
-      const raw = localStorage.getItem(key);
+      setActivePage(fresh.pages[0]?.id ?? null);
+      return fresh;
+    });
+  }, []);
 
-      if (!raw) continue;
+  /* ============================================================
+     Delete Document
+  ============================================================ */
 
-      const snapshot = JSON.parse(raw) as DocumentModel;
+  const deleteDocument = useCallback(
+    (documentId: string) => {
+      try {
+        const savedList = getStoredSavedDocuments();
+        const nextSaved = savedList.filter((d) => d.id !== documentId);
+        localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
+        setSavedDocuments(nextSaved);
 
-      if (
-        !latest ||
-        (snapshot.savedAt ?? 0) >
-          (latest.savedAt ?? 0)
-      ) {
-        latest = snapshot;
+        // Remove snapshots
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(`editor_snapshot.${documentId}.`)) {
+            localStorage.removeItem(key);
+          }
+        }
+
+        // Clean from history
+        const nextHistory = getInitialHistory().filter((h) => h.id !== documentId);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+        setHistory(nextHistory);
+
+        // If the deleted document is currently active
+        setModel((currentModel) => {
+          if (currentModel.id === documentId) {
+            if (nextSaved.length > 0) {
+              const nextDoc = nextSaved[0];
+              setActivePage(nextDoc.pages[0]?.id ?? null);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(nextDoc));
+              return nextDoc;
+            } else {
+              const fresh = createEmptyDocument();
+              setActivePage(fresh.pages[0]?.id ?? null);
+              localStorage.removeItem(STORAGE_KEY);
+              return fresh;
+            }
+          }
+          return currentModel;
+        });
+      } catch {
+        // ignore
       }
+    },
+    []
+  );
+
+  /* ============================================================
+     Reset Document
+  ============================================================ */
+
+  const resetDocument = useCallback(() => {
+    if (model.id) {
+      deleteDocument(model.id);
+    } else {
+      createNewDocument();
     }
+  }, [model.id, deleteDocument, createNewDocument]);
 
-    if (latest) {
-      setModel(latest);
+  /* ============================================================
+     Provider Return
+  ============================================================ */
 
-      if (latest.pages.length) {
-        setActivePage(latest.pages[0].id);
-      }
-    }
-  } catch {
-    // ignore
-  }
-}, []);
-
-/* ============================================================
-   Reset / Delete Document
-============================================================ */
-
-const resetDocument = useCallback(() => {
-  const fresh = createEmptyDocument();
-  setModel(fresh);
-  if (fresh.pages.length) {
-    setActivePage(fresh.pages[0].id);
-  }
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}, []);
-
-/* ============================================================
-   Provider
-============================================================ */
-
-return (
-  <DocumentContext.Provider
-    value={{
-      model,
-
-      activePage,
-
-      history,
-
-      setActivePage,
-
-      setPageHtml,
-
-      updateTitle,
-
-      updateStyleOverride,
-
-      revertStyleOverride,
-
-      addPage,
-
-      removePage,
-
-      addSection,
-
-      updateSection,
-
-      save,
-
-      saveAs,
-
-      restore,
-
-      resetDocument,
-
-      refreshHistory,
-    }}
-  >
-    {children}
-  </DocumentContext.Provider>
-);
+  return (
+    <DocumentContext.Provider
+      value={{
+        model,
+        activePage,
+        history,
+        savedDocuments,
+        setActivePage,
+        setPageHtml,
+        updateTitle,
+        updateStyleOverride,
+        revertStyleOverride,
+        addPage,
+        removePage,
+        addSection,
+        updateSection,
+        save,
+        saveAs,
+        restore,
+        loadDocument,
+        deleteDocument,
+        createNewDocument,
+        resetDocument,
+        refreshHistory,
+      }}
+    >
+      {children}
+    </DocumentContext.Provider>
+  );
 
 }
 

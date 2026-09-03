@@ -51,7 +51,7 @@ export default function InsertTab() {
 
       <RibbonButton
         icon={<FilePlus className="h-4 w-4" />}
-        onClick={addPage}
+        onClick={() => addPage()}
       >
         Add Page
       </RibbonButton>

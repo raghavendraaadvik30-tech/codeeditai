@@ -66,7 +66,6 @@ import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
 
 import { ROUTE_PATHS } from "@/app/router/routePaths";
-import { Role } from "@/app/config/roles";
 
 export default function LoginUI() {
   const navigate = useNavigate();
@@ -127,25 +126,8 @@ const handleLogin = async () => {
 
   if (!success) return;
 
-  // Get logged in user from localStorage
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-
-  if (!user) return;
-
-  switch (user.role) {
-    case Role.Admin:
-      navigate(ROUTE_PATHS.DASHBOARD, {replace:true});
-      break;
-
-    case Role.Author:
-           
-      navigate(ROUTE_PATHS.EDITOR, {replace: true});
-      break;
-
-    default:
-      navigate(ROUTE_PATHS.LOGIN, {replace:true});
-      break;
-  }
+  // Always navigate to the document editor page
+  navigate(ROUTE_PATHS.EDITOR, { replace: true });
 };
     return (
     <div className="relative flex min-h-screen items-center justify-center bg-[#F8FAFC] px-4">
