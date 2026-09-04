@@ -70,7 +70,7 @@ export const documentApi = {
     } catch {
       return {
         document_id: id,
-        doc_title: payload.title || 'Untitled',
+        doc_title: payload.title || 'New Document',
         raw_content: payload.content || '',
         author_name: 'Author',
         ver: '1.0.0',

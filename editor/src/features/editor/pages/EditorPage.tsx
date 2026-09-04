@@ -19,13 +19,16 @@ Acts as the **entry point for the document editor page** by setting up the requi
 
 import { EditorProvider } from "../context/EditorContext";
 import { DocumentModelProvider } from "../store/documentModel";
+import { TableProvider } from "../modules/tables/context";
 import EditorLayout from "../layouts/EditorLayout";
 
 export default function EditorPage() {
   return (
     <DocumentModelProvider>
       <EditorProvider>
-        <EditorLayout />
+        <TableProvider>
+          <EditorLayout />
+        </TableProvider>
       </EditorProvider>
     </DocumentModelProvider>
   );

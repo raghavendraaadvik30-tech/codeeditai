@@ -31,7 +31,7 @@ export class DocumentRepository {
   async getAll(): Promise<DocumentModel[]> {
     const dtos = await documentApi.fetchDocuments();
     if (!dtos.length) {
-      return [DEFAULT_DOCUMENT];
+      return [];
     }
     return dtos.map((dto) => this.mapDtoToModel(dto));
   }

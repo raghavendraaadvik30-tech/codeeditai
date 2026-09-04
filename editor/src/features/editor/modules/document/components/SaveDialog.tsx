@@ -12,12 +12,11 @@ import { useState } from "react";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
 
 function SaveDialogContent({ onClose }: { onClose: () => void }) {
-  const { model, updateTitle, save } = useDocumentModel();
+  const { model, save } = useDocumentModel();
   const [title, setDocTitle] = useState(model.title || "Untitled Document");
 
   const handleSave = () => {
-    updateTitle(title);
-    save();
+    save(title);
     onClose();
   };
 

@@ -36,6 +36,7 @@ import { QueryProvider } from "./QueryProvider";
 // - logout
 // - token/session handling
 import { AuthProvider } from "../../features/auth/index";
+import { SettingsProvider } from "../../features/editor/modules/settings";
 
 
 
@@ -107,21 +108,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({
           multiple components. */}
 
       <AuthProvider>
+        <SettingsProvider>
 
-        {/* children
+          {/* children
 
-            This is the actual application.
+              This is the actual application.
 
-            Example:
+              Example:
 
-            <AppProvider>
-              <RouterProvider router={router} />
-            </AppProvider>
+              <AppProvider>
+                <RouterProvider router={router} />
+              </AppProvider>
 
-            The RouterProvider would be rendered here. */}
+              The RouterProvider would be rendered here. */}
 
-        {children}
-
+          {children}
+        </SettingsProvider>
       </AuthProvider>
 
     </QueryProvider>
