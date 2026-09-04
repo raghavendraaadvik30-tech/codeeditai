@@ -49,11 +49,46 @@ export function EditorProvider({
 }) {
   const editorRef = useRef<HTMLDivElement | null>(null);
 
-  const [activePanel, setActivePanel] =
-    useState<string>("writing");
+  const [activePanel, setActivePanelState] = useState<string>(() => {
+    try {
+      return localStorage.getItem("editor_active_panel") || "document";
+    } catch {
+      return "document";
+    }
+  });
 
-  const [leftPanelOpen, setLeftPanelOpen] =
-    useState<boolean>(false);
+  const [leftPanelOpen, setLeftPanelOpenState] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem("editor_left_panel_open");
+      return stored !== null ? stored === "true" : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const setActivePanel: React.Dispatch<React.SetStateAction<string>> = (action) => {
+    setActivePanelState((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      try {
+        localStorage.setItem("editor_active_panel", next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const setLeftPanelOpen: React.Dispatch<React.SetStateAction<boolean>> = (action) => {
+    setLeftPanelOpenState((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      try {
+        localStorage.setItem("editor_left_panel_open", String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   const [aiPanelOpen, setAiPanelOpen] =
     useState<boolean>(false);
@@ -178,8 +213,14 @@ export function EditorProvider({
   };
 
   const insertHTML = (html: string) => {
-    editorRef.current?.focus();
-    document.execCommand("insertHTML", false, html);
+    const el = editorRef.current;
+    if (el) {
+      el.focus();
+      document.execCommand("insertHTML", false, html);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    } else {
+      document.execCommand("insertHTML", false, html);
+    }
   };
 
   const value: EditorContextType = {

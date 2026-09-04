@@ -312,9 +312,9 @@ export const routes: RouteObject[] = [
 
             element: (
 
-              // Only Author role is allowed.
+              // Allow Admin and Author roles
               <RoleGuard
-                allowedRoles={[Role.Author]}
+                allowedRoles={[Role.Admin, Role.Author]}
               >
 
                 <EditorPage />

@@ -10,6 +10,7 @@ export enum Permission {
 // Author → Can access dashboard and edit documents.  --> Cannot manage users.
 
 export const RolePermissions: Record<Role, Permission[]> = {
-  [Role.Admin]: [Permission.ManageUsers, Permission.ViewDashboard],
-  [Role.Author]: [Permission.EditDocuments],
+  [Role.Admin]: [Permission.ManageUsers, Permission.ViewDashboard, Permission.EditDocuments],
+  [Role.Author]: [Permission.EditDocuments, Permission.ViewDashboard],
+  [Role.Reviewer]: [Permission.ViewDashboard],
 };

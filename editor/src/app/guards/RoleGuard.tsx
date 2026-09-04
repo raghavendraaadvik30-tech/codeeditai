@@ -45,7 +45,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   }
 
   if (!allowedRoles.includes(user.role as Role)) {
-    return <Navigate to={ROUTE_PATHS.DASHBOARD} replace />;
+    return <Navigate to={ROUTE_PATHS.EDITOR} replace />;
   }
 
   return <>{children}</>;
