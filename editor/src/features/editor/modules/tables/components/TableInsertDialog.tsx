@@ -27,6 +27,7 @@ export function TableInsertDialog({
   const [bordered, setBordered] = useState(true);
   const [striped, setStriped] = useState(false);
   const [style, setStyle] = useState<TableStyle>("clinical");
+  const [width, setWidth] = useState("100%");
   const [caption, setCaption] = useState("");
 
   if (!open) return null;
@@ -39,7 +40,7 @@ export function TableInsertDialog({
       bordered,
       striped,
       style,
-      width: "100%",
+      width,
       caption,
     });
     onClose();
@@ -118,6 +119,23 @@ export function TableInsertDialog({
               <option value="default">Default Clean</option>
               <option value="minimal">Minimal / Borderless</option>
               <option value="darkHeader">Dark Header</option>
+            </select>
+          </div>
+
+          {/* Width Preset */}
+          <div>
+            <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300">
+              Table Width Preset
+            </label>
+            <select
+              value={width}
+              onChange={(e) => setWidth(e.target.value)}
+              className="mt-1 h-8 w-full rounded-md border border-slate-200 px-2 outline-none focus:border-[#0078d4] dark:border-slate-700 dark:bg-slate-900"
+            >
+              <option value="100%">Full Width (100%)</option>
+              <option value="90%">Large (90%)</option>
+              <option value="75%">Medium (75%)</option>
+              <option value="50%">Compact (50%)</option>
             </select>
           </div>
 

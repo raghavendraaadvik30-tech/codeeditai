@@ -29,23 +29,15 @@ import {
   Trash2,
   ChevronDown,
   Hash,
-  Table as TableIcon,
-  Image,
-  Link,
-  Sigma,
   AlignLeft,
   AlignCenter,
   AlignRight,
   X,
-  Sliders,
 } from "lucide-react";
 
 // Ribbon UI control components
 import RibbonButton from "../controls/RibbonButton";
 import RibbonDivider from "../controls/RibbonDivider";
-
-// Table Components
-import { TableGridPicker, TableInsertDialog } from "../../../modules/tables/components";
 
 // Document model and editor state hooks
 import { useDocumentModel } from "../../../store/documentModel";
@@ -69,12 +61,9 @@ export default function InsertTab() {
 
   // Dropdown states
   const [pageNumberMenuOpen, setPageNumberMenuOpen] = useState(false);
-  const [tableMenuOpen, setTableMenuOpen] = useState(false);
-  const [tableDialogOpen, setTableDialogOpen] = useState(false);
 
   // References for click-outside detection
   const pageNumberRef = useRef<HTMLDivElement | null>(null);
-  const tableRef = useRef<HTMLDivElement | null>(null);
 
   // ------------------------------------------------------------------------
   // Click-Outside Listener to close dropdown menus
@@ -84,9 +73,6 @@ export default function InsertTab() {
       const target = event.target as Node;
       if (pageNumberRef.current && !pageNumberRef.current.contains(target)) {
         setPageNumberMenuOpen(false);
-      }
-      if (tableRef.current && !tableRef.current.contains(target)) {
-        setTableMenuOpen(false);
       }
     };
 
@@ -482,131 +468,6 @@ export default function InsertTab() {
       {/* ------------------------------------------------------------------
           DIVIDER
           ------------------------------------------------------------------ */}
-      <RibbonDivider />
-
-      {/* ------------------------------------------------------------------
-          5. TABLE BUTTON & QUICK GRID DROPDOWN
-          ------------------------------------------------------------------ */}
-      <div className="relative inline-block" ref={tableRef}>
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => setTableMenuOpen((prev) => !prev)}
-          className={`
-            inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors
-            border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300
-            dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-200 dark:hover:bg-[#162534]
-          `}
-          title="Insert Table"
-        >
-          <TableIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-          <span>Table</span>
-          <ChevronDown
-            className={`h-3.5 w-3.5 text-slate-400 transition-transform ${tableMenuOpen ? "rotate-180" : ""
-              }`}
-          />
-        </button>
-
-        {/* Table Dropdown Menu */}
-        {tableMenuOpen && (
-          <div
-            className="
-              absolute left-0 top-full mt-1.5 z-50 w-72 rounded-xl border border-slate-200 bg-white p-3 shadow-2xl
-              dark:border-slate-800 dark:bg-[#0c1929] space-y-3
-            "
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
-              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                Insert Table
-              </span>
-              <button
-                type="button"
-                onClick={() => setTableMenuOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-
-            {/* Quick Grid Picker */}
-            <div onClick={() => setTableMenuOpen(false)}>
-              <TableGridPicker />
-            </div>
-
-            {/* Custom Table Dialog Trigger */}
-            <div className="border-t border-slate-100 pt-2 dark:border-slate-800">
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  setTableMenuOpen(false);
-                  setTableDialogOpen(true);
-                }}
-                className="
-                  flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50
-                  py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300
-                  dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:bg-slate-800
-                "
-              >
-                <Sliders className="h-3.5 w-3.5 text-blue-500" />
-                <span>Custom Table Builder...</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Custom Table Modal Dialog */}
-      <TableInsertDialog
-        open={tableDialogOpen}
-        onClose={() => setTableDialogOpen(false)}
-      />
-
-      {/* ------------------------------------------------------------------
-          6. IMAGE INSERTION
-          ------------------------------------------------------------------ */}
-      <RibbonButton
-        icon={<Image className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />}
-        onClick={() => {
-          const url = window.prompt("Enter image URL (PNG, JPG, SVG)");
-          if (!url) return;
-          handleInsertHTML(
-            `<img src="${url}" alt="Inserted Image" style="max-width:100%;border-radius:4px;margin:8px 0;" />`
-          );
-        }}
-      >
-        Image
-      </RibbonButton>
-
-      {/* ------------------------------------------------------------------
-          DIVIDER
-          ------------------------------------------------------------------ */}
-      <RibbonDivider />
-
-      {/* ------------------------------------------------------------------
-          7. HYPERLINK
-          ------------------------------------------------------------------ */}
-      <RibbonButton
-        icon={<Link className="h-4 w-4 text-sky-600 dark:text-sky-400" />}
-        onClick={() => {
-          const url = window.prompt("Enter URL (https://...)");
-          if (!url) return;
-          editorRef.current?.focus();
-          document.execCommand("createLink", false, url);
-        }}
-      >
-        Link
-      </RibbonButton>
-
-      {/* ------------------------------------------------------------------
-          8. SPECIAL SYMBOL
-          ------------------------------------------------------------------ */}
-      <RibbonButton
-        icon={<Sigma className="h-4 w-4 text-amber-600 dark:text-amber-400" />}
-        onClick={() => handleInsertHTML("&Sigma;")}
-      >
-        Symbol
-      </RibbonButton>
     </div>
   );
 }

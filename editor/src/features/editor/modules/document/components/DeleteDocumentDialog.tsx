@@ -18,12 +18,14 @@ export function DeleteDocumentDialog({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { model, resetDocument } = useDocumentModel();
+  const { model, deleteDocument } = useDocumentModel();
 
   if (!isOpen) return null;
 
   const handleDelete = () => {
-    resetDocument();
+    if (model.id) {
+      deleteDocument(model.id);
+    }
     onClose();
   };
 

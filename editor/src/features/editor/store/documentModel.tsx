@@ -155,15 +155,6 @@ function createEmptyDocument(): DocumentModel {
   };
 }
 
-function isDocEmpty(doc?: DocumentModel | null): boolean {
-  if (!doc || !Array.isArray(doc.pages) || doc.pages.length === 0) return true;
-  if (doc.pages.length > 1) return false;
-  const firstPageId = doc.pages[0]?.id || "";
-  const html = doc.pageHtml?.[firstPageId] || "";
-  const clean = html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
-  return clean === "";
-}
-
 function getStoredSavedDocuments(): DocumentModel[] {
   try {
     const raw = localStorage.getItem(SAVED_DOCS_KEY);
@@ -758,28 +749,11 @@ export function DocumentModelProvider({
           baseList = [currentModel, ...savedList];
         }
 
-        // 2. Determine insertion position:
-        // - If saved documents exist (or current document is saved), insert fresh ABOVE the saved documents.
-        // - If all documents are unsaved drafts, place fresh BELOW the unsaved draft (at the end).
-        const firstSavedIdx = baseList.findIndex((d) => !!d.savedAt);
-        let nextSaved: DocumentModel[];
-        if (firstSavedIdx >= 0) {
-          nextSaved = [
-            ...baseList.slice(0, firstSavedIdx),
-            fresh,
-            ...baseList.slice(firstSavedIdx),
-          ];
-        } else {
-          nextSaved = [...baseList, fresh];
-        }
-
-        // Deduplicate in case of duplicate IDs
-        const seen = new Set<string>();
-        nextSaved = nextSaved.filter((d) => {
-          if (!d || !d.id || seen.has(d.id)) return false;
-          seen.add(d.id);
-          return true;
-        });
+        // 2. Prepend fresh document to the document list
+        const nextSaved = [
+          fresh,
+          ...baseList.filter((d) => d && d.id && d.id !== fresh.id),
+        ];
 
         localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
         setSavedDocuments(nextSaved);
@@ -847,12 +821,29 @@ export function DocumentModelProvider({
   ============================================================ */
 
   const resetDocument = useCallback(() => {
-    if (model.id) {
-      deleteDocument(model.id);
-    } else {
-      createNewDocument();
-    }
-  }, [model.id, deleteDocument, createNewDocument]);
+    setModel((prev) => {
+      const section = createDefaultSection();
+      const page: PageModel = {
+        id: "page_" + uid(),
+        sectionId: section.id,
+      };
+      const resetModel: DocumentModel = {
+        ...prev,
+        pages: [page],
+        sections: [section],
+        pageHtml: {
+          [page.id]: DEFAULT_HTML,
+        },
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(resetModel));
+      } catch {
+        // ignore
+      }
+      setActivePage(page.id);
+      return resetModel;
+    });
+  }, []);
 
   /* ============================================================
      Provider Return
