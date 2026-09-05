@@ -277,6 +277,25 @@ function focusPage(pageId: string, position: "start" | "end" = "start") {
 }
 
 // --------------------------------------------------------------------------
+// Helper: Focus Table Cell & Place Caret
+// --------------------------------------------------------------------------
+function focusTableCell(cell: HTMLElement) {
+  try {
+    const sel = window.getSelection();
+    if (!sel) return;
+    const range = document.createRange();
+    const p = cell.querySelector("p") || cell;
+    range.selectNodeContents(p);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    cell.focus();
+  } catch {
+    // ignore
+  }
+}
+
+// --------------------------------------------------------------------------
 // Helper: Check if cursor is at the very beginning of the editable container
 // --------------------------------------------------------------------------
 function isCursorAtStart(container: HTMLElement): boolean {
@@ -501,10 +520,18 @@ function DocumentPage({
     // 2. Normal Enter:
     // Enter does NOT mean "create a new page"!
     // Allow normal browser paragraph creation.
-    // After DOM updates, check if content genuinely overflowed the writing area.
-    // If it still fits -> DO NOTHING.
+    // If inside a table cell, allow creating a new line in the cell without paginating!
     // ------------------------------------------------------------------
     if (e.key === "Enter" && !e.shiftKey) {
+      const sel = window.getSelection();
+      const node = sel?.anchorNode;
+      const el = node?.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node?.parentElement;
+      const cell = el?.closest("td, th") as HTMLTableCellElement | null;
+      if (cell) {
+        // Normal Enter in table cell: keep typing inside the cell without pagination
+        return;
+      }
+
       setTimeout(() => {
         checkAndPaginateOverflow();
       }, 20);
@@ -512,7 +539,53 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
-    // 3. Backspace at start of page (Page N > 1)
+    // 3. Tab key inside table cell: navigate to next cell, or add row on last cell
+    // ------------------------------------------------------------------
+    if (e.key === "Tab") {
+      const sel = window.getSelection();
+      const node = sel?.anchorNode;
+      const el = node?.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node?.parentElement;
+      const currentCell = el?.closest("td, th") as HTMLTableCellElement | null;
+
+      if (currentCell) {
+        e.preventDefault();
+        const table = currentCell.closest("table");
+        if (table) {
+          const allCells = Array.from(table.querySelectorAll("td, th")) as HTMLTableCellElement[];
+          const currentIndex = allCells.indexOf(currentCell);
+
+          if (e.shiftKey) {
+            if (currentIndex > 0) {
+              focusTableCell(allCells[currentIndex - 1]);
+            }
+          } else {
+            if (currentIndex < allCells.length - 1) {
+              focusTableCell(allCells[currentIndex + 1]);
+            } else {
+              // Last cell: Append a new row to the table (MS Word standard behavior)
+              const lastRow = table.rows[table.rows.length - 1];
+              if (lastRow) {
+                const newRow = lastRow.cloneNode(true) as HTMLTableRowElement;
+                Array.from(newRow.cells).forEach((c) => {
+                  c.innerHTML = "<p><br></p>";
+                  c.style.height = "auto";
+                });
+                lastRow.parentElement?.appendChild(newRow);
+                const firstNewCell = newRow.cells[0];
+                if (firstNewCell) {
+                  focusTableCell(firstNewCell);
+                }
+                handleInput();
+              }
+            }
+          }
+          return;
+        }
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // 4. Backspace at start of page (Page N > 1)
     // ------------------------------------------------------------------
     if (e.key === "Backspace") {
       handleBackspaceKey(e);

@@ -31,6 +31,7 @@ import {
   ArrowDown,
   Settings,
   X,
+  Table,
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -49,6 +50,8 @@ import RibbonDivider from "../controls/RibbonDivider";
 // Document model and editor state hooks
 import { useDocumentModel } from "../../../store/documentModel";
 import { useEditor } from "../../../context/EditorContext";
+import { useTable } from "../../../modules/tables/hooks";
+import { TableInsertDialog } from "../../../modules/tables/components";
 
 export default function InsertTab() {
   // ------------------------------------------------------------------------
@@ -68,6 +71,14 @@ export default function InsertTab() {
     editorRef,
     insertHTML,
   } = useEditor();
+
+  // Table insertion states
+  const { insertQuickTable } = useTable();
+  const [tableMenuOpen, setTableMenuOpen] = useState(false);
+  const [tableInsertDialogOpen, setTableInsertDialogOpen] = useState(false);
+  const [gridHoverRow, setGridHoverRow] = useState(0);
+  const [gridHoverCol, setGridHoverCol] = useState(0);
+  const tableMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Page Number dropdown & submenu states
   const [pageNumberMenuOpen, setPageNumberMenuOpen] = useState(false);
@@ -91,6 +102,11 @@ export default function InsertTab() {
       if (pageNumberRef.current && !pageNumberRef.current.contains(target)) {
         setPageNumberMenuOpen(false);
         setActiveSubmenu(null);
+      }
+      if (tableMenuRef.current && !tableMenuRef.current.contains(target)) {
+        setTableMenuOpen(false);
+        setGridHoverRow(0);
+        setGridHoverCol(0);
       }
     };
 
@@ -297,6 +313,144 @@ export default function InsertTab() {
       >
         Delete Page
       </RibbonButton>
+
+      {/* ------------------------------------------------------------------
+          DIVIDER
+          ------------------------------------------------------------------ */}
+      <RibbonDivider />
+
+      {/* ------------------------------------------------------------------
+          TABLES GROUP (Microsoft Word Style Table Dropdown)
+          ------------------------------------------------------------------ */}
+      <div className="relative inline-block" ref={tableMenuRef}>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            setTableMenuOpen((prev) => !prev);
+            setPageNumberMenuOpen(false);
+          }}
+          className={`
+            inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors
+            border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300
+            dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/60
+          `}
+          title="Insert Table (Microsoft Word Style)"
+        >
+          <Table className="h-3.5 w-3.5 text-[#0078d4] dark:text-blue-400" />
+          <span>Table</span>
+          <ChevronDown
+            className={`h-3.5 w-3.5 text-blue-600 dark:text-blue-400 transition-transform ${
+              tableMenuOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {/* Word-Style Table Dropdown with Interactive Grid Picker */}
+        {tableMenuOpen && (
+          <div
+            className="
+              absolute left-0 top-full mt-1.5 z-50 w-64 p-3 shadow-2xl rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#0c1622]
+            "
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-1.5">
+                <Table className="h-3.5 w-3.5 text-[#0078d4]" />
+                <span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
+                  Insert Table
+                </span>
+              </div>
+              <span className="text-[11px] font-semibold text-[#0078d4]">
+                {gridHoverRow > 0 && gridHoverCol > 0
+                  ? `${gridHoverRow} × ${gridHoverCol} Table`
+                  : "Hover grid to select"}
+              </span>
+            </div>
+
+            {/* 8x8 Interactive Grid */}
+            <div
+              className="grid grid-cols-8 gap-1 p-1.5 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-200/60 dark:border-slate-800/60"
+              onMouseLeave={() => {
+                setGridHoverRow(0);
+                setGridHoverCol(0);
+              }}
+            >
+              {Array.from({ length: 8 }).map((_, rIdx) => {
+                const rowNum = rIdx + 1;
+                return Array.from({ length: 8 }).map((_, cIdx) => {
+                  const colNum = cIdx + 1;
+                  const isHighlighted = rowNum <= gridHoverRow && colNum <= gridHoverCol;
+
+                  return (
+                    <button
+                      key={`grid-${rowNum}-${colNum}`}
+                      type="button"
+                      onMouseEnter={() => {
+                        setGridHoverRow(rowNum);
+                        setGridHoverCol(colNum);
+                      }}
+                      onClick={() => {
+                        insertQuickTable(rowNum, colNum);
+                        setTableMenuOpen(false);
+                        setGridHoverRow(0);
+                        setGridHoverCol(0);
+                      }}
+                      className={`
+                        h-5 w-5 rounded-xs border transition-all duration-75 cursor-pointer
+                        ${
+                          isHighlighted
+                            ? "border-[#0078d4] bg-[#0078d4]/30 dark:border-[#0078d4] dark:bg-[#0078d4]/50"
+                            : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
+                        }
+                      `}
+                      title={`${rowNum} × ${colNum}`}
+                    />
+                  );
+                });
+              })}
+            </div>
+
+            {/* Quick Dimension Presets */}
+            <div className="mt-2.5 flex items-center justify-between gap-1 text-[10px]">
+              <span className="text-slate-400 font-medium">Presets:</span>
+              {[
+                { r: 2, c: 2 },
+                { r: 3, c: 3 },
+                { r: 4, c: 3 },
+                { r: 5, c: 4 },
+              ].map((preset) => (
+                <button
+                  key={`preset-${preset.r}x${preset.c}`}
+                  type="button"
+                  onClick={() => {
+                    insertQuickTable(preset.r, preset.c);
+                    setTableMenuOpen(false);
+                  }}
+                  className="px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-700 hover:bg-sky-50 hover:border-sky-300 hover:text-sky-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 transition-colors"
+                >
+                  {preset.r}×{preset.c}
+                </button>
+              ))}
+            </div>
+
+            <div className="my-2 border-t border-slate-100 dark:border-slate-800" />
+
+            {/* Action: Custom Insert Table Dialog */}
+            <button
+              type="button"
+              onClick={() => {
+                setTableMenuOpen(false);
+                setTableInsertDialogOpen(true);
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60 transition-colors"
+            >
+              <Table className="h-3.5 w-3.5 text-slate-500" />
+              <span>Insert Table...</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* ------------------------------------------------------------------
           DIVIDER
@@ -729,6 +883,14 @@ export default function InsertTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ------------------------------------------------------------------
+          MODAL DIALOG: INSERT TABLE (Custom Configuration)
+          ------------------------------------------------------------------ */}
+      <TableInsertDialog
+        open={tableInsertDialogOpen}
+        onClose={() => setTableInsertDialogOpen(false)}
+      />
     </div>
   );
 }

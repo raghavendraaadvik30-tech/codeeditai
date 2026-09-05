@@ -76,7 +76,7 @@ export function TableProvider({
   initialConfig?: TableConfig;
 }) {
   const { insertHTML, editorRef } = useEditor();
-  const { setPageHtml } = useDocumentModel();
+  const { setPageHtml, activePage, model } = useDocumentModel();
   const [config, setConfig] = useState<TableConfig>(initialConfig);
 
   const lastActiveCellRef = useRef<HTMLTableCellElement | null>(null);
@@ -228,15 +228,73 @@ export function TableProvider({
     setConfig((prev) => ({ ...prev, ...patch }));
   };
 
+  const executeInsertTable = (html: string) => {
+    const pageId = activePage || model.pages[0]?.id;
+    const pageSection = pageId ? document.querySelector(`section[data-page-id="${pageId}"]`) : null;
+    const activeEditor =
+      (pageSection?.querySelector('[contenteditable="true"]') as HTMLElement | null) ||
+      editorRef.current ||
+      (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
+
+    const sel = window.getSelection();
+    let hasRangeInActive = false;
+    if (sel && sel.rangeCount > 0 && activeEditor) {
+      const common = sel.getRangeAt(0).commonAncestorContainer;
+      if (activeEditor.contains(common)) {
+        hasRangeInActive = true;
+      }
+    }
+
+    if (hasRangeInActive) {
+      insertHTML?.(html);
+    } else if (activeEditor) {
+      activeEditor.focus();
+      const lastP = activeEditor.lastElementChild;
+      if (
+        lastP &&
+        (lastP.innerHTML === "<br>" ||
+          lastP.innerHTML === "<br/>" ||
+          lastP.textContent?.trim() === "")
+      ) {
+        lastP.insertAdjacentHTML("beforebegin", html);
+      } else {
+        activeEditor.insertAdjacentHTML("beforeend", html);
+      }
+      activeEditor.dispatchEvent(new Event("input", { bubbles: true }));
+      const targetPageId = activeEditor.closest("section[data-page-id]")?.getAttribute("data-page-id");
+      if (targetPageId && setPageHtml) {
+        setPageHtml(targetPageId, activeEditor.innerHTML);
+      }
+    } else {
+      insertHTML?.(html);
+    }
+
+    // Automatically place cursor in cell (0, 0) of newly inserted table
+    setTimeout(() => {
+      const targetEditor =
+        activeEditor || editorRef.current || (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
+      if (targetEditor) {
+        const allTables = targetEditor.querySelectorAll("table");
+        const lastTable = allTables[allTables.length - 1];
+        if (lastTable) {
+          const firstCell = lastTable.querySelector("td, th") as HTMLElement | null;
+          if (firstCell) {
+            placeCaretInCell(firstCell);
+          }
+        }
+      }
+    }, 50);
+  };
+
   const insertTableWithConfig = (customConfig?: TableConfig) => {
     const active = customConfig || config;
     const html = generateTableHtml(active);
-    insertHTML?.(html);
+    executeInsertTable(html);
   };
 
   const insertTemplate = (template: TableTemplate) => {
     const html = generateTemplateTableHtml(template);
-    insertHTML?.(html);
+    executeInsertTable(html);
   };
 
   const insertQuickTable = (rows: number, cols: number) => {
@@ -246,7 +304,7 @@ export function TableProvider({
       cols,
     };
     const html = generateTableHtml(quickConfig);
-    insertHTML?.(html);
+    executeInsertTable(html);
   };
 
   const insertRowAbove = () => {
