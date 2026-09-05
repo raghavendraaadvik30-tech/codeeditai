@@ -41,6 +41,8 @@ import {
 } from "lucide-react";
 
 import { parseUploadedFile } from "../../utils/fileImportUtil";
+import { documentService, type DocumentMeta } from "../../services/documentService";
+import { printService } from "../../services/printService";
 
 import { Button } from "@/shared/components/ui/button";
 import ThemeToggle from "@/shared/components/theme/themeToggle";
@@ -202,6 +204,41 @@ export default function HeaderActions() {
     window.setTimeout(() => {
       setSavedFlash(false);
     }, 1500);
+  };
+
+  /* --------------------------------
+     EXPORT DOCX
+  -------------------------------- */
+
+  const handleExportDocx = () => {
+    const fullHtml = model.pages
+      .map((p) => {
+        const pageEl = document.querySelector(`[data-page-id="${p.id}"]`);
+        const editable = pageEl?.querySelector("[contenteditable]");
+        return editable ? (editable as HTMLElement).innerHTML : (model.pageHtml[p.id] || "");
+      })
+      .filter((h) => h.trim().length > 0)
+      .join('<div class="page-break" style="page-break-after:always;"></div>');
+
+    const meta: DocumentMeta = {
+      id: model.id,
+      title: model.title || "Document",
+      author: "Editor User",
+      savedAt: Date.now(),
+      version: 1,
+    };
+
+    const blob = documentService.exportDOCX(meta, fullHtml || "<p></p>");
+    const safeTitle = (model.title || "document").replace(/[^a-zA-Z0-9_\-\s]/g, "").trim() || "document";
+    documentService.download(blob, `${safeTitle}.docx`);
+  };
+
+  /* --------------------------------
+     EXPORT PDF / PRINT
+  -------------------------------- */
+
+  const handleExportPdf = () => {
+    printService.printDocument();
   };
 
   return (
@@ -371,10 +408,10 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-9
-          gap-2
-          px-3
-          text-sm
+          h-8
+          gap-1.5
+          px-2
+          text-xs
 
           text-slate-600
           hover:bg-slate-100
@@ -384,9 +421,10 @@ export default function HeaderActions() {
           dark:hover:bg-slate-800
           dark:hover:text-white
         "
+        onClick={handleExportDocx}
         title="Export DOCX"
       >
-        <FileText className="h-4 w-4" />
+        <FileText className="h-3.5 w-3.5" />
 
         <span>DOCX</span>
       </Button>
@@ -400,10 +438,10 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-9
-          gap-2
-          px-3
-          text-sm
+          h-8
+          gap-1.5
+          px-2
+          text-xs
 
           text-slate-600
           hover:bg-slate-100
@@ -413,9 +451,10 @@ export default function HeaderActions() {
           dark:hover:bg-slate-800
           dark:hover:text-white
         "
+        onClick={handleExportPdf}
         title="Export PDF"
       >
-        <FileDown className="h-4 w-4" />
+        <FileDown className="h-3.5 w-3.5" />
 
         <span>PDF</span>
       </Button>

@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback } from "react";
+import { printService } from "../../../services/printService";
 
 export function usePrint() {
   const [isPrinting, setIsPrinting] = useState(false);
@@ -15,7 +16,7 @@ export function usePrint() {
   const printDocument = useCallback(() => {
     setIsPrinting(true);
     try {
-      window.print();
+      printService.printDocument();
     } finally {
       setIsPrinting(false);
     }

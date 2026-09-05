@@ -14,7 +14,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Move, Maximize2, Minimize2, Columns, Rows, Plus, Trash2 } from "lucide-react";
+import { Move, Maximize2, Minimize2, Columns, Rows } from "lucide-react";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
 
 interface TableControlsOverlayProps {
@@ -964,76 +964,6 @@ export function TableControlsOverlay({
     }
   };
 
-  const handleAddRow = () => {
-    const lastRow = table.rows[table.rows.length - 1];
-    if (!lastRow) return;
-    const newRow = lastRow.cloneNode(true) as HTMLTableRowElement;
-    Array.from(newRow.cells).forEach((c) => {
-      c.innerHTML = "<p><br></p>";
-      c.style.height = "auto";
-    });
-    lastRow.parentElement?.appendChild(newRow);
-    onUpdate();
-    updatePosition();
-
-    const pageContainer = table.closest('[contenteditable="true"]') as HTMLElement | null;
-    if (pageContainer) {
-      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
-      const pageId = pageContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
-      if (pageId && setPageHtml) {
-        setPageHtml(pageId, pageContainer.innerHTML);
-      }
-    }
-  };
-
-  const handleAddCol = () => {
-    const rows = Array.from(table.rows);
-    if (rows.length === 0) return;
-    const numCols = rows[0].cells.length;
-    const newTotalCols = numCols + 1;
-    const newColWidthPct = (100 / newTotalCols).toFixed(2) + "%";
-
-    rows.forEach((r) => {
-      const isHeader = r.parentElement?.tagName.toLowerCase() === "thead" || r.cells[0]?.tagName.toLowerCase() === "th";
-      const newCell = document.createElement(isHeader ? "th" : "td");
-      newCell.innerHTML = "<p><br></p>";
-      newCell.style.border = "1px solid #cbd5e1";
-      newCell.style.padding = "8px 12px";
-      newCell.style.verticalAlign = "top";
-      newCell.style.textAlign = "left";
-      r.appendChild(newCell);
-
-      Array.from(r.cells).forEach((c) => {
-        c.style.width = newColWidthPct;
-      });
-    });
-
-    onUpdate();
-    updatePosition();
-
-    const pageContainer = table.closest('[contenteditable="true"]') as HTMLElement | null;
-    if (pageContainer) {
-      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
-      const pageId = pageContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
-      if (pageId && setPageHtml) {
-        setPageHtml(pageId, pageContainer.innerHTML);
-      }
-    }
-  };
-
-  const handleDeleteTable = () => {
-    const parent = table.parentElement;
-    table.remove();
-    onDeactivateTable?.();
-    if (parent) {
-      parent.dispatchEvent(new Event("input", { bubbles: true }));
-      const pageId = parent.closest("section[data-page-id]")?.getAttribute("data-page-id");
-      if (pageId && setPageHtml) {
-        setPageHtml(pageId, parent.innerHTML);
-      }
-    }
-  };
-
   if (!pos) return null;
 
   return (
@@ -1108,39 +1038,6 @@ export function TableControlsOverlay({
             >
               <Rows className="h-3 w-3 text-emerald-500" />
               <span>Equal Rows</span>
-            </button>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleAddRow}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
-              title="Add New Row Line"
-            >
-              <Plus className="h-3 w-3 text-emerald-600" />
-              <span>+ Row</span>
-            </button>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleAddCol}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
-              title="Add New Column Line"
-            >
-              <Plus className="h-3 w-3 text-blue-600" />
-              <span>+ Col</span>
-            </button>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleDeleteTable}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/50 transition-colors"
-              title="Delete Table"
-            >
-              <Trash2 className="h-3 w-3" />
-              <span>Delete</span>
             </button>
           </div>
         </div>

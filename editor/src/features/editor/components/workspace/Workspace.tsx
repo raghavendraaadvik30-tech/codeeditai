@@ -20,7 +20,7 @@ and provides true Word-style content-overflow pagination across pages.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useEditor } from "../../context/EditorContext";
-import { useDocumentModel, type PageModel } from "../../store/documentModel";
+import { useDocumentModel, type PageModel, type SectionModel } from "../../store/documentModel";
 import { TableControlsOverlay, TableFloatingFormatToolbar } from "../../modules/tables/components";
 
 export default function Workspace() {
@@ -153,6 +153,7 @@ export default function Workspace() {
               pageIndex={index}
               pageNumber={index + 1}
               totalPages={model.pages.length}
+              section={section}
               headerText={section?.header || ""}
               footerText={section?.footer || "Parexel Smart Authoring Suite"}
               pageNumberPosition={section?.pageNumberPosition}
@@ -320,6 +321,7 @@ interface DocumentPageProps {
   totalPages: number;
   headerText: string;
   footerText: string;
+  section?: SectionModel;
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
   pageNumberFormat?: "1" | "i" | "a";
@@ -347,6 +349,7 @@ function DocumentPage({
   totalPages: _totalPages,
   headerText,
   footerText,
+  section,
   pageNumberPosition,
   pageNumberAlignment,
   pageNumberFormat,
@@ -829,19 +832,20 @@ function DocumentPage({
     }
   };
 
+  const isLandscape = section?.orientation === "landscape";
+  const baseWidth = section?.paperSize?.width ?? 816;
+  const baseHeight = section?.paperSize?.height ?? 1056;
+  const pageWidth = isLandscape ? baseHeight : baseWidth;
+  const pageHeight = isLandscape ? baseWidth : baseHeight;
+
   return (
     <section
       data-page-id={pageId}
       onMouseDown={handlePageMouseDown}
       className={`
         relative
-        w-[816px]
-        min-w-[816px]
-        h-[1056px]
-        max-h-[1056px]
         overflow-hidden
         shrink-0
-        bg-white
         cursor-text
         shadow-[0_4px_20px_rgba(0,0,0,0.12)]
         ${
@@ -851,11 +855,43 @@ function DocumentPage({
         }
       `}
       style={{
+        width: `${pageWidth}px`,
+        minWidth: `${pageWidth}px`,
+        height: `${pageHeight}px`,
+        maxHeight: `${pageHeight}px`,
         transform: `scale(${zoom / 100})`,
         transformOrigin: "top center",
-        marginBottom: `${(1056 * zoom) / 100 - 1056}px`,
+        marginBottom: `${(pageHeight * zoom) / 100 - pageHeight}px`,
+        backgroundColor: section?.pageColor || "#ffffff",
+        ...(section?.pageBorders?.style === "box"
+          ? { border: `${section.pageBorders.width || 2}px solid ${section.pageBorders.color || "#000000"}` }
+          : section?.pageBorders?.style === "dashed"
+          ? { border: `${section.pageBorders.width || 2}px dashed ${section.pageBorders.color || "#000000"}` }
+          : section?.pageBorders?.style === "double"
+          ? { border: `4px double ${section.pageBorders.color || "#000000"}` }
+          : section?.pageBorders?.style === "shadow"
+          ? { boxShadow: "0 10px 30px rgba(0,0,0,0.25)" }
+          : {}),
       }}
     >
+      {/* WATERMARK OVERLAY */}
+      {section?.watermark?.text && (
+        <div
+          className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden"
+          style={{ opacity: section.watermark.opacity ?? 0.12 }}
+        >
+          <span
+            className="font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100"
+            style={{
+              fontSize: isLandscape ? "80px" : "64px",
+              transform: "rotate(-35deg)",
+              color: section.watermark.color || "currentColor",
+            }}
+          >
+            {section.watermark.text}
+          </span>
+        </div>
+      )}
       {/* PAGE NUMBER BADGE */}
       <div
         className="
@@ -942,6 +978,22 @@ function DocumentPage({
             onSetActiveTable(clickedTable);
             onActivate();
           }
+        }}
+        style={{
+          ...(section?.marginConfig
+            ? {
+                paddingTop: `${section.marginConfig.top}px`,
+                paddingBottom: `${section.marginConfig.bottom}px`,
+                paddingLeft: `${section.marginConfig.left}px`,
+                paddingRight: `${section.marginConfig.right}px`,
+              }
+            : {}),
+          ...(section?.columns && section.columns.count > 1
+            ? {
+                columnCount: section.columns.count,
+                columnGap: "32px",
+              }
+            : {}),
         }}
         className="
           h-[966px]
