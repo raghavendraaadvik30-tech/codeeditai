@@ -37,6 +37,9 @@ export interface EditorContextType {
 
   focusEditor: () => void;
   insertHTML: (html: string) => void;
+
+  pendingPermissionFile: { fileName: string } | null;
+  setPendingPermissionFile: React.Dispatch<React.SetStateAction<{ fileName: string } | null>>;
 }
 
 export const EditorContext =
@@ -98,6 +101,9 @@ export function EditorProvider({
 
   const [isEditable, setIsEditable] =
     useState<boolean>(true);
+
+  const [pendingPermissionFile, setPendingPermissionFile] =
+    useState<{ fileName: string } | null>(null);
 
   const [selection, setSelection] =
     useState<Selection | null>(null);
@@ -248,6 +254,9 @@ export function EditorProvider({
 
     focusEditor,
     insertHTML,
+
+    pendingPermissionFile,
+    setPendingPermissionFile,
   };
 
   return (

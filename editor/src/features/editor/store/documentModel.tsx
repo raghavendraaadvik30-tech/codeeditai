@@ -55,6 +55,14 @@ export interface SectionModel {
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
   pageNumberFormat?: "1" | "i" | "a";
+  orientation?: "portrait" | "landscape";
+  marginPreset?: "normal" | "narrow" | "moderate" | "wide" | "custom";
+  marginConfig?: { top: number; bottom: number; left: number; right: number };
+  paperSize?: { name: string; width: number; height: number };
+  columns?: { type: "one" | "two" | "three" | "left" | "right"; count: number };
+  watermark?: { text: string; opacity?: number; color?: string };
+  pageColor?: string;
+  pageBorders?: { style: "none" | "box" | "shadow" | "dashed" | "double"; color?: string; width?: number };
 }
 
 export interface PageModel {

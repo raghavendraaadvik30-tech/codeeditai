@@ -56,7 +56,7 @@ export function generateTableHtml(config: TableConfig): string {
           ? "#ffffff"
           : "#1e293b";
 
-      html += `<th style="border: ${borderStyle}; width: ${colWidth}%; background-color: ${headerBg}; color: ${headerColor}; padding: 8px 12px; font-weight: 600; text-align: left; vertical-align: top; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;">&nbsp;</th>`;
+      html += `<th style="border: ${borderStyle}; width: ${colWidth}%; background-color: ${headerBg}; color: ${headerColor}; padding: 8px 12px; font-weight: 600; text-align: left; vertical-align: top; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;"><p><br></p></th>`;
     }
     html += "</tr></thead>";
   }
@@ -68,7 +68,7 @@ export function generateTableHtml(config: TableConfig): string {
 
     html += `<tr style="background-color: ${rowBg};">`;
     for (let c = 0; c < cols; c++) {
-      html += `<td style="border: ${borderStyle}; width: ${colWidth}%; padding: 8px 12px; vertical-align: top; text-align: left; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;">&nbsp;</td>`;
+      html += `<td style="border: ${borderStyle}; width: ${colWidth}%; padding: 8px 12px; vertical-align: top; text-align: left; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;"><p><br></p></td>`;
     }
     html += "</tr>";
   }
@@ -92,7 +92,7 @@ export function generateTemplateTableHtml(template: TableTemplate): string {
   let html = `<table class="editor-table ${getTableStyleClass(style)}" style="border-collapse: collapse; table-layout: fixed; width: 100%; margin: 16px 0; font-size: 10pt; box-sizing: border-box;" data-table="true" border="1">`;
   html += "<thead><tr>";
   headers.forEach((h) => {
-    html += `<th style="border: ${borderStyle}; width: ${colWidth}%; background-color: ${headerBg}; color: ${headerColor}; padding: 8px 12px; font-weight: 600; text-align: left; vertical-align: top; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;">${h}</th>`;
+    html += `<th style="border: ${borderStyle}; width: ${colWidth}%; background-color: ${headerBg}; color: ${headerColor}; padding: 8px 12px; font-weight: 600; text-align: left; vertical-align: top; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;"><p>${h}</p></th>`;
   });
   html += "</tr></thead><tbody>";
 
@@ -102,7 +102,7 @@ export function generateTemplateTableHtml(template: TableTemplate): string {
       const rowBg = style === "striped" && isEven ? "#f8fafc" : "transparent";
       html += `<tr style="background-color: ${rowBg};">`;
       row.forEach((cell) => {
-        html += `<td style="border: ${borderStyle}; width: ${colWidth}%; padding: 8px 12px; vertical-align: top; text-align: left; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;">${cell}</td>`;
+        html += `<td style="border: ${borderStyle}; width: ${colWidth}%; padding: 8px 12px; vertical-align: top; text-align: left; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;"><p>${cell}</p></td>`;
       });
       html += "</tr>";
     });
@@ -110,7 +110,7 @@ export function generateTemplateTableHtml(template: TableTemplate): string {
     for (let r = 1; r < rows; r++) {
       html += "<tr>";
       for (let c = 0; c < cols; c++) {
-        html += `<td style="border: ${borderStyle}; width: ${colWidth}%; padding: 8px 12px; vertical-align: top; text-align: left; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;">&nbsp;</td>`;
+        html += `<td style="border: ${borderStyle}; width: ${colWidth}%; padding: 8px 12px; vertical-align: top; text-align: left; word-break: break-word; overflow-wrap: anywhere; white-space: normal; box-sizing: border-box;"><p><br></p></td>`;
       }
       html += "</tr>";
     }

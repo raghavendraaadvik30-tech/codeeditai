@@ -20,7 +20,7 @@ and provides true Word-style content-overflow pagination across pages.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useEditor } from "../../context/EditorContext";
-import { useDocumentModel, type PageModel } from "../../store/documentModel";
+import { useDocumentModel, type PageModel, type SectionModel } from "../../store/documentModel";
 import { TableControlsOverlay, TableFloatingFormatToolbar } from "../../modules/tables/components";
 
 export default function Workspace() {
@@ -153,6 +153,7 @@ export default function Workspace() {
               pageIndex={index}
               pageNumber={index + 1}
               totalPages={model.pages.length}
+              section={section}
               headerText={section?.header || ""}
               footerText={section?.footer || "Parexel Smart Authoring Suite"}
               pageNumberPosition={section?.pageNumberPosition}
@@ -277,6 +278,25 @@ function focusPage(pageId: string, position: "start" | "end" = "start") {
 }
 
 // --------------------------------------------------------------------------
+// Helper: Focus Table Cell & Place Caret
+// --------------------------------------------------------------------------
+function focusTableCell(cell: HTMLElement) {
+  try {
+    const sel = window.getSelection();
+    if (!sel) return;
+    const range = document.createRange();
+    const p = cell.querySelector("p") || cell;
+    range.selectNodeContents(p);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    cell.focus();
+  } catch {
+    // ignore
+  }
+}
+
+// --------------------------------------------------------------------------
 // Helper: Check if cursor is at the very beginning of the editable container
 // --------------------------------------------------------------------------
 function isCursorAtStart(container: HTMLElement): boolean {
@@ -301,6 +321,7 @@ interface DocumentPageProps {
   totalPages: number;
   headerText: string;
   footerText: string;
+  section?: SectionModel;
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
   pageNumberFormat?: "1" | "i" | "a";
@@ -328,6 +349,7 @@ function DocumentPage({
   totalPages: _totalPages,
   headerText,
   footerText,
+  section,
   pageNumberPosition,
   pageNumberAlignment,
   pageNumberFormat,
@@ -501,10 +523,18 @@ function DocumentPage({
     // 2. Normal Enter:
     // Enter does NOT mean "create a new page"!
     // Allow normal browser paragraph creation.
-    // After DOM updates, check if content genuinely overflowed the writing area.
-    // If it still fits -> DO NOTHING.
+    // If inside a table cell, allow creating a new line in the cell without paginating!
     // ------------------------------------------------------------------
     if (e.key === "Enter" && !e.shiftKey) {
+      const sel = window.getSelection();
+      const node = sel?.anchorNode;
+      const el = node?.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node?.parentElement;
+      const cell = el?.closest("td, th") as HTMLTableCellElement | null;
+      if (cell) {
+        // Normal Enter in table cell: keep typing inside the cell without pagination
+        return;
+      }
+
       setTimeout(() => {
         checkAndPaginateOverflow();
       }, 20);
@@ -512,7 +542,53 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
-    // 3. Backspace at start of page (Page N > 1)
+    // 3. Tab key inside table cell: navigate to next cell, or add row on last cell
+    // ------------------------------------------------------------------
+    if (e.key === "Tab") {
+      const sel = window.getSelection();
+      const node = sel?.anchorNode;
+      const el = node?.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node?.parentElement;
+      const currentCell = el?.closest("td, th") as HTMLTableCellElement | null;
+
+      if (currentCell) {
+        e.preventDefault();
+        const table = currentCell.closest("table");
+        if (table) {
+          const allCells = Array.from(table.querySelectorAll("td, th")) as HTMLTableCellElement[];
+          const currentIndex = allCells.indexOf(currentCell);
+
+          if (e.shiftKey) {
+            if (currentIndex > 0) {
+              focusTableCell(allCells[currentIndex - 1]);
+            }
+          } else {
+            if (currentIndex < allCells.length - 1) {
+              focusTableCell(allCells[currentIndex + 1]);
+            } else {
+              // Last cell: Append a new row to the table (MS Word standard behavior)
+              const lastRow = table.rows[table.rows.length - 1];
+              if (lastRow) {
+                const newRow = lastRow.cloneNode(true) as HTMLTableRowElement;
+                Array.from(newRow.cells).forEach((c) => {
+                  c.innerHTML = "<p><br></p>";
+                  c.style.height = "auto";
+                });
+                lastRow.parentElement?.appendChild(newRow);
+                const firstNewCell = newRow.cells[0];
+                if (firstNewCell) {
+                  focusTableCell(firstNewCell);
+                }
+                handleInput();
+              }
+            }
+          }
+          return;
+        }
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // 4. Backspace at start of page (Page N > 1)
     // ------------------------------------------------------------------
     if (e.key === "Backspace") {
       handleBackspaceKey(e);
@@ -611,9 +687,6 @@ function DocumentPage({
     const currentHtml = element.innerHTML;
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
-
-    // After content changes, check if content genuinely overflowed the writing area
-    checkAndPaginateOverflow();
   };
 
   const handleFocus = () => {
@@ -759,19 +832,20 @@ function DocumentPage({
     }
   };
 
+  const isLandscape = section?.orientation === "landscape";
+  const baseWidth = section?.paperSize?.width ?? 816;
+  const baseHeight = section?.paperSize?.height ?? 1056;
+  const pageWidth = isLandscape ? baseHeight : baseWidth;
+  const pageHeight = isLandscape ? baseWidth : baseHeight;
+
   return (
     <section
       data-page-id={pageId}
       onMouseDown={handlePageMouseDown}
       className={`
         relative
-        w-[816px]
-        min-w-[816px]
-        h-[1056px]
-        max-h-[1056px]
         overflow-hidden
         shrink-0
-        bg-white
         cursor-text
         shadow-[0_4px_20px_rgba(0,0,0,0.12)]
         ${
@@ -781,11 +855,43 @@ function DocumentPage({
         }
       `}
       style={{
+        width: `${pageWidth}px`,
+        minWidth: `${pageWidth}px`,
+        height: `${pageHeight}px`,
+        maxHeight: `${pageHeight}px`,
         transform: `scale(${zoom / 100})`,
         transformOrigin: "top center",
-        marginBottom: `${(1056 * zoom) / 100 - 1056}px`,
+        marginBottom: `${(pageHeight * zoom) / 100 - pageHeight}px`,
+        backgroundColor: section?.pageColor || "#ffffff",
+        ...(section?.pageBorders?.style === "box"
+          ? { border: `${section.pageBorders.width || 2}px solid ${section.pageBorders.color || "#000000"}` }
+          : section?.pageBorders?.style === "dashed"
+          ? { border: `${section.pageBorders.width || 2}px dashed ${section.pageBorders.color || "#000000"}` }
+          : section?.pageBorders?.style === "double"
+          ? { border: `4px double ${section.pageBorders.color || "#000000"}` }
+          : section?.pageBorders?.style === "shadow"
+          ? { boxShadow: "0 10px 30px rgba(0,0,0,0.25)" }
+          : {}),
       }}
     >
+      {/* WATERMARK OVERLAY */}
+      {section?.watermark?.text && (
+        <div
+          className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden"
+          style={{ opacity: section.watermark.opacity ?? 0.12 }}
+        >
+          <span
+            className="font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100"
+            style={{
+              fontSize: isLandscape ? "80px" : "64px",
+              transform: "rotate(-35deg)",
+              color: section.watermark.color || "currentColor",
+            }}
+          >
+            {section.watermark.text}
+          </span>
+        </div>
+      )}
       {/* PAGE NUMBER BADGE */}
       <div
         className="
@@ -872,6 +978,22 @@ function DocumentPage({
             onSetActiveTable(clickedTable);
             onActivate();
           }
+        }}
+        style={{
+          ...(section?.marginConfig
+            ? {
+                paddingTop: `${section.marginConfig.top}px`,
+                paddingBottom: `${section.marginConfig.bottom}px`,
+                paddingLeft: `${section.marginConfig.left}px`,
+                paddingRight: `${section.marginConfig.right}px`,
+              }
+            : {}),
+          ...(section?.columns && section.columns.count > 1
+            ? {
+                columnCount: section.columns.count,
+                columnGap: "32px",
+              }
+            : {}),
         }}
         className="
           h-[966px]
