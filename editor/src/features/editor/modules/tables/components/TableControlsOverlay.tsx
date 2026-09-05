@@ -14,7 +14,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Move, Maximize2, Minimize2, Columns } from "lucide-react";
+import { Move, Maximize2, Minimize2, Columns, Rows } from "lucide-react";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
 
 interface TableControlsOverlayProps {
@@ -22,6 +22,7 @@ interface TableControlsOverlayProps {
   container: HTMLElement;
   zoom: number;
   onUpdate: () => void;
+  onActivateTable?: (table: HTMLTableElement | null) => void;
   onDeactivateTable?: () => void;
 }
 
@@ -61,6 +62,7 @@ export function TableControlsOverlay({
   container,
   zoom,
   onUpdate,
+  onActivateTable,
   onDeactivateTable,
 }: TableControlsOverlayProps) {
   const { setPageHtml, setActivePage } = useDocumentModel();
@@ -86,9 +88,10 @@ export function TableControlsOverlay({
 
   const scale = zoom / 100;
 
-  // Calculate table position, column divider positions, and row divider positions relative to container
+  // Calculate table position, column divider positions, and row divider positions relative to section (offsetParent)
   const updatePosition = useCallback(() => {
     if (!table.isConnected || !container.isConnected) {
+      onDeactivateTable?.();
       setPos(null);
       setColDividers([]);
       setRowDividers([]);
@@ -96,23 +99,24 @@ export function TableControlsOverlay({
     }
 
     const tableRect = table.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
+    const section = container.closest("section[data-page-id]") || container;
+    const sectionRect = section.getBoundingClientRect();
 
-    const top = (tableRect.top - containerRect.top) / scale;
-    const left = (tableRect.left - containerRect.left) / scale;
+    const top = (tableRect.top - sectionRect.top) / scale;
+    const left = (tableRect.left - sectionRect.left) / scale;
     const width = tableRect.width / scale;
     const height = tableRect.height / scale;
 
     setPos({ top, left, width, height });
 
-    // Calculate vertical column divider positions
+    // Calculate vertical column divider positions relative to section
     const firstRow = table.rows[0];
     if (firstRow && firstRow.cells.length > 0) {
       const dividers: ColDivider[] = [];
       const cells = Array.from(firstRow.cells);
       for (let i = 0; i < cells.length; i++) {
         const cRect = cells[i].getBoundingClientRect();
-        const dividerLeft = (cRect.right - containerRect.left) / scale;
+        const dividerLeft = (cRect.right - sectionRect.left) / scale;
         dividers.push({
           colIndex: i,
           left: dividerLeft,
@@ -124,13 +128,13 @@ export function TableControlsOverlay({
       setColDividers([]);
     }
 
-    // Calculate horizontal row divider positions
+    // Calculate horizontal row divider positions relative to section
     if (table.rows.length > 1) {
       const rDividers: RowDivider[] = [];
       const rows = Array.from(table.rows);
       for (let i = 0; i < rows.length - 1; i++) {
         const rRect = rows[i].getBoundingClientRect();
-        const dividerTop = (rRect.bottom - containerRect.top) / scale;
+        const dividerTop = (rRect.bottom - sectionRect.top) / scale;
         rDividers.push({ rowIndex: i, top: dividerTop });
       }
       setRowDividers(rDividers);
@@ -159,7 +163,7 @@ export function TableControlsOverlay({
   }, [table, container, updatePosition]);
 
   /* ============================================================
-     1. Column Lines Extend ("in the table lines extand")
+     1. Column Lines Extend ("in the table lines extend")
      - Dragging vertical column dividers between columns
      - Dragging the right edge of last column resizes table width
   ============================================================ */
@@ -170,6 +174,12 @@ export function TableControlsOverlay({
   ) => {
     e.preventDefault();
     e.stopPropagation();
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
 
     const startPointerX = e.clientX;
     const firstRow = table.rows[0];
@@ -182,11 +192,11 @@ export function TableControlsOverlay({
       const startTableWidth = table.getBoundingClientRect().width / scale;
 
       const compStyle = window.getComputedStyle(container);
-      const padLeft = parseFloat(compStyle.paddingLeft) || 72;
-      const padRight = parseFloat(compStyle.paddingRight) || 72;
-      const totalContentWidth = Math.round((container.clientWidth || 816) - (padLeft + padRight));
+      const padLeft = parseFloat(compStyle.paddingLeft) || 0;
+      const padRight = parseFloat(compStyle.paddingRight) || 0;
+      const availableContentWidth = Math.max(100, Math.round((container.clientWidth || 816) - (padLeft + padRight)));
       const currentMarginLeft = parseFloat(table.style.marginLeft) || 0;
-      const maxAvailableWidth = Math.max(80, totalContentWidth - currentMarginLeft);
+      const maxAvailableWidth = Math.max(80, availableContentWidth - currentMarginLeft);
 
       setActiveColIndex(colIndex);
       document.body.style.cursor = "col-resize";
@@ -204,7 +214,7 @@ export function TableControlsOverlay({
 
         table.style.width = `${newTableWidth}px`;
         table.style.minWidth = `${newTableWidth}px`;
-        table.style.maxWidth = `${totalContentWidth}px`;
+        table.style.maxWidth = `${availableContentWidth}px`;
 
         for (let r = 0; r < table.rows.length; r++) {
           if (table.rows[r].cells[colIndex]) {
@@ -301,6 +311,12 @@ export function TableControlsOverlay({
     e.preventDefault();
     e.stopPropagation();
 
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+
     const startPointerY = e.clientY;
     const row = table.rows[rowIndex];
     if (!row) return;
@@ -347,31 +363,43 @@ export function TableControlsOverlay({
   /* ============================================================
      3. Table Resize Handler (Bidirectional Shrinking & Growing: Small & Large)
      - Allows dragging corner to scale both width and height
-     - Proportional column distribution ensures table doesn't jam
+     - Proportional column and row distribution ensures table doesn't distort
   ============================================================ */
   const handleResizePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
 
     const startPointerX = e.clientX;
     const startPointerY = e.clientY;
     const startTableWidth = table.getBoundingClientRect().width / scale;
     const startTableHeight = table.getBoundingClientRect().height / scale;
 
-    const computedStyle = window.getComputedStyle(container);
-    const paddingLeft = parseFloat(computedStyle.paddingLeft) || 72;
-    const paddingRight = parseFloat(computedStyle.paddingRight) || 72;
-    const totalContentWidth = Math.round((container.clientWidth || 816) - (paddingLeft + paddingRight));
+    const contentRect = container.getBoundingClientRect();
+    const compStyle = window.getComputedStyle(container);
+    const padLeft = parseFloat(compStyle.paddingLeft) || 0;
+    const padRight = parseFloat(compStyle.paddingRight) || 0;
+    const padTop = parseFloat(compStyle.paddingTop) || 0;
+    const padBottom = parseFloat(compStyle.paddingBottom) || 0;
+
+    const availableContentWidth = Math.max(100, Math.round((contentRect.width / scale) - padLeft - padRight));
+    const availableContentHeight = Math.max(100, Math.round((contentRect.height / scale) - padTop - padBottom));
+
     const currentMarginLeft = parseFloat(table.style.marginLeft) || 0;
-    const maxAvailableWidth = Math.max(80, totalContentWidth - currentMarginLeft);
-    const minTableWidth = 80;
-    const minTableHeight = 40;
+    const maxAvailableWidth = Math.max(80, availableContentWidth - currentMarginLeft);
+    const minTableWidth = Math.max(60, table.rows[0]?.cells.length ? table.rows[0].cells.length * 28 : 60);
 
     const firstRowCells = table.rows[0] ? Array.from(table.rows[0].cells) : [];
     const startColWidths = firstRowCells.map((c) => c.getBoundingClientRect().width / scale);
 
     const tableRows = Array.from(table.rows);
     const startRowHeights = tableRows.map((r) => r.getBoundingClientRect().height / scale);
+    const minTableHeight = Math.max(30, tableRows.length * 22);
 
     setIsResizing(true);
     document.body.style.cursor = "nwse-resize";
@@ -388,13 +416,13 @@ export function TableControlsOverlay({
         Math.max(minTableWidth, Math.round(startTableWidth + deltaX))
       );
       const targetHeight = Math.min(
-        950,
+        availableContentHeight,
         Math.max(minTableHeight, Math.round(startTableHeight + deltaY))
       );
 
       table.style.width = `${targetWidth}px`;
       table.style.minWidth = `${targetWidth}px`;
-      table.style.maxWidth = `${totalContentWidth}px`;
+      table.style.maxWidth = `${availableContentWidth}px`;
 
       // Scale columns proportionally so shrinking down small and growing large is smooth
       if (startTableWidth > 0 && firstRowCells.length > 0) {
@@ -409,8 +437,8 @@ export function TableControlsOverlay({
         });
       }
 
-      // Scale rows proportionally so vertical height expansion works
-      if (Math.abs(deltaY) > 2 && startTableHeight > 0) {
+      // Scale rows proportionally so vertical height expansion and shrinking both work
+      if (Math.abs(deltaY) > 2 && startTableHeight > 0 && tableRows.length > 0) {
         const heightRatio = targetHeight / startTableHeight;
         tableRows.forEach((row, rowIdx) => {
           const scaledRowHeight = Math.max(20, Math.round(startRowHeights[rowIdx] * heightRatio));
@@ -456,17 +484,24 @@ export function TableControlsOverlay({
     e.preventDefault();
     e.stopPropagation();
 
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+
     const startPointerX = e.clientX;
     const startPointerY = e.clientY;
     const tableRect = table.getBoundingClientRect();
     const grabOffsetX = startPointerX - tableRect.left;
     const grabOffsetY = startPointerY - tableRect.top;
     const startMarginLeft = parseFloat(table.style.marginLeft) || 0;
+    const startMarginTop = parseFloat(table.style.marginTop) || 0;
 
     setIsDragging(true);
     setDragPreview({
-      x: tableRect.left,
-      y: tableRect.top,
+      x: startPointerX - grabOffsetX,
+      y: startPointerY - grabOffsetY,
       width: tableRect.width,
       height: tableRect.height,
     });
@@ -488,16 +523,16 @@ export function TableControlsOverlay({
         autoScrollRaf = null;
       }
 
-      const viewportHeight = window.innerHeight;
+      const scrollRect = scrollContainer.getBoundingClientRect();
       const scrollThreshold = 90;
       let scrollSpeed = 0;
 
-      if (clientY < scrollThreshold) {
-        const factor = (scrollThreshold - clientY) / scrollThreshold;
-        scrollSpeed = -Math.max(6, Math.round(factor * 18));
-      } else if (clientY > viewportHeight - scrollThreshold) {
-        const factor = (clientY - (viewportHeight - scrollThreshold)) / scrollThreshold;
-        scrollSpeed = Math.max(6, Math.round(factor * 18));
+      if (clientY < scrollRect.top + scrollThreshold) {
+        const factor = (scrollRect.top + scrollThreshold - clientY) / scrollThreshold;
+        scrollSpeed = -Math.max(6, Math.round(factor * 20));
+      } else if (clientY > scrollRect.bottom - scrollThreshold) {
+        const factor = (clientY - (scrollRect.bottom - scrollThreshold)) / scrollThreshold;
+        scrollSpeed = Math.max(6, Math.round(factor * 20));
       }
 
       if (scrollSpeed !== 0) {
@@ -510,6 +545,7 @@ export function TableControlsOverlay({
     };
 
     let latestClampedMarginLeft = startMarginLeft;
+    let latestClampedMarginTop = startMarginTop;
 
     const onPointerMove = (moveEv: PointerEvent) => {
       moveEv.preventDefault();
@@ -544,27 +580,36 @@ export function TableControlsOverlay({
         targetSection?.querySelector<HTMLElement>('[contenteditable="true"]') || container;
       const targetContainerRect = targetContainer.getBoundingClientRect();
       const compStyle = window.getComputedStyle(targetContainer);
-      const padLeft = parseFloat(compStyle.paddingLeft) || 72;
-      const padRight = parseFloat(compStyle.paddingRight) || 72;
+      const padLeft = parseFloat(compStyle.paddingLeft) || 0;
+      const padRight = parseFloat(compStyle.paddingRight) || 0;
+      const padTop = parseFloat(compStyle.paddingTop) || 0;
+      const padBottom = parseFloat(compStyle.paddingBottom) || 0;
       const contentWidth = Math.max(100, Math.round((targetContainer.clientWidth || 816) - (padLeft + padRight)));
+      const contentHeight = Math.max(100, Math.round((targetContainer.clientHeight || 1056) - (padTop + padBottom)));
       const tableWidth = Math.round(tableRect.width / scale);
+      const tableHeight = Math.round(tableRect.height / scale);
 
       // Horizontal edge clamping:
-      // At the left edge: margin is 0 (aligns with text left edge, 72px from paper left, never goes outside)
-      // At the right edge: margin is contentWidth - tableWidth (never goes outside right margin)
       const maxMarginLeft = Math.max(0, contentWidth - tableWidth);
       const deltaX = (moveEv.clientX - startPointerX) / scale;
       const targetMarginLeft = Math.round(startMarginLeft + deltaX);
       const clampedMarginLeft = Math.max(0, Math.min(maxMarginLeft, targetMarginLeft));
       latestClampedMarginLeft = clampedMarginLeft;
 
-      // Ghost preview position locked strictly within document boundaries
-      const ghostLeft = targetContainerRect.left + (padLeft + clampedMarginLeft) * scale;
-      const ghostTop = moveEv.clientY - grabOffsetY;
+      // Vertical edge clamping (allows placing the table anywhere vertically on the page!):
+      const maxMarginTop = Math.max(0, contentHeight - tableHeight);
+      const deltaY = (moveEv.clientY - startPointerY) / scale;
+      const targetMarginTop = Math.round(startMarginTop + deltaY);
+      const clampedMarginTop = Math.max(0, Math.min(maxMarginTop, targetMarginTop));
+      latestClampedMarginTop = clampedMarginTop;
+
+      // Drag preview ghost smoothly follows pointer across the entire viewport
+      const ghostX = Math.max(0, Math.min(window.innerWidth - tableRect.width, moveEv.clientX - grabOffsetX));
+      const ghostY = Math.max(0, Math.min(window.innerHeight - 40, moveEv.clientY - grabOffsetY));
 
       setDragPreview({
-        x: ghostLeft,
-        y: ghostTop,
+        x: ghostX,
+        y: ghostY,
         width: tableRect.width,
         height: tableRect.height,
       });
@@ -574,7 +619,8 @@ export function TableControlsOverlay({
         (child) => !child.hasAttribute("data-editor-ui") && child !== table
       );
 
-      const indicatorWidth = Math.min(tableRect.width, contentWidth * scale);
+      const indicatorLeft = targetContainerRect.left + (padLeft + clampedMarginLeft) * scale;
+      const indicatorWidth = Math.min(tableRect.width, (contentWidth - clampedMarginLeft) * scale);
 
       if (blockChildren.length === 0) {
         dragTargetRef.current = {
@@ -583,8 +629,8 @@ export function TableControlsOverlay({
           insertAfter: true,
         };
         setDropIndicator({
-          top: targetContainerRect.top + 28,
-          left: ghostLeft,
+          top: targetContainerRect.top + (padTop + clampedMarginTop) * scale,
+          left: indicatorLeft,
           width: indicatorWidth,
         });
         return;
@@ -600,7 +646,7 @@ export function TableControlsOverlay({
         };
         setDropIndicator({
           top: firstRect.top - 4,
-          left: ghostLeft,
+          left: indicatorLeft,
           width: indicatorWidth,
         });
         return;
@@ -614,9 +660,13 @@ export function TableControlsOverlay({
           targetNode: blockChildren[blockChildren.length - 1],
           insertAfter: true,
         };
+        const indicatorTop = Math.max(
+          lastRect.bottom + 4,
+          targetContainerRect.top + (padTop + clampedMarginTop) * scale
+        );
         setDropIndicator({
-          top: lastRect.bottom + 4,
-          left: ghostLeft,
+          top: indicatorTop,
+          left: indicatorLeft,
           width: indicatorWidth,
         });
         return;
@@ -650,11 +700,15 @@ export function TableControlsOverlay({
         const lineTop = insertAfter ? blockRect.bottom + 4 : blockRect.top - 4;
         setDropIndicator({
           top: lineTop,
-          left: ghostLeft,
+          left: indicatorLeft,
           width: indicatorWidth,
         });
       } else {
-        dragTargetRef.current = null;
+        dragTargetRef.current = {
+          targetContainer,
+          targetNode: null,
+          insertAfter: true,
+        };
         setDropIndicator(null);
       }
     };
@@ -678,78 +732,105 @@ export function TableControlsOverlay({
       setDragPreview(null);
       setDropIndicator(null);
 
-      if (dragTargetRef.current) {
-        const { targetContainer, targetNode, insertAfter } = dragTargetRef.current;
-        const sourceContainer = table.parentElement as HTMLElement | null;
+      const targetInfo = dragTargetRef.current;
+      const targetContainer = targetInfo?.targetContainer || container;
+      const targetNode = targetInfo?.targetNode || null;
+      const insertAfter = targetInfo?.insertAfter || false;
+      const sourceContainer = table.parentElement as HTMLElement | null;
 
-        if (targetNode) {
-          if (insertAfter) {
-            targetContainer.insertBefore(table, targetNode.nextSibling);
-          } else {
-            targetContainer.insertBefore(table, targetNode);
-          }
+      const blockChildren = Array.from(targetContainer.children).filter(
+        (child) => !child.hasAttribute("data-editor-ui") && child !== table
+      );
+
+      if (targetNode && targetNode !== table) {
+        if (insertAfter) {
+          targetContainer.insertBefore(table, targetNode.nextSibling);
         } else {
-          targetContainer.appendChild(table);
+          targetContainer.insertBefore(table, targetNode);
         }
-
-        // Apply clamped horizontal position:
-        table.style.marginLeft = `${latestClampedMarginLeft}px`;
-        table.style.marginRight = "auto";
-
-        dragTargetRef.current = null;
-
-        // Synchronize source and destination pages
-        if (sourceContainer && sourceContainer !== targetContainer) {
-          if (!sourceContainer.innerHTML.trim() || sourceContainer.innerHTML.trim() === "<br>") {
-            sourceContainer.innerHTML = "<p><br></p>";
-          }
-
-          const sourcePageId = sourceContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
-          const destPageId = targetContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
-
-          if (sourcePageId && setPageHtml) {
-            setPageHtml(sourcePageId, sourceContainer.innerHTML);
-          }
-          if (destPageId && setPageHtml) {
-            setPageHtml(destPageId, targetContainer.innerHTML);
-          }
-          if (destPageId && setActivePage) {
-            setActivePage(destPageId);
-          }
-
-          sourceContainer.dispatchEvent(new Event("input", { bubbles: true }));
-          targetContainer.dispatchEvent(new Event("input", { bubbles: true }));
-
-          onDeactivateTable?.();
-
-          // Automatically focus first cell in destination table so controls remount on dest page
-          const cell = table.querySelector("td, th") as HTMLElement | null;
-          if (cell) {
-            cell.focus();
-            try {
-              const sel = window.getSelection();
-              if (sel) {
-                const range = document.createRange();
-                range.selectNodeContents(cell);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-              }
-            } catch {
-              // ignore
-            }
-          }
-        } else if (sourceContainer) {
-          onUpdate();
-
-          const cell = table.querySelector("td, th") as HTMLElement | null;
-          if (cell) {
-            cell.focus();
-          }
-        }
-
-        updatePosition();
+      } else if (!targetNode) {
+        targetContainer.appendChild(table);
       }
+
+      // Apply clamped horizontal position:
+      table.style.marginLeft = `${latestClampedMarginLeft}px`;
+      table.style.marginRight = "auto";
+
+      // Apply clamped vertical position:
+      const targetContainerRect = targetContainer.getBoundingClientRect();
+      const compStyle = window.getComputedStyle(targetContainer);
+      const padTop = parseFloat(compStyle.paddingTop) || 0;
+
+      if (!targetNode || blockChildren.length === 0) {
+        table.style.marginTop = `${latestClampedMarginTop}px`;
+      } else if (insertAfter && targetNode === blockChildren[blockChildren.length - 1]) {
+        const lastBlockBottom = (targetNode.getBoundingClientRect().bottom - targetContainerRect.top) / scale - padTop;
+        const verticalGap = Math.max(0, Math.round(latestClampedMarginTop - lastBlockBottom));
+        table.style.marginTop = `${verticalGap}px`;
+      } else {
+        table.style.marginTop = "0px";
+      }
+
+      dragTargetRef.current = null;
+
+      // Synchronize source and destination pages
+      if (sourceContainer && sourceContainer !== targetContainer) {
+        if (!sourceContainer.innerHTML.trim() || sourceContainer.innerHTML.trim() === "<br>") {
+          sourceContainer.innerHTML = "<p><br></p>";
+        }
+
+        const sourcePageId = sourceContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
+        const destPageId = targetContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
+
+        if (sourcePageId && setPageHtml) {
+          setPageHtml(sourcePageId, sourceContainer.innerHTML);
+        }
+        if (destPageId && setPageHtml) {
+          setPageHtml(destPageId, targetContainer.innerHTML);
+        }
+        if (destPageId && setActivePage) {
+          setActivePage(destPageId);
+        }
+
+        sourceContainer.dispatchEvent(new Event("input", { bubbles: true }));
+        targetContainer.dispatchEvent(new Event("input", { bubbles: true }));
+
+        // Activate table on destination page and focus first cell
+        onActivateTable?.(table);
+
+        const cell = table.querySelector("td, th") as HTMLElement | null;
+        if (cell) {
+          cell.focus();
+          try {
+            const sel = window.getSelection();
+            if (sel) {
+              const range = document.createRange();
+              range.selectNodeContents(cell);
+              range.collapse(true);
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+          } catch {
+            // ignore
+          }
+        }
+      } else if (sourceContainer) {
+        const pageId = sourceContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
+        if (pageId && setPageHtml) {
+          setPageHtml(pageId, sourceContainer.innerHTML);
+        }
+        sourceContainer.dispatchEvent(new Event("input", { bubbles: true }));
+
+        onUpdate();
+        onActivateTable?.(table);
+
+        const cell = table.querySelector("td, th") as HTMLElement | null;
+        if (cell) {
+          cell.focus();
+        }
+      }
+
+      updatePosition();
     };
 
     window.addEventListener("pointermove", onPointerMove);
@@ -804,16 +885,60 @@ export function TableControlsOverlay({
       ...Array.from(table.rows).map((r) => r.cells.length),
       1
     );
-    const colWidth = (100 / numCols).toFixed(2) + "%";
+    const colWidthPct = (100 / numCols).toFixed(2) + "%";
+    const tableWidth = table.getBoundingClientRect().width / scale;
+    const colWidthPx = Math.max(20, Math.floor(tableWidth / numCols));
 
     Array.from(table.rows).forEach((row) => {
       Array.from(row.cells).forEach((cell) => {
-        cell.style.width = colWidth;
+        cell.style.minWidth = "";
+        cell.style.maxWidth = "";
+        cell.style.width = table.style.width && table.style.width.endsWith("px")
+          ? `${colWidthPx}px`
+          : colWidthPct;
+        cell.style.boxSizing = "border-box";
       });
     });
 
     onUpdate();
     updatePosition();
+
+    const pageContainer = table.closest('[contenteditable="true"]') as HTMLElement | null;
+    if (pageContainer) {
+      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+      const pageId = pageContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
+      if (pageId && setPageHtml) {
+        setPageHtml(pageId, pageContainer.innerHTML);
+      }
+    }
+  };
+
+  const handleDistributeRows = () => {
+    const rows = Array.from(table.rows);
+    if (rows.length === 0) return;
+
+    const currentHeight = table.getBoundingClientRect().height / scale;
+    const equalRowHeight = Math.max(28, Math.round(currentHeight / rows.length));
+
+    rows.forEach((row) => {
+      row.style.height = `${equalRowHeight}px`;
+      Array.from(row.cells).forEach((cell) => {
+        cell.style.height = `${equalRowHeight}px`;
+        cell.style.boxSizing = "border-box";
+      });
+    });
+
+    onUpdate();
+    updatePosition();
+
+    const pageContainer = table.closest('[contenteditable="true"]') as HTMLElement | null;
+    if (pageContainer) {
+      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+      const pageId = pageContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
+      if (pageId && setPageHtml) {
+        setPageHtml(pageId, pageContainer.innerHTML);
+      }
+    }
   };
 
   if (!pos) return null;
@@ -879,6 +1004,17 @@ export function TableControlsOverlay({
             >
               <Columns className="h-3 w-3 text-indigo-500" />
               <span>Equal Cols</span>
+            </button>
+            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleDistributeRows}
+              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+              title="Distribute Rows Evenly"
+            >
+              <Rows className="h-3 w-3 text-emerald-500" />
+              <span>Equal Rows</span>
             </button>
           </div>
         </div>

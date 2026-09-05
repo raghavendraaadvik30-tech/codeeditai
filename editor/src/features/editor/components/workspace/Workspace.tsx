@@ -41,6 +41,73 @@ export default function Workspace() {
     setAiPanelOpen,
   } = useEditor();
 
+  const [activeTable, setActiveTable] = useState<HTMLTableElement | null>(null);
+
+  // Unified global table selection tracking across all document pages
+  useEffect(() => {
+    const handleGlobalTableSelection = (e?: Event) => {
+      // Do not clear activeTable if interacting with move/resize handle or table toolbar
+      if (e && e.target instanceof Element) {
+        if (e.target.closest("[data-editor-ui]") || e.target.closest("[data-table-control]")) {
+          return;
+        }
+
+        const clickedTable = e.target.closest("table") as HTMLTableElement | null;
+        if (clickedTable) {
+          const pageContainer = clickedTable.closest('[contenteditable="true"]');
+          if (pageContainer) {
+            setActiveTable(clickedTable);
+            const pageSection = clickedTable.closest("section[data-page-id]");
+            const pageId = pageSection?.getAttribute("data-page-id");
+            if (pageId && activePage !== pageId) {
+              setActivePage(pageId);
+            }
+            return;
+          }
+        }
+      }
+
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const anchor = sel.anchorNode;
+        const el = anchor?.nodeType === Node.ELEMENT_NODE ? (anchor as HTMLElement) : anchor?.parentElement;
+        const table = el?.closest("table") as HTMLTableElement | null;
+        if (table && table.closest('[contenteditable="true"]')) {
+          setActiveTable(table);
+          const pageSection = table.closest("section[data-page-id]");
+          const pageId = pageSection?.getAttribute("data-page-id");
+          if (pageId && activePage !== pageId) {
+            setActivePage(pageId);
+          }
+          return;
+        }
+      }
+
+      if (document.activeElement) {
+        const table = document.activeElement.closest("table") as HTMLTableElement | null;
+        if (table && table.closest('[contenteditable="true"]')) {
+          setActiveTable(table);
+          const pageSection = table.closest("section[data-page-id]");
+          const pageId = pageSection?.getAttribute("data-page-id");
+          if (pageId && activePage !== pageId) {
+            setActivePage(pageId);
+          }
+          return;
+        }
+      }
+
+      setActiveTable(null);
+    };
+
+    document.addEventListener("selectionchange", handleGlobalTableSelection);
+    document.addEventListener("pointerdown", handleGlobalTableSelection);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleGlobalTableSelection);
+      document.removeEventListener("pointerdown", handleGlobalTableSelection);
+    };
+  }, [activePage, setActivePage]);
+
   return (
     <main
       className="
@@ -97,6 +164,8 @@ export default function Workspace() {
               editorRef={editorRef}
               allPages={model.pages}
               pageHtmlMap={model.pageHtml}
+              activeTable={activeTable}
+              onSetActiveTable={setActiveTable}
               onActivate={() => {
                 if (activePage !== page.id) {
                   setActivePage(page.id);
@@ -241,6 +310,8 @@ interface DocumentPageProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
   allPages: PageModel[];
   pageHtmlMap: Record<string, string>;
+  activeTable: HTMLTableElement | null;
+  onSetActiveTable: (table: HTMLTableElement | null) => void;
   onActivate: () => void;
   onChange: (html: string) => void;
   onAddPage: (afterPageId?: string, initialHtml?: string) => string;
@@ -266,6 +337,8 @@ function DocumentPage({
   editorRef,
   allPages,
   pageHtmlMap,
+  activeTable,
+  onSetActiveTable,
   onActivate,
   onChange,
   onAddPage,
@@ -277,58 +350,6 @@ function DocumentPage({
   const localEditorRef = useRef<HTMLDivElement | null>(null);
   const lastHtmlRef = useRef<string>(html);
 
-  const [activeTable, setActiveTable] = useState<HTMLTableElement | null>(null);
-
-  // Track active table inside this page's editor container
-  useEffect(() => {
-    const handleSelectionOrFocus = (e?: Event) => {
-      const container = localEditorRef.current;
-      if (!container) return;
-
-      // Do not clear activeTable if interacting with move/resize handle or table toolbar
-      if (e && e.target instanceof Element) {
-        if (e.target.closest("[data-editor-ui]") || e.target.closest("[data-table-control]")) {
-          return;
-        }
-
-        // Immediately capture table if user clicked on a table cell, border, or child in this container
-        if (container.contains(e.target)) {
-          const clickedTable = e.target.closest("table") as HTMLTableElement | null;
-          if (clickedTable) {
-            setActiveTable(clickedTable);
-            return;
-          }
-        }
-      }
-
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        const anchor = sel.anchorNode;
-        const el = anchor?.nodeType === Node.ELEMENT_NODE ? (anchor as HTMLElement) : anchor?.parentElement;
-        if (el && container.contains(el)) {
-          const table = el.closest("table") as HTMLTableElement | null;
-          setActiveTable(table);
-          return;
-        }
-      }
-
-      if (document.activeElement && container.contains(document.activeElement)) {
-        const table = document.activeElement.closest("table") as HTMLTableElement | null;
-        setActiveTable(table);
-        return;
-      }
-
-      setActiveTable(null);
-    };
-
-    document.addEventListener("selectionchange", handleSelectionOrFocus);
-    document.addEventListener("pointerdown", handleSelectionOrFocus);
-
-    return () => {
-      document.removeEventListener("selectionchange", handleSelectionOrFocus);
-      document.removeEventListener("pointerdown", handleSelectionOrFocus);
-    };
-  }, []);
 
   /*
    * Keep the page HTML synchronized with the document model
@@ -341,17 +362,15 @@ function DocumentPage({
     const normalize = (s: string) => s.replace(/<br\s*\/?>/gi, "<br>").replace(/\s+/g, " ").trim();
 
     // If active element is inside this editor, avoid destroying the user's cursor
-    if (element === document.activeElement || element.contains(document.activeElement)) {
+    const hasFocus = element === document.activeElement || element.contains(document.activeElement);
+    if (hasFocus) {
       if (normalize(lastHtmlRef.current) === normalize(html)) {
         return;
       }
     }
 
     if (normalize(element.innerHTML) !== normalize(html)) {
-      if (normalize(lastHtmlRef.current) === normalize(html)) {
-        return;
-      }
-      element.innerHTML = html;
+      element.innerHTML = html || "<p><br></p>";
       lastHtmlRef.current = html;
     }
   }, [html]);
@@ -847,6 +866,13 @@ function DocumentPage({
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onMouseDown={handlePageMouseDown}
+        onPointerDown={(e) => {
+          const clickedTable = (e.target as HTMLElement).closest("table");
+          if (clickedTable) {
+            onSetActiveTable(clickedTable);
+            onActivate();
+          }
+        }}
         className="
           h-[966px]
           max-h-[966px]
@@ -886,7 +912,6 @@ function DocumentPage({
           [&_ol]:pl-6
 
           [&_table]:my-4
-          [&_table]:w-full
           [&_table]:max-w-none
           [&_table]:border-collapse
           [&_table]:table-fixed
@@ -925,7 +950,8 @@ function DocumentPage({
               onChange(updatedHtml);
             }
           }}
-          onDeactivateTable={() => setActiveTable(null)}
+          onActivateTable={onSetActiveTable}
+          onDeactivateTable={() => onSetActiveTable(null)}
         />
       )}
 

@@ -84,7 +84,20 @@ export function TableProvider({
 
   // Continuously track active table and cell across the document
   useEffect(() => {
-    const updateActiveCell = () => {
+    const updateActiveCell = (e?: Event) => {
+      if (e && e.target) {
+        const targetEl = getNodeElement(e.target as Node);
+        const table = targetEl?.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+          const cell = targetEl?.closest("td, th") as HTMLTableCellElement | null;
+          if (cell) {
+            lastActiveCellRef.current = cell;
+          }
+          return;
+        }
+      }
+
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const el = getNodeElement(selection.anchorNode);
@@ -94,6 +107,11 @@ export function TableProvider({
           lastActiveTableRef.current = cell.closest("table");
           return;
         }
+        const table = el?.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+          return;
+        }
       }
 
       if (document.activeElement) {
@@ -101,6 +119,11 @@ export function TableProvider({
         if (cell) {
           lastActiveCellRef.current = cell;
           lastActiveTableRef.current = cell.closest("table");
+          return;
+        }
+        const table = document.activeElement.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
         }
       }
     };
@@ -909,11 +932,18 @@ export function TableProvider({
       ...Array.from(table.rows).map((r) => r.cells.length),
       1
     );
-    const colWidth = (100 / numCols).toFixed(2) + "%";
+    const colWidthPct = (100 / numCols).toFixed(2) + "%";
+    const tableWidth = table.getBoundingClientRect().width;
+    const colWidthPx = Math.max(20, Math.floor(tableWidth / numCols));
 
     Array.from(table.rows).forEach((row) => {
       Array.from(row.cells).forEach((cell) => {
-        cell.style.width = colWidth;
+        cell.style.minWidth = "";
+        cell.style.maxWidth = "";
+        cell.style.width = table.style.width && table.style.width.endsWith("px")
+          ? `${colWidthPx}px`
+          : colWidthPct;
+        cell.style.boxSizing = "border-box";
       });
     });
 
@@ -924,10 +954,17 @@ export function TableProvider({
     const { table } = findActiveTarget();
     if (!table) return;
 
-    Array.from(table.rows).forEach((row) => {
-      row.style.height = "auto";
+    const rows = Array.from(table.rows);
+    if (rows.length === 0) return;
+
+    const currentHeight = table.getBoundingClientRect().height;
+    const equalRowHeight = Math.max(28, Math.round(currentHeight / rows.length));
+
+    rows.forEach((row) => {
+      row.style.height = `${equalRowHeight}px`;
       Array.from(row.cells).forEach((cell) => {
-        cell.style.height = "auto";
+        cell.style.height = `${equalRowHeight}px`;
+        cell.style.boxSizing = "border-box";
       });
     });
 
