@@ -1,23 +1,25 @@
 /**
  * LayoutTab.tsx
  *
- * Provides page layout controls in the editor ribbon:
- * - Group 1: Header, Footer
- * - Group 2: Margins, Orientation, Size, Columns
+ * Microsoft Word-style Layout Section Ribbon:
+ * - Group 1: Header, Footer, Page Number (Top, Bottom, Current Position, Format, Remove)
+ * - Group 2: Margins, Orientation, Size (with search), Columns
  * - Group 3: Watermark, Page Color, Page Borders
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   ChevronDown,
   Check,
   Columns2,
   Palette,
   FileText,
+  Search,
 } from "lucide-react";
 
 import RibbonDivider from "../controls/RibbonDivider";
 import { useDocumentModel, type SectionModel } from "../../../store/documentModel";
+import { useEditor } from "../../../context/EditorContext";
 
 import {
   DropdownMenu,
@@ -26,6 +28,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/shared/components/ui/dropdown-menu";
 
 import {
@@ -60,9 +65,30 @@ const triggerClass = `
   select-none
 `;
 
-export default function LayoutTab() {
-  const { model, activePage, updateSection } = useDocumentModel();
+interface PaperSizeDef {
+  name: string;
+  width: number;
+  height: number;
+  dimText: string;
+}
 
+const PAPER_SIZES: PaperSizeDef[] = [
+  { name: "Letter", width: 816, height: 1056, dimText: "8.5\" × 11\" (21.59 × 27.94 cm)" },
+  { name: "Tabloid", width: 1056, height: 1632, dimText: "11\" × 17\" (27.94 × 43.18 cm)" },
+  { name: "Legal", width: 816, height: 1344, dimText: "8.5\" × 14\" (21.59 × 35.56 cm)" },
+  { name: "Statement", width: 528, height: 816, dimText: "5.5\" × 8.5\" (13.97 × 21.59 cm)" },
+  { name: "Executive", width: 696, height: 1008, dimText: "7.25\" × 10.5\" (18.41 × 26.67 cm)" },
+  { name: "A3", width: 1123, height: 1587, dimText: "11.69\" × 16.54\" (29.7 × 42 cm)" },
+  { name: "A4", width: 794, height: 1123, dimText: "8.27\" × 11.69\" (21 × 29.7 cm)" },
+  { name: "A5", width: 559, height: 794, dimText: "5.83\" × 8.27\" (14.8 × 21 cm)" },
+];
+
+export default function LayoutTab() {
+  const { model, activePage, updateSection, addSection } =
+    useDocumentModel();
+  const { insertHTML } = useEditor();
+
+  // Active section resolution: activePage -> sectionId -> section
   const activePageObj =
     model.pages.find((p) => p.id === activePage) ?? model.pages[0];
   const activeSection: SectionModel =
@@ -81,38 +107,300 @@ export default function LayoutTab() {
     });
   };
 
+  const applyToThisPage = (patch: Partial<SectionModel>) => {
+    if (!activePageObj) return;
+    const pagesInSection = model.pages.filter(
+      (p) => p.sectionId === activeSection.id
+    );
+    if (pagesInSection.length <= 1) {
+      applyToSection(patch);
+    } else {
+      addSection(activePageObj.id);
+      setTimeout(() => {
+        const freshTarget = model.pages.find((p) => p.id === activePageObj.id);
+        if (freshTarget) {
+          updateSection(freshTarget.sectionId, patch);
+        }
+      }, 50);
+    }
+  };
+
+  // ------------------------------------------------------------------------
   // Dialog States
+  // ------------------------------------------------------------------------
+  // 1. Header & Footer
   const [headerDialogOpen, setHeaderDialogOpen] = useState(false);
   const [headerInput, setHeaderInput] = useState("");
-
   const [footerDialogOpen, setFooterDialogOpen] = useState(false);
   const [footerInput, setFooterInput] = useState("");
 
+  // 2. Page Number Format Dialog
+  const [pageNumberFormatOpen, setPageNumberFormatOpen] = useState(false);
+  const [formatChoice, setFormatChoice] = useState<"1" | "a" | "A" | "i" | "I">("1");
+  const [numberingMode, setNumberingMode] = useState<"continue" | "startAt">("continue");
+  const [startAtValue, setStartAtValue] = useState<number>(1);
+
+  // 3. Custom Margins Dialog
   const [marginsDialogOpen, setMarginsDialogOpen] = useState(false);
   const [customTop, setCustomTop] = useState("1.0");
   const [customBottom, setCustomBottom] = useState("1.0");
   const [customLeft, setCustomLeft] = useState("1.0");
   const [customRight, setCustomRight] = useState("1.0");
 
-  const [watermarkDialogOpen, setWatermarkDialogOpen] = useState(false);
-  const [customWatermark, setCustomWatermark] = useState("CONFIDENTIAL");
+  // 4. Custom Page Size Dialog
+  const [customSizeDialogOpen, setCustomSizeDialogOpen] = useState(false);
+  const [customWidthInches, setCustomWidthInches] = useState("8.5");
+  const [customHeightInches, setCustomHeightInches] = useState("11.0");
+  const [sizeSearch, setSizeSearch] = useState("");
 
+  // 5. Custom Columns Dialog
+  const [columnsDialogOpen, setColumnsDialogOpen] = useState(false);
+  const [customColumnCount, setCustomColumnCount] = useState("2");
+  const [customColumnGap, setCustomColumnGap] = useState("32");
+
+  // 6. Watermark Dialog
+  const [watermarkDialogOpen, setWatermarkDialogOpen] = useState(false);
+  const [watermarkType, setWatermarkType] = useState<"text" | "image">("text");
+  const [wmText, setWmText] = useState("CONFIDENTIAL");
+  const [wmFont, setWmFont] = useState("Calibri");
+  const [wmFontSize, setWmFontSize] = useState<string>("auto");
+  const [wmColor, setWmColor] = useState("#94a3b8");
+  const [wmOpacity, setWmOpacity] = useState(15);
+  const [wmRotation, setWmRotation] = useState<"diagonal" | "horizontal">("diagonal");
+  const [wmImageUrl, setWmImageUrl] = useState("");
+
+  // 7. Page Borders Dialog
   const [bordersDialogOpen, setBordersDialogOpen] = useState(false);
-  const [selectedBorderStyle, setSelectedBorderStyle] = useState<
-    "none" | "box" | "shadow" | "dashed" | "double"
+  const [borderSetting, setBorderSetting] = useState<
+    "none" | "box" | "shadow" | "3d" | "custom"
   >("box");
-  const [selectedBorderColor, setSelectedBorderColor] = useState("#000000");
+  const [borderStyle, setBorderStyle] = useState<
+    "solid" | "dashed" | "dotted" | "double"
+  >("solid");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [borderWidth, setBorderWidth] = useState<number>(2);
+  const [borderTop, setBorderTop] = useState(true);
+  const [borderBottom, setBorderBottom] = useState(true);
+  const [borderLeft, setBorderLeft] = useState(true);
+  const [borderRight, setBorderRight] = useState(true);
+  const [borderApplyTo, setBorderApplyTo] = useState<"section" | "document" | "page">("section");
+
+  // ------------------------------------------------------------------------
+  // Handlers for Page Number
+  // ------------------------------------------------------------------------
+  const handleSetHeaderPageNumber = (alignment: "left" | "center" | "right") => {
+    applyToSection({
+      pageNumberPosition: "header",
+      pageNumberAlignment: alignment,
+      showPageNumbers: true,
+    });
+  };
+
+  const handleSetFooterPageNumber = (alignment: "left" | "center" | "right") => {
+    applyToSection({
+      pageNumberPosition: "footer",
+      pageNumberAlignment: alignment,
+      showPageNumbers: true,
+    });
+  };
+
+  const handleInsertCurrentPosition = (alignment: "left" | "center" | "right") => {
+    const pageIndex = activePageObj
+      ? model.pages.findIndex((p) => p.id === activePageObj.id)
+      : 0;
+    const pNum = pageIndex >= 0 ? pageIndex + 1 : 1;
+    const htmlSnippet = `<p style="text-align: ${alignment};"><span class="page-number-field" data-field="page-number" contenteditable="false" style="padding: 1px 6px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 10pt; user-select: none;">Page ${pNum}</span></p>`;
+
+    insertHTML(htmlSnippet);
+  };
+
+  const handleRemovePageNumbers = () => {
+    applyToSection({
+      showPageNumbers: false,
+      pageNumberPosition: undefined,
+    });
+  };
+
+  const handleApplyPageNumberFormat = () => {
+    applyToSection({
+      pageNumberFormat: formatChoice,
+      pageNumberStartAt: numberingMode === "startAt" ? Math.max(1, startAtValue) : undefined,
+    });
+    setPageNumberFormatOpen(false);
+  };
+
+  // ------------------------------------------------------------------------
+  // Handlers for Margins
+  // ------------------------------------------------------------------------
+  const handleApplyNormalMargins = () => {
+    applyToSection({
+      marginPreset: "normal",
+      marginConfig: { top: 72, bottom: 72, left: 72, right: 72 },
+    });
+  };
+
+  const handleApplyNarrowMargins = () => {
+    applyToSection({
+      marginPreset: "narrow",
+      marginConfig: { top: 36, bottom: 36, left: 36, right: 36 },
+    });
+  };
+
+  const handleApplyModerateMargins = () => {
+    applyToSection({
+      marginPreset: "moderate",
+      marginConfig: { top: 72, bottom: 72, left: 54, right: 54 },
+    });
+  };
+
+  const handleApplyWideMargins = () => {
+    applyToSection({
+      marginPreset: "wide",
+      marginConfig: { top: 72, bottom: 72, left: 144, right: 144 },
+    });
+  };
+
+  const handleApplyMirroredMargins = () => {
+    applyToSection({
+      marginPreset: "mirrored",
+      marginConfig: { top: 72, bottom: 72, left: 90, right: 72 },
+    });
+  };
+
+  const handleApplyCustomMargins = () => {
+    const top = Math.round(Math.max(0.1, parseFloat(customTop || "1")) * 72);
+    const bottom = Math.round(Math.max(0.1, parseFloat(customBottom || "1")) * 72);
+    const left = Math.round(Math.max(0.1, parseFloat(customLeft || "1")) * 72);
+    const right = Math.round(Math.max(0.1, parseFloat(customRight || "1")) * 72);
+
+    applyToSection({
+      marginPreset: "custom",
+      marginConfig: { top, bottom, left, right },
+    });
+    setMarginsDialogOpen(false);
+  };
+
+  // ------------------------------------------------------------------------
+  // Handlers for Paper Size
+  // ------------------------------------------------------------------------
+  const filteredPaperSizes = useMemo(() => {
+    if (!sizeSearch.trim()) return PAPER_SIZES;
+    return PAPER_SIZES.filter((ps) =>
+      ps.name.toLowerCase().includes(sizeSearch.toLowerCase())
+    );
+  }, [sizeSearch]);
+
+  const handleApplyCustomSize = () => {
+    const widthInches = parseFloat(customWidthInches);
+    const heightInches = parseFloat(customHeightInches);
+    if (!isNaN(widthInches) && !isNaN(heightInches) && widthInches > 0 && heightInches > 0) {
+      applyToSection({
+        paperSize: {
+          name: `Custom (${widthInches}" × ${heightInches}")`,
+          width: Math.round(widthInches * 96),
+          height: Math.round(heightInches * 96),
+        },
+      });
+      setCustomSizeDialogOpen(false);
+    }
+  };
+
+  // ------------------------------------------------------------------------
+  // Handlers for Columns
+  // ------------------------------------------------------------------------
+  const handleApplyCustomColumns = () => {
+    const count = parseInt(customColumnCount, 10);
+    const gap = parseInt(customColumnGap, 10);
+    if (!isNaN(count) && count >= 1 && count <= 5) {
+      applyToSection({
+        columns: {
+          type: "custom",
+          count,
+          gap: isNaN(gap) ? 32 : gap,
+        },
+      });
+      setColumnsDialogOpen(false);
+    }
+  };
+
+  // ------------------------------------------------------------------------
+  // Handlers for Watermark
+  // ------------------------------------------------------------------------
+  const handleApplyCustomWatermark = () => {
+    if (watermarkType === "text") {
+      applyToSection({
+        watermark: {
+          text: wmText.trim(),
+          font: wmFont,
+          fontSize: wmFontSize === "auto" ? "auto" : parseInt(wmFontSize, 10) || "auto",
+          color: wmColor,
+          opacity: wmOpacity / 100,
+          rotation: wmRotation,
+        },
+      });
+    } else {
+      applyToSection({
+        watermark: {
+          image: wmImageUrl,
+          opacity: wmOpacity / 100,
+        },
+      });
+    }
+    setWatermarkDialogOpen(false);
+  };
+
+  // ------------------------------------------------------------------------
+  // Handlers for Page Borders
+  // ------------------------------------------------------------------------
+  const handleApplyBorders = () => {
+    const patch: Partial<SectionModel> = {
+      pageBorders: {
+        style:
+          borderSetting === "none"
+            ? "none"
+            : borderSetting === "shadow"
+            ? "shadow"
+            : borderSetting === "3d"
+            ? "3d"
+            : borderStyle === "dashed"
+            ? "dashed"
+            : borderStyle === "dotted"
+            ? "dotted"
+            : borderStyle === "double"
+            ? "double"
+            : "box",
+        color: borderColor,
+        width: borderWidth,
+        top: borderTop,
+        bottom: borderBottom,
+        left: borderLeft,
+        right: borderRight,
+        applyTo: borderApplyTo,
+      },
+    };
+
+    if (borderApplyTo === "document") {
+      applyToAllSections(patch);
+    } else if (borderApplyTo === "page") {
+      applyToThisPage(patch);
+    } else {
+      applyToSection(patch);
+    }
+
+    setBordersDialogOpen(false);
+  };
+
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 overflow-x-auto py-0.5 text-slate-700 dark:text-slate-200">
       {/* =======================================================
-          GROUP 1: HEADER & FOOTER
+          GROUP 1: HEADER, FOOTER, PAGE NUMBER
       ======================================================= */}
 
       {/* HEADER */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Document Header">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -128,48 +416,8 @@ export default function LayoutTab() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 text-xs">
           <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold">
-            Header Presets
+            Header Options
           </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                header: model.title || "Document Header",
-              })
-            }
-            className="flex justify-between items-center cursor-pointer"
-          >
-            <span>Default Document Title</span>
-            {activeSection?.header === model.title && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                header: "Parexel Clinical Study Report",
-              })
-            }
-            className="flex justify-between items-center cursor-pointer"
-          >
-            <span>Parexel Clinical Header</span>
-            {activeSection?.header === "Parexel Clinical Study Report" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                header: "CONFIDENTIAL & PROPRIETARY",
-              })
-            }
-            className="flex justify-between items-center cursor-pointer"
-          >
-            <span>Confidential Header</span>
-            {activeSection?.header === "CONFIDENTIAL & PROPRIETARY" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
               setHeaderInput(activeSection?.header || "");
@@ -180,7 +428,13 @@ export default function LayoutTab() {
             Edit Header...
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ header: "" })}
+            onClick={() =>
+              applyToSection({
+                header: "",
+                firstHeader: "",
+                evenHeader: "",
+              })
+            }
             className="text-red-600 cursor-pointer"
           >
             Remove Header
@@ -191,7 +445,7 @@ export default function LayoutTab() {
       {/* FOOTER */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Document Footer">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -207,46 +461,8 @@ export default function LayoutTab() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 text-xs">
           <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold">
-            Footer Presets
+            Footer Options
           </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                footer: "Parexel Smart Authoring Suite",
-              })
-            }
-            className="flex justify-between items-center cursor-pointer"
-          >
-            <span>Parexel Authoring Suite</span>
-            {activeSection?.footer === "Parexel Smart Authoring Suite" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                footer: "Confidential & Proprietary",
-              })
-            }
-            className="flex justify-between items-center cursor-pointer"
-          >
-            <span>Confidential & Proprietary</span>
-            {activeSection?.footer === "Confidential & Proprietary" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                footer: "",
-                showPageNumbers: true,
-              })
-            }
-            className="flex justify-between items-center cursor-pointer"
-          >
-            <span>Page Number Only</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
               setFooterInput(activeSection?.footer || "");
@@ -257,10 +473,178 @@ export default function LayoutTab() {
             Edit Footer...
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ footer: "" })}
+            onClick={() =>
+              applyToSection({
+                footer: "",
+                firstFooter: "",
+                evenFooter: "",
+              })
+            }
             className="text-red-600 cursor-pointer"
           >
             Remove Footer
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => {
+              setFormatChoice(activeSection?.pageNumberFormat || "1");
+              setNumberingMode(
+                activeSection?.pageNumberStartAt !== undefined ? "startAt" : "continue"
+              );
+              setStartAtValue(activeSection?.pageNumberStartAt ?? 1);
+              setPageNumberFormatOpen(true);
+            }}
+            className="cursor-pointer"
+          >
+            Page Number Settings...
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* PAGE NUMBER */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className={triggerClass} title="Page Numbers">
+            <span className="font-semibold text-[11px] text-slate-600 dark:text-slate-300">#</span>
+            <span>Page Number</span>
+            <ChevronDown className="h-3 w-3 text-slate-400" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56 text-xs">
+          {/* 1. Top of Page Submenu */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="cursor-pointer">
+              <span>Top of Page</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-40 text-xs">
+              <DropdownMenuItem
+                onClick={() => handleSetHeaderPageNumber("left")}
+                className="cursor-pointer flex justify-between items-center"
+              >
+                <span>Left</span>
+                {activeSection?.showPageNumbers !== false &&
+                  activeSection?.pageNumberPosition === "header" &&
+                  activeSection?.pageNumberAlignment === "left" && (
+                    <Check className="h-3.5 w-3.5 text-blue-600" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSetHeaderPageNumber("center")}
+                className="cursor-pointer flex justify-between items-center"
+              >
+                <span>Center</span>
+                {activeSection?.showPageNumbers !== false &&
+                  activeSection?.pageNumberPosition === "header" &&
+                  activeSection?.pageNumberAlignment === "center" && (
+                    <Check className="h-3.5 w-3.5 text-blue-600" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSetHeaderPageNumber("right")}
+                className="cursor-pointer flex justify-between items-center"
+              >
+                <span>Right</span>
+                {activeSection?.showPageNumbers !== false &&
+                  activeSection?.pageNumberPosition === "header" &&
+                  activeSection?.pageNumberAlignment === "right" && (
+                    <Check className="h-3.5 w-3.5 text-blue-600" />
+                  )}
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          {/* 2. Bottom of Page Submenu */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="cursor-pointer">
+              <span>Bottom of Page</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-40 text-xs">
+              <DropdownMenuItem
+                onClick={() => handleSetFooterPageNumber("left")}
+                className="cursor-pointer flex justify-between items-center"
+              >
+                <span>Left</span>
+                {activeSection?.showPageNumbers !== false &&
+                  activeSection?.pageNumberPosition === "footer" &&
+                  activeSection?.pageNumberAlignment === "left" && (
+                    <Check className="h-3.5 w-3.5 text-blue-600" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSetFooterPageNumber("center")}
+                className="cursor-pointer flex justify-between items-center"
+              >
+                <span>Center</span>
+                {activeSection?.showPageNumbers !== false &&
+                  activeSection?.pageNumberPosition === "footer" &&
+                  activeSection?.pageNumberAlignment === "center" && (
+                    <Check className="h-3.5 w-3.5 text-blue-600" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSetFooterPageNumber("right")}
+                className="cursor-pointer flex justify-between items-center"
+              >
+                <span>Right</span>
+                {activeSection?.showPageNumbers !== false &&
+                  activeSection?.pageNumberPosition === "footer" &&
+                  activeSection?.pageNumberAlignment === "right" && (
+                    <Check className="h-3.5 w-3.5 text-blue-600" />
+                  )}
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          {/* 3. Current Position Submenu */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="cursor-pointer">
+              <span>Current Position</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-40 text-xs">
+              <DropdownMenuItem
+                onClick={() => handleInsertCurrentPosition("left")}
+                className="cursor-pointer"
+              >
+                <span>Left</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleInsertCurrentPosition("center")}
+                className="cursor-pointer"
+              >
+                <span>Center</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleInsertCurrentPosition("right")}
+                className="cursor-pointer"
+              >
+                <span>Right</span>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          <DropdownMenuSeparator />
+
+          {/* 4. Format Page Numbers */}
+          <DropdownMenuItem
+            onClick={() => {
+              setFormatChoice(activeSection?.pageNumberFormat || "1");
+              setNumberingMode(
+                activeSection?.pageNumberStartAt !== undefined ? "startAt" : "continue"
+              );
+              setStartAtValue(activeSection?.pageNumberStartAt ?? 1);
+              setPageNumberFormatOpen(true);
+            }}
+            className="cursor-pointer text-blue-600 font-medium"
+          >
+            Format Page Numbers...
+          </DropdownMenuItem>
+
+          {/* 5. Remove Page Numbers */}
+          <DropdownMenuItem
+            onClick={handleRemovePageNumbers}
+            className="cursor-pointer text-red-600"
+          >
+            Remove Page Numbers
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -274,7 +658,7 @@ export default function LayoutTab() {
       {/* MARGINS */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Margins">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -283,49 +667,35 @@ export default function LayoutTab() {
               strokeWidth="2"
             >
               <rect x="4" y="4" width="16" height="16" rx="2" />
-              <path
-                d="M9 4v16M15 4v16M4 9h16M4 15h16"
-                strokeDasharray="2 2"
-              />
+              <path d="M9 4v16M15 4v16M4 9h16M4 15h16" strokeDasharray="2 2" />
             </svg>
             <span>Margins</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-60 text-xs">
+        <DropdownMenuContent align="start" className="w-64 text-xs">
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                marginPreset: "normal",
-                marginConfig: { top: 72, bottom: 72, left: 72, right: 72 },
-              })
-            }
+            onClick={handleApplyNormalMargins}
             className="flex justify-between items-center py-1.5 cursor-pointer"
           >
             <div>
               <div className="font-semibold">Normal</div>
               <div className="text-[10px] text-slate-400">
-                Top/Bottom: 1.0", Left/Right: 1.0"
+                Top: 1", Bottom: 1", Left: 1", Right: 1"
               </div>
             </div>
-            {(!activeSection?.marginPreset ||
-              activeSection?.marginPreset === "normal") && (
+            {(!activeSection?.marginPreset || activeSection?.marginPreset === "normal") && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                marginPreset: "narrow",
-                marginConfig: { top: 36, bottom: 36, left: 36, right: 36 },
-              })
-            }
+            onClick={handleApplyNarrowMargins}
             className="flex justify-between items-center py-1.5 cursor-pointer"
           >
             <div>
               <div className="font-semibold">Narrow</div>
               <div className="text-[10px] text-slate-400">
-                Top/Bottom: 0.5", Left/Right: 0.5"
+                Top: 0.5", Bottom: 0.5", Left: 0.5", Right: 0.5"
               </div>
             </div>
             {activeSection?.marginPreset === "narrow" && (
@@ -333,18 +703,13 @@ export default function LayoutTab() {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                marginPreset: "moderate",
-                marginConfig: { top: 72, bottom: 72, left: 54, right: 54 },
-              })
-            }
+            onClick={handleApplyModerateMargins}
             className="flex justify-between items-center py-1.5 cursor-pointer"
           >
             <div>
               <div className="font-semibold">Moderate</div>
               <div className="text-[10px] text-slate-400">
-                Top/Bottom: 1.0", Left/Right: 0.75"
+                Top: 1", Bottom: 1", Left: 0.75", Right: 0.75"
               </div>
             </div>
             {activeSection?.marginPreset === "moderate" && (
@@ -352,21 +717,30 @@ export default function LayoutTab() {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                marginPreset: "wide",
-                marginConfig: { top: 72, bottom: 72, left: 144, right: 144 },
-              })
-            }
+            onClick={handleApplyWideMargins}
             className="flex justify-between items-center py-1.5 cursor-pointer"
           >
             <div>
               <div className="font-semibold">Wide</div>
               <div className="text-[10px] text-slate-400">
-                Top/Bottom: 1.0", Left/Right: 2.0"
+                Top: 1", Bottom: 1", Left: 2", Right: 2"
               </div>
             </div>
             {activeSection?.marginPreset === "wide" && (
+              <Check className="h-3.5 w-3.5 text-blue-600" />
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleApplyMirroredMargins}
+            className="flex justify-between items-center py-1.5 cursor-pointer"
+          >
+            <div>
+              <div className="font-semibold">Mirrored</div>
+              <div className="text-[10px] text-slate-400">
+                Top: 1", Bottom: 1", Inside: 1.25", Outside: 1"
+              </div>
+            </div>
+            {activeSection?.marginPreset === "mirrored" && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
@@ -383,7 +757,7 @@ export default function LayoutTab() {
       {/* ORIENTATION */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Orientation">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -398,127 +772,130 @@ export default function LayoutTab() {
             <ChevronDown className="h-3 w-3 text-slate-400" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48 text-xs">
+        <DropdownMenuContent align="start" className="w-52 text-xs">
           <DropdownMenuItem
-            onClick={() => applyToAllSections({ orientation: "portrait" })}
-            className="flex justify-between items-center py-2 cursor-pointer"
+            onClick={() => applyToSection({ orientation: "portrait" })}
+            className="flex justify-between items-center py-1.5 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <span className="inline-block w-4 h-5 border border-slate-500 rounded-sm" />
+              <span className="inline-block w-3.5 h-4.5 border border-slate-500 rounded-sm" />
               <span className="font-medium">Portrait</span>
             </div>
-            {(!activeSection?.orientation ||
-              activeSection?.orientation === "portrait") && (
+            {(!activeSection?.orientation || activeSection?.orientation === "portrait") && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToAllSections({ orientation: "landscape" })}
-            className="flex justify-between items-center py-2 cursor-pointer"
+            onClick={() => applyToSection({ orientation: "landscape" })}
+            className="flex justify-between items-center py-1.5 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <span className="inline-block w-5 h-4 border border-slate-500 rounded-sm" />
+              <span className="inline-block w-4.5 h-3.5 border border-slate-500 rounded-sm" />
               <span className="font-medium">Landscape</span>
             </div>
             {activeSection?.orientation === "landscape" && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="cursor-pointer">
+              <span>Apply To</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-44 text-xs">
+              <DropdownMenuItem
+                onClick={() => {
+                  const currentOr = activeSection?.orientation || "portrait";
+                  applyToSection({ orientation: currentOr });
+                }}
+                className="cursor-pointer"
+              >
+                Current Section
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  const currentOr = activeSection?.orientation || "portrait";
+                  applyToAllSections({ orientation: currentOr });
+                }}
+                className="cursor-pointer"
+              >
+                Whole Document
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  const currentOr = activeSection?.orientation || "portrait";
+                  applyToThisPage({ orientation: currentOr });
+                }}
+                className="cursor-pointer"
+              >
+                This Page
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
 
       {/* SIZE */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Paper Size">
             <FileText className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
             <span>Size</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-52 text-xs">
-          <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                paperSize: { name: "Letter", width: 816, height: 1056 },
-              })
-            }
-            className="flex justify-between items-center py-1.5 cursor-pointer"
-          >
-            <div>
-              <div className="font-semibold">Letter</div>
-              <div className="text-[10px] text-slate-400">8.5" × 11"</div>
+        <DropdownMenuContent align="start" className="w-64 text-xs">
+          {/* Search Filter Box */}
+          <div className="p-1.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800">
+              <Search className="h-3 w-3 text-slate-400" />
+              <input
+                type="text"
+                value={sizeSearch}
+                onChange={(e) => setSizeSearch(e.target.value)}
+                placeholder="Search paper size..."
+                className="w-full bg-transparent text-xs outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              />
             </div>
-            {(!activeSection?.paperSize ||
-              activeSection?.paperSize?.name === "Letter") && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
+          </div>
+
+          <div className="max-h-60 overflow-y-auto py-1">
+            {filteredPaperSizes.map((ps) => {
+              const isSelected =
+                (!activeSection?.paperSize && ps.name === "Letter") ||
+                activeSection?.paperSize?.name === ps.name;
+
+              return (
+                <DropdownMenuItem
+                  key={ps.name}
+                  onClick={() =>
+                    applyToSection({
+                      paperSize: { name: ps.name, width: ps.width, height: ps.height },
+                    })
+                  }
+                  className="flex justify-between items-center py-1.5 cursor-pointer"
+                >
+                  <div>
+                    <div className="font-semibold">{ps.name}</div>
+                    <div className="text-[10px] text-slate-400">{ps.dimText}</div>
+                  </div>
+                  {isSelected && <Check className="h-3.5 w-3.5 text-blue-600" />}
+                </DropdownMenuItem>
+              );
+            })}
+          </div>
+
+          <DropdownMenuSeparator />
+
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                paperSize: { name: "A4", width: 794, height: 1123 },
-              })
-            }
-            className="flex justify-between items-center py-1.5 cursor-pointer"
+            onClick={() => setCustomSizeDialogOpen(true)}
+            className="text-blue-600 font-medium cursor-pointer"
           >
-            <div>
-              <div className="font-semibold">A4</div>
-              <div className="text-[10px] text-slate-400">
-                8.27" × 11.69" (210 × 297 mm)
-              </div>
-            </div>
-            {activeSection?.paperSize?.name === "A4" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                paperSize: { name: "Legal", width: 816, height: 1344 },
-              })
-            }
-            className="flex justify-between items-center py-1.5 cursor-pointer"
-          >
-            <div>
-              <div className="font-semibold">Legal</div>
-              <div className="text-[10px] text-slate-400">8.5" × 14"</div>
-            </div>
-            {activeSection?.paperSize?.name === "Legal" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                paperSize: { name: "Executive", width: 696, height: 1008 },
-              })
-            }
-            className="flex justify-between items-center py-1.5 cursor-pointer"
-          >
-            <div>
-              <div className="font-semibold">Executive</div>
-              <div className="text-[10px] text-slate-400">7.25" × 10.5"</div>
-            </div>
-            {activeSection?.paperSize?.name === "Executive" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({
-                paperSize: { name: "A3", width: 1123, height: 1587 },
-              })
-            }
-            className="flex justify-between items-center py-1.5 cursor-pointer"
-          >
-            <div>
-              <div className="font-semibold">A3</div>
-              <div className="text-[10px] text-slate-400">11.69" × 16.54"</div>
-            </div>
-            {activeSection?.paperSize?.name === "A3" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
+            Custom Page Size...
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -526,51 +903,42 @@ export default function LayoutTab() {
       {/* COLUMNS */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Columns">
             <Columns2 className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
             <span>Columns</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-44 text-xs">
+        <DropdownMenuContent align="start" className="w-48 text-xs">
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({ columns: { type: "one", count: 1 } })
-            }
+            onClick={() => applyToSection({ columns: { type: "one", count: 1 } })}
             className="flex justify-between items-center cursor-pointer"
           >
-            <span>One Column</span>
-            {(!activeSection?.columns ||
-              activeSection?.columns?.type === "one") && (
+            <span>One</span>
+            {(!activeSection?.columns || activeSection?.columns?.type === "one") && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({ columns: { type: "two", count: 2 } })
-            }
+            onClick={() => applyToSection({ columns: { type: "two", count: 2 } })}
             className="flex justify-between items-center cursor-pointer"
           >
-            <span>Two Columns</span>
+            <span>Two</span>
             {activeSection?.columns?.type === "two" && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({ columns: { type: "three", count: 3 } })
-            }
+            onClick={() => applyToSection({ columns: { type: "three", count: 3 } })}
             className="flex justify-between items-center cursor-pointer"
           >
-            <span>Three Columns</span>
+            <span>Three</span>
             {activeSection?.columns?.type === "three" && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({ columns: { type: "left", count: 2 } })
-            }
+            onClick={() => applyToSection({ columns: { type: "left", count: 2 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Left (Narrow Left)</span>
@@ -579,15 +947,22 @@ export default function LayoutTab() {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              applyToAllSections({ columns: { type: "right", count: 2 } })
-            }
+            onClick={() => applyToSection({ columns: { type: "right", count: 2 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Right (Narrow Right)</span>
             {activeSection?.columns?.type === "right" && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            onClick={() => setColumnsDialogOpen(true)}
+            className="text-blue-600 font-medium cursor-pointer"
+          >
+            More Columns...
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -601,7 +976,7 @@ export default function LayoutTab() {
       {/* WATERMARK */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Watermark">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -616,11 +991,11 @@ export default function LayoutTab() {
             <ChevronDown className="h-3 w-3 text-slate-400" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48 text-xs">
+        <DropdownMenuContent align="start" className="w-52 text-xs">
           <DropdownMenuItem
             onClick={() =>
-              applyToAllSections({
-                watermark: { text: "CONFIDENTIAL", opacity: 0.12 },
+              applyToSection({
+                watermark: { text: "CONFIDENTIAL", opacity: 0.12, rotation: "diagonal" },
               })
             }
             className="flex justify-between items-center cursor-pointer"
@@ -632,8 +1007,8 @@ export default function LayoutTab() {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
-              applyToAllSections({
-                watermark: { text: "DO NOT COPY", opacity: 0.12 },
+              applyToSection({
+                watermark: { text: "DO NOT COPY", opacity: 0.12, rotation: "diagonal" },
               })
             }
             className="flex justify-between items-center cursor-pointer"
@@ -645,8 +1020,8 @@ export default function LayoutTab() {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
-              applyToAllSections({
-                watermark: { text: "DRAFT", opacity: 0.12 },
+              applyToSection({
+                watermark: { text: "DRAFT", opacity: 0.12, rotation: "diagonal" },
               })
             }
             className="flex justify-between items-center cursor-pointer"
@@ -658,8 +1033,8 @@ export default function LayoutTab() {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
-              applyToAllSections({
-                watermark: { text: "URGENT", opacity: 0.12 },
+              applyToSection({
+                watermark: { text: "URGENT", opacity: 0.12, rotation: "diagonal" },
               })
             }
             className="flex justify-between items-center cursor-pointer"
@@ -669,10 +1044,12 @@ export default function LayoutTab() {
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
+
           <DropdownMenuSeparator />
+
           <DropdownMenuItem
             onClick={() => {
-              setCustomWatermark(activeSection?.watermark?.text || "");
+              setWmText(activeSection?.watermark?.text || "CONFIDENTIAL");
               setWatermarkDialogOpen(true);
             }}
             className="text-blue-600 font-medium cursor-pointer"
@@ -680,7 +1057,7 @@ export default function LayoutTab() {
             Custom Watermark...
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToAllSections({ watermark: undefined })}
+            onClick={() => applyToSection({ watermark: undefined })}
             className="text-red-600 cursor-pointer"
           >
             Remove Watermark
@@ -691,7 +1068,7 @@ export default function LayoutTab() {
       {/* PAGE COLOR */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass}>
+          <button type="button" className={triggerClass} title="Page Color">
             <Palette className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
             <span>Page Color</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
@@ -699,15 +1076,15 @@ export default function LayoutTab() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 p-2 text-xs">
           <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold mb-2">
-            Background Colors
+            Page Background Color
           </DropdownMenuLabel>
           <div className="grid grid-cols-5 gap-1.5 mb-2">
             {[
               { color: "#ffffff", label: "White" },
               { color: "#f8fafc", label: "Light Gray" },
-              { color: "#fefce8", label: "Soft Yellow" },
-              { color: "#f0fdf4", label: "Soft Green" },
-              { color: "#eff6ff", label: "Soft Blue" },
+              { color: "#eff6ff", label: "Light Blue" },
+              { color: "#fefce8", label: "Light Yellow" },
+              { color: "#f0fdf4", label: "Light Green" },
               { color: "#faf5ff", label: "Soft Purple" },
               { color: "#fff1f2", label: "Soft Pink" },
               { color: "#ffedd5", label: "Soft Orange" },
@@ -718,15 +1095,29 @@ export default function LayoutTab() {
                 key={color}
                 type="button"
                 title={label}
-                onClick={() => applyToAllSections({ pageColor: color })}
-                className="h-6 w-6 rounded border border-slate-300 shadow-sm transition-transform hover:scale-110 active:scale-95"
+                onClick={() => applyToSection({ pageColor: color })}
+                className={`h-6 w-6 rounded border shadow-xs transition-transform hover:scale-110 cursor-pointer ${
+                  activeSection?.pageColor === color ? "ring-2 ring-blue-500" : "border-slate-300"
+                }`}
                 style={{ backgroundColor: color }}
               />
             ))}
           </div>
+
+          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+            <Label className="text-[11px] text-slate-500">Custom:</Label>
+            <input
+              type="color"
+              value={activeSection?.pageColor || "#ffffff"}
+              onChange={(e) => applyToSection({ pageColor: e.target.value })}
+              className="h-6 w-8 cursor-pointer rounded border border-slate-300"
+            />
+          </div>
+
           <DropdownMenuSeparator />
+
           <DropdownMenuItem
-            onClick={() => applyToAllSections({ pageColor: "#ffffff" })}
+            onClick={() => applyToSection({ pageColor: "#ffffff" })}
             className="text-slate-600 font-medium cursor-pointer"
           >
             No Color (Default White)
@@ -738,11 +1129,35 @@ export default function LayoutTab() {
       <button
         type="button"
         onClick={() => {
-          setSelectedBorderStyle(activeSection?.pageBorders?.style || "box");
-          setSelectedBorderColor(activeSection?.pageBorders?.color || "#000000");
+          setBorderSetting(
+            activeSection?.pageBorders?.style === "none"
+              ? "none"
+              : activeSection?.pageBorders?.style === "shadow"
+              ? "shadow"
+              : activeSection?.pageBorders?.style === "3d"
+              ? "3d"
+              : "box"
+          );
+          setBorderStyle(
+            activeSection?.pageBorders?.style === "dashed"
+              ? "dashed"
+              : activeSection?.pageBorders?.style === "dotted"
+              ? "dotted"
+              : activeSection?.pageBorders?.style === "double"
+              ? "double"
+              : "solid"
+          );
+          setBorderColor(activeSection?.pageBorders?.color || "#000000");
+          setBorderWidth(activeSection?.pageBorders?.width || 2);
+          setBorderTop(activeSection?.pageBorders?.top ?? true);
+          setBorderBottom(activeSection?.pageBorders?.bottom ?? true);
+          setBorderLeft(activeSection?.pageBorders?.left ?? true);
+          setBorderRight(activeSection?.pageBorders?.right ?? true);
+          setBorderApplyTo(activeSection?.pageBorders?.applyTo || "section");
           setBordersDialogOpen(true);
         }}
         className={triggerClass}
+        title="Page Borders"
       >
         <svg
           className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
@@ -756,6 +1171,7 @@ export default function LayoutTab() {
         </svg>
         <span>Page Borders</span>
       </button>
+
 
       {/* =======================================================
           MODAL DIALOGS
@@ -837,7 +1253,84 @@ export default function LayoutTab() {
         </DialogContent>
       </Dialog>
 
-      {/* 3. Custom Margins Dialog */}
+      {/* 3. Page Number Format Dialog */}
+      <Dialog open={pageNumberFormatOpen} onOpenChange={setPageNumberFormatOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold">
+              Page Number Format
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2 text-xs">
+            <div>
+              <Label className="text-xs font-semibold mb-1 block">Number Format:</Label>
+              <select
+                value={formatChoice}
+                onChange={(e) =>
+                  setFormatChoice(e.target.value as "1" | "a" | "A" | "i" | "I")
+                }
+                className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+              >
+                <option value="1">1, 2, 3, ...</option>
+                <option value="a">a, b, c, ...</option>
+                <option value="A">A, B, C, ...</option>
+                <option value="i">i, ii, iii, ...</option>
+                <option value="I">I, II, III, ...</option>
+              </select>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+              <Label className="text-xs font-semibold mb-2 block">Page Numbering:</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="pageNumbering"
+                    checked={numberingMode === "continue"}
+                    onChange={() => setNumberingMode("continue")}
+                    className="text-blue-600"
+                  />
+                  <span>Continue from previous section</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="pageNumbering"
+                    checked={numberingMode === "startAt"}
+                    onChange={() => setNumberingMode("startAt")}
+                    className="text-blue-600"
+                  />
+                  <span>Start at:</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={startAtValue}
+                    onChange={(e) =>
+                      setStartAtValue(Math.max(1, parseInt(e.target.value, 10) || 1))
+                    }
+                    disabled={numberingMode !== "startAt"}
+                    className="w-16 h-7 px-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 disabled:opacity-50"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPageNumberFormatOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleApplyPageNumberFormat}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 4. Custom Margins Dialog */}
       <Dialog open={marginsDialogOpen} onOpenChange={setMarginsDialogOpen}>
         <DialogContent className="max-w-xs">
           <DialogHeader>
@@ -851,8 +1344,8 @@ export default function LayoutTab() {
               <Input
                 type="number"
                 step="0.1"
-                min="0.2"
-                max="3"
+                min="0.1"
+                max="5"
                 value={customTop}
                 onChange={(e) => setCustomTop(e.target.value)}
                 className="text-xs"
@@ -863,8 +1356,8 @@ export default function LayoutTab() {
               <Input
                 type="number"
                 step="0.1"
-                min="0.2"
-                max="3"
+                min="0.1"
+                max="5"
                 value={customBottom}
                 onChange={(e) => setCustomBottom(e.target.value)}
                 className="text-xs"
@@ -875,8 +1368,8 @@ export default function LayoutTab() {
               <Input
                 type="number"
                 step="0.1"
-                min="0.2"
-                max="3"
+                min="0.1"
+                max="5"
                 value={customLeft}
                 onChange={(e) => setCustomLeft(e.target.value)}
                 className="text-xs"
@@ -887,8 +1380,8 @@ export default function LayoutTab() {
               <Input
                 type="number"
                 step="0.1"
-                min="0.2"
-                max="3"
+                min="0.1"
+                max="5"
                 value={customRight}
                 onChange={(e) => setCustomRight(e.target.value)}
                 className="text-xs"
@@ -903,42 +1396,301 @@ export default function LayoutTab() {
             >
               Cancel
             </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                const top = Math.round(parseFloat(customTop || "1") * 72);
-                const bottom = Math.round(parseFloat(customBottom || "1") * 72);
-                const left = Math.round(parseFloat(customLeft || "1") * 72);
-                const right = Math.round(parseFloat(customRight || "1") * 72);
-                applyToAllSections({
-                  marginPreset: "custom",
-                  marginConfig: { top, bottom, left, right },
-                });
-                setMarginsDialogOpen(false);
-              }}
-            >
+            <Button size="sm" onClick={handleApplyCustomMargins}>
               Apply Margins
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* 4. Custom Watermark Dialog */}
-      <Dialog open={watermarkDialogOpen} onOpenChange={setWatermarkDialogOpen}>
-        <DialogContent className="max-w-sm">
+      {/* 5. Custom Page Size Dialog */}
+      <Dialog open={customSizeDialogOpen} onOpenChange={setCustomSizeDialogOpen}>
+        <DialogContent className="max-w-xs">
           <DialogHeader>
             <DialogTitle className="text-sm font-semibold">
-              Custom Watermark
+              Custom Page Size (inches)
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <Label className="text-xs">Watermark Text</Label>
-            <Input
-              value={customWatermark}
-              onChange={(e) => setCustomWatermark(e.target.value)}
-              placeholder="e.g. STRICTLY CONFIDENTIAL"
-              className="text-xs"
-            />
+            <div className="space-y-1">
+              <Label className="text-xs">Width (in)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                min="1"
+                max="50"
+                value={customWidthInches}
+                onChange={(e) => setCustomWidthInches(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Height (in)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                min="1"
+                max="50"
+                value={customHeightInches}
+                onChange={(e) => setCustomHeightInches(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCustomSizeDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleApplyCustomSize}>
+              Apply Size
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 6. Custom Columns Dialog */}
+      <Dialog open={columnsDialogOpen} onOpenChange={setColumnsDialogOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold">Columns Setup</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-xs">
+            <div className="space-y-1">
+              <Label className="text-xs">Number of Columns (1–5)</Label>
+              <Input
+                type="number"
+                min="1"
+                max="5"
+                value={customColumnCount}
+                onChange={(e) => setCustomColumnCount(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Spacing / Gap (px)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={customColumnGap}
+                onChange={(e) => setCustomColumnGap(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setColumnsDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleApplyCustomColumns}>
+              Apply Columns
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 7. Custom Watermark Dialog */}
+      <Dialog open={watermarkDialogOpen} onOpenChange={setWatermarkDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold">
+              Watermark Configuration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2 text-xs">
+            {/* Tabs for Text vs Image */}
+            <div className="flex rounded-md bg-slate-100 dark:bg-slate-800 p-1">
+              <button
+                type="button"
+                onClick={() => setWatermarkType("text")}
+                className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
+                  watermarkType === "text"
+                    ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
+                    : "text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                Text Watermark
+              </button>
+              <button
+                type="button"
+                onClick={() => setWatermarkType("image")}
+                className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
+                  watermarkType === "image"
+                    ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
+                    : "text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                Picture Watermark
+              </button>
+            </div>
+
+            {watermarkType === "text" ? (
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs mb-1 block">Text</Label>
+                  <Input
+                    value={wmText}
+                    onChange={(e) => setWmText(e.target.value)}
+                    placeholder="e.g. CONFIDENTIAL"
+                    className="text-xs"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs mb-1 block">Font</Label>
+                    <select
+                      value={wmFont}
+                      onChange={(e) => setWmFont(e.target.value)}
+                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                    >
+                      <option value="Calibri">Calibri</option>
+                      <option value="Arial">Arial</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Courier New">Courier New</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1 block">Size</Label>
+                    <select
+                      value={wmFontSize}
+                      onChange={(e) => setWmFontSize(e.target.value)}
+                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                    >
+                      <option value="auto">Auto</option>
+                      <option value="36">36 pt</option>
+                      <option value="48">48 pt</option>
+                      <option value="60">60 pt</option>
+                      <option value="72">72 pt</option>
+                      <option value="96">96 pt</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 items-center">
+                  <div>
+                    <Label className="text-xs mb-1 block">Color</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={wmColor}
+                        onChange={(e) => setWmColor(e.target.value)}
+                        className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                      />
+                      <span className="font-mono text-[11px] text-slate-500">
+                        {wmColor}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1 block">
+                      Opacity: {wmOpacity}%
+                    </Label>
+                    <input
+                      type="range"
+                      min={5}
+                      max={100}
+                      value={wmOpacity}
+                      onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-xs mb-1 block">Layout / Rotation</Label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="wmRot"
+                        checked={wmRotation === "diagonal"}
+                        onChange={() => setWmRotation("diagonal")}
+                        className="text-blue-600"
+                      />
+                      <span>Diagonal (-35°)</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="wmRot"
+                        checked={wmRotation === "horizontal"}
+                        onChange={() => setWmRotation("horizontal")}
+                        className="text-blue-600"
+                      />
+                      <span>Horizontal (0°)</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs mb-1 block">Image URL</Label>
+                  <Input
+                    value={wmImageUrl}
+                    onChange={(e) => setWmImageUrl(e.target.value)}
+                    placeholder="https://example.com/watermark.png"
+                    className="text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs mb-1 block">
+                    Opacity: {wmOpacity}%
+                  </Label>
+                  <input
+                    type="range"
+                    min={5}
+                    max={100}
+                    value={wmOpacity}
+                    onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Live Preview Box */}
+            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
+                Preview
+              </div>
+              <div className="h-28 w-full bg-white dark:bg-[#0c1622] rounded border border-slate-200 dark:border-slate-800 relative flex items-center justify-center overflow-hidden">
+                {watermarkType === "text" ? (
+                  <span
+                    style={{
+                      fontFamily: wmFont,
+                      fontSize: "22px",
+                      fontWeight: 700,
+                      color: wmColor,
+                      opacity: wmOpacity / 100,
+                      transform: `rotate(${wmRotation === "diagonal" ? -35 : 0}deg)`,
+                      userSelect: "none",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {wmText || "PREVIEW"}
+                  </span>
+                ) : wmImageUrl ? (
+                  <img
+                    src={wmImageUrl}
+                    alt="Preview"
+                    className="max-h-24 max-w-full object-contain"
+                    style={{ opacity: wmOpacity / 100 }}
+                  />
+                ) : (
+                  <span className="text-xs text-slate-400">Enter image URL</span>
+                )}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -948,53 +1700,56 @@ export default function LayoutTab() {
             >
               Cancel
             </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                applyToAllSections({
-                  watermark: {
-                    text: customWatermark.trim().toUpperCase(),
-                    opacity: 0.12,
-                  },
-                });
-                setWatermarkDialogOpen(false);
-              }}
-            >
+            <Button size="sm" onClick={handleApplyCustomWatermark}>
               Apply Watermark
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* 5. Page Borders Dialog */}
+      {/* 8. Page Borders Dialog */}
       <Dialog open={bordersDialogOpen} onOpenChange={setBordersDialogOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-sm font-semibold">
-              Page Borders
+              Borders and Shading
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Border Style</Label>
-              <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="space-y-4 py-2 text-xs">
+            {/* Presets Settings */}
+            <div>
+              <Label className="text-xs font-semibold mb-1.5 block">Setting:</Label>
+              <div className="grid grid-cols-5 gap-1.5">
                 {(
                   [
-                    { style: "none", label: "None" },
-                    { style: "box", label: "Box (Solid)" },
-                    { style: "shadow", label: "Shadow" },
-                    { style: "dashed", label: "Dashed" },
-                    { style: "double", label: "Double" },
+                    { id: "none", label: "None" },
+                    { id: "box", label: "Box" },
+                    { id: "shadow", label: "Shadow" },
+                    { id: "3d", label: "3D" },
+                    { id: "custom", label: "Custom" },
                   ] as const
-                ).map(({ style, label }) => (
+                ).map(({ id, label }) => (
                   <button
-                    key={style}
+                    key={id}
                     type="button"
-                    onClick={() => setSelectedBorderStyle(style)}
-                    className={`p-2 rounded border text-center transition-colors cursor-pointer ${
-                      selectedBorderStyle === style
-                        ? "border-blue-600 bg-blue-50 font-semibold text-blue-600 dark:bg-blue-950/40"
-                        : "border-slate-200 hover:bg-slate-50 dark:border-slate-800"
+                    onClick={() => {
+                      setBorderSetting(id);
+                      if (id === "none") {
+                        setBorderTop(false);
+                        setBorderBottom(false);
+                        setBorderLeft(false);
+                        setBorderRight(false);
+                      } else {
+                        setBorderTop(true);
+                        setBorderBottom(true);
+                        setBorderLeft(true);
+                        setBorderRight(true);
+                      }
+                    }}
+                    className={`py-1.5 px-2 rounded border text-center font-medium transition-colors cursor-pointer ${
+                      borderSetting === id
+                        ? "border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-950/40"
+                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-50"
                     }`}
                   >
                     {label}
@@ -1003,21 +1758,160 @@ export default function LayoutTab() {
               </div>
             </div>
 
-            {selectedBorderStyle !== "none" && (
-              <div className="space-y-1.5">
-                <Label className="text-xs">Border Color</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="color"
-                    value={selectedBorderColor}
-                    onChange={(e) => setSelectedBorderColor(e.target.value)}
-                    className="h-8 w-14 p-0.5 cursor-pointer"
-                  />
-                  <span className="text-xs text-slate-500 font-mono">
-                    {selectedBorderColor}
-                  </span>
+            {borderSetting !== "none" && (
+              <>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-xs mb-1 block">Style:</Label>
+                    <select
+                      value={borderStyle}
+                      onChange={(e) =>
+                        setBorderStyle(
+                          e.target.value as "solid" | "dashed" | "dotted" | "double"
+                        )
+                      }
+                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                    >
+                      <option value="solid">Solid Line</option>
+                      <option value="dashed">Dashed Line</option>
+                      <option value="dotted">Dotted Line</option>
+                      <option value="double">Double Line</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1 block">Width:</Label>
+                    <select
+                      value={borderWidth}
+                      onChange={(e) => setBorderWidth(parseInt(e.target.value, 10))}
+                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                    >
+                      <option value={1}>1/2 pt (1px)</option>
+                      <option value={2}>1 pt (2px)</option>
+                      <option value={3}>2 1/4 pt (3px)</option>
+                      <option value={4}>3 pt (4px)</option>
+                      <option value={6}>4 1/2 pt (6px)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1 block">Color:</Label>
+                    <div className="flex items-center gap-1.5 h-8">
+                      <input
+                        type="color"
+                        value={borderColor}
+                        onChange={(e) => setBorderColor(e.target.value)}
+                        className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                      />
+                      <span className="font-mono text-[10px] text-slate-500">
+                        {borderColor}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+                {/* Individual Sides Toggle */}
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">
+                    Border Sides:
+                  </Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBorderTop((p) => !p)}
+                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
+                        borderTop
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-slate-300 text-slate-600"
+                      }`}
+                    >
+                      Top
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBorderBottom((p) => !p)}
+                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
+                        borderBottom
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-slate-300 text-slate-600"
+                      }`}
+                    >
+                      Bottom
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBorderLeft((p) => !p)}
+                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
+                        borderLeft
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-slate-300 text-slate-600"
+                      }`}
+                    >
+                      Left
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBorderRight((p) => !p)}
+                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
+                        borderRight
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-slate-300 text-slate-600"
+                      }`}
+                    >
+                      Right
+                    </button>
+                  </div>
+                </div>
+
+                {/* Apply To */}
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">Apply To:</Label>
+                  <select
+                    value={borderApplyTo}
+                    onChange={(e) =>
+                      setBorderApplyTo(
+                        e.target.value as "section" | "document" | "page"
+                      )
+                    }
+                    className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                  >
+                    <option value="section">Current Section</option>
+                    <option value="document">Whole Document</option>
+                    <option value="page">This Page</option>
+                  </select>
+                </div>
+
+                {/* Live Preview Box */}
+                <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
+                  <div className="text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
+                    Live Preview
+                  </div>
+                  <div className="h-28 w-full flex items-center justify-center">
+                    <div
+                      className="h-24 w-32 bg-white dark:bg-[#0c1622] rounded flex items-center justify-center text-[10px] text-slate-400"
+                      style={{
+                        boxSizing: "border-box",
+                        borderTop: borderTop
+                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                          : "none",
+                        borderBottom: borderBottom
+                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                          : "none",
+                        borderLeft: borderLeft
+                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                          : "none",
+                        borderRight: borderRight
+                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                          : "none",
+                        boxShadow:
+                          borderSetting === "shadow"
+                            ? "0 8px 20px rgba(0,0,0,0.25)"
+                            : "none",
+                      }}
+                    >
+                      Page Content
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
           <DialogFooter>
@@ -1028,19 +1922,7 @@ export default function LayoutTab() {
             >
               Cancel
             </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                applyToAllSections({
-                  pageBorders: {
-                    style: selectedBorderStyle,
-                    color: selectedBorderColor,
-                    width: selectedBorderStyle === "double" ? 4 : 2,
-                  },
-                });
-                setBordersDialogOpen(false);
-              }}
-            >
+            <Button size="sm" onClick={handleApplyBorders}>
               Apply Border
             </Button>
           </DialogFooter>

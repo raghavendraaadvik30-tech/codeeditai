@@ -34,9 +34,21 @@ export const printService = {
       clone.style.transform = "none";
       clone.style.transformOrigin = "initial";
       clone.style.marginBottom = "0";
-      clone.style.boxShadow = "none";
-      clone.style.border = "none";
       clone.style.outline = "none";
+
+      // Preserve custom page borders while removing default editor focus border
+      const pageElHtml = pageEl as HTMLElement;
+      const hasCustomBorder =
+        pageElHtml.style.border ||
+        pageElHtml.style.borderTop ||
+        pageElHtml.style.borderBottom ||
+        pageElHtml.style.borderLeft ||
+        pageElHtml.style.borderRight;
+
+      if (!hasCustomBorder) {
+        clone.style.border = "none";
+        clone.style.boxShadow = "none";
+      }
 
       // Apply print classes
       clone.classList.add("print-page", "print-preview-page");
