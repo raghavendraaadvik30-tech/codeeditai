@@ -611,9 +611,6 @@ function DocumentPage({
     const currentHtml = element.innerHTML;
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
-
-    // After content changes, check if content genuinely overflowed the writing area
-    checkAndPaginateOverflow();
   };
 
   const handleFocus = () => {
