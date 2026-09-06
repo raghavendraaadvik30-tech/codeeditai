@@ -82,6 +82,38 @@ export interface SectionModel {
     right?: boolean;
     applyTo?: "document" | "section" | "page";
   };
+  // Reference-compatible rich HTML header/footer fields
+  headerHtml?: string;
+  footerHtml?: string;
+  firstHeaderHtml?: string;
+  firstFooterHtml?: string;
+  evenHeaderHtml?: string;
+  evenFooterHtml?: string;
+
+  // Extended page number & section linking config
+  pageNumberConfig?: {
+    format: "arabic" | "roman-lower" | "roman-upper" | "alpha-lower" | "alpha-upper";
+    startAt?: number;
+    includeChapterNumber?: boolean;
+    showPageX?: boolean;
+    showPageXofY?: boolean;
+  };
+  pageNumberStart?: number;
+  linkToPrevious?: boolean;
+  headerTopDistance?: number;
+  footerBottomDistance?: number;
+
+  // Reference-compatible extended layout configs
+  paperSizeConfig?: { name: string; width: number; height: number };
+  columnsConfig?: { type: "one" | "two" | "three" | "left" | "right" | "custom"; count: number; gap?: number };
+  pageBordersConfig?: {
+    type: "none" | "box" | "shadow" | "3d" | "custom";
+    top?: { style: string; color: string; width: number; art?: string };
+    bottom?: { style: string; color: string; width: number; art?: string };
+    left?: { style: string; color: string; width: number; art?: string };
+    right?: { style: string; color: string; width: number; art?: string };
+    applyTo: "whole" | "section" | "firstPage" | "exceptFirstPage" | "document" | "page";
+  };
 }
 
 export interface PageModel {
@@ -97,6 +129,28 @@ export interface DocumentModel {
   pageHtml: Record<string, string>;
   savedAt?: number;
   styleOverrides: StyleOverrides ;
+  watermarkConfig?: {
+    type: "none" | "text" | "image";
+    text?: string;
+    imageSrc?: string;
+    opacity?: number;
+    rotation?: number;
+    scale?: number;
+    color?: string;
+    fontFamily?: string;
+  };
+  pageColor?: string;
+  metadata?: {
+    title: string;
+    subject?: string;
+    author: string;
+    keywords?: string;
+    category?: string;
+    createdDate?: number;
+    modifiedDate?: number;
+    company?: string;
+    manager?: string;
+  };
 }
 
 export interface HistoryEntry {

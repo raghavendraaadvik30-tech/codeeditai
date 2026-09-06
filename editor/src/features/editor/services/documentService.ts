@@ -53,6 +53,9 @@ It does **not** contain the actual editor UI itself. Instead, it prepares the re
 
 > **Page-level composition and provider setup for the Document Editor.**/
 
+import type { DocumentModel } from "../store/documentModel";
+import { generateWordDocx } from "./docxGeneratorService";
+
 export interface DocumentMeta {
   id: string;
   title: string;
@@ -382,24 +385,40 @@ ${html}
   },
 
   /* ==========================================================
-     Export DOCX (Word HTML)
+     Export DOCX (OpenXML Word Document)
   ========================================================== */
 
-  exportDOCX(
-    meta: DocumentMeta,
-    html: string
-  ): Blob {
+  async exportDOCX(
+    modelOrMeta: DocumentModel | DocumentMeta,
+    htmlOrOptions?: string | { tableAutoFitMode?: "fixed" | "contents" | "window"; exportMarkupMode?: "markup" | "final" | "original" }
+  ): Promise<Blob> {
+    if ("pages" in modelOrMeta && "sections" in modelOrMeta) {
+      return generateWordDocx(
+        modelOrMeta,
+        typeof htmlOrOptions === "object" ? htmlOrOptions : undefined
+      );
+    }
 
-    const htmlBlob =
-      this.exportHTML(meta, html);
-
-    return new Blob(
-      [htmlBlob],
-      {
-        type:
-          "application/msword",
-      }
-    );
+    const fallbackModel: DocumentModel = {
+      id: modelOrMeta.id,
+      title: modelOrMeta.title,
+      pages: [{ id: "p1", sectionId: "s1" }],
+      sections: [{
+        id: "s1",
+        header: "",
+        footer: "",
+        differentFirstPage: false,
+        differentOddEven: false,
+        firstHeader: "",
+        firstFooter: "",
+        evenHeader: "",
+        evenFooter: "",
+        showPageNumbers: false,
+      }],
+      pageHtml: { p1: typeof htmlOrOptions === "string" ? htmlOrOptions : "<p></p>" },
+      styleOverrides: {},
+    };
+    return generateWordDocx(fallbackModel);
   },
 
   /* ==========================================================

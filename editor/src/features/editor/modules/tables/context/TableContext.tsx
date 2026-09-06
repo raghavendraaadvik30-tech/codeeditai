@@ -57,15 +57,78 @@ function placeCaretInCell(cell: HTMLElement) {
   try {
     const sel = window.getSelection();
     if (!sel) return;
+    const target = cell.querySelector("p") || cell.firstChild || cell;
     const range = document.createRange();
-    range.selectNodeContents(cell);
+    range.selectNodeContents(target);
     range.collapse(true);
     sel.removeAllRanges();
     sel.addRange(range);
-    cell.focus();
+
+    const editable = cell.closest('[contenteditable="true"]') as HTMLElement | null;
+    if (editable) {
+      editable.focus();
+    } else {
+      cell.focus();
+    }
   } catch {
     // ignore
   }
+}
+
+interface CellGridInfo {
+  cell: HTMLTableCellElement;
+  row: HTMLTableRowElement;
+  rowIndex: number;
+  colIndex: number;
+  colSpan: number;
+  rowSpan: number;
+}
+
+function getTableGridMap(table: HTMLTableElement) {
+  const rows = Array.from(table.querySelectorAll("tr"));
+  const grid: (HTMLTableCellElement | null)[][] = [];
+  const cellInfos = new Map<HTMLTableCellElement, CellGridInfo>();
+  let maxCols = 0;
+
+  for (let r = 0; r < rows.length; r++) {
+    if (!grid[r]) grid[r] = [];
+    const tr = rows[r];
+    const cells = Array.from(tr.children).filter(
+      (c): c is HTMLTableCellElement => c.tagName.toLowerCase() === "td" || c.tagName.toLowerCase() === "th"
+    );
+
+    let col = 0;
+    for (const cell of cells) {
+      while (grid[r][col] !== undefined && grid[r][col] !== null) {
+        col++;
+      }
+
+      const colSpan = Math.max(1, cell.colSpan || 1);
+      const rowSpan = Math.max(1, cell.rowSpan || 1);
+
+      cellInfos.set(cell, {
+        cell,
+        row: tr,
+        rowIndex: r,
+        colIndex: col,
+        colSpan,
+        rowSpan,
+      });
+
+      for (let dr = 0; dr < rowSpan; dr++) {
+        const targetR = r + dr;
+        if (!grid[targetR]) grid[targetR] = [];
+        for (let dc = 0; dc < colSpan; dc++) {
+          grid[targetR][col + dc] = cell;
+        }
+      }
+
+      col += colSpan;
+      if (col > maxCols) maxCols = col;
+    }
+  }
+
+  return { grid, cellInfos, maxCols, rows };
 }
 
 export function TableProvider({
@@ -145,9 +208,48 @@ export function TableProvider({
     // 1. Current selection
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
-      const el = getNodeElement(sel.anchorNode);
-      const cell = el?.closest("td, th") as HTMLTableCellElement | null;
+      const range = sel.getRangeAt(0);
+
+      // 1a. anchorNode
+      let el = getNodeElement(sel.anchorNode);
+      let cell = el?.closest("td, th") as HTMLTableCellElement | null;
+
+      // 1b. focusNode
+      if (!cell && sel.focusNode) {
+        el = getNodeElement(sel.focusNode);
+        cell = el?.closest("td, th") as HTMLTableCellElement | null;
+      }
+
+      // 1c. commonAncestorContainer
+      if (!cell && range.commonAncestorContainer) {
+        el = getNodeElement(range.commonAncestorContainer);
+        cell = el?.closest("td, th") as HTMLTableCellElement | null;
+      }
+
+      // 1d. startContainer / child at startOffset
+      if (!cell && range.startContainer) {
+        el = getNodeElement(range.startContainer);
+        cell = el?.closest("td, th") as HTMLTableCellElement | null;
+        if (!cell && range.startContainer.nodeType === Node.ELEMENT_NODE) {
+          const containerElem = range.startContainer as Element;
+          const childAtOffset = containerElem.children[range.startOffset] || containerElem.children[0];
+          cell = childAtOffset?.closest("td, th") as HTMLTableCellElement | null;
+        }
+      }
+
+      // 1e. Check table cells intersected by selection range
+      if (!cell) {
+        const activeContainer =
+          editorRef.current || (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
+        if (activeContainer) {
+          const allCells = Array.from(activeContainer.querySelectorAll("td, th")) as HTMLTableCellElement[];
+          cell = allCells.find((c) => range.intersectsNode(c)) || null;
+        }
+      }
+
       if (cell && cell.isConnected) {
+        lastActiveCellRef.current = cell;
+        lastActiveTableRef.current = cell.closest("table");
         return {
           cell,
           tr: cell.closest("tr"),
@@ -160,6 +262,8 @@ export function TableProvider({
     if (document.activeElement) {
       const cell = document.activeElement.closest("td, th") as HTMLTableCellElement | null;
       if (cell && cell.isConnected) {
+        lastActiveCellRef.current = cell;
+        lastActiveTableRef.current = cell.closest("table");
         return {
           cell,
           tr: cell.closest("tr"),
@@ -277,8 +381,10 @@ export function TableProvider({
         const allTables = targetEditor.querySelectorAll("table");
         const lastTable = allTables[allTables.length - 1];
         if (lastTable) {
-          const firstCell = lastTable.querySelector("td, th") as HTMLElement | null;
+          const firstCell = lastTable.querySelector("td, th") as HTMLTableCellElement | null;
           if (firstCell) {
+            lastActiveCellRef.current = firstCell;
+            lastActiveTableRef.current = lastTable;
             placeCaretInCell(firstCell);
           }
         }
@@ -606,15 +712,20 @@ export function TableProvider({
           texts.push(c.innerHTML.trim());
         }
       });
-      firstCell.innerHTML = texts.length > 0 ? texts.join(" ") : "&nbsp;";
+      firstCell.innerHTML = texts.length > 0 ? texts.join(" ") : "<p><br></p>";
 
       if (rows.length === 1) {
         // Horizontal merge within single row
         let totalColSpan = 0;
+        let totalWidth = 0;
         selectedCells.forEach((c) => {
           totalColSpan += c.colSpan || 1;
+          totalWidth += parseFloat(c.style.width) || 0;
         });
         firstCell.colSpan = totalColSpan;
+        if (totalWidth > 0) {
+          firstCell.style.width = `${totalWidth.toFixed(2)}%`;
+        }
       } else {
         // Multi-row merge
         const firstRowCells = selectedCells.filter((c) => c.closest("tr") === rows[0]);
@@ -652,6 +763,11 @@ export function TableProvider({
         } else {
           targetCell.innerHTML = nextCell.innerHTML;
         }
+      }
+      const w1 = parseFloat(targetCell.style.width) || 0;
+      const w2 = parseFloat(nextCell.style.width) || 0;
+      if (w1 > 0 || w2 > 0) {
+        targetCell.style.width = `${(w1 + w2).toFixed(2)}%`;
       }
       targetCell.colSpan = (targetCell.colSpan || 1) + (nextCell.colSpan || 1);
       nextCell.remove();
@@ -694,6 +810,11 @@ export function TableProvider({
     const targetTable = table || targetCell?.closest("table");
     if (!targetCell || !targetTr || !targetTable) return;
 
+    const { grid, cellInfos, maxCols, rows } = getTableGridMap(targetTable);
+    const targetInfo = cellInfos.get(targetCell);
+    const targetRowIndex = targetInfo ? targetInfo.rowIndex : rows.indexOf(targetTr);
+    const targetColIndex = targetInfo ? targetInfo.colIndex : targetCell.cellIndex;
+
     const colSpan = targetCell.colSpan || 1;
     const rowSpan = targetCell.rowSpan || 1;
     const isHeader = targetCell.tagName.toLowerCase() === "th";
@@ -701,50 +822,71 @@ export function TableProvider({
     // 1. If cell is merged horizontally (colspan > 1), split into individual cells
     if (colSpan > 1) {
       targetCell.colSpan = 1;
+      const curWidth = parseFloat(targetCell.style.width);
+      const splitPct = (!isNaN(curWidth) && curWidth > 0)
+        ? (curWidth / colSpan).toFixed(2) + "%"
+        : `${(100 / (maxCols || 1)).toFixed(2)}%`;
+      targetCell.style.width = splitPct;
+
+      let insertAfter: Node = targetCell;
       for (let i = 0; i < colSpan - 1; i++) {
         const newCell = document.createElement(isHeader ? "th" : "td") as HTMLTableCellElement;
         newCell.style.border = targetCell.style.border || "1px solid #cbd5e1";
         newCell.style.padding = targetCell.style.padding || "8px 12px";
-        newCell.style.verticalAlign = "top";
-        newCell.style.textAlign = "left";
+        newCell.style.verticalAlign = targetCell.style.verticalAlign || "top";
+        newCell.style.textAlign = targetCell.style.textAlign || "left";
         newCell.style.wordBreak = "break-word";
         newCell.style.overflowWrap = "anywhere";
         newCell.style.boxSizing = "border-box";
-        newCell.innerHTML = "&nbsp;";
+        newCell.style.width = splitPct;
+        newCell.colSpan = 1;
+        newCell.rowSpan = rowSpan;
+        newCell.innerHTML = "<p><br></p>";
         if (isHeader) {
           newCell.style.backgroundColor = targetCell.style.backgroundColor || "#f1f5f9";
           newCell.style.fontWeight = targetCell.style.fontWeight || "600";
+          newCell.style.color = targetCell.style.color || "#1e293b";
         }
-        if (targetCell.nextSibling) {
-          targetTr.insertBefore(newCell, targetCell.nextSibling);
+        if (insertAfter.nextSibling) {
+          targetTr.insertBefore(newCell, insertAfter.nextSibling);
         } else {
           targetTr.appendChild(newCell);
         }
+        insertAfter = newCell;
       }
     } else if (rowSpan > 1) {
       // 2. If cell is merged vertically (rowspan > 1), restore into separate rows
       targetCell.rowSpan = 1;
-      const allRows = Array.from(targetTable.querySelectorAll("tr"));
-      const rowIndex = allRows.indexOf(targetTr);
-      const colIndex = targetCell.cellIndex;
-
-      if (rowIndex !== -1) {
+      if (targetRowIndex !== -1) {
         for (let r = 1; r < rowSpan; r++) {
-          const rowElem = allRows[rowIndex + r];
+          const rowElem = rows[targetRowIndex + r];
           if (rowElem) {
             const newCell = document.createElement("td") as HTMLTableCellElement;
             newCell.style.border = targetCell.style.border || "1px solid #cbd5e1";
             newCell.style.padding = targetCell.style.padding || "8px 12px";
-            newCell.style.verticalAlign = "top";
-            newCell.style.textAlign = "left";
+            newCell.style.verticalAlign = targetCell.style.verticalAlign || "top";
+            newCell.style.textAlign = targetCell.style.textAlign || "left";
             newCell.style.wordBreak = "break-word";
             newCell.style.overflowWrap = "anywhere";
             newCell.style.boxSizing = "border-box";
-            newCell.innerHTML = "&nbsp;";
+            newCell.style.width = targetCell.style.width;
+            newCell.colSpan = colSpan;
+            newCell.rowSpan = 1;
+            newCell.innerHTML = "<p><br></p>";
 
-            if (rowElem.children[colIndex]) {
-              rowElem.insertBefore(newCell, rowElem.children[colIndex]);
-            } else {
+            const nextRowCells = Array.from(rowElem.children).filter(
+              (c): c is HTMLTableCellElement => c.tagName.toLowerCase() === "td" || c.tagName.toLowerCase() === "th"
+            );
+            let inserted = false;
+            for (const c of nextRowCells) {
+              const cInfo = cellInfos.get(c);
+              if (cInfo && cInfo.colIndex > targetColIndex) {
+                rowElem.insertBefore(newCell, c);
+                inserted = true;
+                break;
+              }
+            }
+            if (!inserted) {
               rowElem.appendChild(newCell);
             }
           }
@@ -752,33 +894,47 @@ export function TableProvider({
       }
     } else {
       // 3. Normal unmerged cell: Split this cell horizontally into two cells
+      const curWidth = parseFloat(targetCell.style.width);
+      const halfPct = (!isNaN(curWidth) && curWidth > 0)
+        ? (curWidth / 2).toFixed(2) + "%"
+        : `${(100 / ((maxCols || 1) + 1)).toFixed(2)}%`;
+
+      targetCell.style.width = halfPct;
+
       const newCell = document.createElement(isHeader ? "th" : "td") as HTMLTableCellElement;
       newCell.style.border = targetCell.style.border || "1px solid #cbd5e1";
       newCell.style.padding = targetCell.style.padding || "8px 12px";
-      newCell.style.verticalAlign = "top";
-      newCell.style.textAlign = "left";
+      newCell.style.verticalAlign = targetCell.style.verticalAlign || "top";
+      newCell.style.textAlign = targetCell.style.textAlign || "left";
       newCell.style.wordBreak = "break-word";
       newCell.style.overflowWrap = "anywhere";
       newCell.style.boxSizing = "border-box";
-      newCell.innerHTML = "&nbsp;";
+      newCell.style.width = halfPct;
+      newCell.colSpan = 1;
+      newCell.rowSpan = 1;
+      newCell.innerHTML = "<p><br></p>";
       if (isHeader) {
         newCell.style.backgroundColor = targetCell.style.backgroundColor || "#f1f5f9";
         newCell.style.fontWeight = targetCell.style.fontWeight || "600";
-      }
-
-      if (targetCell.style.width && targetCell.style.width.endsWith("%")) {
-        const currentPct = parseFloat(targetCell.style.width);
-        if (!isNaN(currentPct) && currentPct > 0) {
-          const halfPct = (currentPct / 2).toFixed(2) + "%";
-          targetCell.style.width = halfPct;
-          newCell.style.width = halfPct;
-        }
+        newCell.style.color = targetCell.style.color || "#1e293b";
       }
 
       if (targetCell.nextSibling) {
         targetTr.insertBefore(newCell, targetCell.nextSibling);
       } else {
         targetTr.appendChild(newCell);
+      }
+
+      // Maintain a strictly rectangular table grid:
+      // For all other rows, expand the cell spanning this column position so all rows remain aligned
+      const updatedOtherCells = new Set<HTMLTableCellElement>();
+      for (let r = 0; r < rows.length; r++) {
+        if (r === targetRowIndex) continue;
+        const otherCell = grid[r] ? grid[r][targetColIndex] : null;
+        if (otherCell && !updatedOtherCells.has(otherCell)) {
+          updatedOtherCells.add(otherCell);
+          otherCell.colSpan = (otherCell.colSpan || 1) + 1;
+        }
       }
 
       lastActiveCellRef.current = newCell;
