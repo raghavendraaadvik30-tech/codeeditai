@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 
 import { parseUploadedFile } from "../../utils/fileImportUtil";
-import { documentService, type DocumentMeta } from "../../services/documentService";
+import { documentService } from "../../services/documentService";
 import { printService } from "../../services/printService";
 
 import { Button } from "@/shared/components/ui/button";
@@ -59,7 +59,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 
-import { useDocumentModel } from "../../store/documentModel";
+import { useDocumentModel, type DocumentModel } from "../../store/documentModel";
 import { useEditor } from "../../context/EditorContext";
 
 export default function HeaderActions() {
@@ -210,27 +210,30 @@ export default function HeaderActions() {
      EXPORT DOCX
   -------------------------------- */
 
-  const handleExportDocx = () => {
-    const fullHtml = model.pages
-      .map((p) => {
+  const handleExportDocx = async () => {
+    try {
+      const updatedPageHtml: Record<string, string> = { ...model.pageHtml };
+      model.pages.forEach((p) => {
         const pageEl = document.querySelector(`[data-page-id="${p.id}"]`);
         const editable = pageEl?.querySelector("[contenteditable]");
-        return editable ? (editable as HTMLElement).innerHTML : (model.pageHtml[p.id] || "");
-      })
-      .filter((h) => h.trim().length > 0)
-      .join('<div class="page-break" style="page-break-after:always;"></div>');
+        if (editable) {
+          updatedPageHtml[p.id] = (editable as HTMLElement).innerHTML;
+        }
+      });
+      const activeModel: DocumentModel = {
+        ...model,
+        pageHtml: updatedPageHtml,
+      };
 
-    const meta: DocumentMeta = {
-      id: model.id,
-      title: model.title || "Document",
-      author: "Editor User",
-      savedAt: Date.now(),
-      version: 1,
-    };
-
-    const blob = documentService.exportDOCX(meta, fullHtml || "<p></p>");
-    const safeTitle = (model.title || "document").replace(/[^a-zA-Z0-9_\-\s]/g, "").trim() || "document";
-    documentService.download(blob, `${safeTitle}.docx`);
+      const blob = await documentService.exportDOCX(activeModel, {
+        tableAutoFitMode: "fixed",
+        exportMarkupMode: "markup",
+      });
+      const safeTitle = (model.title || "document").replace(/[^a-zA-Z0-9_\-\s]/g, "").trim() || "document";
+      documentService.download(blob, `${safeTitle}.docx`);
+    } catch (err) {
+      console.error("Failed to generate DOCX:", err);
+    }
   };
 
   /* --------------------------------

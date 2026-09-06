@@ -36,12 +36,37 @@ export function ExportDialog({
             type="button"
             disabled={exporting}
             onClick={() => {
+              exportDocument("docx");
+              onClose();
+            }}
+            className="rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 font-medium text-left"
+          >
+            <div className="font-semibold text-slate-800 dark:text-slate-100">Word (.docx)</div>
+            <div className="text-[10px] text-slate-400">Microsoft Word document</div>
+          </button>
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={() => {
+              exportDocument("pdf");
+              onClose();
+            }}
+            className="rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 font-medium text-left"
+          >
+            <div className="font-semibold text-slate-800 dark:text-slate-100">PDF Document</div>
+            <div className="text-[10px] text-slate-400">Print to PDF format</div>
+          </button>
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={() => {
               exportDocument("html");
               onClose();
             }}
-            className="rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 font-medium"
+            className="rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 font-medium text-left"
           >
-            HTML File
+            <div className="font-semibold text-slate-800 dark:text-slate-100">HTML File</div>
+            <div className="text-[10px] text-slate-400">Web page format</div>
           </button>
           <button
             type="button"
@@ -50,9 +75,10 @@ export function ExportDialog({
               exportDocument("txt");
               onClose();
             }}
-            className="rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 font-medium"
+            className="rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 font-medium text-left"
           >
-            Plain Text (.txt)
+            <div className="font-semibold text-slate-800 dark:text-slate-100">Plain Text (.txt)</div>
+            <div className="text-[10px] text-slate-400">Unformatted text</div>
           </button>
         </div>
         <div className="mt-4 flex justify-end">

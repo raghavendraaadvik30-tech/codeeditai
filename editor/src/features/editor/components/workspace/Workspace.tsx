@@ -138,49 +138,71 @@ export default function Workspace() {
           pb-16
         "
       >
-        {model.pages.map((page, index) => {
-          const section =
-            model.sections.find((s) => s.id === page.sectionId) ??
-            model.sections[0];
-          const isEffectiveActive = activePage
-            ? activePage === page.id
-            : index === 0;
+        {(() => {
+          const pageNumbersMap: Record<string, number> = {};
+          let currentNum = 1;
+          let currentSecId = "";
 
-          return (
-            <DocumentPage
-              key={page.id}
-              pageId={page.id}
-              pageIndex={index}
-              pageNumber={index + 1}
-              totalPages={model.pages.length}
-              section={section}
-              headerText={section?.header || ""}
-              footerText={section?.footer || "Parexel Smart Authoring Suite"}
-              pageNumberPosition={section?.pageNumberPosition}
-              pageNumberAlignment={section?.pageNumberAlignment}
-              pageNumberFormat={section?.pageNumberFormat}
-              html={model.pageHtml?.[page.id] ?? ""}
-              active={isEffectiveActive}
-              editable={isEditable}
-              editorRef={editorRef}
-              allPages={model.pages}
-              pageHtmlMap={model.pageHtml}
-              activeTable={activeTable}
-              onSetActiveTable={setActiveTable}
-              onActivate={() => {
-                if (activePage !== page.id) {
-                  setActivePage(page.id);
-                }
-              }}
-              onChange={(html) => setPageHtml(page.id, html)}
-              onAddPage={addPage}
-              onRemovePage={removePage}
-              onSetPageHtml={setPageHtml}
-              onSetActivePage={setActivePage}
-              zoom={zoom}
-            />
-          );
-        })}
+          model.pages.forEach((p, idx) => {
+            const pSec =
+              model.sections.find((s) => s.id === p.sectionId) ??
+              model.sections[0];
+            if (pSec && pSec.id !== currentSecId) {
+              currentSecId = pSec.id;
+              if (pSec.pageNumberStartAt !== undefined && pSec.pageNumberStartAt > 0) {
+                currentNum = pSec.pageNumberStartAt;
+              } else if (idx === 0) {
+                currentNum = 1;
+              }
+            }
+            pageNumbersMap[p.id] = currentNum;
+            currentNum++;
+          });
+
+          return model.pages.map((page, index) => {
+            const section =
+              model.sections.find((s) => s.id === page.sectionId) ??
+              model.sections[0];
+            const isEffectiveActive = activePage
+              ? activePage === page.id
+              : index === 0;
+
+            return (
+              <DocumentPage
+                key={page.id}
+                pageId={page.id}
+                pageIndex={index}
+                pageNumber={pageNumbersMap[page.id] ?? (index + 1)}
+                totalPages={model.pages.length}
+                section={section}
+                headerText={section?.header || ""}
+                footerText={section?.footer || "Parexel Smart Authoring Suite"}
+                pageNumberPosition={section?.pageNumberPosition}
+                pageNumberAlignment={section?.pageNumberAlignment}
+                pageNumberFormat={section?.pageNumberFormat}
+                html={model.pageHtml?.[page.id] ?? ""}
+                active={isEffectiveActive}
+                editable={isEditable}
+                editorRef={editorRef}
+                allPages={model.pages}
+                pageHtmlMap={model.pageHtml}
+                activeTable={activeTable}
+                onSetActiveTable={setActiveTable}
+                onActivate={() => {
+                  if (activePage !== page.id) {
+                    setActivePage(page.id);
+                  }
+                }}
+                onChange={(html) => setPageHtml(page.id, html)}
+                onAddPage={addPage}
+                onRemovePage={removePage}
+                onSetPageHtml={setPageHtml}
+                onSetActivePage={setActivePage}
+                zoom={zoom}
+              />
+            );
+          });
+        })()}
       </div>
 
       {/* WORD-STYLE CONTEXTUAL TABLE TEXT FORMATTING TOOLBAR
@@ -324,7 +346,7 @@ interface DocumentPageProps {
   section?: SectionModel;
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
-  pageNumberFormat?: "1" | "i" | "a";
+  pageNumberFormat?: "1" | "i" | "I" | "a" | "A";
   html: string;
   active: boolean;
   editable: boolean;
@@ -837,6 +859,57 @@ function DocumentPage({
   const baseHeight = section?.paperSize?.height ?? 1056;
   const pageWidth = isLandscape ? baseHeight : baseWidth;
   const pageHeight = isLandscape ? baseWidth : baseHeight;
+  const headerHeight = 45;
+  const footerHeight = 45;
+  const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
+
+  const getBorderStyle = (): React.CSSProperties => {
+    if (!section?.pageBorders || section.pageBorders.style === "none") {
+      return {};
+    }
+
+    const {
+      style,
+      color = "#000000",
+      width = 2,
+      top = true,
+      bottom = true,
+      left = true,
+      right = true,
+    } = section.pageBorders;
+
+    const borderVal =
+      style === "double"
+        ? `${Math.max(3, width)}px double ${color}`
+        : style === "dashed"
+        ? `${width}px dashed ${color}`
+        : style === "dotted"
+        ? `${width}px dotted ${color}`
+        : style === "3d"
+        ? `${width}px inset ${color}`
+        : `${width}px solid ${color}`;
+
+    const styles: React.CSSProperties = {
+      boxSizing: "border-box",
+    };
+
+    if (top) styles.borderTop = borderVal;
+    if (bottom) styles.borderBottom = borderVal;
+    if (left) styles.borderLeft = borderVal;
+    if (right) styles.borderRight = borderVal;
+
+    if (style === "shadow") {
+      styles.boxShadow = "0 10px 30px rgba(0,0,0,0.25)";
+      styles.border = `${width}px solid ${color}`;
+    }
+
+    return styles;
+  };
+
+  const marginL = section?.marginConfig?.left ?? 72;
+  const marginR = section?.marginConfig?.right ?? 72;
+  const marginT = section?.marginConfig?.top ?? 32;
+  const marginB = section?.marginConfig?.bottom ?? 32;
 
   return (
     <section
@@ -848,10 +921,15 @@ function DocumentPage({
         shrink-0
         cursor-text
         shadow-[0_4px_20px_rgba(0,0,0,0.12)]
+        box-border
         ${
           active
-            ? "border border-blue-300 ring-1 ring-blue-300/40"
-            : "border border-slate-200"
+            ? "ring-1 ring-blue-300/40"
+            : ""
+        }
+        ${!section?.pageBorders || section.pageBorders.style === "none"
+            ? (active ? "border border-blue-300" : "border border-slate-200")
+            : ""
         }
       `}
       style={{
@@ -863,15 +941,7 @@ function DocumentPage({
         transformOrigin: "top center",
         marginBottom: `${(pageHeight * zoom) / 100 - pageHeight}px`,
         backgroundColor: section?.pageColor || "#ffffff",
-        ...(section?.pageBorders?.style === "box"
-          ? { border: `${section.pageBorders.width || 2}px solid ${section.pageBorders.color || "#000000"}` }
-          : section?.pageBorders?.style === "dashed"
-          ? { border: `${section.pageBorders.width || 2}px dashed ${section.pageBorders.color || "#000000"}` }
-          : section?.pageBorders?.style === "double"
-          ? { border: `4px double ${section.pageBorders.color || "#000000"}` }
-          : section?.pageBorders?.style === "shadow"
-          ? { boxShadow: "0 10px 30px rgba(0,0,0,0.25)" }
-          : {}),
+        ...getBorderStyle(),
       }}
     >
       {/* WATERMARK OVERLAY */}
@@ -883,8 +953,20 @@ function DocumentPage({
           <span
             className="font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100"
             style={{
-              fontSize: isLandscape ? "80px" : "64px",
-              transform: "rotate(-35deg)",
+              fontSize:
+                section.watermark.fontSize === "auto" || !section.watermark.fontSize
+                  ? isLandscape
+                    ? "80px"
+                    : "64px"
+                  : `${section.watermark.fontSize}px`,
+              fontFamily: section.watermark.font || "inherit",
+              transform: `rotate(${
+                section.watermark.rotation === "horizontal"
+                  ? 0
+                  : typeof section.watermark.rotation === "number"
+                  ? section.watermark.rotation
+                  : -35
+              }deg)`,
               color: section.watermark.color || "currentColor",
             }}
           >
@@ -892,6 +974,19 @@ function DocumentPage({
           </span>
         </div>
       )}
+      {section?.watermark?.image && (
+        <div
+          className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden p-12"
+          style={{ opacity: section.watermark.opacity ?? 0.15 }}
+        >
+          <img
+            src={section.watermark.image}
+            alt="Watermark"
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      )}
+
       {/* PAGE NUMBER BADGE */}
       <div
         className="
@@ -915,16 +1010,20 @@ function DocumentPage({
           max-h-[45px]
           border-b
           border-slate-100
-          px-[72px]
-          pt-6
           text-[10px]
           text-slate-500
           flex
           items-center
           justify-between
+          box-border
         "
+        style={{
+          paddingLeft: `${marginL}px`,
+          paddingRight: `${marginR}px`,
+          paddingTop: "14px",
+        }}
       >
-        {pageNumberPosition === "header" ? (
+        {section?.showPageNumbers !== false && pageNumberPosition === "header" ? (
           <>
             {pageNumberAlignment === "left" ? (
               <>
@@ -955,7 +1054,7 @@ function DocumentPage({
         )}
       </div>
 
-      {/* EDITABLE DOCUMENT WRITING AREA (Standard 966px, 902px usable height with padding) */}
+      {/* EDITABLE DOCUMENT WRITING AREA (Dynamically calculated based on paper dimensions & margins) */}
       <div
         ref={(element) => {
           localEditorRef.current = element;
@@ -980,27 +1079,21 @@ function DocumentPage({
           }
         }}
         style={{
-          ...(section?.marginConfig
-            ? {
-                paddingTop: `${section.marginConfig.top}px`,
-                paddingBottom: `${section.marginConfig.bottom}px`,
-                paddingLeft: `${section.marginConfig.left}px`,
-                paddingRight: `${section.marginConfig.right}px`,
-              }
-            : {}),
+          height: `${contentHeight}px`,
+          maxHeight: `${contentHeight}px`,
+          paddingTop: `${marginT}px`,
+          paddingBottom: `${marginB}px`,
+          paddingLeft: `${marginL}px`,
+          paddingRight: `${marginR}px`,
           ...(section?.columns && section.columns.count > 1
             ? {
                 columnCount: section.columns.count,
-                columnGap: "32px",
+                columnGap: `${section.columns.gap ?? 32}px`,
               }
             : {}),
         }}
         className="
-          h-[966px]
-          max-h-[966px]
           overflow-hidden
-          px-[72px]
-          py-8
           box-border
           outline-none
           cursor-text
@@ -1034,7 +1127,8 @@ function DocumentPage({
           [&_ol]:pl-6
 
           [&_table]:my-4
-          [&_table]:max-w-none
+          [&_table]:max-w-full
+          [&_table]:box-border
           [&_table]:border-collapse
           [&_table]:table-fixed
 
@@ -1086,18 +1180,20 @@ function DocumentPage({
           max-h-[45px]
           border-t
           border-slate-100
-          px-[72px]
-          py-3
           text-[10px]
           text-slate-400
           flex
           items-center
           justify-between
+          box-border
         "
+        style={{
+          paddingLeft: `${marginL}px`,
+          paddingRight: `${marginR}px`,
+          paddingTop: "14px",
+        }}
       >
-        {pageNumberPosition === "header" ? (
-          <span>{footerText}</span>
-        ) : (
+        {section?.showPageNumbers !== false && pageNumberPosition === "footer" ? (
           <>
             {pageNumberAlignment === "left" ? (
               <>
@@ -1123,19 +1219,66 @@ function DocumentPage({
               </>
             )}
           </>
+        ) : (
+          <span>{footerText}</span>
         )}
       </div>
     </section>
   );
 }
 
-function formatPageNumber(n: number, format?: "1" | "i" | "a"): string {
+function toRoman(num: number): string {
+  if (num <= 0) return String(num);
+  const lookup: [number, string][] = [
+    [1000, "m"],
+    [900, "cm"],
+    [500, "d"],
+    [400, "cd"],
+    [100, "c"],
+    [90, "xc"],
+    [50, "l"],
+    [40, "xl"],
+    [10, "x"],
+    [9, "ix"],
+    [5, "v"],
+    [4, "iv"],
+    [1, "i"],
+  ];
+  let result = "";
+  let val = num;
+  for (const [k, v] of lookup) {
+    while (val >= k) {
+      result += v;
+      val -= k;
+    }
+  }
+  return result;
+}
+
+function toAlpha(num: number): string {
+  if (num <= 0) return String(num);
+  let res = "";
+  let n = num;
+  while (n > 0) {
+    const rem = (n - 1) % 26;
+    res = String.fromCharCode(97 + rem) + res;
+    n = Math.floor((n - 1) / 26);
+  }
+  return res;
+}
+
+function formatPageNumber(n: number, format?: "1" | "i" | "I" | "a" | "A"): string {
   if (format === "i") {
-    const roman = ["", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii"];
-    return roman[n] || String(n);
+    return toRoman(n).toLowerCase();
+  }
+  if (format === "I") {
+    return toRoman(n).toUpperCase();
   }
   if (format === "a") {
-    return String.fromCharCode(96 + (((n - 1) % 26) + 1));
+    return toAlpha(n).toLowerCase();
+  }
+  if (format === "A") {
+    return toAlpha(n).toUpperCase();
   }
   return String(n);
 }

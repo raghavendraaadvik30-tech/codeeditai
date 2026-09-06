@@ -54,15 +54,66 @@ export interface SectionModel {
   showPageNumbers: boolean;
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
-  pageNumberFormat?: "1" | "i" | "a";
+  pageNumberFormat?: "1" | "i" | "I" | "a" | "A";
+  pageNumberStartAt?: number;
   orientation?: "portrait" | "landscape";
-  marginPreset?: "normal" | "narrow" | "moderate" | "wide" | "custom";
+  marginPreset?: "normal" | "narrow" | "moderate" | "wide" | "mirrored" | "custom";
   marginConfig?: { top: number; bottom: number; left: number; right: number };
   paperSize?: { name: string; width: number; height: number };
-  columns?: { type: "one" | "two" | "three" | "left" | "right"; count: number };
-  watermark?: { text: string; opacity?: number; color?: string };
+  columns?: { type: "one" | "two" | "three" | "left" | "right" | "custom"; count: number; gap?: number };
+  watermark?: {
+    text?: string;
+    image?: string;
+    opacity?: number;
+    color?: string;
+    font?: string;
+    fontSize?: number | "auto";
+    rotation?: "diagonal" | "horizontal" | number;
+    layout?: string;
+  };
   pageColor?: string;
-  pageBorders?: { style: "none" | "box" | "shadow" | "dashed" | "double"; color?: string; width?: number };
+  pageBorders?: {
+    style: "none" | "box" | "shadow" | "dashed" | "dotted" | "double" | "3d";
+    color?: string;
+    width?: number;
+    top?: boolean;
+    bottom?: boolean;
+    left?: boolean;
+    right?: boolean;
+    applyTo?: "document" | "section" | "page";
+  };
+  // Reference-compatible rich HTML header/footer fields
+  headerHtml?: string;
+  footerHtml?: string;
+  firstHeaderHtml?: string;
+  firstFooterHtml?: string;
+  evenHeaderHtml?: string;
+  evenFooterHtml?: string;
+
+  // Extended page number & section linking config
+  pageNumberConfig?: {
+    format: "arabic" | "roman-lower" | "roman-upper" | "alpha-lower" | "alpha-upper";
+    startAt?: number;
+    includeChapterNumber?: boolean;
+    showPageX?: boolean;
+    showPageXofY?: boolean;
+  };
+  pageNumberStart?: number;
+  linkToPrevious?: boolean;
+  headerTopDistance?: number;
+  footerBottomDistance?: number;
+
+  // Reference-compatible extended layout configs
+  paperSizeConfig?: { name: string; width: number; height: number };
+  columnsConfig?: { type: "one" | "two" | "three" | "left" | "right" | "custom"; count: number; gap?: number };
+  pageBordersConfig?: {
+    type: "none" | "box" | "shadow" | "3d" | "custom";
+    top?: { style: string; color: string; width: number; art?: string };
+    bottom?: { style: string; color: string; width: number; art?: string };
+    left?: { style: string; color: string; width: number; art?: string };
+    right?: { style: string; color: string; width: number; art?: string };
+    applyTo: "whole" | "section" | "firstPage" | "exceptFirstPage" | "document" | "page";
+  };
 }
 
 export interface PageModel {
@@ -78,6 +129,28 @@ export interface DocumentModel {
   pageHtml: Record<string, string>;
   savedAt?: number;
   styleOverrides: StyleOverrides ;
+  watermarkConfig?: {
+    type: "none" | "text" | "image";
+    text?: string;
+    imageSrc?: string;
+    opacity?: number;
+    rotation?: number;
+    scale?: number;
+    color?: string;
+    fontFamily?: string;
+  };
+  pageColor?: string;
+  metadata?: {
+    title: string;
+    subject?: string;
+    author: string;
+    keywords?: string;
+    category?: string;
+    createdDate?: number;
+    modifiedDate?: number;
+    company?: string;
+    manager?: string;
+  };
 }
 
 export interface HistoryEntry {
@@ -470,10 +543,10 @@ export function DocumentModelProvider({
 
   const addSection = useCallback(
     (afterPageId?: string) => {
-      setModel((prev) => {
-        const sectionId = "section_" + uid();
-        const pageId = "page_" + uid();
+      const sectionId = "section_" + uid();
+      const pageId = "page_" + uid();
 
+      setModel((prev) => {
         const index = afterPageId
           ? prev.pages.findIndex(
               (page) => page.id === afterPageId
@@ -483,14 +556,28 @@ export function DocumentModelProvider({
         const insertIndex =
           index >= 0 ? index : prev.pages.length - 1;
 
-        const section =
-          createDefaultSection(sectionId);
+        const prevPage = prev.pages[insertIndex];
+        const prevSection =
+          prev.sections.find((s) => s.id === prevPage?.sectionId) ??
+          prev.sections[0];
 
-        section.header =
-          "Section " +
-          (prev.sections.length + 1);
-
-        section.footer = "";
+        const section: SectionModel = {
+          ...createDefaultSection(sectionId),
+          header: "Section " + (prev.sections.length + 1),
+          footer: prevSection?.footer ?? "",
+          orientation: prevSection?.orientation,
+          marginPreset: prevSection?.marginPreset,
+          marginConfig: prevSection?.marginConfig ? { ...prevSection.marginConfig } : undefined,
+          paperSize: prevSection?.paperSize ? { ...prevSection.paperSize } : undefined,
+          columns: prevSection?.columns ? { ...prevSection.columns } : undefined,
+          watermark: prevSection?.watermark ? { ...prevSection.watermark } : undefined,
+          pageColor: prevSection?.pageColor,
+          pageBorders: prevSection?.pageBorders ? { ...prevSection.pageBorders } : undefined,
+          pageNumberFormat: prevSection?.pageNumberFormat,
+          pageNumberPosition: prevSection?.pageNumberPosition,
+          pageNumberAlignment: prevSection?.pageNumberAlignment,
+          showPageNumbers: prevSection?.showPageNumbers ?? true,
+        };
 
         const page: PageModel = {
           id: pageId,
@@ -514,6 +601,8 @@ export function DocumentModelProvider({
           },
         };
       });
+
+      setActivePage(pageId);
     },
     []
   );
