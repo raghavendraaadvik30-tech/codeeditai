@@ -56,6 +56,7 @@ export interface SectionModel {
   pageNumberAlignment?: "left" | "center" | "right";
   pageNumberFormat?: "1" | "i" | "I" | "a" | "A";
   pageNumberStartAt?: number;
+  pageNumberStyle?: string;
   orientation?: "portrait" | "landscape";
   marginPreset?: "normal" | "narrow" | "moderate" | "wide" | "mirrored" | "custom";
   marginConfig?: { top: number; bottom: number; left: number; right: number };
@@ -70,6 +71,7 @@ export interface SectionModel {
     fontSize?: number | "auto";
     rotation?: "diagonal" | "horizontal" | number;
     layout?: string;
+    scale?: number | string;
   };
   pageColor?: string;
   pageBorders?: {
@@ -187,6 +189,9 @@ const createDefaultSection = (
   evenHeader: "",
   evenFooter: "",
   showPageNumbers: true,
+  marginPreset: "normal",
+  marginConfig: { top: 96, bottom: 96, left: 96, right: 96 },
+  columns: { type: "one", count: 1 },
 });
 
 function normalizeDoc(doc: DocumentModel): DocumentModel {
@@ -333,6 +338,9 @@ interface DocumentContextType {
   ) => void;
   updateSection: (
     sectionId: string,
+    patch: Partial<SectionModel>
+  ) => void;
+  updateAllSections: (
     patch: Partial<SectionModel>
   ) => void;
   save: (customTitle?: string) => void;
@@ -576,6 +584,7 @@ export function DocumentModelProvider({
           pageNumberFormat: prevSection?.pageNumberFormat,
           pageNumberPosition: prevSection?.pageNumberPosition,
           pageNumberAlignment: prevSection?.pageNumberAlignment,
+          pageNumberStyle: prevSection?.pageNumberStyle,
           showPageNumbers: prevSection?.showPageNumbers ?? true,
         };
 
@@ -627,6 +636,19 @@ export function DocumentModelProvider({
                 }
               : section
         ),
+      }));
+    },
+    []
+  );
+
+  const updateAllSections = useCallback(
+    (patch: Partial<SectionModel>) => {
+      setModel((prev) => ({
+        ...prev,
+        sections: prev.sections.map((section) => ({
+          ...section,
+          ...patch,
+        })),
       }));
     },
     []
@@ -962,6 +984,7 @@ export function DocumentModelProvider({
         removePage,
         addSection,
         updateSection,
+        updateAllSections,
         save,
         saveAs,
         restore,

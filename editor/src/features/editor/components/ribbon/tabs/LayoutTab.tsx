@@ -7,7 +7,7 @@
  * - Group 3: Watermark, Page Color, Page Borders
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   ChevronDown,
   Check,
@@ -19,7 +19,7 @@ import {
 
 import RibbonDivider from "../controls/RibbonDivider";
 import { useDocumentModel, type SectionModel } from "../../../store/documentModel";
-import { useEditor } from "../../../context/EditorContext";
+
 
 import {
   DropdownMenu,
@@ -84,9 +84,9 @@ const PAPER_SIZES: PaperSizeDef[] = [
 ];
 
 export default function LayoutTab() {
-  const { model, activePage, updateSection, addSection } =
+  const { model, activePage, updateSection, updateAllSections, addSection } =
     useDocumentModel();
-  const { insertHTML } = useEditor();
+
 
   // Active section resolution: activePage -> sectionId -> section
   const activePageObj =
@@ -102,9 +102,7 @@ export default function LayoutTab() {
   };
 
   const applyToAllSections = (patch: Partial<SectionModel>) => {
-    model.sections.forEach((sec) => {
-      updateSection(sec.id, patch);
-    });
+    updateAllSections(patch);
   };
 
   const applyToThisPage = (patch: Partial<SectionModel>) => {
@@ -168,6 +166,24 @@ export default function LayoutTab() {
   const [wmOpacity, setWmOpacity] = useState(15);
   const [wmRotation, setWmRotation] = useState<"diagonal" | "horizontal">("diagonal");
   const [wmImageUrl, setWmImageUrl] = useState("");
+  const [wmImageRotation, setWmImageRotation] = useState<number>(-45);
+  const [wmImageScale, setWmImageScale] = useState<string>("100");
+  const [wmFileName, setWmFileName] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setWmFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (typeof event.target?.result === "string") {
+          setWmImageUrl(event.target.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // 7. Page Borders Dialog
   const [bordersDialogOpen, setBordersDialogOpen] = useState(false);
@@ -183,43 +199,10 @@ export default function LayoutTab() {
   const [borderBottom, setBorderBottom] = useState(true);
   const [borderLeft, setBorderLeft] = useState(true);
   const [borderRight, setBorderRight] = useState(true);
-  const [borderApplyTo, setBorderApplyTo] = useState<"section" | "document" | "page">("section");
+  const [borderApplyTo, setBorderApplyTo] = useState<"section" | "document" | "page">("document");
+  const [artBorder, setArtBorder] = useState<string>("none");
 
-  // ------------------------------------------------------------------------
-  // Handlers for Page Number
-  // ------------------------------------------------------------------------
-  const handleSetHeaderPageNumber = (alignment: "left" | "center" | "right") => {
-    applyToSection({
-      pageNumberPosition: "header",
-      pageNumberAlignment: alignment,
-      showPageNumbers: true,
-    });
-  };
 
-  const handleSetFooterPageNumber = (alignment: "left" | "center" | "right") => {
-    applyToSection({
-      pageNumberPosition: "footer",
-      pageNumberAlignment: alignment,
-      showPageNumbers: true,
-    });
-  };
-
-  const handleInsertCurrentPosition = (alignment: "left" | "center" | "right") => {
-    const pageIndex = activePageObj
-      ? model.pages.findIndex((p) => p.id === activePageObj.id)
-      : 0;
-    const pNum = pageIndex >= 0 ? pageIndex + 1 : 1;
-    const htmlSnippet = `<p style="text-align: ${alignment};"><span class="page-number-field" data-field="page-number" contenteditable="false" style="padding: 1px 6px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 10pt; user-select: none;">Page ${pNum}</span></p>`;
-
-    insertHTML(htmlSnippet);
-  };
-
-  const handleRemovePageNumbers = () => {
-    applyToSection({
-      showPageNumbers: false,
-      pageNumberPosition: undefined,
-    });
-  };
 
   const handleApplyPageNumberFormat = () => {
     applyToSection({
@@ -233,47 +216,56 @@ export default function LayoutTab() {
   // Handlers for Margins
   // ------------------------------------------------------------------------
   const handleApplyNormalMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "normal",
-      marginConfig: { top: 72, bottom: 72, left: 72, right: 72 },
+      marginConfig: { top: 96, bottom: 96, left: 96, right: 96 },
     });
   };
 
   const handleApplyNarrowMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "narrow",
-      marginConfig: { top: 36, bottom: 36, left: 36, right: 36 },
+      marginConfig: { top: 48, bottom: 48, left: 48, right: 48 },
     });
   };
 
   const handleApplyModerateMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "moderate",
-      marginConfig: { top: 72, bottom: 72, left: 54, right: 54 },
+      marginConfig: { top: 96, bottom: 96, left: 72, right: 72 },
     });
   };
 
   const handleApplyWideMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "wide",
-      marginConfig: { top: 72, bottom: 72, left: 144, right: 144 },
+      marginConfig: { top: 96, bottom: 96, left: 192, right: 192 },
     });
   };
 
   const handleApplyMirroredMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "mirrored",
-      marginConfig: { top: 72, bottom: 72, left: 90, right: 72 },
+      marginConfig: { top: 96, bottom: 96, left: 120, right: 96 },
     });
   };
 
-  const handleApplyCustomMargins = () => {
-    const top = Math.round(Math.max(0.1, parseFloat(customTop || "1")) * 72);
-    const bottom = Math.round(Math.max(0.1, parseFloat(customBottom || "1")) * 72);
-    const left = Math.round(Math.max(0.1, parseFloat(customLeft || "1")) * 72);
-    const right = Math.round(Math.max(0.1, parseFloat(customRight || "1")) * 72);
+  const openCustomMarginsDialog = () => {
+    const mg = activeSection?.marginConfig ?? { top: 96, bottom: 96, left: 96, right: 96 };
+    setCustomTop((mg.top / 96).toFixed(1));
+    setCustomBottom((mg.bottom / 96).toFixed(1));
+    setCustomLeft((mg.left / 96).toFixed(1));
+    setCustomRight((mg.right / 96).toFixed(1));
+    setMarginsDialogOpen(true);
+  };
 
-    applyToSection({
+  const handleApplyCustomMargins = () => {
+    const top = Math.round(Math.max(0.1, parseFloat(customTop || "1")) * 96);
+    const bottom = Math.round(Math.max(0.1, parseFloat(customBottom || "1")) * 96);
+    const left = Math.round(Math.max(0.1, parseFloat(customLeft || "1")) * 96);
+    const right = Math.round(Math.max(0.1, parseFloat(customRight || "1")) * 96);
+
+    applyToAllSections({
       marginPreset: "custom",
       marginConfig: { top, bottom, left, right },
     });
@@ -308,11 +300,17 @@ export default function LayoutTab() {
   // ------------------------------------------------------------------------
   // Handlers for Columns
   // ------------------------------------------------------------------------
+  const openCustomColumnsDialog = () => {
+    setCustomColumnCount(String(activeSection?.columns?.count ?? 2));
+    setCustomColumnGap(String(activeSection?.columns?.gap ?? 32));
+    setColumnsDialogOpen(true);
+  };
+
   const handleApplyCustomColumns = () => {
     const count = parseInt(customColumnCount, 10);
     const gap = parseInt(customColumnGap, 10);
     if (!isNaN(count) && count >= 1 && count <= 5) {
-      applyToSection({
+      applyToAllSections({
         columns: {
           type: "custom",
           count,
@@ -343,6 +341,8 @@ export default function LayoutTab() {
         watermark: {
           image: wmImageUrl,
           opacity: wmOpacity / 100,
+          rotation: wmImageRotation,
+          scale: wmImageScale,
         },
       });
     }
@@ -501,153 +501,7 @@ export default function LayoutTab() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* PAGE NUMBER */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Page Numbers">
-            <span className="font-semibold text-[11px] text-slate-600 dark:text-slate-300">#</span>
-            <span>Page Number</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 text-xs">
-          {/* 1. Top of Page Submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Top of Page</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => handleSetHeaderPageNumber("left")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Left</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "header" &&
-                  activeSection?.pageNumberAlignment === "left" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetHeaderPageNumber("center")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Center</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "header" &&
-                  activeSection?.pageNumberAlignment === "center" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetHeaderPageNumber("right")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Right</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "header" &&
-                  activeSection?.pageNumberAlignment === "right" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
 
-          {/* 2. Bottom of Page Submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Bottom of Page</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => handleSetFooterPageNumber("left")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Left</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "footer" &&
-                  activeSection?.pageNumberAlignment === "left" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetFooterPageNumber("center")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Center</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "footer" &&
-                  activeSection?.pageNumberAlignment === "center" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetFooterPageNumber("right")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Right</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "footer" &&
-                  activeSection?.pageNumberAlignment === "right" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          {/* 3. Current Position Submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Current Position</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("left")}
-                className="cursor-pointer"
-              >
-                <span>Left</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("center")}
-                className="cursor-pointer"
-              >
-                <span>Center</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("right")}
-                className="cursor-pointer"
-              >
-                <span>Right</span>
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          <DropdownMenuSeparator />
-
-          {/* 4. Format Page Numbers */}
-          <DropdownMenuItem
-            onClick={() => {
-              setFormatChoice(activeSection?.pageNumberFormat || "1");
-              setNumberingMode(
-                activeSection?.pageNumberStartAt !== undefined ? "startAt" : "continue"
-              );
-              setStartAtValue(activeSection?.pageNumberStartAt ?? 1);
-              setPageNumberFormatOpen(true);
-            }}
-            className="cursor-pointer text-blue-600 font-medium"
-          >
-            Format Page Numbers...
-          </DropdownMenuItem>
-
-          {/* 5. Remove Page Numbers */}
-          <DropdownMenuItem
-            onClick={handleRemovePageNumbers}
-            className="cursor-pointer text-red-600"
-          >
-            Remove Page Numbers
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
 
       <RibbonDivider />
 
@@ -746,7 +600,7 @@ export default function LayoutTab() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => setMarginsDialogOpen(true)}
+            onClick={openCustomMarginsDialog}
             className="text-blue-600 font-medium cursor-pointer"
           >
             Custom Margins...
@@ -911,34 +765,34 @@ export default function LayoutTab() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48 text-xs">
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "one", count: 1 } })}
+            onClick={() => applyToAllSections({ columns: { type: "one", count: 1 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>One</span>
-            {(!activeSection?.columns || activeSection?.columns?.type === "one") && (
+            {(!activeSection?.columns || activeSection?.columns?.type === "one" || activeSection?.columns?.count === 1) && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "two", count: 2 } })}
+            onClick={() => applyToAllSections({ columns: { type: "two", count: 2, gap: 32 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Two</span>
-            {activeSection?.columns?.type === "two" && (
+            {(activeSection?.columns?.type === "two" || (activeSection?.columns?.count === 2 && activeSection?.columns?.type !== "left" && activeSection?.columns?.type !== "right")) && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "three", count: 3 } })}
+            onClick={() => applyToAllSections({ columns: { type: "three", count: 3, gap: 24 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Three</span>
-            {activeSection?.columns?.type === "three" && (
+            {(activeSection?.columns?.type === "three" || activeSection?.columns?.count === 3) && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "left", count: 2 } })}
+            onClick={() => applyToAllSections({ columns: { type: "left", count: 2, gap: 32 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Left (Narrow Left)</span>
@@ -947,7 +801,7 @@ export default function LayoutTab() {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "right", count: 2 } })}
+            onClick={() => applyToAllSections({ columns: { type: "right", count: 2, gap: 32 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Right (Narrow Right)</span>
@@ -959,7 +813,7 @@ export default function LayoutTab() {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => setColumnsDialogOpen(true)}
+            onClick={openCustomColumnsDialog}
             className="text-blue-600 font-medium cursor-pointer"
           >
             More Columns...
@@ -1049,7 +903,23 @@ export default function LayoutTab() {
 
           <DropdownMenuItem
             onClick={() => {
-              setWmText(activeSection?.watermark?.text || "CONFIDENTIAL");
+              if (activeSection?.watermark?.image) {
+                setWatermarkType("image");
+                setWmImageUrl(activeSection.watermark.image);
+                setWmOpacity(Math.round((activeSection.watermark.opacity ?? 0.5) * 100));
+                setWmImageRotation(
+                  typeof activeSection.watermark.rotation === "number"
+                    ? activeSection.watermark.rotation
+                    : activeSection.watermark.rotation === "diagonal"
+                    ? -45
+                    : 0
+                );
+                setWmImageScale(String(activeSection.watermark.scale ?? "100"));
+              } else {
+                setWatermarkType("text");
+                setWmText(activeSection?.watermark?.text || "CONFIDENTIAL");
+                setWmOpacity(Math.round((activeSection?.watermark?.opacity ?? 0.15) * 100));
+              }
               setWatermarkDialogOpen(true);
             }}
             className="text-blue-600 font-medium cursor-pointer"
@@ -1153,7 +1023,7 @@ export default function LayoutTab() {
           setBorderBottom(activeSection?.pageBorders?.bottom ?? true);
           setBorderLeft(activeSection?.pageBorders?.left ?? true);
           setBorderRight(activeSection?.pageBorders?.right ?? true);
-          setBorderApplyTo(activeSection?.pageBorders?.applyTo || "section");
+          setBorderApplyTo(activeSection?.pageBorders?.applyTo || "document");
           setBordersDialogOpen(true);
         }}
         className={triggerClass}
@@ -1499,196 +1369,335 @@ export default function LayoutTab() {
 
       {/* 7. Custom Watermark Dialog */}
       <Dialog open={watermarkDialogOpen} onOpenChange={setWatermarkDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent
+          className="!max-w-[760px] !w-[760px] max-h-[90vh] overflow-y-auto"
+          style={{ maxWidth: "760px", width: "95vw" }}
+        >
           <DialogHeader>
             <DialogTitle className="text-sm font-semibold">
               Watermark Configuration
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2 text-xs">
-            {/* Tabs for Text vs Image */}
-            <div className="flex rounded-md bg-slate-100 dark:bg-slate-800 p-1">
-              <button
-                type="button"
-                onClick={() => setWatermarkType("text")}
-                className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
-                  watermarkType === "text"
-                    ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                Text Watermark
-              </button>
-              <button
-                type="button"
-                onClick={() => setWatermarkType("image")}
-                className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
-                  watermarkType === "image"
-                    ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                Picture Watermark
-              </button>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-6 py-2 text-xs items-stretch">
+            {/* Left: Configuration Controls */}
+            <div className="w-full sm:w-[380px] flex-shrink-0 space-y-4">
+              {/* Tabs for Text vs Image */}
+              <div className="flex rounded-md bg-slate-100 dark:bg-slate-800 p-1">
+                <button
+                  type="button"
+                  onClick={() => setWatermarkType("text")}
+                  className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
+                    watermarkType === "text"
+                      ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
+                      : "text-slate-600 dark:text-slate-400"
+                  }`}
+                >
+                  Text Watermark
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWatermarkType("image")}
+                  className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
+                    watermarkType === "image"
+                      ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
+                      : "text-slate-600 dark:text-slate-400"
+                  }`}
+                >
+                  Picture Watermark
+                </button>
+              </div>
 
-            {watermarkType === "text" ? (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs mb-1 block">Text</Label>
-                  <Input
-                    value={wmText}
-                    onChange={(e) => setWmText(e.target.value)}
-                    placeholder="e.g. CONFIDENTIAL"
-                    className="text-xs"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+              {watermarkType === "text" ? (
+                <div className="space-y-3">
                   <div>
-                    <Label className="text-xs mb-1 block">Font</Label>
-                    <select
-                      value={wmFont}
-                      onChange={(e) => setWmFont(e.target.value)}
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    >
-                      <option value="Calibri">Calibri</option>
-                      <option value="Arial">Arial</option>
-                      <option value="Times New Roman">Times New Roman</option>
-                      <option value="Georgia">Georgia</option>
-                      <option value="Courier New">Courier New</option>
-                    </select>
+                    <Label className="text-xs mb-1 block">Text</Label>
+                    <Input
+                      value={wmText}
+                      onChange={(e) => setWmText(e.target.value)}
+                      placeholder="e.g. CONFIDENTIAL"
+                      className="text-xs"
+                    />
                   </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">Size</Label>
-                    <select
-                      value={wmFontSize}
-                      onChange={(e) => setWmFontSize(e.target.value)}
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    >
-                      <option value="auto">Auto</option>
-                      <option value="36">36 pt</option>
-                      <option value="48">48 pt</option>
-                      <option value="60">60 pt</option>
-                      <option value="72">72 pt</option>
-                      <option value="96">96 pt</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs mb-1 block">Font</Label>
+                      <select
+                        value={wmFont}
+                        onChange={(e) => setWmFont(e.target.value)}
+                        className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                      >
+                        <option value="Calibri">Calibri</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Courier New">Courier New</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">Size</Label>
+                      <select
+                        value={wmFontSize}
+                        onChange={(e) => setWmFontSize(e.target.value)}
+                        className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                      >
+                        <option value="auto">Auto</option>
+                        <option value="36">36 pt</option>
+                        <option value="48">48 pt</option>
+                        <option value="60">60 pt</option>
+                        <option value="72">72 pt</option>
+                        <option value="96">96 pt</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-3 items-center">
-                  <div>
-                    <Label className="text-xs mb-1 block">Color</Label>
-                    <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                      <Label className="text-xs mb-1 block">Color</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={wmColor}
+                          onChange={(e) => setWmColor(e.target.value)}
+                          className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                        />
+                        <span className="font-mono text-[11px] text-slate-500">
+                          {wmColor}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">
+                        Opacity: {wmOpacity}%
+                      </Label>
                       <input
-                        type="color"
-                        value={wmColor}
-                        onChange={(e) => setWmColor(e.target.value)}
-                        className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                        type="range"
+                        min={5}
+                        max={100}
+                        value={wmOpacity}
+                        onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
+                        className="w-full cursor-pointer accent-sky-500"
                       />
-                      <span className="font-mono text-[11px] text-slate-500">
-                        {wmColor}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs mb-1 block">Layout / Rotation</Label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="wmRot"
+                          checked={wmRotation === "diagonal"}
+                          onChange={() => setWmRotation("diagonal")}
+                          className="text-blue-600"
+                        />
+                        <span>Diagonal (-35°)</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="wmRot"
+                          checked={wmRotation === "horizontal"}
+                          onChange={() => setWmRotation("horizontal")}
+                          className="text-blue-600"
+                        />
+                        <span>Horizontal (0°)</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* 1. Select Image File */}
+                  <div>
+                    <Label className="text-xs font-semibold mb-2 block">
+                      Select Image File
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-8 px-3.5 text-xs font-medium bg-[#1d8cd7] hover:bg-[#157bbd] text-white cursor-pointer rounded shadow-xs"
+                      >
+                        Choose File
+                      </Button>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+                        {wmFileName || "No file chosen"}
                       </span>
                     </div>
                   </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">
-                      Opacity: {wmOpacity}%
+
+                  {/* 2. Rotation & Scale (Size) */}
+                  <div className="grid grid-cols-2 gap-4 items-center">
+                    <div>
+                      <Label className="text-xs font-semibold mb-1.5 block">
+                        Rotation
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min={-90}
+                          max={90}
+                          step={5}
+                          value={wmImageRotation}
+                          onChange={(e) => setWmImageRotation(parseInt(e.target.value, 10))}
+                          className="w-full cursor-pointer accent-sky-500"
+                        />
+                        <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-8 text-right">
+                          {wmImageRotation}°
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold mb-1.5 block">
+                        Scale (Size)
+                      </Label>
+                      <select
+                        value={wmImageScale}
+                        onChange={(e) => setWmImageScale(e.target.value)}
+                        className="w-full h-8 px-2.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-200"
+                      >
+                        <option value="auto">Auto</option>
+                        <option value="500">500%</option>
+                        <option value="200">200%</option>
+                        <option value="150">150%</option>
+                        <option value="100">100%</option>
+                        <option value="50">50%</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 3. Opacity / Transparency Card */}
+                  <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/60 dark:bg-slate-900/40 space-y-2">
+                    <Label className="text-xs font-semibold block">
+                      Opacity / Transparency
                     </Label>
-                    <input
-                      type="range"
-                      min={5}
-                      max={100}
-                      value={wmOpacity}
-                      onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
-                      className="w-full"
-                    />
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={5}
+                        max={100}
+                        step={5}
+                        value={wmOpacity}
+                        onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
+                        className="w-full cursor-pointer accent-sky-500"
+                      />
+                      <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-8 text-right">
+                        {wmOpacity}%
+                      </span>
+                    </div>
                   </div>
                 </div>
+              )}
+            </div>
 
-                <div>
-                  <Label className="text-xs mb-1 block">Layout / Rotation</Label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="wmRot"
-                        checked={wmRotation === "diagonal"}
-                        onChange={() => setWmRotation("diagonal")}
-                        className="text-blue-600"
+            {/* Right: Live Preview Box */}
+            <div className="flex-1 min-w-[260px] flex flex-col items-center justify-center">
+              <div
+                className="w-full h-full min-h-[350px] rounded-xl border border-slate-700/60 p-5 flex flex-col items-center justify-center shadow-lg relative select-none"
+                style={{ backgroundColor: "#0c1421" }}
+              >
+                <div className="text-[11px] uppercase font-bold tracking-[0.2em] text-slate-400 mb-5 text-center">
+                  LIVE PREVIEW
+                </div>
+
+                {/* White Document Page */}
+                <div
+                  className="w-44 h-60 rounded-xs shadow-2xl relative overflow-hidden flex flex-col pt-4 px-3.5 pb-3 select-none"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    boxSizing: "border-box",
+                    borderTop:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.top ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    borderBottom:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.bottom ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    borderLeft:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.left ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    borderRight:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.right ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    boxShadow:
+                      activeSection?.pageBorders?.style === "shadow"
+                        ? "0 10px 25px -5px rgba(0,0,0,0.5), 6px 6px 0px rgba(0,0,0,0.35)"
+                        : "0 10px 25px -5px rgba(0,0,0,0.4)",
+                  }}
+                >
+                  {/* Skeleton Document Lines */}
+                  <div className="space-y-2 pointer-events-none select-none z-10 w-full">
+                    <div className="h-3 w-20 bg-slate-200/90 rounded-full mb-3" />
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-[72%] bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-[94%] bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-[60%] bg-slate-100 rounded-full" />
+                  </div>
+
+                  {/* Watermark Overlay on Document Page */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-20 p-2">
+                    {watermarkType === "text" ? (
+                      <span
+                        style={{
+                          fontFamily: wmFont,
+                          fontSize:
+                            wmFontSize === "auto"
+                              ? "16px"
+                              : `${Math.min(22, Math.max(11, parseInt(wmFontSize, 10) / 3))}px`,
+                          fontWeight: 700,
+                          color: wmColor,
+                          opacity: wmOpacity / 100,
+                          transform: `rotate(${wmRotation === "diagonal" ? -35 : 0}deg)`,
+                          userSelect: "none",
+                          textTransform: "uppercase",
+                          textAlign: "center",
+                          lineHeight: 1.1,
+                          wordBreak: "break-word",
+                          maxWidth: "90%",
+                          display: "block",
+                        }}
+                      >
+                        {wmText || "PREVIEW"}
+                      </span>
+                    ) : wmImageUrl ? (
+                      <img
+                        src={wmImageUrl}
+                        alt="Preview"
+                        className="max-h-36 max-w-[85%] object-contain"
+                        style={{
+                          opacity: wmOpacity / 100,
+                          transform: `rotate(${wmImageRotation}deg) scale(${
+                            wmImageScale === "auto" ? 1 : Number(wmImageScale) / 100
+                          })`,
+                        }}
                       />
-                      <span>Diagonal (-35°)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="wmRot"
-                        checked={wmRotation === "horizontal"}
-                        onChange={() => setWmRotation("horizontal")}
-                        className="text-blue-600"
-                      />
-                      <span>Horizontal (0°)</span>
-                    </label>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 font-medium">No image chosen</span>
+                    )}
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs mb-1 block">Image URL</Label>
-                  <Input
-                    value={wmImageUrl}
-                    onChange={(e) => setWmImageUrl(e.target.value)}
-                    placeholder="https://example.com/watermark.png"
-                    className="text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs mb-1 block">
-                    Opacity: {wmOpacity}%
-                  </Label>
-                  <input
-                    type="range"
-                    min={5}
-                    max={100}
-                    value={wmOpacity}
-                    onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Live Preview Box */}
-            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
-              <div className="text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
-                Preview
-              </div>
-              <div className="h-28 w-full bg-white dark:bg-[#0c1622] rounded border border-slate-200 dark:border-slate-800 relative flex items-center justify-center overflow-hidden">
-                {watermarkType === "text" ? (
-                  <span
-                    style={{
-                      fontFamily: wmFont,
-                      fontSize: "22px",
-                      fontWeight: 700,
-                      color: wmColor,
-                      opacity: wmOpacity / 100,
-                      transform: `rotate(${wmRotation === "diagonal" ? -35 : 0}deg)`,
-                      userSelect: "none",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {wmText || "PREVIEW"}
-                  </span>
-                ) : wmImageUrl ? (
-                  <img
-                    src={wmImageUrl}
-                    alt="Preview"
-                    className="max-h-24 max-w-full object-contain"
-                    style={{ opacity: wmOpacity / 100 }}
-                  />
-                ) : (
-                  <span className="text-xs text-slate-400">Enter image URL</span>
-                )}
               </div>
             </div>
           </div>
@@ -1709,60 +1718,72 @@ export default function LayoutTab() {
 
       {/* 8. Page Borders Dialog */}
       <Dialog open={bordersDialogOpen} onOpenChange={setBordersDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-sm font-semibold">
-              Borders and Shading
-            </DialogTitle>
+        <DialogContent
+          className="!max-w-[780px] !w-[780px] sm:!max-w-[780px] sm:!w-[780px] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800"
+          style={{ maxWidth: "780px", width: "95vw" }}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Page Border</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2 text-xs">
-            {/* Presets Settings */}
-            <div>
-              <Label className="text-xs font-semibold mb-1.5 block">Setting:</Label>
-              <div className="grid grid-cols-5 gap-1.5">
-                {(
-                  [
-                    { id: "none", label: "None" },
-                    { id: "box", label: "Box" },
-                    { id: "shadow", label: "Shadow" },
-                    { id: "3d", label: "3D" },
-                    { id: "custom", label: "Custom" },
-                  ] as const
-                ).map(({ id, label }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => {
-                      setBorderSetting(id);
-                      if (id === "none") {
-                        setBorderTop(false);
-                        setBorderBottom(false);
-                        setBorderLeft(false);
-                        setBorderRight(false);
-                      } else {
-                        setBorderTop(true);
-                        setBorderBottom(true);
-                        setBorderLeft(true);
-                        setBorderRight(true);
-                      }
-                    }}
-                    className={`py-1.5 px-2 rounded border text-center font-medium transition-colors cursor-pointer ${
-                      borderSetting === id
-                        ? "border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-950/40"
-                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-50"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            {borderSetting !== "none" && (
-              <>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-xs mb-1 block">Style:</Label>
+          {/* Scrollable Content Body */}
+          <div className="flex-1 overflow-y-auto px-6 pt-5 pb-4 min-h-0">
+            <div className="flex flex-row gap-5 text-xs items-stretch">
+              {/* Column 1: SETTING */}
+              <div className="w-[125px] flex-shrink-0 border-r border-slate-200/90 dark:border-slate-800 pr-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+                  SETTING
+                </div>
+                <div className="space-y-1.5">
+                  {(
+                    [
+                      { id: "none", label: "None" },
+                      { id: "box", label: "Box" },
+                      { id: "shadow", label: "Shadow" },
+                      { id: "3d", label: "3d" },
+                      { id: "custom", label: "Custom" },
+                    ] as const
+                  ).map(({ id, label }) => {
+                    const isSelected = borderSetting === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => {
+                          setBorderSetting(id);
+                          if (id === "none") {
+                            setBorderTop(false);
+                            setBorderBottom(false);
+                            setBorderLeft(false);
+                            setBorderRight(false);
+                          } else {
+                            setBorderTop(true);
+                            setBorderBottom(true);
+                            setBorderLeft(true);
+                            setBorderRight(true);
+                          }
+                        }}
+                        className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-[#E1F0FF] border border-[#0078D4] text-slate-900 font-semibold shadow-xs dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-500"
+                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Column 2: Controls */}
+              <div className="flex-1 min-w-[230px] px-1 space-y-3">
+                {/* Style */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    Style
+                  </label>
+                  <div className="relative">
                     <select
                       value={borderStyle}
                       onChange={(e) =>
@@ -1770,162 +1791,241 @@ export default function LayoutTab() {
                           e.target.value as "solid" | "dashed" | "dotted" | "double"
                         )
                       }
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
                     >
-                      <option value="solid">Solid Line</option>
-                      <option value="dashed">Dashed Line</option>
-                      <option value="dotted">Dotted Line</option>
-                      <option value="double">Double Line</option>
+                      <option value="solid">───── Solid</option>
+                      <option value="dashed">- - - - - - Dashed</option>
+                      <option value="dotted">············ Dotted</option>
+                      <option value="double">══════ Double</option>
                     </select>
+                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
+                </div>
+
+                {/* Color & Width */}
+                <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <Label className="text-xs mb-1 block">Width:</Label>
-                    <select
-                      value={borderWidth}
-                      onChange={(e) => setBorderWidth(parseInt(e.target.value, 10))}
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    >
-                      <option value={1}>1/2 pt (1px)</option>
-                      <option value={2}>1 pt (2px)</option>
-                      <option value={3}>2 1/4 pt (3px)</option>
-                      <option value={4}>3 pt (4px)</option>
-                      <option value={6}>4 1/2 pt (6px)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">Color:</Label>
-                    <div className="flex items-center gap-1.5 h-8">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                      Color
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden flex-shrink-0 cursor-pointer flex items-center justify-center p-0.5 shadow-xs">
+                        <input
+                          type="color"
+                          value={borderColor}
+                          onChange={(e) => setBorderColor(e.target.value)}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                        <div
+                          className="w-full h-full rounded-xs"
+                          style={{ backgroundColor: borderColor }}
+                        />
+                      </div>
                       <input
-                        type="color"
+                        type="text"
                         value={borderColor}
                         onChange={(e) => setBorderColor(e.target.value)}
-                        className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                        className="w-full h-8 px-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-mono uppercase bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-[#0078D4]"
                       />
-                      <span className="font-mono text-[10px] text-slate-500">
-                        {borderColor}
-                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                      Width
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={borderWidth}
+                        onChange={(e) => setBorderWidth(parseInt(e.target.value, 10))}
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      >
+                        <option value={1}>1/4 pt</option>
+                        <option value={1}>1/2 pt</option>
+                        <option value={1}>3/4 pt</option>
+                        <option value={2}>1 pt</option>
+                        <option value={2}>1 1/2 pt</option>
+                        <option value={3}>2 1/4 pt</option>
+                        <option value={4}>3 pt</option>
+                        <option value={6}>4 1/2 pt</option>
+                        <option value={8}>6 pt</option>
+                      </select>
+                      <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
-                {/* Individual Sides Toggle */}
+                {/* Art Borders */}
                 <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">
-                    Border Sides:
-                  </Label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setBorderTop((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderTop
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    Art Borders
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={artBorder}
+                      onChange={(e) => setArtBorder(e.target.value)}
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
                     >
-                      Top
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBorderBottom((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderBottom
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
-                    >
-                      Bottom
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBorderLeft((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderLeft
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
-                    >
-                      Left
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBorderRight((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderRight
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
-                    >
-                      Right
-                    </button>
+                      <option value="none">None</option>
+                      <option value="stars">Stars (★)</option>
+                      <option value="hearts">Hearts (♥)</option>
+                      <option value="diamonds">Diamonds (♦)</option>
+                      <option value="apples">Apples (🍎)</option>
+                      <option value="ribbon">Ribbon (🎀)</option>
+                    </select>
+                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
 
                 {/* Apply To */}
                 <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">Apply To:</Label>
-                  <select
-                    value={borderApplyTo}
-                    onChange={(e) =>
-                      setBorderApplyTo(
-                        e.target.value as "section" | "document" | "page"
-                      )
-                    }
-                    className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                  >
-                    <option value="section">Current Section</option>
-                    <option value="document">Whole Document</option>
-                    <option value="page">This Page</option>
-                  </select>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    Apply To
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={borderApplyTo}
+                      onChange={(e) =>
+                        setBorderApplyTo(
+                          e.target.value as "section" | "document" | "page"
+                        )
+                      }
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                    >
+                      <option value="document">Whole document</option>
+                      <option value="section">This section</option>
+                      <option value="firstPage">This section - First page only</option>
+                      <option value="exceptFirstPage">This section - All except first page</option>
+                    </select>
+                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Column 3: PREVIEW Card */}
+              <div className="w-[250px] flex-shrink-0 bg-[#F2F7FC] dark:bg-[#0c1421] rounded-2xl p-4 border border-[#E1EDF8] dark:border-slate-800 flex flex-col items-center justify-between shadow-xs">
+                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 text-center mb-2">
+                  PREVIEW
                 </div>
 
-                {/* Live Preview Box */}
-                <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
-                  <div className="text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
-                    Live Preview
-                  </div>
-                  <div className="h-28 w-full flex items-center justify-center">
-                    <div
-                      className="h-24 w-32 bg-white dark:bg-[#0c1622] rounded flex items-center justify-center text-[10px] text-slate-400"
-                      style={{
-                        boxSizing: "border-box",
-                        borderTop: borderTop
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                <div className="relative flex items-center justify-center my-2">
+                  {/* T Button */}
+                  <button
+                    type="button"
+                    title="Toggle Top Border"
+                    onClick={() => setBorderTop((prev) => !prev)}
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderTop && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    T
+                  </button>
+
+                  {/* B Button */}
+                  <button
+                    type="button"
+                    title="Toggle Bottom Border"
+                    onClick={() => setBorderBottom((prev) => !prev)}
+                    className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderBottom && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    B
+                  </button>
+
+                  {/* L Button */}
+                  <button
+                    type="button"
+                    title="Toggle Left Border"
+                    onClick={() => setBorderLeft((prev) => !prev)}
+                    className={`absolute top-1/2 -left-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderLeft && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    L
+                  </button>
+
+                  {/* R Button */}
+                  <button
+                    type="button"
+                    title="Toggle Right Border"
+                    onClick={() => setBorderRight((prev) => !prev)}
+                    className={`absolute top-1/2 -right-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderRight && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    R
+                  </button>
+
+                  {/* Document Sheet */}
+                  <div
+                    className="w-36 h-48 rounded-xs bg-white dark:bg-slate-900 relative overflow-hidden flex flex-col pt-3.5 px-3 pb-3 transition-all select-none"
+                    style={{
+                      boxSizing: "border-box",
+                      borderTop:
+                        borderTop && borderSetting !== "none"
+                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
                           : "none",
-                        borderBottom: borderBottom
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                      borderBottom:
+                        borderBottom && borderSetting !== "none"
+                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
                           : "none",
-                        borderLeft: borderLeft
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                      borderLeft:
+                        borderLeft && borderSetting !== "none"
+                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
                           : "none",
-                        borderRight: borderRight
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
+                      borderRight:
+                        borderRight && borderSetting !== "none"
+                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
                           : "none",
-                        boxShadow:
-                          borderSetting === "shadow"
-                            ? "0 8px 20px rgba(0,0,0,0.25)"
-                            : "none",
-                      }}
-                    >
-                      Page Content
+                      boxShadow:
+                        borderSetting === "shadow"
+                          ? "5px 5px 0px rgba(0,0,0,0.85), 0 8px 20px -4px rgba(0,0,0,0.25)"
+                          : "0 8px 20px -4px rgba(0,0,0,0.12), 0 2px 6px -1px rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    {/* Skeleton text lines */}
+                    <div className="space-y-1.5 pointer-events-none select-none w-full">
+                      <div className="h-1.5 w-[65%] bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
+                      <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full" />
+                      <div className="h-1.5 w-[85%] bg-slate-100 dark:bg-slate-800 rounded-full" />
+                      <div className="h-1.5 w-[70%] bg-slate-100 dark:bg-slate-800 rounded-full" />
                     </div>
                   </div>
                 </div>
-              </>
-            )}
+
+                <div className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-2 text-center select-none font-normal">
+                  Click T/B/L/R to toggle individual sides
+                </div>
+              </div>
+            </div>
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
+
+          {/* Sticky Non-Scrolling Edge-to-Edge Footer - ALWAYS VISIBLE */}
+          <div className="border-t border-slate-200 dark:border-slate-800 px-6 py-3.5 bg-slate-50/80 dark:bg-slate-900/90 flex items-center justify-end gap-3 shrink-0 rounded-b-2xl">
+            <button
+              type="button"
               onClick={() => setBordersDialogOpen(false)}
+              className="px-5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium transition-colors cursor-pointer shadow-xs"
             >
               Cancel
-            </Button>
-            <Button size="sm" onClick={handleApplyBorders}>
-              Apply Border
-            </Button>
-          </DialogFooter>
+            </button>
+            <button
+              type="button"
+              onClick={handleApplyBorders}
+              className="px-5 py-2 rounded-lg bg-[#0078D4] hover:bg-[#006CBD] active:bg-[#005A9E] text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+            >
+              Apply Borders
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

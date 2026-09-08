@@ -180,6 +180,7 @@ export default function Workspace() {
                 pageNumberPosition={section?.pageNumberPosition}
                 pageNumberAlignment={section?.pageNumberAlignment}
                 pageNumberFormat={section?.pageNumberFormat}
+                pageNumberStyle={section?.pageNumberStyle}
                 html={model.pageHtml?.[page.id] ?? ""}
                 active={isEffectiveActive}
                 editable={isEditable}
@@ -347,6 +348,7 @@ interface DocumentPageProps {
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
   pageNumberFormat?: "1" | "i" | "I" | "a" | "A";
+  pageNumberStyle?: string;
   html: string;
   active: boolean;
   editable: boolean;
@@ -368,13 +370,14 @@ function DocumentPage({
   pageId,
   pageIndex,
   pageNumber,
-  totalPages: _totalPages,
+  totalPages,
   headerText,
   footerText,
   section,
   pageNumberPosition,
   pageNumberAlignment,
   pageNumberFormat,
+  pageNumberStyle,
   html,
   active,
   editable,
@@ -394,6 +397,55 @@ function DocumentPage({
   const localEditorRef = useRef<HTMLDivElement | null>(null);
   const lastHtmlRef = useRef<string>(html);
 
+  const marginL = section?.marginConfig?.left ?? 96;
+  const marginR = section?.marginConfig?.right ?? 96;
+  const marginT = Math.max(16, (section?.marginConfig?.top ?? 96) - 24);
+  const marginB = Math.max(16, (section?.marginConfig?.bottom ?? 96) - 24);
+
+  /*
+   * Keep dynamic page number fields inside document content synchronized
+   * with current pageNumber, totalPages, and format across all pages.
+   */
+  useEffect(() => {
+    const element = localEditorRef.current;
+    if (!element) return;
+
+    const dynamicFields = element.querySelectorAll<HTMLElement>(".page-number-field, [data-field]");
+    if (dynamicFields.length === 0) return;
+
+    let hasChange = false;
+    const formattedNum = formatPageNumber(pageNumber, pageNumberFormat);
+    const formattedTotal = formatPageNumber(totalPages, pageNumberFormat);
+
+    dynamicFields.forEach((field) => {
+      if (field.getAttribute("data-static") === "true") return;
+
+      const fieldType = field.getAttribute("data-field");
+      let expectedText = "";
+
+      if (fieldType === "page-number") {
+        expectedText = formattedNum;
+      } else if (fieldType === "page-x") {
+        expectedText = `Page ${formattedNum}`;
+      } else if (fieldType === "page-x-of-y") {
+        expectedText = `Page ${formattedNum} of ${formattedTotal}`;
+      } else if (fieldType === "x-of-y") {
+        expectedText = `${formattedNum} of ${formattedTotal}`;
+      } else if (fieldType === "total-pages") {
+        expectedText = formattedTotal;
+      }
+
+      if (expectedText && field.textContent !== expectedText) {
+        field.textContent = expectedText;
+        hasChange = true;
+      }
+    });
+
+    if (hasChange) {
+      lastHtmlRef.current = element.innerHTML;
+      onChange(element.innerHTML);
+    }
+  }, [pageNumber, totalPages, pageNumberFormat, onChange]);
 
   /*
    * Keep the page HTML synchronized with the document model
@@ -458,16 +510,42 @@ function DocumentPage({
     const containerRect = container.getBoundingClientRect();
     if (containerRect.height === 0) return;
 
-    // Available writing boundary: container bottom minus 28px bottom padding tolerance
-    const maxBottom = containerRect.bottom - 28;
+    // Available writing boundary: container bottom minus bottom margin tolerance
+    const maxBottom = containerRect.bottom - Math.max(16, marginB);
 
-    // Find the first child whose bottom edge exceeds the writing area
+    const columnCount = section?.columns?.count ?? 1;
+    const isMultiColumn = columnCount > 1;
+
+    // Find the first child whose boundary exceeds the writing area
     let splitIdx = -1;
     for (let i = 0; i < children.length; i++) {
       const childRect = children[i].getBoundingClientRect();
-      if (childRect.bottom > maxBottom) {
-        splitIdx = i;
-        break;
+
+      if (isMultiColumn) {
+        // Multi-column layout overflow check:
+        // 1. Child spilled past the right edge of container into an overflow column
+        const isPastRightBoundary =
+          childRect.right > containerRect.right - marginR + 10 ||
+          childRect.left >= containerRect.right - marginR;
+
+        // 2. Child is in the last column and exceeds bottom boundary
+        const approxColWidth =
+          (containerRect.width - marginL - marginR - (columnCount - 1) * (section?.columns?.gap ?? 32)) /
+          columnCount;
+        const lastColLeftThreshold = containerRect.right - marginR - approxColWidth - 15;
+        const isInLastColumn = childRect.left >= lastColLeftThreshold;
+        const isPastBottomInLastCol = isInLastColumn && childRect.bottom > maxBottom;
+
+        if (isPastRightBoundary || isPastBottomInLastCol) {
+          splitIdx = i;
+          break;
+        }
+      } else {
+        // Single column layout
+        if (childRect.bottom > maxBottom) {
+          splitIdx = i;
+          break;
+        }
       }
     }
 
@@ -522,7 +600,7 @@ function DocumentPage({
         focusPage(nextPage.id, "start");
       }, 50);
     }
-  }, [allPages, onChange, onAddPage, onSetPageHtml, pageHtmlMap, pageId]);
+  }, [allPages, marginB, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section]);
 
   // ------------------------------------------------------------------------
   // KeyDown: Enter, Ctrl+Enter, and Backspace Handlers
@@ -906,11 +984,6 @@ function DocumentPage({
     return styles;
   };
 
-  const marginL = section?.marginConfig?.left ?? 72;
-  const marginR = section?.marginConfig?.right ?? 72;
-  const marginT = section?.marginConfig?.top ?? 32;
-  const marginB = section?.marginConfig?.bottom ?? 32;
-
   return (
     <section
       data-page-id={pageId}
@@ -983,6 +1056,19 @@ function DocumentPage({
             src={section.watermark.image}
             alt="Watermark"
             className="max-h-full max-w-full object-contain"
+            style={{
+              transform: `rotate(${
+                typeof section.watermark.rotation === "number"
+                  ? section.watermark.rotation
+                  : section.watermark.rotation === "horizontal"
+                  ? 0
+                  : -45
+              }deg) scale(${
+                section.watermark.scale === "auto" || !section.watermark.scale
+                  ? 1
+                  : Number(section.watermark.scale) / 100
+              })`,
+            }}
           />
         </div>
       )}
@@ -1027,25 +1113,25 @@ function DocumentPage({
           <>
             {pageNumberAlignment === "left" ? (
               <>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
+                <div className="font-semibold text-slate-700 dark:text-slate-300">
+                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                </div>
                 <span>{headerText}</span>
               </>
             ) : pageNumberAlignment === "center" ? (
               <>
                 <span>{headerText}</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
+                <div className="font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                </div>
                 <span />
               </>
             ) : (
               <>
                 <span>{headerText}</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
+                <div className="font-semibold text-slate-700 dark:text-slate-300">
+                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                </div>
               </>
             )}
           </>
@@ -1089,6 +1175,8 @@ function DocumentPage({
             ? {
                 columnCount: section.columns.count,
                 columnGap: `${section.columns.gap ?? 32}px`,
+                columnFill: "balance",
+                WebkitColumnFill: "balance",
               }
             : {}),
         }}
@@ -1102,6 +1190,11 @@ function DocumentPage({
           text-slate-800
 
           [&_p]:my-2
+          [&_p]:break-inside-avoid-column
+          [&_table]:break-inside-avoid-column
+          [&_h1]:break-after-avoid
+          [&_h2]:break-after-avoid
+          [&_h3]:break-after-avoid
 
           [&_h1]:mb-4
           [&_h1]:mt-6
@@ -1197,25 +1290,25 @@ function DocumentPage({
           <>
             {pageNumberAlignment === "left" ? (
               <>
-                <span className="font-medium text-slate-600 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
+                <div className="font-medium text-slate-600 dark:text-slate-300">
+                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                </div>
                 <span>{footerText}</span>
               </>
             ) : pageNumberAlignment === "center" ? (
               <>
                 <span>{footerText}</span>
-                <span className="font-medium text-slate-600 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
+                <div className="font-medium text-slate-600 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                </div>
                 <span />
               </>
             ) : (
               <>
                 <span>{footerText}</span>
-                <span className="font-medium text-slate-600 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
+                <div className="font-medium text-slate-600 dark:text-slate-300">
+                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                </div>
               </>
             )}
           </>
@@ -1281,4 +1374,80 @@ function formatPageNumber(n: number, format?: "1" | "i" | "I" | "a" | "A"): stri
     return toAlpha(n).toUpperCase();
   }
   return String(n);
+}
+
+function renderPageNumberContent(
+  pageNumber: number,
+  totalPages: number,
+  format?: "1" | "i" | "I" | "a" | "A",
+  style?: string,
+): React.ReactNode {
+  const formattedNum = formatPageNumber(pageNumber, format);
+  const formattedTotal = formatPageNumber(totalPages, format);
+
+  switch (style) {
+    case "plain":
+    case "plain-1":
+    case "plain-2":
+    case "plain-3":
+      return <span>{formattedNum}</span>;
+
+    case "page-x":
+      return <span>Page {formattedNum}</span>;
+
+    case "page-x-of-y":
+      return (
+        <span>
+          Page {formattedNum} of {formattedTotal}
+        </span>
+      );
+
+    case "x-of-y":
+      return (
+        <span>
+          {formattedNum} of {formattedTotal}
+        </span>
+      );
+
+    case "accent-bar":
+      return (
+        <span className="inline-flex items-center border-b-2 border-sky-500 pb-0.5 font-bold tracking-wider text-[10px] text-slate-800 dark:text-slate-100">
+          PAGE {formattedNum}
+        </span>
+      );
+
+    case "circle":
+      return (
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] font-bold shadow-xs">
+          {formattedNum}
+        </span>
+      );
+
+    case "modern":
+      return (
+        <span className="inline-flex items-center gap-1.5">
+          <span className="text-[9px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">
+            CONFIDENTIAL
+          </span>
+          <span className="text-slate-300 dark:text-slate-600 font-normal">|</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-100">
+            {formattedNum}
+          </span>
+        </span>
+      );
+
+    case "bold-numbers":
+      return (
+        <span>
+          Page <strong className="font-bold text-slate-900 dark:text-white">{formattedNum}</strong> of{" "}
+          <strong className="font-bold text-slate-900 dark:text-white">{formattedTotal}</strong>
+        </span>
+      );
+
+    case "brackets":
+      return <span>[ {formattedNum} ]</span>;
+
+    default:
+      return <span>{formattedNum}</span>;
+  }
 }
