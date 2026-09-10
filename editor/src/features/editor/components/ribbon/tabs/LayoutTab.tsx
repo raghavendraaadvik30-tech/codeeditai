@@ -18,7 +18,11 @@ import {
 } from "lucide-react";
 
 import RibbonDivider from "../controls/RibbonDivider";
-import { useDocumentModel, type SectionModel } from "../../../store/documentModel";
+import { useDocumentModel, type SectionModel, type PageBorderConfig } from "../../../store/documentModel";
+import {
+  HeaderGallery,
+  FooterGallery,
+} from "@/features/editor/modules/document/components/HeaderFooterGallery";
 
 
 import {
@@ -84,8 +88,14 @@ const PAPER_SIZES: PaperSizeDef[] = [
 ];
 
 export default function LayoutTab() {
-  const { model, activePage, updateSection, updateAllSections, addSection } =
-    useDocumentModel();
+  const {
+    model,
+    activePage,
+    updateSection,
+    updateAllSections,
+    addSection,
+    applyPageBorders,
+  } = useDocumentModel();
 
 
   // Active section resolution: activePage -> sectionId -> section
@@ -191,7 +201,7 @@ export default function LayoutTab() {
     "none" | "box" | "shadow" | "3d" | "custom"
   >("box");
   const [borderStyle, setBorderStyle] = useState<
-    "solid" | "dashed" | "dotted" | "double"
+    "solid" | "dashed" | "dotted" | "double" | "dash-dot" | "thick-solid"
   >("solid");
   const [borderColor, setBorderColor] = useState("#000000");
   const [borderWidth, setBorderWidth] = useState<number>(2);
@@ -199,7 +209,13 @@ export default function LayoutTab() {
   const [borderBottom, setBorderBottom] = useState(true);
   const [borderLeft, setBorderLeft] = useState(true);
   const [borderRight, setBorderRight] = useState(true);
-  const [borderApplyTo, setBorderApplyTo] = useState<"section" | "document" | "page">("document");
+  const [borderDistanceTop, setBorderDistanceTop] = useState<number>(24);
+  const [borderDistanceBottom, setBorderDistanceBottom] = useState<number>(24);
+  const [borderDistanceLeft, setBorderDistanceLeft] = useState<number>(24);
+  const [borderDistanceRight, setBorderDistanceRight] = useState<number>(24);
+  const [borderApplyTo, setBorderApplyTo] = useState<
+    "document" | "section" | "page" | "firstPage" | "exceptFirstPage"
+  >("document");
   const [artBorder, setArtBorder] = useState<string>("none");
 
 
@@ -353,39 +369,43 @@ export default function LayoutTab() {
   // Handlers for Page Borders
   // ------------------------------------------------------------------------
   const handleApplyBorders = () => {
-    const patch: Partial<SectionModel> = {
-      pageBorders: {
-        style:
-          borderSetting === "none"
-            ? "none"
-            : borderSetting === "shadow"
-            ? "shadow"
-            : borderSetting === "3d"
-            ? "3d"
-            : borderStyle === "dashed"
-            ? "dashed"
-            : borderStyle === "dotted"
-            ? "dotted"
-            : borderStyle === "double"
-            ? "double"
-            : "box",
-        color: borderColor,
-        width: borderWidth,
-        top: borderTop,
-        bottom: borderBottom,
-        left: borderLeft,
-        right: borderRight,
-        applyTo: borderApplyTo,
+    const isNone =
+      borderSetting === "none" ||
+      (!borderTop && !borderBottom && !borderLeft && !borderRight);
+    const effectiveSetting = isNone ? "none" : borderSetting;
+    const borderConfig: PageBorderConfig = {
+      setting: effectiveSetting,
+      lineStyle: borderStyle,
+      style:
+        effectiveSetting === "none"
+          ? "none"
+          : effectiveSetting === "shadow"
+          ? "shadow"
+          : effectiveSetting === "3d"
+          ? "3d"
+          : borderStyle,
+      color: borderColor,
+      width: borderWidth,
+      top: !isNone ? borderTop : false,
+      bottom: !isNone ? borderBottom : false,
+      left: !isNone ? borderLeft : false,
+      right: !isNone ? borderRight : false,
+      distance: {
+        top: borderDistanceTop,
+        bottom: borderDistanceBottom,
+        left: borderDistanceLeft,
+        right: borderDistanceRight,
       },
+      applyTo: borderApplyTo,
+      art: artBorder !== "none" ? artBorder : undefined,
     };
 
-    if (borderApplyTo === "document") {
-      applyToAllSections(patch);
-    } else if (borderApplyTo === "page") {
-      applyToThisPage(patch);
-    } else {
-      applyToSection(patch);
-    }
+    applyPageBorders(
+      borderConfig,
+      borderApplyTo,
+      activePageObj?.id || activePage || undefined,
+      activeSection?.id
+    );
 
     setBordersDialogOpen(false);
   };
@@ -398,108 +418,10 @@ export default function LayoutTab() {
       ======================================================= */}
 
       {/* HEADER */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Document Header">
-            <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 8V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M4 16h16" />
-            </svg>
-            <span>Header</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 text-xs">
-          <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold">
-            Header Options
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => {
-              setHeaderInput(activeSection?.header || "");
-              setHeaderDialogOpen(true);
-            }}
-            className="text-blue-600 font-medium cursor-pointer"
-          >
-            Edit Header...
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                header: "",
-                firstHeader: "",
-                evenHeader: "",
-              })
-            }
-            className="text-red-600 cursor-pointer"
-          >
-            Remove Header
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <HeaderGallery buttonClassName={triggerClass} />
 
       {/* FOOTER */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Document Footer">
-            <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 16v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4M4 8h16" />
-            </svg>
-            <span>Footer</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 text-xs">
-          <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold">
-            Footer Options
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => {
-              setFooterInput(activeSection?.footer || "");
-              setFooterDialogOpen(true);
-            }}
-            className="text-blue-600 font-medium cursor-pointer"
-          >
-            Edit Footer...
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                footer: "",
-                firstFooter: "",
-                evenFooter: "",
-              })
-            }
-            className="text-red-600 cursor-pointer"
-          >
-            Remove Footer
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setFormatChoice(activeSection?.pageNumberFormat || "1");
-              setNumberingMode(
-                activeSection?.pageNumberStartAt !== undefined ? "startAt" : "continue"
-              );
-              setStartAtValue(activeSection?.pageNumberStartAt ?? 1);
-              setPageNumberFormatOpen(true);
-            }}
-            className="cursor-pointer"
-          >
-            Page Number Settings...
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <FooterGallery buttonClassName={triggerClass} />
 
 
 
@@ -999,31 +921,88 @@ export default function LayoutTab() {
       <button
         type="button"
         onClick={() => {
-          setBorderSetting(
-            activeSection?.pageBorders?.style === "none"
-              ? "none"
-              : activeSection?.pageBorders?.style === "shadow"
-              ? "shadow"
-              : activeSection?.pageBorders?.style === "3d"
-              ? "3d"
-              : "box"
-          );
-          setBorderStyle(
-            activeSection?.pageBorders?.style === "dashed"
-              ? "dashed"
-              : activeSection?.pageBorders?.style === "dotted"
-              ? "dotted"
-              : activeSection?.pageBorders?.style === "double"
-              ? "double"
-              : "solid"
-          );
-          setBorderColor(activeSection?.pageBorders?.color || "#000000");
-          setBorderWidth(activeSection?.pageBorders?.width || 2);
-          setBorderTop(activeSection?.pageBorders?.top ?? true);
-          setBorderBottom(activeSection?.pageBorders?.bottom ?? true);
-          setBorderLeft(activeSection?.pageBorders?.left ?? true);
-          setBorderRight(activeSection?.pageBorders?.right ?? true);
-          setBorderApplyTo(activeSection?.pageBorders?.applyTo || "document");
+          const effectiveBorder =
+            activePageObj?.pageBorders ?? activeSection?.pageBorders;
+
+          if (
+            effectiveBorder &&
+            effectiveBorder.setting !== "none" &&
+            effectiveBorder.style !== "none"
+          ) {
+            const hasCustomSides =
+              effectiveBorder.top === false ||
+              effectiveBorder.bottom === false ||
+              effectiveBorder.left === false ||
+              effectiveBorder.right === false;
+
+            const inferredSetting =
+              effectiveBorder.setting ||
+              (effectiveBorder.style === "shadow"
+                ? "shadow"
+                : effectiveBorder.style === "3d"
+                ? "3d"
+                : hasCustomSides
+                ? "custom"
+                : "box");
+
+            setBorderSetting(inferredSetting);
+
+            const inferredLineStyle =
+              effectiveBorder.lineStyle ||
+              (effectiveBorder.style === "dashed"
+                ? "dashed"
+                : effectiveBorder.style === "dotted"
+                ? "dotted"
+                : effectiveBorder.style === "double"
+                ? "double"
+                : effectiveBorder.style === "dash-dot"
+                ? "dash-dot"
+                : effectiveBorder.style === "thick-solid"
+                ? "thick-solid"
+                : "solid");
+
+            setBorderStyle(inferredLineStyle);
+            setBorderColor(effectiveBorder.color || "#000000");
+            setBorderWidth(effectiveBorder.width ?? 2);
+            setBorderTop(effectiveBorder.top ?? true);
+            setBorderBottom(effectiveBorder.bottom ?? true);
+            setBorderLeft(effectiveBorder.left ?? true);
+            setBorderRight(effectiveBorder.right ?? true);
+            const dist = effectiveBorder.distance ?? { top: 24, bottom: 24, left: 24, right: 24 };
+            setBorderDistanceTop(dist.top ?? 24);
+            setBorderDistanceBottom(dist.bottom ?? 24);
+            setBorderDistanceLeft(dist.left ?? 24);
+            setBorderDistanceRight(dist.right ?? 24);
+
+            const rawApplyTo = effectiveBorder.applyTo;
+            const validApplyTo: "document" | "section" | "page" | "firstPage" | "exceptFirstPage" =
+              rawApplyTo === "page" ||
+              rawApplyTo === "section" ||
+              rawApplyTo === "firstPage" ||
+              rawApplyTo === "exceptFirstPage" ||
+              rawApplyTo === "document"
+                ? rawApplyTo
+                : activePageObj?.pageBorders
+                ? "page"
+                : "document";
+            setBorderApplyTo(validApplyTo);
+            setArtBorder(effectiveBorder.art || "none");
+          } else {
+            setBorderSetting("none");
+            setBorderStyle("solid");
+            setBorderColor("#000000");
+            setBorderWidth(2);
+            setBorderTop(false);
+            setBorderBottom(false);
+            setBorderLeft(false);
+            setBorderRight(false);
+            setBorderDistanceTop(24);
+            setBorderDistanceBottom(24);
+            setBorderDistanceLeft(24);
+            setBorderDistanceRight(24);
+            setBorderApplyTo(activePageObj?.pageBorders ? "page" : "document");
+            setArtBorder("none");
+          }
           setBordersDialogOpen(true);
         }}
         className={triggerClass}
@@ -1719,20 +1698,31 @@ export default function LayoutTab() {
       {/* 8. Page Borders Dialog */}
       <Dialog open={bordersDialogOpen} onOpenChange={setBordersDialogOpen}>
         <DialogContent
-          className="!max-w-[780px] !w-[780px] sm:!max-w-[780px] sm:!w-[780px] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800"
-          style={{ maxWidth: "780px", width: "95vw" }}
+          className="!max-w-[820px] !w-[820px] sm:!max-w-[820px] sm:!w-[820px] max-h-[92vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800"
+          style={{ maxWidth: "820px", width: "95vw" }}
         >
-          <DialogHeader className="sr-only">
-            <DialogTitle>Page Border</DialogTitle>
+          <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between">
+            <DialogTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <svg
+                className="h-4 w-4 text-blue-600"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+              </svg>
+              Page Borders
+            </DialogTitle>
           </DialogHeader>
 
           {/* Scrollable Content Body */}
-          <div className="flex-1 overflow-y-auto px-6 pt-5 pb-4 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 pt-4 pb-4 min-h-0">
             <div className="flex flex-row gap-5 text-xs items-stretch">
               {/* Column 1: SETTING */}
               <div className="w-[125px] flex-shrink-0 border-r border-slate-200/90 dark:border-slate-800 pr-4">
                 <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
-                  SETTING
+                  Setting
                 </div>
                 <div className="space-y-1.5">
                   {(
@@ -1740,7 +1730,7 @@ export default function LayoutTab() {
                       { id: "none", label: "None" },
                       { id: "box", label: "Box" },
                       { id: "shadow", label: "Shadow" },
-                      { id: "3d", label: "3d" },
+                      { id: "3d", label: "3-D" },
                       { id: "custom", label: "Custom" },
                     ] as const
                   ).map(({ id, label }) => {
@@ -1756,6 +1746,13 @@ export default function LayoutTab() {
                             setBorderBottom(false);
                             setBorderLeft(false);
                             setBorderRight(false);
+                          } else if (id === "custom") {
+                            if (!borderTop && !borderBottom && !borderLeft && !borderRight) {
+                              setBorderTop(true);
+                              setBorderBottom(true);
+                              setBorderLeft(true);
+                              setBorderRight(true);
+                            }
                           } else {
                             setBorderTop(true);
                             setBorderBottom(true);
@@ -1777,7 +1774,7 @@ export default function LayoutTab() {
               </div>
 
               {/* Column 2: Controls */}
-              <div className="flex-1 min-w-[230px] px-1 space-y-3">
+              <div className="flex-1 min-w-[240px] px-1 space-y-3">
                 {/* Style */}
                 <div>
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
@@ -1786,50 +1783,83 @@ export default function LayoutTab() {
                   <div className="relative">
                     <select
                       value={borderStyle}
-                      onChange={(e) =>
-                        setBorderStyle(
-                          e.target.value as "solid" | "dashed" | "dotted" | "double"
-                        )
-                      }
+                      onChange={(e) => {
+                        const nextStyle = e.target.value as "solid" | "dashed" | "dotted" | "double" | "dash-dot" | "thick-solid";
+                        setBorderStyle(nextStyle);
+                        if (borderSetting === "none") {
+                          setBorderSetting("box");
+                          setBorderTop(true);
+                          setBorderBottom(true);
+                          setBorderLeft(true);
+                          setBorderRight(true);
+                        }
+                      }}
                       className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
                     >
                       <option value="solid">───── Solid</option>
                       <option value="dashed">- - - - - - Dashed</option>
                       <option value="dotted">············ Dotted</option>
                       <option value="double">══════ Double</option>
+                      <option value="dash-dot">─ · ─ · ─ Dash-Dot</option>
+                      <option value="thick-solid">━━━━━━ Thick Solid</option>
                     </select>
                     <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
 
-                {/* Color & Width */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
-                      Color
-                    </label>
-                    <div className="flex items-center gap-1.5">
-                      <div className="relative w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden flex-shrink-0 cursor-pointer flex items-center justify-center p-0.5 shadow-xs">
-                        <input
-                          type="color"
-                          value={borderColor}
-                          onChange={(e) => setBorderColor(e.target.value)}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                        />
-                        <div
-                          className="w-full h-full rounded-xs"
-                          style={{ backgroundColor: borderColor }}
-                        />
-                      </div>
+                {/* Color with Word Preset Palette */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    Color
+                  </label>
+                  <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                    {[
+                      { name: "Black", hex: "#000000" },
+                      { name: "White", hex: "#FFFFFF" },
+                      { name: "Gray", hex: "#6B7280" },
+                      { name: "Red", hex: "#EF4444" },
+                      { name: "Blue", hex: "#2563EB" },
+                      { name: "Green", hex: "#10B981" },
+                      { name: "Yellow", hex: "#F59E0B" },
+                    ].map((c) => (
+                      <button
+                        key={c.hex}
+                        type="button"
+                        title={c.name}
+                        onClick={() => setBorderColor(c.hex)}
+                        className={`h-5 w-5 rounded-full border transition-transform hover:scale-110 cursor-pointer ${
+                          borderColor.toLowerCase() === c.hex.toLowerCase()
+                            ? "ring-2 ring-blue-500 scale-110"
+                            : "border-slate-300 dark:border-slate-600"
+                        }`}
+                        style={{ backgroundColor: c.hex }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden flex-shrink-0 cursor-pointer flex items-center justify-center p-0.5 shadow-xs">
                       <input
-                        type="text"
+                        type="color"
                         value={borderColor}
                         onChange={(e) => setBorderColor(e.target.value)}
-                        className="w-full h-8 px-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-mono uppercase bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-[#0078D4]"
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                      <div
+                        className="w-full h-full rounded-xs"
+                        style={{ backgroundColor: borderColor }}
                       />
                     </div>
+                    <input
+                      type="text"
+                      value={borderColor}
+                      onChange={(e) => setBorderColor(e.target.value)}
+                      className="w-full h-8 px-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-mono uppercase bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-[#0078D4]"
+                    />
                   </div>
+                </div>
 
+                {/* Width & Art */}
+                <div className="grid grid-cols-2 gap-2.5">
                   <div>
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
                       Width
@@ -1837,43 +1867,89 @@ export default function LayoutTab() {
                     <div className="relative">
                       <select
                         value={borderWidth}
-                        onChange={(e) => setBorderWidth(parseInt(e.target.value, 10))}
+                        onChange={(e) => setBorderWidth(parseFloat(e.target.value))}
                         className="w-full h-8 px-2.5 pr-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
                       >
-                        <option value={1}>1/4 pt</option>
-                        <option value={1}>1/2 pt</option>
-                        <option value={1}>3/4 pt</option>
+                        <option value={1}>0.5 pt</option>
+                        <option value={1.5}>0.75 pt</option>
                         <option value={2}>1 pt</option>
-                        <option value={2}>1 1/2 pt</option>
-                        <option value={3}>2 1/4 pt</option>
-                        <option value={4}>3 pt</option>
-                        <option value={6}>4 1/2 pt</option>
-                        <option value={8}>6 pt</option>
+                        <option value={3}>1.5 pt</option>
+                        <option value={4}>2.25 pt</option>
+                        <option value={6}>3 pt</option>
+                        <option value={8}>4.5 pt</option>
+                        <option value={10}>6 pt</option>
+                      </select>
+                      <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                      Art
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={artBorder}
+                        onChange={(e) => setArtBorder(e.target.value)}
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      >
+                        <option value="none">None</option>
                       </select>
                       <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
-                {/* Art Borders */}
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
-                    Art Borders
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={artBorder}
-                      onChange={(e) => setArtBorder(e.target.value)}
-                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
-                    >
-                      <option value="none">None</option>
-                      <option value="stars">Stars (★)</option>
-                      <option value="hearts">Hearts (♥)</option>
-                      <option value="diamonds">Diamonds (♦)</option>
-                      <option value="apples">Apples (🍎)</option>
-                      <option value="ribbon">Ribbon (🎀)</option>
-                    </select>
-                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                {/* Distance Options (Word Distance from Page Edge) */}
+                <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-2.5 bg-slate-50/70 dark:bg-slate-900/50">
+                  <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Distance from Edge (px)
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Top:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceTop}
+                        onChange={(e) => setBorderDistanceTop(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Bottom:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceBottom}
+                        onChange={(e) => setBorderDistanceBottom(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Left:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceLeft}
+                        onChange={(e) => setBorderDistanceLeft(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Right:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceRight}
+                        onChange={(e) => setBorderDistanceRight(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -1887,13 +1963,19 @@ export default function LayoutTab() {
                       value={borderApplyTo}
                       onChange={(e) =>
                         setBorderApplyTo(
-                          e.target.value as "section" | "document" | "page"
+                          e.target.value as
+                            | "document"
+                            | "section"
+                            | "page"
+                            | "firstPage"
+                            | "exceptFirstPage"
                         )
                       }
                       className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
                     >
-                      <option value="document">Whole document</option>
-                      <option value="section">This section</option>
+                      <option value="document">Whole Document</option>
+                      <option value="section">Current Section</option>
+                      <option value="page">Current Page</option>
                       <option value="firstPage">This section - First page only</option>
                       <option value="exceptFirstPage">This section - All except first page</option>
                     </select>
@@ -1913,7 +1995,17 @@ export default function LayoutTab() {
                   <button
                     type="button"
                     title="Toggle Top Border"
-                    onClick={() => setBorderTop((prev) => !prev)}
+                    onClick={() => {
+                      const next = !borderTop;
+                      setBorderTop(next);
+                      if (!next && !borderBottom && !borderLeft && !borderRight) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!next || !borderBottom || !borderLeft || !borderRight) setBorderSetting("custom");
+                      }
+                    }}
                     className={`absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderTop && borderSetting !== "none"
                         ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
@@ -1927,7 +2019,17 @@ export default function LayoutTab() {
                   <button
                     type="button"
                     title="Toggle Bottom Border"
-                    onClick={() => setBorderBottom((prev) => !prev)}
+                    onClick={() => {
+                      const next = !borderBottom;
+                      setBorderBottom(next);
+                      if (!borderTop && !next && !borderLeft && !borderRight) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!borderTop || !next || !borderLeft || !borderRight) setBorderSetting("custom");
+                      }
+                    }}
                     className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderBottom && borderSetting !== "none"
                         ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
@@ -1941,7 +2043,17 @@ export default function LayoutTab() {
                   <button
                     type="button"
                     title="Toggle Left Border"
-                    onClick={() => setBorderLeft((prev) => !prev)}
+                    onClick={() => {
+                      const next = !borderLeft;
+                      setBorderLeft(next);
+                      if (!borderTop && !borderBottom && !next && !borderRight) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!borderTop || !borderBottom || !next || !borderRight) setBorderSetting("custom");
+                      }
+                    }}
                     className={`absolute top-1/2 -left-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderLeft && borderSetting !== "none"
                         ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
@@ -1955,7 +2067,17 @@ export default function LayoutTab() {
                   <button
                     type="button"
                     title="Toggle Right Border"
-                    onClick={() => setBorderRight((prev) => !prev)}
+                    onClick={() => {
+                      const next = !borderRight;
+                      setBorderRight(next);
+                      if (!borderTop && !borderBottom && !borderLeft && !next) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!borderTop || !borderBottom || !borderLeft || !next) setBorderSetting("custom");
+                      }
+                    }}
                     className={`absolute top-1/2 -right-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderRight && borderSetting !== "none"
                         ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
@@ -1965,26 +2087,26 @@ export default function LayoutTab() {
                     R
                   </button>
 
-                  {/* Document Sheet */}
+                  {/* Miniature Document Sheet with Interactive Clickable Sides */}
                   <div
-                    className="w-36 h-48 rounded-xs bg-white dark:bg-slate-900 relative overflow-hidden flex flex-col pt-3.5 px-3 pb-3 transition-all select-none"
+                    className="w-36 h-48 rounded-xs bg-white dark:bg-slate-900 relative overflow-hidden flex flex-col pt-3.5 px-3 pb-3 transition-all select-none cursor-pointer"
                     style={{
                       boxSizing: "border-box",
                       borderTop:
                         borderTop && borderSetting !== "none"
-                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
                           : "none",
                       borderBottom:
                         borderBottom && borderSetting !== "none"
-                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
                           : "none",
                       borderLeft:
                         borderLeft && borderSetting !== "none"
-                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
                           : "none",
                       borderRight:
                         borderRight && borderSetting !== "none"
-                          ? `${borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle} ${borderColor}`
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
                           : "none",
                       boxShadow:
                         borderSetting === "shadow"
@@ -1992,6 +2114,28 @@ export default function LayoutTab() {
                           : "0 8px 20px -4px rgba(0,0,0,0.12), 0 2px 6px -1px rgba(0,0,0,0.06)",
                     }}
                   >
+                    {/* Clickable side hotspots */}
+                    <div
+                      className="absolute top-0 left-0 right-0 h-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Top border"
+                      onClick={() => setBorderTop(!borderTop)}
+                    />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Bottom border"
+                      onClick={() => setBorderBottom(!borderBottom)}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 left-0 w-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Left border"
+                      onClick={() => setBorderLeft(!borderLeft)}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 right-0 w-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Right border"
+                      onClick={() => setBorderRight(!borderRight)}
+                    />
+
                     {/* Skeleton text lines */}
                     <div className="space-y-1.5 pointer-events-none select-none w-full">
                       <div className="h-1.5 w-[65%] bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
@@ -2003,7 +2147,7 @@ export default function LayoutTab() {
                 </div>
 
                 <div className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-2 text-center select-none font-normal">
-                  Click T/B/L/R to toggle individual sides
+                  Click sides or T/B/L/R to toggle
                 </div>
               </div>
             </div>
@@ -2021,9 +2165,9 @@ export default function LayoutTab() {
             <button
               type="button"
               onClick={handleApplyBorders}
-              className="px-5 py-2 rounded-lg bg-[#0078D4] hover:bg-[#006CBD] active:bg-[#005A9E] text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+              className="px-6 py-2 rounded-lg bg-[#0078D4] hover:bg-[#006CBD] active:bg-[#005A9E] text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
             >
-              Apply Borders
+              OK
             </button>
           </div>
         </DialogContent>

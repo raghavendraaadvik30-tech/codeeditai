@@ -22,6 +22,7 @@ interface RibbonButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  title?: string;
 }
 
 export default function RibbonButton({
@@ -30,6 +31,7 @@ export default function RibbonButton({
   onClick,
   disabled = false,
   className = "",
+  title,
 }: RibbonButtonProps) {
   const handleMouseDown = (
     event: MouseEvent<HTMLButtonElement>
@@ -41,6 +43,7 @@ export default function RibbonButton({
   return (
     <button
       type="button"
+      title={title}
       disabled={disabled}
       onMouseDown={handleMouseDown}
       onClick={onClick}

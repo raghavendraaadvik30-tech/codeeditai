@@ -886,50 +886,72 @@ function cleanHtmlChanges(html: string, accept: boolean): string {
 }
 
 function buildPgBordersXml(sec: SectionModel): string {
-  const borders = sec.pageBordersConfig ?? (sec.pageBorders ? {
-    type: sec.pageBorders.style === "none" ? "none" : sec.pageBorders.style === "box" ? "box" : sec.pageBorders.style === "shadow" ? "shadow" : sec.pageBorders.style === "3d" ? "3d" : "custom",
-    applyTo: (sec.pageBorders.applyTo === "page" ? "firstPage" : sec.pageBorders.applyTo === "section" ? "section" : "whole") as "whole" | "section" | "firstPage" | "exceptFirstPage",
-    top: sec.pageBorders.top ? { style: sec.pageBorders.style, color: sec.pageBorders.color || "#000000", width: sec.pageBorders.width || 1 } : undefined,
-    bottom: sec.pageBorders.bottom ? { style: sec.pageBorders.style, color: sec.pageBorders.color || "#000000", width: sec.pageBorders.width || 1 } : undefined,
-    left: sec.pageBorders.left ? { style: sec.pageBorders.style, color: sec.pageBorders.color || "#000000", width: sec.pageBorders.width || 1 } : undefined,
-    right: sec.pageBorders.right ? { style: sec.pageBorders.style, color: sec.pageBorders.color || "#000000", width: sec.pageBorders.width || 1 } : undefined,
-  } : undefined);
+  const pb = sec.pageBorders;
+  if (!pb || pb.setting === "none" || pb.style === "none") return "";
 
-  if (!borders || borders.type === "none") return "";
+  const type =
+    pb.setting ||
+    (pb.style === "box"
+      ? "box"
+      : pb.style === "shadow"
+      ? "shadow"
+      : pb.style === "3d"
+      ? "3d"
+      : "custom");
 
   let display = "allPages";
-  if (borders.applyTo === "firstPage") display = "firstPage";
-  else if (borders.applyTo === "exceptFirstPage") display = "notFirstPage";
+  if (pb.applyTo === "firstPage") display = "firstPage";
+  else if (pb.applyTo === "exceptFirstPage") display = "notFirstPage";
 
   let xml = `<w:pgBorders w:display="${display}" w:offsetFrom="page" w:zOrder="back">`;
 
-  const renderSideXml = (sideTag: string, b?: { style: string; color?: string; width?: number; art?: string }) => {
-    if (!b || b.style === "none" || (!b.width && !b.art)) {
+  const lineStyle =
+    pb.lineStyle ||
+    (pb.style === "dashed"
+      ? "dashed"
+      : pb.style === "dotted"
+      ? "dotted"
+      : pb.style === "double"
+      ? "double"
+      : "solid");
+
+  const sideBorder = {
+    style: lineStyle,
+    color: pb.color || "#000000",
+    width: pb.width || 1,
+    art: pb.art,
+  };
+
+  const renderSideXml = (
+    sideTag: string,
+    enabled?: boolean
+  ) => {
+    if (!enabled || (!sideBorder.width && !sideBorder.art)) {
       return "";
     }
 
-    if (b.art && b.art !== "none") {
+    if (sideBorder.art && sideBorder.art !== "none") {
       let artVal = "double";
       let sz = "24";
       let color = "auto";
-      if (b.art === "double-red") {
+      if (sideBorder.art === "double-red") {
         artVal = "double";
         sz = "24";
         color = "EF4444";
-      } else if (b.art === "stars") {
+      } else if (sideBorder.art === "stars") {
         artVal = "stars";
         sz = "24";
         color = "EAB308";
       } else {
         artVal = "dashed";
         sz = "16";
-        color = parseColorToHex(b.color) || "000000";
+        color = parseColorToHex(sideBorder.color) || "000000";
       }
       return `<w:${sideTag} w:val="${artVal}" w:sz="${sz}" w:space="24" w:color="${color}"/>`;
     }
 
     let val = "single";
-    const s = b.style.trim();
+    const s = sideBorder.style.trim();
     if (s === "solid") val = "single";
     else if (s === "double") val = "double";
     else if (s === "dashed") val = "dashed";
@@ -946,19 +968,19 @@ function buildPgBordersXml(sec: SectionModel): string {
     else if (s === "inset") val = "inset";
     else if (s === "outset") val = "outset";
 
-    const ptWidth = b.width || 1.5;
+    const ptWidth = sideBorder.width || 1.5;
     const szVal = Math.round(ptWidth * 8);
     const sz = String(Math.max(2, Math.min(96, szVal)));
-    const colorHex = parseColorToHex(b.color) || "000000";
-    const isShadow = borders.type === "shadow" ? ' w:shadow="true"' : "";
+    const colorHex = parseColorToHex(sideBorder.color) || "000000";
+    const isShadow = type === "shadow" ? ' w:shadow="true"' : "";
 
     return `<w:${sideTag} w:val="${val}" w:sz="${sz}" w:space="24" w:color="${colorHex}"${isShadow}/>`;
   };
 
-  xml += renderSideXml("top", borders.top);
-  xml += renderSideXml("left", borders.left);
-  xml += renderSideXml("bottom", borders.bottom);
-  xml += renderSideXml("right", borders.right);
+  xml += renderSideXml("top", pb.top);
+  xml += renderSideXml("left", pb.left);
+  xml += renderSideXml("bottom", pb.bottom);
+  xml += renderSideXml("right", pb.right);
 
   xml += "</w:pgBorders>";
   return xml;

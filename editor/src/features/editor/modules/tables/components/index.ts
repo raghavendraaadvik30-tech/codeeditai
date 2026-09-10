@@ -4,3 +4,8 @@ export * from "./TableTemplateList";
 export * from "./TableActionsToolbar";
 export * from "./TableControlsOverlay";
 export * from "./TableFloatingFormatToolbar";
+export * from "./TableContextMenu";
+export * from "./TableBordersShadingDialog";
+export * from "./TablePropertiesDialog";
+export * from "./StandardTablesDropdown";
+export * from "./StandardTablesPanel";

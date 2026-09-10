@@ -67,10 +67,8 @@ export default function HeaderActions() {
     model,
     save,
     saveAs,
-    updateTitle,
-    setPageHtml,
     setActivePage,
-    removePage,
+    importDocumentPages,
   } = useDocumentModel();
 
   const {
@@ -103,21 +101,13 @@ export default function HeaderActions() {
     if (!file) return;
 
     try {
-      const { title, html } = await parseUploadedFile(file);
+      const { title, html, pages } = await parseUploadedFile(file);
 
-      updateTitle(title);
+      const pagesToImport =
+        pages && pages.length > 0 ? pages : [html || "<p><br/></p>"];
 
-      const firstPageId = model.pages[0]?.id;
-      if (firstPageId) {
-        // If extra pages were inserted previously, remove them so the document starts cleanly on page 1
-        for (let i = 1; i < model.pages.length; i++) {
-          removePage(model.pages[i].id);
-        }
-
-        // Set uploaded content directly on page 1
-        setPageHtml(firstPageId, html);
-        setActivePage(firstPageId);
-      }
+      // Check document pages and insert all of them directly into the document
+      importDocumentPages(title, pagesToImport);
 
       // Immediately place in Protected View and ask permission to edit
       setIsEditable(false);

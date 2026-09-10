@@ -20,15 +20,18 @@ Acts as the **entry point for the document editor page** by setting up the requi
 import { EditorProvider } from "../context/EditorContext";
 import { DocumentModelProvider } from "../store/documentModel";
 import { TableProvider } from "../modules/tables/context";
+import { HeaderFooterProvider } from "../modules/document/context/HeaderFooterContext";
 import EditorLayout from "../layouts/EditorLayout";
 
 export default function EditorPage() {
   return (
     <DocumentModelProvider>
       <EditorProvider>
-        <TableProvider>
-          <EditorLayout />
-        </TableProvider>
+        <HeaderFooterProvider>
+          <TableProvider>
+            <EditorLayout />
+          </TableProvider>
+        </HeaderFooterProvider>
       </EditorProvider>
     </DocumentModelProvider>
   );

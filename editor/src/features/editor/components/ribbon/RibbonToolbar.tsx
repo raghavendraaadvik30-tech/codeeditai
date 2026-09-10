@@ -19,28 +19,41 @@ Provides the main ribbon toolbar and manages navigation between editor tabs.
 **Backend needed for:** Saving toolbar-related document changes, user preferences, or synchronizing editor actions.
 */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import HomeTab from "./tabs/HomeTab";
 import InsertTab from "./tabs/InsertTab";
 import LayoutTab from "./tabs/LayoutTab";
-
 import ReviewTab from "./tabs/ReviewTab";
-
+import HeaderFooterTab from "./tabs/HeaderFooterTab";
+import { useHeaderFooter } from "@/features/editor/modules/document/context/HeaderFooterContext";
 
 const tabs = [
   "Home",
   "Insert",
   "Layout",
   "Review",
-  
 ] as const;
 
 type RibbonTab = (typeof tabs)[number];
 
 export default function RibbonToolbar() {
-  const [activeTab, setActiveTab] =
-    useState<RibbonTab>("Home");
+  const { isHeaderFooterActive } = useHeaderFooter();
+  const [activeTab, setActiveTab] = useState<RibbonTab | "Header & Footer">("Home");
+  const previousTabRef = useRef<RibbonTab>("Home");
+
+  useEffect(() => {
+    if (isHeaderFooterActive) {
+      if (activeTab !== "Header & Footer") {
+        previousTabRef.current = (activeTab as RibbonTab) || "Home";
+      }
+      setActiveTab("Header & Footer");
+    } else {
+      if (activeTab === "Header & Footer") {
+        setActiveTab(previousTabRef.current || "Layout");
+      }
+    }
+  }, [isHeaderFooterActive]);
 
   const renderRibbon = () => {
     switch (activeTab) {
@@ -53,11 +66,11 @@ export default function RibbonToolbar() {
       case "Layout":
         return <LayoutTab />;
 
-      
       case "Review":
         return <ReviewTab />;
 
-    
+      case "Header & Footer":
+        return <HeaderFooterTab />;
 
       default:
         return <HomeTab />;
@@ -114,6 +127,35 @@ export default function RibbonToolbar() {
             </button>
           );
         })}
+
+        {/* Contextual Header & Footer Tab */}
+        {isHeaderFooterActive && (
+          <button
+            key="Header & Footer"
+            type="button"
+            onClick={() => setActiveTab("Header & Footer")}
+            className={`
+              rounded-t-md
+              px-4
+              py-1.5
+              text-sm
+              font-semibold
+              transition-colors
+              flex
+              items-center
+              gap-1.5
+
+              ${
+                activeTab === "Header & Footer"
+                  ? "bg-blue-50 text-[#0078d4] border border-b-0 border-blue-300 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-700"
+                  : "text-blue-600 hover:bg-blue-50/60 dark:text-blue-400 dark:hover:bg-slate-800"
+              }
+            `}
+          >
+            <span className="h-2 w-2 rounded-full bg-[#0078d4] animate-pulse" />
+            <span>Header &amp; Footer</span>
+          </button>
+        )}
       </div>
 
       {/* --------------------------------
