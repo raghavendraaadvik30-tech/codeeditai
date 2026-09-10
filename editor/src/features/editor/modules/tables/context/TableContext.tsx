@@ -23,6 +23,7 @@ export interface TableContextValue {
   insertTableWithConfig: (customConfig?: TableConfig) => void;
   insertTemplate: (template: TableTemplate) => void;
   insertQuickTable: (rows: number, cols: number) => void;
+  insertCustomTableHTML: (html: string) => void;
   insertRowAbove: () => void;
   insertRowBelow: () => void;
   insertColLeft: () => void;
@@ -138,7 +139,7 @@ export function TableProvider({
   children: ReactNode;
   initialConfig?: TableConfig;
 }) {
-  const { insertHTML, editorRef } = useEditor();
+  const { insertHTML, editorRef, zoom } = useEditor();
   const { setPageHtml, activePage, model } = useDocumentModel();
   const [config, setConfig] = useState<TableConfig>(initialConfig);
 
@@ -205,6 +206,26 @@ export function TableProvider({
   }, []);
 
   const findActiveTarget = () => {
+    // 0. Currently active table marked by overlay or selection
+    const activeOverlayTable = document.querySelector<HTMLTableElement>('table[data-active-table="true"]');
+    if (activeOverlayTable && activeOverlayTable.isConnected) {
+      lastActiveTableRef.current = activeOverlayTable;
+      const selCell = window.getSelection()?.anchorNode
+        ? (getNodeElement(window.getSelection()!.anchorNode)?.closest("td, th") as HTMLTableCellElement | null)
+        : null;
+      const cell = (selCell && activeOverlayTable.contains(selCell))
+        ? selCell
+        : (lastActiveCellRef.current && activeOverlayTable.contains(lastActiveCellRef.current))
+        ? lastActiveCellRef.current
+        : (activeOverlayTable.querySelector("td, th") as HTMLTableCellElement | null);
+      if (cell) lastActiveCellRef.current = cell;
+      return {
+        cell,
+        tr: cell ? cell.closest("tr") : activeOverlayTable.querySelector("tr"),
+        table: activeOverlayTable,
+      };
+    }
+
     // 1. Current selection
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
@@ -340,6 +361,11 @@ export function TableProvider({
       editorRef.current ||
       (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
 
+    const marker = `data-new-tbl-${Date.now()}`;
+    const markedHtml = html.includes("<table")
+      ? html.replace("<table", `<table ${marker}="true"`)
+      : html;
+
     const sel = window.getSelection();
     let hasRangeInActive = false;
     if (sel && sel.rangeCount > 0 && activeEditor) {
@@ -350,7 +376,7 @@ export function TableProvider({
     }
 
     if (hasRangeInActive) {
-      insertHTML?.(html);
+      insertHTML?.(markedHtml);
     } else if (activeEditor) {
       activeEditor.focus();
       const lastP = activeEditor.lastElementChild;
@@ -360,9 +386,9 @@ export function TableProvider({
           lastP.innerHTML === "<br/>" ||
           lastP.textContent?.trim() === "")
       ) {
-        lastP.insertAdjacentHTML("beforebegin", html);
+        lastP.insertAdjacentHTML("beforebegin", markedHtml);
       } else {
-        activeEditor.insertAdjacentHTML("beforeend", html);
+        activeEditor.insertAdjacentHTML("beforeend", markedHtml);
       }
       activeEditor.dispatchEvent(new Event("input", { bubbles: true }));
       const targetPageId = activeEditor.closest("section[data-page-id]")?.getAttribute("data-page-id");
@@ -370,24 +396,36 @@ export function TableProvider({
         setPageHtml(targetPageId, activeEditor.innerHTML);
       }
     } else {
-      insertHTML?.(html);
+      insertHTML?.(markedHtml);
     }
 
-    // Automatically place cursor in cell (0, 0) of newly inserted table
+    // Automatically place cursor in cell (0, 0) of newly inserted table and activate it
     setTimeout(() => {
       const targetEditor =
         activeEditor || editorRef.current || (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
+      let newTable: HTMLTableElement | null = null;
       if (targetEditor) {
+        newTable = targetEditor.querySelector(`table[${marker}="true"]`) as HTMLTableElement | null;
+      }
+      if (!newTable) {
+        newTable = document.querySelector(`table[${marker}="true"]`) as HTMLTableElement | null;
+      }
+      if (!newTable && targetEditor) {
         const allTables = targetEditor.querySelectorAll("table");
-        const lastTable = allTables[allTables.length - 1];
-        if (lastTable) {
-          const firstCell = lastTable.querySelector("td, th") as HTMLTableCellElement | null;
-          if (firstCell) {
-            lastActiveCellRef.current = firstCell;
-            lastActiveTableRef.current = lastTable;
-            placeCaretInCell(firstCell);
-          }
+        newTable = allTables[allTables.length - 1] || null;
+      }
+
+      if (newTable) {
+        newTable.removeAttribute(marker);
+        lastActiveTableRef.current = newTable;
+        const firstCell = newTable.querySelector("td, th") as HTMLTableCellElement | null;
+        if (firstCell) {
+          lastActiveCellRef.current = firstCell;
+          placeCaretInCell(firstCell);
         }
+        newTable.dispatchEvent(new Event("selectionchange", { bubbles: true }));
+        newTable.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        notifyDomChange(newTable);
       }
     }, 50);
   };
@@ -989,12 +1027,28 @@ export function TableProvider({
     const spacer = document.createElement("p");
     spacer.innerHTML = "<br/>";
 
+    // Continuation Title Caption (Word-style clinical table continuation)
+    let origCaptionText = "Table 1: Table Title";
+    const prevElem = targetTable.previousElementSibling;
+    if (prevElem && (prevElem.classList.contains("doc-table-caption") || prevElem.getAttribute("data-caption") === "true")) {
+      origCaptionText = prevElem.textContent?.trim() || origCaptionText;
+    }
+    const continueCaption = document.createElement("p");
+    continueCaption.className = "doc-table-caption font-bold";
+    continueCaption.setAttribute("data-caption", "true");
+    continueCaption.style.cssText = "font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;";
+    continueCaption.textContent = origCaptionText.includes("(Continued)")
+      ? origCaptionText
+      : `${origCaptionText} (Continued)`;
+
     const parentNode = targetTable.parentNode;
     if (targetTable.nextSibling) {
       parentNode.insertBefore(spacer, targetTable.nextSibling);
-      parentNode.insertBefore(newTable, spacer.nextSibling);
+      parentNode.insertBefore(continueCaption, spacer.nextSibling);
+      parentNode.insertBefore(newTable, continueCaption.nextSibling);
     } else {
       parentNode.appendChild(spacer);
+      parentNode.appendChild(continueCaption);
       parentNode.appendChild(newTable);
     }
 
@@ -1146,14 +1200,15 @@ export function TableProvider({
       ...Array.from(table.rows).map((r) => r.cells.length),
       1
     );
+    const scale = (zoom || 100) / 100;
     const colWidthPct = (100 / numCols).toFixed(2) + "%";
-    const tableWidth = table.getBoundingClientRect().width;
+    const tableWidth = table.getBoundingClientRect().width / scale;
     const colWidthPx = Math.max(20, Math.floor(tableWidth / numCols));
 
     Array.from(table.rows).forEach((row) => {
       Array.from(row.cells).forEach((cell) => {
-        cell.style.minWidth = "";
-        cell.style.maxWidth = "";
+        cell.style.minWidth = "unset";
+        cell.style.maxWidth = "unset";
         cell.style.width = table.style.width && table.style.width.endsWith("px")
           ? `${colWidthPx}px`
           : colWidthPct;
@@ -1162,6 +1217,7 @@ export function TableProvider({
     });
 
     notifyDomChange(table);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const distributeRows = () => {
@@ -1171,18 +1227,41 @@ export function TableProvider({
     const rows = Array.from(table.rows);
     if (rows.length === 0) return;
 
-    const currentHeight = table.getBoundingClientRect().height;
-    const equalRowHeight = Math.max(28, Math.round(currentHeight / rows.length));
+    const scale = (zoom || 100) / 100;
+    const rowHeights = rows.map((r) => r.getBoundingClientRect().height / scale);
+    const totalRowsHeight = rowHeights.reduce((acc, h) => acc + h, 0);
+    const equalRowHeight = Math.max(18, Math.round(totalRowsHeight / rows.length));
 
-    rows.forEach((row) => {
-      row.style.height = `${equalRowHeight}px`;
-      Array.from(row.cells).forEach((cell) => {
-        cell.style.height = `${equalRowHeight}px`;
-        cell.style.boxSizing = "border-box";
+    let maxContentHeight = 18;
+    rows.forEach((r) => {
+      Array.from(r.cells).forEach((c) => {
+        const cellContentHeight = Math.max(c.scrollHeight || 0, c.offsetHeight || 0, 18);
+        if (cellContentHeight > maxContentHeight) {
+          maxContentHeight = cellContentHeight;
+        }
       });
     });
 
+    const targetRowHeight = Math.max(equalRowHeight, Math.round(maxContentHeight));
+
+    rows.forEach((row) => {
+      row.style.height = `${targetRowHeight}px`;
+      row.removeAttribute("height");
+      Array.from(row.cells).forEach((cell) => {
+        cell.style.height = `${targetRowHeight}px`;
+        cell.style.minHeight = "unset";
+        cell.style.maxHeight = "unset";
+        cell.style.boxSizing = "border-box";
+        cell.removeAttribute("height");
+      });
+    });
+
+    table.style.height = `${Math.round(targetRowHeight * rows.length)}px`;
+    table.style.minHeight = "unset";
+    table.removeAttribute("height");
+
     notifyDomChange(table);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const value = useMemo<TableContextValue>(
@@ -1193,6 +1272,7 @@ export function TableProvider({
       insertTableWithConfig,
       insertTemplate,
       insertQuickTable,
+      insertCustomTableHTML: executeInsertTable,
       insertRowAbove,
       insertRowBelow,
       insertColLeft,

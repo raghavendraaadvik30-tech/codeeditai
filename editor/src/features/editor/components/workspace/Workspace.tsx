@@ -20,8 +20,15 @@ and provides true Word-style content-overflow pagination across pages.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useEditor } from "../../context/EditorContext";
-import { useDocumentModel, type PageModel, type SectionModel } from "../../store/documentModel";
-import { TableControlsOverlay, TableFloatingFormatToolbar } from "../../modules/tables/components";
+import { useDocumentModel, type PageModel, type SectionModel, type PageBorderConfig } from "../../store/documentModel";
+import { useHeaderFooter } from "../../modules/document/context/HeaderFooterContext";
+import {
+  TableControlsOverlay,
+  TableFloatingFormatToolbar,
+  TableContextMenu,
+  type TableContextMenuState,
+} from "../../modules/tables/components";
+import DocumentRuler from "./DocumentRuler";
 
 export default function Workspace() {
   const {
@@ -31,7 +38,23 @@ export default function Workspace() {
     setPageHtml,
     addPage,
     removePage,
+    updateSection,
   } = useDocumentModel();
+
+  const {
+    isHeaderFooterActive,
+    exitHeaderFooterMode,
+  } = useHeaderFooter();
+
+  useEffect(() => {
+    const handleGlobalEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isHeaderFooterActive) {
+        exitHeaderFooterMode();
+      }
+    };
+    window.addEventListener("keydown", handleGlobalEscape);
+    return () => window.removeEventListener("keydown", handleGlobalEscape);
+  }, [isHeaderFooterActive, exitHeaderFooterMode]);
 
   const {
     zoom,
@@ -42,6 +65,14 @@ export default function Workspace() {
   } = useEditor();
 
   const [activeTable, setActiveTable] = useState<HTMLTableElement | null>(null);
+  const [tableContextMenu, setTableContextMenu] = useState<TableContextMenuState>({
+    open: false,
+    x: 0,
+    y: 0,
+    table: null,
+    cell: null,
+    savedRange: null,
+  });
 
   // Unified global table selection tracking across all document pages
   useEffect(() => {
@@ -108,6 +139,80 @@ export default function Workspace() {
     };
   }, [activePage, setActivePage]);
 
+  // Close table context menu when navigating pages
+  useEffect(() => {
+    setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+  }, [activePage]);
+
+  // Native contextmenu detection specifically for table cells (td, th)
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // Determine clicked element using closest("td, th")
+      const cell = target.closest("td, th") as HTMLTableCellElement | null;
+      const table = cell?.closest("table") as HTMLTableElement | null;
+
+      if (cell && table) {
+        const pageSection = table.closest("section[data-page-id]");
+        if (pageSection) {
+          // 1. Prevent browser's default context menu
+          e.preventDefault();
+
+          // 2. Update active table and active page
+          setActiveTable(table);
+          const pageId = pageSection.getAttribute("data-page-id");
+          if (pageId && activePage !== pageId) {
+            setActivePage(pageId);
+          }
+
+          // 3. Preserve text selection range if inside cell
+          let savedRange: Range | null = null;
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            const r = sel.getRangeAt(0);
+            if (cell.contains(r.commonAncestorContainer)) {
+              savedRange = r.cloneRange();
+            }
+          }
+
+          // 4. Open table context menu at pointer position
+          setTableContextMenu({
+            open: true,
+            x: e.clientX,
+            y: e.clientY,
+            table,
+            cell,
+            savedRange,
+          });
+          return;
+        }
+      }
+
+      // If clicked outside a table cell, close any open table context menu and leave default behavior
+      setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [activePage, setActivePage]);
+
+  const activePageObj =
+    model.pages.find((p) => p.id === activePage) ?? model.pages[0];
+  const activeSection =
+    model.sections.find((s) => s.id === activePageObj?.sectionId) ??
+    model.sections[0];
+
+  const isLandscape = activeSection?.orientation === "landscape";
+  const baseWidth = activeSection?.paperSize?.width ?? 816;
+  const baseHeight = activeSection?.paperSize?.height ?? 1056;
+  const activePageWidth = isLandscape ? baseHeight : baseWidth;
+  const activeMarginLeft = activeSection?.marginConfig?.left ?? 96;
+  const activeMarginRight = activeSection?.marginConfig?.right ?? 96;
+
   return (
     <main
       className="
@@ -118,12 +223,33 @@ export default function Workspace() {
         min-w-0
         min-h-0
         flex-1
-        overflow-x-hidden
+        flex-col
+        overflow-x-auto
         overflow-y-auto
         bg-[#EEF4FA]
         dark:bg-[#050B11]
       "
     >
+      {/* WORD HORIZONTAL RULER */}
+      <DocumentRuler
+        pageWidth={activePageWidth}
+        zoom={zoom}
+        marginLeft={activeMarginLeft}
+        marginRight={activeMarginRight}
+        onMarginChange={(newLeft, newRight) => {
+          if (activeSection?.id) {
+            updateSection(activeSection.id, {
+              marginConfig: {
+                top: activeSection.marginConfig?.top ?? 96,
+                bottom: activeSection.marginConfig?.bottom ?? 96,
+                left: newLeft,
+                right: newRight,
+              },
+            });
+          }
+        }}
+      />
+
       {/* DOCUMENT AREA */}
       <div
         className="
@@ -167,6 +293,29 @@ export default function Workspace() {
               ? activePage === page.id
               : index === 0;
 
+            const sectionPages = model.pages.filter(
+              (p) => p.sectionId === section?.id
+            );
+            const isFirstPageOfSection = sectionPages[0]?.id === page.id;
+
+            let effectivePageBorders: PageBorderConfig | undefined = undefined;
+            if (page.pageBorders !== undefined) {
+              effectivePageBorders = page.pageBorders;
+            } else if (section?.pageBorders) {
+              const applyTo = section.pageBorders.applyTo;
+              if (applyTo === "firstPage") {
+                if (isFirstPageOfSection) {
+                  effectivePageBorders = section.pageBorders;
+                }
+              } else if (applyTo === "exceptFirstPage") {
+                if (!isFirstPageOfSection) {
+                  effectivePageBorders = section.pageBorders;
+                }
+              } else {
+                effectivePageBorders = section.pageBorders;
+              }
+            }
+
             return (
               <DocumentPage
                 key={page.id}
@@ -175,6 +324,7 @@ export default function Workspace() {
                 pageNumber={pageNumbersMap[page.id] ?? (index + 1)}
                 totalPages={model.pages.length}
                 section={section}
+                pageBorders={effectivePageBorders}
                 headerText={section?.header || ""}
                 footerText={section?.footer || "Parexel Smart Authoring Suite"}
                 pageNumberPosition={section?.pageNumberPosition}
@@ -210,6 +360,29 @@ export default function Workspace() {
           Appears automatically near selection when text inside a table cell is selected
       */}
       {isEditable && <TableFloatingFormatToolbar />}
+
+      {/* MICROSOFT WORD-STYLE TABLE CELL CONTEXT MENU
+          Appears exclusively when right-clicking inside a table cell (td, th)
+      */}
+      {isEditable && (
+        <TableContextMenu
+          state={tableContextMenu}
+          onClose={() => setTableContextMenu((prev) => ({ ...prev, open: false }))}
+          onUpdateTable={() => {
+            if (tableContextMenu.table) {
+              const editable = tableContextMenu.table.closest('[contenteditable="true"]') as HTMLElement | null;
+              if (editable) {
+                editable.dispatchEvent(new Event("input", { bubbles: true }));
+                const pageSection = editable.closest("section[data-page-id]");
+                const pageId = pageSection?.getAttribute("data-page-id");
+                if (pageId) {
+                  setPageHtml(pageId, editable.innerHTML);
+                }
+              }
+            }
+          }}
+        />
+      )}
 
       {/* AI FLOATING BUTTON
           Only show when AI panel is closed
@@ -345,6 +518,7 @@ interface DocumentPageProps {
   headerText: string;
   footerText: string;
   section?: SectionModel;
+  pageBorders?: PageBorderConfig;
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
   pageNumberFormat?: "1" | "i" | "I" | "a" | "A";
@@ -371,9 +545,10 @@ function DocumentPage({
   pageIndex,
   pageNumber,
   totalPages,
-  headerText,
-  footerText,
+  headerText: _headerText,
+  footerText: _footerText,
   section,
+  pageBorders,
   pageNumberPosition,
   pageNumberAlignment,
   pageNumberFormat,
@@ -401,6 +576,124 @@ function DocumentPage({
   const marginR = section?.marginConfig?.right ?? 96;
   const marginT = Math.max(16, (section?.marginConfig?.top ?? 96) - 24);
   const marginB = Math.max(16, (section?.marginConfig?.bottom ?? 96) - 24);
+
+  const { model: docModel, updateSection: docUpdateSection } = useDocumentModel();
+  const {
+    isHeaderFooterActive,
+    showDocumentText,
+    enterHeaderFooterMode,
+    exitHeaderFooterMode,
+    setActiveHFType,
+  } = useHeaderFooter();
+
+  const sectionIndex = docModel.sections.findIndex((s) => s.id === section?.id);
+  const secNumber = sectionIndex >= 0 ? sectionIndex + 1 : 1;
+
+  // Link to previous section resolution
+  const isLinked = (section?.linkToPrevious ?? false) && sectionIndex > 0;
+  const effectiveSection = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1] : section;
+
+  // Section pages for first-page check
+  const sectionPages = docModel.pages.filter((p) => p.sectionId === section?.id);
+  const isFirstPageOfSection = (sectionPages[0]?.id === pageId) || pageIndex === 0;
+  const isEvenPage = pageNumber % 2 === 0;
+
+  // Header resolution
+  let headerKind: "first" | "even" | "odd" | "normal" = "normal";
+  let headerLabel = `HEADER - SECTION ${secNumber}`;
+  let effectiveHeaderText = effectiveSection?.header || "";
+  let effectiveHeaderHtml = effectiveSection?.headerHtml || "";
+
+  if (effectiveSection?.differentFirstPage && isFirstPageOfSection) {
+    headerKind = "first";
+    headerLabel = `FIRST PAGE HEADER - SECTION ${secNumber}`;
+    effectiveHeaderText = effectiveSection.firstHeader || effectiveSection.header || "";
+    effectiveHeaderHtml = effectiveSection.firstHeaderHtml || effectiveSection.headerHtml || "";
+  } else if (effectiveSection?.differentOddEven && isEvenPage) {
+    headerKind = "even";
+    headerLabel = `EVEN PAGE HEADER - SECTION ${secNumber}`;
+    effectiveHeaderText = effectiveSection.evenHeader || effectiveSection.header || "";
+    effectiveHeaderHtml = effectiveSection.evenHeaderHtml || effectiveSection.headerHtml || "";
+  } else if (effectiveSection?.differentOddEven && !isEvenPage) {
+    headerKind = "odd";
+    headerLabel = `ODD PAGE HEADER - SECTION ${secNumber}`;
+    effectiveHeaderText = effectiveSection.header || "";
+    effectiveHeaderHtml = effectiveSection.headerHtml || "";
+  }
+
+  // Footer resolution
+  let footerKind: "first" | "even" | "odd" | "normal" = "normal";
+  let footerLabel = `FOOTER - SECTION ${secNumber}`;
+  let effectiveFooterText = effectiveSection?.footer || "Parexel Smart Authoring Suite";
+  let effectiveFooterHtml = effectiveSection?.footerHtml || "";
+
+  if (effectiveSection?.differentFirstPage && isFirstPageOfSection) {
+    footerKind = "first";
+    footerLabel = `FIRST PAGE FOOTER - SECTION ${secNumber}`;
+    effectiveFooterText = effectiveSection.firstFooter || effectiveSection.footer || "";
+    effectiveFooterHtml = effectiveSection.firstFooterHtml || effectiveSection.footerHtml || "";
+  } else if (effectiveSection?.differentOddEven && isEvenPage) {
+    footerKind = "even";
+    footerLabel = `EVEN PAGE FOOTER - SECTION ${secNumber}`;
+    effectiveFooterText = effectiveSection.evenFooter || effectiveSection.footer || "";
+    effectiveFooterHtml = effectiveSection.evenFooterHtml || effectiveSection.footerHtml || "";
+  } else if (effectiveSection?.differentOddEven && !isEvenPage) {
+    footerKind = "odd";
+    footerLabel = `ODD PAGE FOOTER - SECTION ${secNumber}`;
+    effectiveFooterText = effectiveSection.footer || "";
+    effectiveFooterHtml = effectiveSection.footerHtml || "";
+  }
+
+  const headerContentRef = useRef<HTMLDivElement | null>(null);
+  const footerContentRef = useRef<HTMLDivElement | null>(null);
+  const isEditingHeaderRef = useRef(false);
+  const isEditingFooterRef = useRef(false);
+
+  useEffect(() => {
+    if (headerContentRef.current && !isEditingHeaderRef.current) {
+      headerContentRef.current.innerHTML = effectiveHeaderHtml || effectiveHeaderText || "";
+    }
+  }, [effectiveHeaderHtml, effectiveHeaderText, isHeaderFooterActive]);
+
+  useEffect(() => {
+    if (footerContentRef.current && !isEditingFooterRef.current) {
+      footerContentRef.current.innerHTML = effectiveFooterHtml || effectiveFooterText || "";
+    }
+  }, [effectiveFooterHtml, effectiveFooterText, isHeaderFooterActive]);
+
+  const handleHeaderUpdate = useCallback(
+    (newText: string, newHtml: string) => {
+      if (!section) return;
+      const targetSecId = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1]?.id : section.id;
+      if (!targetSecId) return;
+
+      if (headerKind === "first") {
+        docUpdateSection(targetSecId, { firstHeader: newText, firstHeaderHtml: newHtml });
+      } else if (headerKind === "even") {
+        docUpdateSection(targetSecId, { evenHeader: newText, evenHeaderHtml: newHtml });
+      } else {
+        docUpdateSection(targetSecId, { header: newText, headerHtml: newHtml });
+      }
+    },
+    [section, isLinked, sectionIndex, docModel.sections, headerKind, docUpdateSection]
+  );
+
+  const handleFooterUpdate = useCallback(
+    (newText: string, newHtml: string) => {
+      if (!section) return;
+      const targetSecId = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1]?.id : section.id;
+      if (!targetSecId) return;
+
+      if (footerKind === "first") {
+        docUpdateSection(targetSecId, { firstFooter: newText, firstFooterHtml: newHtml });
+      } else if (footerKind === "even") {
+        docUpdateSection(targetSecId, { evenFooter: newText, evenFooterHtml: newHtml });
+      } else {
+        docUpdateSection(targetSecId, { footer: newText, footerHtml: newHtml });
+      }
+    },
+    [section, isLinked, sectionIndex, docModel.sections, footerKind, docUpdateSection]
+  );
 
   /*
    * Keep dynamic page number fields inside document content synchronized
@@ -937,57 +1230,20 @@ function DocumentPage({
   const baseHeight = section?.paperSize?.height ?? 1056;
   const pageWidth = isLandscape ? baseHeight : baseWidth;
   const pageHeight = isLandscape ? baseWidth : baseHeight;
-  const headerHeight = 45;
-  const footerHeight = 45;
+  const headerHeight = Math.max(45, section?.headerTopDistance ?? 48);
+  const footerHeight = Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
-
-  const getBorderStyle = (): React.CSSProperties => {
-    if (!section?.pageBorders || section.pageBorders.style === "none") {
-      return {};
-    }
-
-    const {
-      style,
-      color = "#000000",
-      width = 2,
-      top = true,
-      bottom = true,
-      left = true,
-      right = true,
-    } = section.pageBorders;
-
-    const borderVal =
-      style === "double"
-        ? `${Math.max(3, width)}px double ${color}`
-        : style === "dashed"
-        ? `${width}px dashed ${color}`
-        : style === "dotted"
-        ? `${width}px dotted ${color}`
-        : style === "3d"
-        ? `${width}px inset ${color}`
-        : `${width}px solid ${color}`;
-
-    const styles: React.CSSProperties = {
-      boxSizing: "border-box",
-    };
-
-    if (top) styles.borderTop = borderVal;
-    if (bottom) styles.borderBottom = borderVal;
-    if (left) styles.borderLeft = borderVal;
-    if (right) styles.borderRight = borderVal;
-
-    if (style === "shadow") {
-      styles.boxShadow = "0 10px 30px rgba(0,0,0,0.25)";
-      styles.border = `${width}px solid ${color}`;
-    }
-
-    return styles;
-  };
 
   return (
     <section
       data-page-id={pageId}
       onMouseDown={handlePageMouseDown}
+      onDoubleClick={(e) => {
+        if (isHeaderFooterActive && !(e.target as HTMLElement).closest('[data-hf-container]')) {
+          e.stopPropagation();
+          exitHeaderFooterMode();
+        }
+      }}
       className={`
         relative
         overflow-hidden
@@ -995,14 +1251,11 @@ function DocumentPage({
         cursor-text
         shadow-[0_4px_20px_rgba(0,0,0,0.12)]
         box-border
+        border
         ${
           active
-            ? "ring-1 ring-blue-300/40"
-            : ""
-        }
-        ${!section?.pageBorders || section.pageBorders.style === "none"
-            ? (active ? "border border-blue-300" : "border border-slate-200")
-            : ""
+            ? "border-blue-300 ring-1 ring-blue-300/40"
+            : "border-slate-200"
         }
       `}
       style={{
@@ -1014,9 +1267,96 @@ function DocumentPage({
         transformOrigin: "top center",
         marginBottom: `${(pageHeight * zoom) / 100 - pageHeight}px`,
         backgroundColor: section?.pageColor || "#ffffff",
-        ...getBorderStyle(),
       }}
     >
+      {/* WORD-STYLE PAGE BORDER OVERLAY */}
+      {(() => {
+        if (!pageBorders || pageBorders.setting === "none" || pageBorders.style === "none") {
+          return null;
+        }
+
+        const {
+          setting = "box",
+          lineStyle,
+          style,
+          color = "#000000",
+          width = 2,
+          top = true,
+          bottom = true,
+          left = true,
+          right = true,
+          distance,
+        } = pageBorders;
+
+        if (!top && !bottom && !left && !right) {
+          return null;
+        }
+
+        const effectiveLineStyle =
+          lineStyle ||
+          (style === "dashed"
+            ? "dashed"
+            : style === "dotted"
+            ? "dotted"
+            : style === "double"
+            ? "double"
+            : style === "dash-dot"
+            ? "dash-dot"
+            : style === "thick-solid"
+            ? "thick-solid"
+            : "solid");
+
+        const effectiveBorderWidth =
+          effectiveLineStyle === "thick-solid"
+            ? Math.max(4, width * 1.5)
+            : effectiveLineStyle === "double"
+            ? Math.max(3, width)
+            : width;
+
+        const effectiveBorderType =
+          setting === "3d"
+            ? "inset"
+            : effectiveLineStyle === "dash-dot"
+            ? "dashed"
+            : effectiveLineStyle === "thick-solid"
+            ? "solid"
+            : effectiveLineStyle;
+
+        const borderVal = `${effectiveBorderWidth}px ${effectiveBorderType} ${color}`;
+
+        const distTop = distance?.top ?? 24;
+        const distBottom = distance?.bottom ?? 24;
+        const distLeft = distance?.left ?? 24;
+        const distRight = distance?.right ?? 24;
+
+        const borderOverlayStyles: React.CSSProperties = {
+          position: "absolute",
+          top: `${distTop}px`,
+          bottom: `${distBottom}px`,
+          left: `${distLeft}px`,
+          right: `${distRight}px`,
+          pointerEvents: "none",
+          zIndex: 15,
+          boxSizing: "border-box",
+          borderTop: top ? borderVal : "none",
+          borderBottom: bottom ? borderVal : "none",
+          borderLeft: left ? borderVal : "none",
+          borderRight: right ? borderVal : "none",
+        };
+
+        if (setting === "shadow") {
+          borderOverlayStyles.filter = `drop-shadow(4px 4px 0px ${color || "#000000"})`;
+        }
+
+        return (
+          <div
+            data-page-border="true"
+            className="pointer-events-none absolute z-15 select-none"
+            style={borderOverlayStyles}
+          />
+        );
+      })()}
+
       {/* WATERMARK OVERLAY */}
       {section?.watermark?.text && (
         <div
@@ -1089,55 +1429,145 @@ function DocumentPage({
 
       {/* DOCUMENT HEADER */}
       <div
-        className="
+        data-hf-container="header"
+        data-page-id={pageId}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          enterHeaderFooterMode("header", section?.id, pageId);
+        }}
+        title={!isHeaderFooterActive ? "Double-click to edit Header" : undefined}
+        className={`
           relative
-          h-[45px]
-          min-h-[45px]
-          max-h-[45px]
-          border-b
-          border-slate-100
+          box-border
           text-[10px]
           text-slate-500
-          flex
-          items-center
-          justify-between
-          box-border
-        "
+          transition-all
+          ${
+            isHeaderFooterActive
+              ? "border-b border-dashed border-[#0078d4] bg-blue-50/20 ring-1 ring-blue-300/40 dark:border-blue-500 dark:bg-blue-950/20"
+              : "border-b border-slate-100 hover:bg-blue-50/15 cursor-pointer dark:border-slate-800"
+          }
+        `}
         style={{
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
-          paddingTop: "14px",
+          paddingTop: `${Math.max(8, (section?.headerTopDistance ?? 48) - 34)}px`,
+          paddingBottom: "8px",
+          minHeight: `${headerHeight}px`,
         }}
       >
-        {section?.showPageNumbers !== false && pageNumberPosition === "header" ? (
-          <>
-            {pageNumberAlignment === "left" ? (
-              <>
-                <div className="font-semibold text-slate-700 dark:text-slate-300">
-                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
-                </div>
-                <span>{headerText}</span>
-              </>
-            ) : pageNumberAlignment === "center" ? (
-              <>
-                <span>{headerText}</span>
-                <div className="font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
-                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
-                </div>
-                <span />
-              </>
-            ) : (
-              <>
-                <span>{headerText}</span>
-                <div className="font-semibold text-slate-700 dark:text-slate-300">
-                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
-                </div>
-              </>
+        {/* Editor-only Header Section Label */}
+        {isHeaderFooterActive && (
+          <div
+            data-editor-ui="true"
+            className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-white text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+          >
+            <span>{headerLabel}</span>
+            {isLinked && (
+              <span className="opacity-80 font-normal text-[8px]">(Same as Previous)</span>
             )}
-          </>
-        ) : (
-          <span>{headerText}</span>
+          </div>
         )}
+
+        <div className="flex items-center justify-between w-full h-full">
+          {section?.showPageNumbers !== false && pageNumberPosition === "header" ? (
+            <>
+              {pageNumberAlignment === "left" ? (
+                <>
+                  <div className="font-semibold text-slate-700 dark:text-slate-300 mr-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={headerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("header")}
+                      onInput={(e) => {
+                        isEditingHeaderRef.current = true;
+                        handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveHeaderHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+                  ) : (
+                    <span>{effectiveHeaderText}</span>
+                  )}
+                </>
+              ) : pageNumberAlignment === "center" ? (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={headerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("header")}
+                      onInput={(e) => {
+                        isEditingHeaderRef.current = true;
+                        handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveHeaderHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+                  ) : (
+                    <span>{effectiveHeaderText}</span>
+                  )}
+                  <div className="font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  <span />
+                </>
+              ) : (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={headerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("header")}
+                      onInput={(e) => {
+                        isEditingHeaderRef.current = true;
+                        handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveHeaderHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+                  ) : (
+                    <span>{effectiveHeaderText}</span>
+                  )}
+                  <div className="font-semibold text-slate-700 dark:text-slate-300 ml-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            isHeaderFooterActive ? (
+              <div
+                ref={headerContentRef}
+                contentEditable
+                suppressContentEditableWarning
+                onFocus={() => setActiveHFType("header")}
+                onInput={(e) => {
+                  isEditingHeaderRef.current = true;
+                  handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                  setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                }}
+                className="w-full outline-none text-[10px] cursor-text select-text"
+              />
+            ) : effectiveHeaderHtml ? (
+              <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+            ) : (
+              <span>{effectiveHeaderText}</span>
+            )
+          )}
+        </div>
       </div>
 
       {/* EDITABLE DOCUMENT WRITING AREA (Dynamically calculated based on paper dimensions & margins) */}
@@ -1151,13 +1581,14 @@ function DocumentPage({
             ).current = element;
           }
         }}
-        contentEditable={editable}
+        contentEditable={editable && !isHeaderFooterActive}
         suppressContentEditableWarning
         onFocus={handleFocus}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onMouseDown={handlePageMouseDown}
         onPointerDown={(e) => {
+          if (isHeaderFooterActive) return;
           const clickedTable = (e.target as HTMLElement).closest("table");
           if (clickedTable) {
             onSetActiveTable(clickedTable);
@@ -1171,6 +1602,10 @@ function DocumentPage({
           paddingBottom: `${marginB}px`,
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
+          opacity: isHeaderFooterActive ? (showDocumentText ? 0.35 : 0) : 1,
+          pointerEvents: isHeaderFooterActive ? "none" : "auto",
+          userSelect: isHeaderFooterActive ? "none" : "text",
+          transition: "opacity 0.2s ease",
           ...(section?.columns && section.columns.count > 1
             ? {
                 columnCount: section.columns.count,
@@ -1220,7 +1655,6 @@ function DocumentPage({
           [&_ol]:pl-6
 
           [&_table]:my-4
-          [&_table]:max-w-full
           [&_table]:box-border
           [&_table]:border-collapse
           [&_table]:table-fixed
@@ -1230,7 +1664,7 @@ function DocumentPage({
           [&_td]:p-2.5
           [&_td]:text-left
           [&_td]:align-top
-          [&_td]:min-w-[48px]
+          [&_td]:min-w-[32px]
           [&_td]:break-words
           [&_td]:whitespace-normal
 
@@ -1240,7 +1674,7 @@ function DocumentPage({
           [&_th]:text-left
           [&_th]:align-top
           [&_th]:font-semibold
-          [&_th]:min-w-[48px]
+          [&_th]:min-w-[32px]
           [&_th]:break-words
           [&_th]:whitespace-normal
         "
@@ -1266,55 +1700,145 @@ function DocumentPage({
 
       {/* DOCUMENT FOOTER */}
       <div
-        className="
+        data-hf-container="footer"
+        data-page-id={pageId}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          enterHeaderFooterMode("footer", section?.id, pageId);
+        }}
+        title={!isHeaderFooterActive ? "Double-click to edit Footer" : undefined}
+        className={`
           relative
-          h-[45px]
-          min-h-[45px]
-          max-h-[45px]
-          border-t
-          border-slate-100
+          box-border
           text-[10px]
           text-slate-400
-          flex
-          items-center
-          justify-between
-          box-border
-        "
+          transition-all
+          ${
+            isHeaderFooterActive
+              ? "border-t border-dashed border-[#0078d4] bg-blue-50/20 ring-1 ring-blue-300/40 dark:border-blue-500 dark:bg-blue-950/20"
+              : "border-t border-slate-100 hover:bg-blue-50/15 cursor-pointer dark:border-slate-800"
+          }
+        `}
         style={{
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
-          paddingTop: "14px",
+          paddingTop: "10px",
+          paddingBottom: `${Math.max(8, (section?.footerBottomDistance ?? 48) - 34)}px`,
+          minHeight: `${footerHeight}px`,
         }}
       >
-        {section?.showPageNumbers !== false && pageNumberPosition === "footer" ? (
-          <>
-            {pageNumberAlignment === "left" ? (
-              <>
-                <div className="font-medium text-slate-600 dark:text-slate-300">
-                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
-                </div>
-                <span>{footerText}</span>
-              </>
-            ) : pageNumberAlignment === "center" ? (
-              <>
-                <span>{footerText}</span>
-                <div className="font-medium text-slate-600 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
-                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
-                </div>
-                <span />
-              </>
-            ) : (
-              <>
-                <span>{footerText}</span>
-                <div className="font-medium text-slate-600 dark:text-slate-300">
-                  {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
-                </div>
-              </>
+        {/* Editor-only Footer Section Label */}
+        {isHeaderFooterActive && (
+          <div
+            data-editor-ui="true"
+            className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-white text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+          >
+            <span>{footerLabel}</span>
+            {isLinked && (
+              <span className="opacity-80 font-normal text-[8px]">(Same as Previous)</span>
             )}
-          </>
-        ) : (
-          <span>{footerText}</span>
+          </div>
         )}
+
+        <div className="flex items-center justify-between w-full h-full">
+          {section?.showPageNumbers !== false && pageNumberPosition === "footer" ? (
+            <>
+              {pageNumberAlignment === "left" ? (
+                <>
+                  <div className="font-medium text-slate-600 dark:text-slate-300 mr-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={footerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("footer")}
+                      onInput={(e) => {
+                        isEditingFooterRef.current = true;
+                        handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveFooterHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+                  ) : (
+                    <span>{effectiveFooterText}</span>
+                  )}
+                </>
+              ) : pageNumberAlignment === "center" ? (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={footerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("footer")}
+                      onInput={(e) => {
+                        isEditingFooterRef.current = true;
+                        handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveFooterHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+                  ) : (
+                    <span>{effectiveFooterText}</span>
+                  )}
+                  <div className="font-medium text-slate-600 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  <span />
+                </>
+              ) : (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={footerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("footer")}
+                      onInput={(e) => {
+                        isEditingFooterRef.current = true;
+                        handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveFooterHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+                  ) : (
+                    <span>{effectiveFooterText}</span>
+                  )}
+                  <div className="font-medium text-slate-600 dark:text-slate-300 ml-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            isHeaderFooterActive ? (
+              <div
+                ref={footerContentRef}
+                contentEditable
+                suppressContentEditableWarning
+                onFocus={() => setActiveHFType("footer")}
+                onInput={(e) => {
+                  isEditingFooterRef.current = true;
+                  handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                  setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                }}
+                className="w-full outline-none text-[10px] cursor-text select-text"
+              />
+            ) : effectiveFooterHtml ? (
+              <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+            ) : (
+              <span>{effectiveFooterText}</span>
+            )
+          )}
+        </div>
       </div>
     </section>
   );

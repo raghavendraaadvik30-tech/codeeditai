@@ -20,6 +20,7 @@ import {
   TableGridPicker,
   TableInsertDialog,
   TableActionsToolbar,
+  StandardTablesPanel,
 } from "../components";
 import { cn } from "@/lib/utils";
 
@@ -30,21 +31,14 @@ function TablesPageContent() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     quickGrid: false,
     actions: false,
-    templates: false,
-    styles: false,
+    standardTables: false,
   });
 
   const toggleSection = (section: string) => {
-    setOpenSections((prev) => {
-      const isCurrentlyOpen = !!prev[section];
-      return {
-        quickGrid: false,
-        actions: false,
-        templates: false,
-        styles: false,
-        [section]: !isCurrentlyOpen,
-      };
-    });
+    setOpenSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
   return (
@@ -122,6 +116,30 @@ function TablesPageContent() {
           </button>
 
           {openSections.actions && <TableActionsToolbar />}
+        </div>
+
+        {/* STANDARD TABLES (Directly below Table Tools & Rows) */}
+        <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800/80">
+          <button
+            type="button"
+            onClick={() => toggleSection("standardTables")}
+            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+          >
+            <div className="flex items-center gap-1.5">
+              <Table2 className="h-3.5 w-3.5 text-[#0078d4]" />
+              <span>Standard Tables</span>
+            </div>
+            <ChevronRight
+              className={cn(
+                "h-3.5 w-3.5 transition-transform duration-200",
+                openSections.standardTables ? "rotate-90" : ""
+              )}
+            />
+          </button>
+
+          {openSections.standardTables && (
+            <StandardTablesPanel searchQuery={searchQuery} />
+          )}
         </div>
       </div>
 

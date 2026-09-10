@@ -74,16 +74,7 @@ export interface SectionModel {
     scale?: number | string;
   };
   pageColor?: string;
-  pageBorders?: {
-    style: "none" | "box" | "shadow" | "dashed" | "dotted" | "double" | "3d";
-    color?: string;
-    width?: number;
-    top?: boolean;
-    bottom?: boolean;
-    left?: boolean;
-    right?: boolean;
-    applyTo?: "document" | "section" | "page";
-  };
+  pageBorders?: PageBorderConfig;
   // Reference-compatible rich HTML header/footer fields
   headerHtml?: string;
   footerHtml?: string;
@@ -108,19 +99,35 @@ export interface SectionModel {
   // Reference-compatible extended layout configs
   paperSizeConfig?: { name: string; width: number; height: number };
   columnsConfig?: { type: "one" | "two" | "three" | "left" | "right" | "custom"; count: number; gap?: number };
-  pageBordersConfig?: {
-    type: "none" | "box" | "shadow" | "3d" | "custom";
-    top?: { style: string; color: string; width: number; art?: string };
-    bottom?: { style: string; color: string; width: number; art?: string };
-    left?: { style: string; color: string; width: number; art?: string };
-    right?: { style: string; color: string; width: number; art?: string };
-    applyTo: "whole" | "section" | "firstPage" | "exceptFirstPage" | "document" | "page";
-  };
+  pageBordersConfig?: PageBorderConfig;
+}
+
+export interface PageBorderDistance {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+export interface PageBorderConfig {
+  setting?: "none" | "box" | "shadow" | "3d" | "custom";
+  lineStyle?: "solid" | "dashed" | "dotted" | "double" | "dash-dot" | "thick-solid";
+  style?: "none" | "box" | "shadow" | "dashed" | "dotted" | "double" | "3d" | "solid" | "dash-dot" | "thick-solid" | string;
+  color?: string;
+  width?: number;
+  top?: boolean;
+  bottom?: boolean;
+  left?: boolean;
+  right?: boolean;
+  distance?: PageBorderDistance;
+  applyTo?: "document" | "section" | "page" | "firstPage" | "exceptFirstPage" | "whole";
+  art?: string;
 }
 
 export interface PageModel {
   id: string;
   sectionId: string;
+  pageBorders?: PageBorderConfig;
 }
 
 export interface DocumentModel {
@@ -194,16 +201,83 @@ const createDefaultSection = (
   columns: { type: "one", count: 1 },
 });
 
+function normalizeBorderConfig(b?: PageBorderConfig): PageBorderConfig | undefined {
+  if (!b) return undefined;
+  const setting =
+    b.setting ||
+    (b.style === "none"
+      ? "none"
+      : b.style === "shadow"
+      ? "shadow"
+      : b.style === "3d"
+      ? "3d"
+      : b.top === false || b.bottom === false || b.left === false || b.right === false
+      ? "custom"
+      : "box");
+
+  const lineStyle =
+    b.lineStyle ||
+    (b.style === "dashed"
+      ? "dashed"
+      : b.style === "dotted"
+      ? "dotted"
+      : b.style === "double"
+      ? "double"
+      : b.style === "dash-dot"
+      ? "dash-dot"
+      : b.style === "thick-solid"
+      ? "thick-solid"
+      : "solid");
+
+  const distance: PageBorderDistance = {
+    top: typeof b.distance?.top === "number" ? b.distance.top : 24,
+    bottom: typeof b.distance?.bottom === "number" ? b.distance.bottom : 24,
+    left: typeof b.distance?.left === "number" ? b.distance.left : 24,
+    right: typeof b.distance?.right === "number" ? b.distance.right : 24,
+  };
+
+  return {
+    ...b,
+    setting,
+    lineStyle,
+    style:
+      b.style ||
+      (setting === "none"
+        ? "none"
+        : setting === "shadow"
+        ? "shadow"
+        : setting === "3d"
+        ? "3d"
+        : lineStyle),
+    color: b.color || "#000000",
+    width: b.width ?? 2,
+    top: setting !== "none" ? (b.top ?? true) : false,
+    bottom: setting !== "none" ? (b.bottom ?? true) : false,
+    left: setting !== "none" ? (b.left ?? true) : false,
+    right: setting !== "none" ? (b.right ?? true) : false,
+    distance,
+    applyTo: b.applyTo || "document",
+  };
+}
+
 function normalizeDoc(doc: DocumentModel): DocumentModel {
   if (!doc) return createEmptyDocument();
-  const pages =
-    Array.isArray(doc.pages) && doc.pages.length > 0
-      ? doc.pages
-      : [{ id: "page_" + uid(), sectionId: "section_1" }];
-  const sections =
+  const sections = (
     Array.isArray(doc.sections) && doc.sections.length > 0
       ? doc.sections
-      : [createDefaultSection()];
+      : [createDefaultSection()]
+  ).map((sec) => ({
+    ...sec,
+    pageBorders: sec.pageBorders ? normalizeBorderConfig(sec.pageBorders) : undefined,
+  }));
+  const pages = (
+    Array.isArray(doc.pages) && doc.pages.length > 0
+      ? doc.pages
+      : [{ id: "page_" + uid(), sectionId: sections[0]?.id || "section_1" }]
+  ).map((p) => ({
+    ...p,
+    pageBorders: p.pageBorders ? normalizeBorderConfig(p.pageBorders) : undefined,
+  }));
   const pageHtml =
     doc.pageHtml && typeof doc.pageHtml === "object" ? { ...doc.pageHtml } : {};
   pages.forEach((p) => {
@@ -343,6 +417,16 @@ interface DocumentContextType {
   updateAllSections: (
     patch: Partial<SectionModel>
   ) => void;
+  updatePage: (
+    pageId: string,
+    patch: Partial<PageModel>
+  ) => void;
+  applyPageBorders: (
+    borderConfig: PageBorderConfig,
+    applyTo: "document" | "section" | "page" | "firstPage" | "exceptFirstPage",
+    targetPageId?: string,
+    targetSectionId?: string
+  ) => void;
   save: (customTitle?: string) => void;
   saveAs: (
     title: string
@@ -359,6 +443,7 @@ interface DocumentContextType {
   createNewDocument: (title?: string) => void;
   resetDocument: () => void;
   refreshHistory: () => void;
+  importDocumentPages: (title: string, pagesHtml: string[]) => void;
 }
 
 const DocumentContext =
@@ -652,6 +737,84 @@ export function DocumentModelProvider({
       }));
     },
     []
+  );
+
+  const updatePage = useCallback((pageId: string, patch: Partial<PageModel>) => {
+    setModel((prev) => ({
+      ...prev,
+      pages: prev.pages.map((p) =>
+        p.id === pageId ? { ...p, ...patch } : p
+      ),
+    }));
+  }, []);
+
+  const applyPageBorders = useCallback(
+    (
+      borderConfig: PageBorderConfig,
+      applyTo: "document" | "section" | "page" | "firstPage" | "exceptFirstPage",
+      targetPageId?: string,
+      targetSectionId?: string
+    ) => {
+      setModel((prev) => {
+        const pageId = targetPageId || activePage || prev.pages[0]?.id;
+        const targetPage = prev.pages.find((p) => p.id === pageId);
+        const sectionId =
+          targetSectionId || targetPage?.sectionId || prev.sections[0]?.id;
+
+        if (applyTo === "document") {
+          return {
+            ...prev,
+            sections: prev.sections.map((sec) => ({
+              ...sec,
+              pageBorders: { ...borderConfig, applyTo: "document" },
+            })),
+            pages: prev.pages.map((p) => {
+              if (p.pageBorders) {
+                const { pageBorders: _, ...rest } = p;
+                return rest;
+              }
+              return p;
+            }),
+          };
+        }
+
+        if (
+          applyTo === "section" ||
+          applyTo === "firstPage" ||
+          applyTo === "exceptFirstPage"
+        ) {
+          return {
+            ...prev,
+            sections: prev.sections.map((sec) =>
+              sec.id === sectionId
+                ? { ...sec, pageBorders: { ...borderConfig, applyTo } }
+                : sec
+            ),
+            pages: prev.pages.map((p) => {
+              if (p.sectionId === sectionId && p.pageBorders) {
+                const { pageBorders: _, ...rest } = p;
+                return rest;
+              }
+              return p;
+            }),
+          };
+        }
+
+        if (applyTo === "page") {
+          return {
+            ...prev,
+            pages: prev.pages.map((p) =>
+              p.id === pageId
+                ? { ...p, pageBorders: { ...borderConfig, applyTo: "page" } }
+                : p
+            ),
+          };
+        }
+
+        return prev;
+      });
+    },
+    [activePage]
   );
 
   /* ============================================================
@@ -965,6 +1128,51 @@ export function DocumentModelProvider({
   }, []);
 
   /* ============================================================
+     Import Document Pages (Atomic multi-page document insertion)
+  ============================================================ */
+
+  const importDocumentPages = useCallback(
+    (title: string, pagesHtml: string[]) => {
+      setModel((prev) => {
+        const section = prev.sections[0] || createDefaultSection();
+        const validPages =
+          pagesHtml.length > 0
+            ? pagesHtml.map((h) => (h && h.trim() ? h.trim() : DEFAULT_HTML))
+            : [DEFAULT_HTML];
+
+        const newPages: PageModel[] = validPages.map(() => ({
+          id: "page_" + uid(),
+          sectionId: section.id,
+        }));
+
+        const newPageHtml: Record<string, string> = {};
+        newPages.forEach((p, idx) => {
+          newPageHtml[p.id] = validPages[idx];
+        });
+
+        const newModel: DocumentModel = {
+          ...prev,
+          title: title.trim() || prev.title || "Uploaded Document",
+          pages: newPages,
+          sections: prev.sections.length > 0 ? prev.sections : [section],
+          pageHtml: newPageHtml,
+          savedAt: Date.now(),
+        };
+
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newModel));
+        } catch {
+          // ignore
+        }
+
+        setActivePage(newPages[0]?.id || null);
+        return newModel;
+      });
+    },
+    []
+  );
+
+  /* ============================================================
      Provider Return
   ============================================================ */
 
@@ -985,6 +1193,8 @@ export function DocumentModelProvider({
         addSection,
         updateSection,
         updateAllSections,
+        updatePage,
+        applyPageBorders,
         save,
         saveAs,
         restore,
@@ -993,6 +1203,7 @@ export function DocumentModelProvider({
         createNewDocument,
         resetDocument,
         refreshHistory,
+        importDocumentPages,
       }}
     >
       {children}
