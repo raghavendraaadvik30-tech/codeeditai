@@ -899,10 +899,11 @@ export function DocumentModelProvider({
   const saveAs = useCallback(
     (title: string) => {
       setModel((currentModel) => {
+        const titleToSave = title.trim() || "Untitled Document";
+
         const saved: DocumentModel = {
           ...currentModel,
-          id: "doc_" + uid(),
-          title: title.trim() || "Untitled Document",
+          title: titleToSave,
           savedAt: Date.now(),
         };
 
@@ -918,14 +919,28 @@ export function DocumentModelProvider({
           );
 
           const existingSaved = getStoredSavedDocuments();
-          const nextSaved = [saved, ...existingSaved];
+          const docIndex = existingSaved.findIndex((d) => d.id === currentModel.id);
+          let nextSaved: DocumentModel[];
+          if (docIndex >= 0) {
+            // Update current document in place - prevents creating an extra duplicate document in Document Section
+            nextSaved = [
+              ...existingSaved.slice(0, docIndex),
+              saved,
+              ...existingSaved.slice(docIndex + 1),
+            ];
+          } else {
+            // If not found in existingSaved, filter out any unsaved entry with matching id before adding
+            const filtered = existingSaved.filter((d) => d.id !== currentModel.id);
+            nextSaved = [saved, ...filtered];
+          }
+
           localStorage.setItem(
             SAVED_DOCS_KEY,
             JSON.stringify(nextSaved)
           );
           setSavedDocuments(nextSaved);
 
-          const historyItems = getInitialHistory();
+          const historyItems = getInitialHistory().filter((h) => h.id !== saved.id);
           historyItems.unshift({
             id: saved.id,
             title: saved.title,

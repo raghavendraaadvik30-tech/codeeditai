@@ -147,12 +147,12 @@ export default function RibbonToolbar() {
 
               ${
                 activeTab === "Header & Footer"
-                  ? "bg-blue-50 text-[#0078d4] border border-b-0 border-blue-300 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-700"
-                  : "text-blue-600 hover:bg-blue-50/60 dark:text-blue-400 dark:hover:bg-slate-800"
+                  ? "bg-white text-emerald-700 border-t-2 border-t-emerald-600 border-x border-b-0 border-slate-200 shadow-2xs dark:bg-[#07131E] dark:text-emerald-400 dark:border-slate-700 dark:border-t-emerald-500"
+                  : "text-emerald-600 hover:bg-emerald-50/60 dark:text-emerald-400 dark:hover:bg-slate-800"
               }
             `}
           >
-            <span className="h-2 w-2 rounded-full bg-[#0078d4] animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
             <span>Header &amp; Footer</span>
           </button>
         )}
@@ -163,17 +163,16 @@ export default function RibbonToolbar() {
       -------------------------------- */}
 
       <div
-        className="
-          min-h-[48px]
+        className={`
           border-t
           border-slate-200
           bg-white
-          px-3
+          px-2
           py-1
-
           dark:border-slate-800
           dark:bg-[#07131E]
-        "
+          ${activeTab === "Header & Footer" ? "min-h-[94px] bg-[#fbfcfd] dark:bg-[#081522]" : "min-h-[48px]"}
+        `}
       >
         {renderRibbon()}
       </div>

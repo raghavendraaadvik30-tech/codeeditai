@@ -1435,7 +1435,6 @@ function DocumentPage({
           e.stopPropagation();
           enterHeaderFooterMode("header", section?.id, pageId);
         }}
-        title={!isHeaderFooterActive ? "Double-click to edit Header" : undefined}
         className={`
           relative
           box-border
@@ -1706,7 +1705,6 @@ function DocumentPage({
           e.stopPropagation();
           enterHeaderFooterMode("footer", section?.id, pageId);
         }}
-        title={!isHeaderFooterActive ? "Double-click to edit Footer" : undefined}
         className={`
           relative
           box-border
