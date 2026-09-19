@@ -8,13 +8,19 @@
  * --------------------------------------------------------
  */
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { TableConfig, TableTemplate } from "../types";
 import { DEFAULT_TABLE_CONFIG } from "../constants";
 import { generateTableHtml, generateTemplateTableHtml } from "../utils";
 import { useEditor } from "@/features/editor/context/EditorContext";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
+
+export interface ActiveCellFormat {
+  verticalAlign: "top" | "middle" | "bottom";
+  horizontalAlign: "left" | "center" | "right";
+  isVerticalText: boolean;
+}
 
 export interface TableContextValue {
   config: TableConfig;
@@ -41,6 +47,7 @@ export interface TableContextValue {
   setCellHorizontalAlign: (align: "left" | "center" | "right") => void;
   setCellVerticalAlign: (align: "top" | "middle" | "bottom") => void;
   toggleCellTextDirection: () => void;
+  activeCellFormat: ActiveCellFormat;
   autoFitWindow: () => void;
   autoFitContent: () => void;
   distributeColumns: () => void;
@@ -146,64 +153,11 @@ export function TableProvider({
   const lastActiveCellRef = useRef<HTMLTableCellElement | null>(null);
   const lastActiveTableRef = useRef<HTMLTableElement | null>(null);
 
-  // Continuously track active table and cell across the document
-  useEffect(() => {
-    const updateActiveCell = (e?: Event) => {
-      if (e && e.target) {
-        const targetEl = getNodeElement(e.target as Node);
-        const table = targetEl?.closest("table");
-        if (table) {
-          lastActiveTableRef.current = table;
-          const cell = targetEl?.closest("td, th") as HTMLTableCellElement | null;
-          if (cell) {
-            lastActiveCellRef.current = cell;
-          }
-          return;
-        }
-      }
-
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const el = getNodeElement(selection.anchorNode);
-        const cell = el?.closest("td, th") as HTMLTableCellElement | null;
-        if (cell) {
-          lastActiveCellRef.current = cell;
-          lastActiveTableRef.current = cell.closest("table");
-          return;
-        }
-        const table = el?.closest("table");
-        if (table) {
-          lastActiveTableRef.current = table;
-          return;
-        }
-      }
-
-      if (document.activeElement) {
-        const cell = document.activeElement.closest("td, th") as HTMLTableCellElement | null;
-        if (cell) {
-          lastActiveCellRef.current = cell;
-          lastActiveTableRef.current = cell.closest("table");
-          return;
-        }
-        const table = document.activeElement.closest("table");
-        if (table) {
-          lastActiveTableRef.current = table;
-        }
-      }
-    };
-
-    document.addEventListener("selectionchange", updateActiveCell);
-    document.addEventListener("pointerdown", updateActiveCell);
-    document.addEventListener("keyup", updateActiveCell);
-    document.addEventListener("focusin", updateActiveCell);
-
-    return () => {
-      document.removeEventListener("selectionchange", updateActiveCell);
-      document.removeEventListener("pointerdown", updateActiveCell);
-      document.removeEventListener("keyup", updateActiveCell);
-      document.removeEventListener("focusin", updateActiveCell);
-    };
-  }, []);
+  const [activeCellFormat, setActiveCellFormat] = useState<ActiveCellFormat>({
+    verticalAlign: "top",
+    horizontalAlign: "left",
+    isVerticalText: false,
+  });
 
   const findActiveTarget = () => {
     // 0. Currently active table marked by overlay or selection
@@ -330,6 +284,148 @@ export function TableProvider({
 
     return { cell: null, tr: null, table: null };
   };
+
+  // Helper to retrieve all target cells: either multi-selection, single cell, or table cells
+  const getTargetCells = (): { cells: HTMLTableCellElement[]; table: HTMLTableElement | null } => {
+    const { cell, table } = findActiveTarget();
+    const targetTable = table || cell?.closest("table") || null;
+    if (!targetTable && !cell) return { cells: [], table: null };
+
+    // 1. Check if user selected multiple cells via mouse selection range
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && targetTable) {
+      const range = sel.getRangeAt(0);
+      const allCells = Array.from(targetTable.querySelectorAll("td, th")) as HTMLTableCellElement[];
+      const intersecting = allCells.filter((c) => {
+        try {
+          return range.intersectsNode(c);
+        } catch {
+          return false;
+        }
+      });
+      if (intersecting.length > 0) {
+        return { cells: intersecting, table: targetTable };
+      }
+    }
+
+    // 2. Focused / active single cell
+    if (cell && cell.isConnected) {
+      return { cells: [cell], table: targetTable };
+    }
+
+    // 3. Fallback: all cells in active table if table is selected
+    if (targetTable) {
+      return { cells: Array.from(targetTable.querySelectorAll("td, th")) as HTMLTableCellElement[], table: targetTable };
+    }
+
+    return { cells: [], table: null };
+  };
+
+  const updateCellFormatState = useCallback(() => {
+    const target = findActiveTarget();
+    const cell = target.cell;
+    if (!cell || !cell.isConnected) return;
+
+    // Detect vertical alignment
+    let vAlign: "top" | "middle" | "bottom" = "top";
+    const vStyle =
+      cell.style.verticalAlign || cell.getAttribute("valign") || cell.getAttribute("data-vertical-align");
+    if (vStyle === "middle" || vStyle === "center") {
+      vAlign = "middle";
+    } else if (vStyle === "bottom") {
+      vAlign = "bottom";
+    }
+
+    // Detect horizontal alignment
+    let hAlign: "left" | "center" | "right" = "left";
+    const hStyle = cell.style.textAlign || cell.getAttribute("align");
+    if (hStyle === "center") {
+      hAlign = "center";
+    } else if (hStyle === "right") {
+      hAlign = "right";
+    }
+
+    // Detect text direction
+    const isVert =
+      cell.style.writingMode === "vertical-rl" ||
+      cell.style.writingMode === "vertical-lr" ||
+      cell.getAttribute("data-text-direction") === "vertical";
+
+    setActiveCellFormat({
+      verticalAlign: vAlign,
+      horizontalAlign: hAlign,
+      isVerticalText: isVert,
+    });
+  }, []);
+
+  // Continuously track active table and cell across the document
+  useEffect(() => {
+    const updateActiveCell = (e?: Event) => {
+      if (e && e.target) {
+        const targetEl = getNodeElement(e.target as Node);
+        const table = targetEl?.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+          const cell = targetEl?.closest("td, th") as HTMLTableCellElement | null;
+          if (cell) {
+            lastActiveCellRef.current = cell;
+          }
+          return;
+        }
+      }
+
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const el = getNodeElement(selection.anchorNode);
+        const cell = el?.closest("td, th") as HTMLTableCellElement | null;
+        if (cell) {
+          lastActiveCellRef.current = cell;
+          lastActiveTableRef.current = cell.closest("table");
+          return;
+        }
+        const table = el?.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+          return;
+        }
+      }
+
+      if (document.activeElement) {
+        const cell = document.activeElement.closest("td, th") as HTMLTableCellElement | null;
+        if (cell) {
+          lastActiveCellRef.current = cell;
+          lastActiveTableRef.current = cell.closest("table");
+          return;
+        }
+        const table = document.activeElement.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+        }
+      }
+    };
+
+    const handleEvents = (e?: Event) => {
+      updateActiveCell(e);
+      updateCellFormatState();
+    };
+
+    // Initial inspection
+    updateCellFormatState();
+
+    document.addEventListener("selectionchange", handleEvents);
+    document.addEventListener("pointerdown", handleEvents);
+    document.addEventListener("keyup", handleEvents);
+    document.addEventListener("focusin", handleEvents);
+    window.addEventListener("table:updated", updateCellFormatState);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleEvents);
+      document.removeEventListener("pointerdown", handleEvents);
+      document.removeEventListener("keyup", handleEvents);
+      document.removeEventListener("focusin", handleEvents);
+      window.removeEventListener("table:updated", updateCellFormatState);
+    };
+  }, [updateCellFormatState]);
 
   const notifyDomChange = (node?: Node | null) => {
     const editable =
@@ -1124,29 +1220,131 @@ export function TableProvider({
   };
 
   const setCellHorizontalAlign = (align: "left" | "center" | "right") => {
-    const { cell, table } = findActiveTarget();
-    if (!cell) return;
-    cell.style.textAlign = align;
-    const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div, span, h1, h2, h3");
-    innerBlocks.forEach((b) => {
-      b.style.textAlign = align;
+    const { cells, table } = getTargetCells();
+    if (cells.length === 0) return;
+
+    cells.forEach((cell) => {
+      cell.style.textAlign = align;
+      cell.setAttribute("align", align);
+      const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div, span, h1, h2, h3");
+      innerBlocks.forEach((b) => {
+        b.style.textAlign = align;
+      });
     });
-    notifyDomChange(table || cell);
+
+    updateCellFormatState();
+    notifyDomChange(table || cells[0]);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const setCellVerticalAlign = (align: "top" | "middle" | "bottom") => {
-    const { cell, table } = findActiveTarget();
-    if (!cell) return;
-    cell.style.verticalAlign = align;
-    notifyDomChange(table || cell);
+    const { cells, table } = getTargetCells();
+    if (cells.length === 0) return;
+
+    cells.forEach((cell) => {
+      cell.style.verticalAlign = align;
+      cell.setAttribute("valign", align);
+      cell.setAttribute("data-vertical-align", align);
+
+      // Reset paragraph vertical margins inside the cell to allow accurate centering
+      const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div");
+      innerBlocks.forEach((b) => {
+        b.style.marginTop = "0px";
+        b.style.marginBottom = "0px";
+      });
+
+      // Ensure the row has enough height so middle & bottom alignments are clearly visible
+      const row = cell.closest("tr");
+      if (row && (align === "middle" || align === "bottom")) {
+        const currentHeight = parseFloat(row.style.height) || row.offsetHeight || 0;
+        if (currentHeight < 44) {
+          row.style.height = "44px";
+          Array.from(row.cells).forEach((rc) => {
+            rc.style.height = "44px";
+          });
+        }
+      }
+    });
+
+    updateCellFormatState();
+    notifyDomChange(table || cells[0]);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const toggleCellTextDirection = () => {
-    const { cell, table } = findActiveTarget();
-    if (!cell) return;
-    const current = cell.style.writingMode;
-    cell.style.writingMode = current === "vertical-rl" ? "horizontal-tb" : "vertical-rl";
-    notifyDomChange(table || cell);
+    const { cells, table } = getTargetCells();
+    if (cells.length === 0) return;
+
+    const primary = cells[0];
+    const isCurrentlyVertical =
+      primary.style.writingMode === "vertical-rl" ||
+      primary.getAttribute("data-text-direction") === "vertical" ||
+      primary.style.writingMode === "vertical-lr";
+
+    const targetMode = isCurrentlyVertical ? "horizontal-tb" : "vertical-rl";
+
+    cells.forEach((cell) => {
+      cell.style.writingMode = targetMode;
+      const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div, span, h1, h2, h3");
+
+      if (targetMode === "vertical-rl") {
+        cell.setAttribute("data-text-direction", "vertical");
+        cell.style.textOrientation = "mixed";
+        cell.style.whiteSpace = "nowrap";
+
+        innerBlocks.forEach((b) => {
+          b.style.writingMode = "vertical-rl";
+          b.style.textOrientation = "mixed";
+          b.style.whiteSpace = "nowrap";
+          b.style.marginTop = "0px";
+          b.style.marginBottom = "0px";
+        });
+
+        const row = cell.closest("tr");
+        if (row) {
+          const textLen = (cell.textContent || "").trim().length;
+          const neededHeight = Math.max(70, Math.min(240, textLen * 12 + 24));
+          const currentHeight = parseFloat(row.style.height) || row.offsetHeight || 0;
+          if (currentHeight < neededHeight) {
+            row.style.height = `${neededHeight}px`;
+            Array.from(row.cells).forEach((rc) => {
+              rc.style.height = `${neededHeight}px`;
+            });
+          }
+        }
+      } else {
+        cell.removeAttribute("data-text-direction");
+        cell.style.textOrientation = "";
+        cell.style.whiteSpace = "";
+
+        innerBlocks.forEach((b) => {
+          b.style.writingMode = "horizontal-tb";
+          b.style.textOrientation = "";
+          b.style.whiteSpace = "";
+          b.style.marginTop = "";
+          b.style.marginBottom = "";
+        });
+
+        const row = cell.closest("tr");
+        if (row) {
+          const otherVerticalCells = Array.from(row.cells).filter(
+            (rc) => rc !== cell && rc.getAttribute("data-text-direction") === "vertical"
+          );
+          if (otherVerticalCells.length === 0) {
+            row.style.height = "";
+            row.removeAttribute("height");
+            Array.from(row.cells).forEach((rc) => {
+              rc.style.height = "";
+              rc.removeAttribute("height");
+            });
+          }
+        }
+      }
+    });
+
+    updateCellFormatState();
+    notifyDomChange(table || cells[0]);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const autoFitWindow = () => {
@@ -1289,13 +1487,14 @@ export function TableProvider({
       setCellHorizontalAlign,
       setCellVerticalAlign,
       toggleCellTextDirection,
+      activeCellFormat,
       autoFitWindow,
       autoFitContent,
       distributeColumns,
       distributeRows,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config]
+    [config, activeCellFormat]
   );
 
   return (

@@ -41,6 +41,7 @@ import IconSidebar from "../components/sidebar/IconSidebar";
 import LeftOverlay from "../components/overlay/LeftOverlay";
 import Workspace from "../components/workspace/Workspace";
 import AIPanel from "../components/ai/AIPanel";
+import EditorStatusBar from "../components/statusbar/EditorStatusBar";
 
 
 import { useEditor } from "../hooks/useEditor";
@@ -124,7 +125,8 @@ export default function EditorLayout() {
 
       </main>
 
-      
+      {/* WORD-STYLE STATUS & VIEW CONTROL BAR */}
+      <EditorStatusBar />
 
     </div>
   );

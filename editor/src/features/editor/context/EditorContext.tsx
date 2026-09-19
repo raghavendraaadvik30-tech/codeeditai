@@ -9,6 +9,8 @@ import type { ReactNode, RefObject } from "react";
 
 import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
 
+export type ViewMode = "print" | "web" | "read" | "outline" | "draft";
+
 export interface EditorContextType {
   activePanel: string;
   setActivePanel: React.Dispatch<React.SetStateAction<string>>;
@@ -28,6 +30,9 @@ export interface EditorContextType {
 
   zoom: number;
   setZoom: React.Dispatch<React.SetStateAction<number>>;
+
+  viewMode: ViewMode;
+  setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
 
   isEditable: boolean;
   setIsEditable: React.Dispatch<React.SetStateAction<boolean>>;
@@ -98,6 +103,9 @@ export function EditorProvider({
 
   const [zoom, setZoom] =
     useState<number>(100);
+
+  const [viewMode, setViewMode] =
+    useState<ViewMode>("print");
 
   const [isEditable, setIsEditable] =
     useState<boolean>(true);
@@ -245,6 +253,9 @@ export function EditorProvider({
 
     zoom,
     setZoom,
+
+    viewMode,
+    setViewMode,
 
     isEditable,
     setIsEditable,

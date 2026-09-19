@@ -38,6 +38,8 @@ export interface EditorState {
 
   zoom: number;
 
+  viewMode?: "print" | "web" | "read" | "outline" | "draft";
+
   leftPanelOpen: boolean;
 
   aiPanelOpen: boolean;

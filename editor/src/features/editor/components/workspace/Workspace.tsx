@@ -19,7 +19,7 @@ and provides true Word-style content-overflow pagination across pages.
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { useEditor } from "../../context/EditorContext";
+import { useEditor, type ViewMode } from "../../context/EditorContext";
 import { useDocumentModel, type PageModel, type SectionModel, type PageBorderConfig } from "../../store/documentModel";
 import { useHeaderFooter } from "../../modules/document/context/HeaderFooterContext";
 import {
@@ -62,6 +62,7 @@ export default function Workspace() {
     editorRef,
     aiPanelOpen,
     setAiPanelOpen,
+    viewMode,
   } = useEditor();
 
   const [activeTable, setActiveTable] = useState<HTMLTableElement | null>(null);
@@ -231,31 +232,34 @@ export default function Workspace() {
       "
     >
       {/* WORD HORIZONTAL RULER */}
-      <DocumentRuler
-        pageWidth={activePageWidth}
-        zoom={zoom}
-        marginLeft={activeMarginLeft}
-        marginRight={activeMarginRight}
-        onMarginChange={(newLeft, newRight) => {
-          if (activeSection?.id) {
-            updateSection(activeSection.id, {
-              marginConfig: {
-                top: activeSection.marginConfig?.top ?? 96,
-                bottom: activeSection.marginConfig?.bottom ?? 96,
-                left: newLeft,
-                right: newRight,
-              },
-            });
-          }
-        }}
-      />
+      {viewMode !== "read" && (
+        <DocumentRuler
+          pageWidth={activePageWidth}
+          zoom={zoom}
+          marginLeft={activeMarginLeft}
+          marginRight={activeMarginRight}
+          onMarginChange={(newLeft, newRight) => {
+            if (activeSection?.id) {
+              updateSection(activeSection.id, {
+                marginConfig: {
+                  top: activeSection.marginConfig?.top ?? 96,
+                  bottom: activeSection.marginConfig?.bottom ?? 96,
+                  left: newLeft,
+                  right: newRight,
+                },
+              });
+            }
+          }}
+        />
+      )}
 
       {/* DOCUMENT AREA */}
       <div
         className="
           flex
-          w-full
-          min-w-0
+          min-w-full
+          w-fit
+          mx-auto
           flex-col
           items-center
           gap-8
@@ -333,7 +337,7 @@ export default function Workspace() {
                 pageNumberStyle={section?.pageNumberStyle}
                 html={model.pageHtml?.[page.id] ?? ""}
                 active={isEffectiveActive}
-                editable={isEditable}
+                editable={isEditable && viewMode !== "read"}
                 editorRef={editorRef}
                 allPages={model.pages}
                 pageHtmlMap={model.pageHtml}
@@ -350,6 +354,7 @@ export default function Workspace() {
                 onSetPageHtml={setPageHtml}
                 onSetActivePage={setActivePage}
                 zoom={zoom}
+                viewMode={viewMode}
               />
             );
           });
@@ -359,12 +364,12 @@ export default function Workspace() {
       {/* WORD-STYLE CONTEXTUAL TABLE TEXT FORMATTING TOOLBAR
           Appears automatically near selection when text inside a table cell is selected
       */}
-      {isEditable && <TableFloatingFormatToolbar />}
+      {isEditable && viewMode !== "read" && <TableFloatingFormatToolbar />}
 
       {/* MICROSOFT WORD-STYLE TABLE CELL CONTEXT MENU
           Appears exclusively when right-clicking inside a table cell (td, th)
       */}
-      {isEditable && (
+      {isEditable && viewMode !== "read" && (
         <TableContextMenu
           state={tableContextMenu}
           onClose={() => setTableContextMenu((prev) => ({ ...prev, open: false }))}
@@ -385,9 +390,9 @@ export default function Workspace() {
       )}
 
       {/* AI FLOATING BUTTON
-          Only show when AI panel is closed
+          Only show when AI panel is closed and not in read mode
       */}
-      {!aiPanelOpen && (
+      {!aiPanelOpen && viewMode !== "read" && (
         <button
           type="button"
           onClick={() => setAiPanelOpen(true)}
@@ -538,6 +543,7 @@ interface DocumentPageProps {
   onSetPageHtml: (pageId: string, html: string) => void;
   onSetActivePage: (id: string | null) => void;
   zoom: number;
+  viewMode?: ViewMode;
 }
 
 function DocumentPage({
@@ -568,6 +574,7 @@ function DocumentPage({
   onSetPageHtml,
   onSetActivePage,
   zoom,
+  viewMode,
 }: DocumentPageProps) {
   const localEditorRef = useRef<HTMLDivElement | null>(null);
   const lastHtmlRef = useRef<string>(html);
@@ -1228,49 +1235,66 @@ function DocumentPage({
   const isLandscape = section?.orientation === "landscape";
   const baseWidth = section?.paperSize?.width ?? 816;
   const baseHeight = section?.paperSize?.height ?? 1056;
+  const isWeb = viewMode === "web";
+  const isDraft = viewMode === "draft";
+  const isRead = viewMode === "read";
+
   const pageWidth = isLandscape ? baseHeight : baseWidth;
   const pageHeight = isLandscape ? baseWidth : baseHeight;
-  const headerHeight = Math.max(45, section?.headerTopDistance ?? 48);
-  const footerHeight = Math.max(45, section?.footerBottomDistance ?? 48);
+  const scaledPageWidth = Math.round((pageWidth * zoom) / 100);
+  const scaledPageHeight = Math.round((pageHeight * zoom) / 100);
+  const headerHeight = isDraft ? 0 : Math.max(45, section?.headerTopDistance ?? 48);
+  const footerHeight = isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
 
   return (
-    <section
-      data-page-id={pageId}
-      onMouseDown={handlePageMouseDown}
-      onDoubleClick={(e) => {
-        if (isHeaderFooterActive && !(e.target as HTMLElement).closest('[data-hf-container]')) {
-          e.stopPropagation();
-          exitHeaderFooterMode();
-        }
-      }}
-      className={`
-        relative
-        overflow-hidden
-        shrink-0
-        cursor-text
-        shadow-[0_4px_20px_rgba(0,0,0,0.12)]
-        box-border
-        border
-        ${
-          active
-            ? "border-blue-300 ring-1 ring-blue-300/40"
-            : "border-slate-200"
-        }
-      `}
+    <div
+      data-page-wrapper={pageId}
+      className="relative flex justify-center shrink-0 print:contents"
       style={{
-        width: `${pageWidth}px`,
-        minWidth: `${pageWidth}px`,
-        height: `${pageHeight}px`,
-        maxHeight: `${pageHeight}px`,
-        transform: `scale(${zoom / 100})`,
-        transformOrigin: "top center",
-        marginBottom: `${(pageHeight * zoom) / 100 - pageHeight}px`,
-        backgroundColor: section?.pageColor || "#ffffff",
+        width: `${scaledPageWidth}px`,
+        height: isWeb ? "auto" : `${scaledPageHeight}px`,
       }}
     >
-      {/* WORD-STYLE PAGE BORDER OVERLAY */}
-      {(() => {
+      <section
+        data-page-id={pageId}
+        onMouseDown={handlePageMouseDown}
+        onDoubleClick={(e) => {
+          if (!isRead && !isDraft && isHeaderFooterActive && !(e.target as HTMLElement).closest('[data-hf-container]')) {
+            e.stopPropagation();
+            exitHeaderFooterMode();
+          }
+        }}
+        className={`
+          relative
+          overflow-hidden
+          shrink-0
+          cursor-text
+          box-border
+          border
+          ${
+            isWeb || isDraft
+              ? "shadow-sm border-slate-200 dark:border-slate-800"
+              : "shadow-[0_4px_20px_rgba(0,0,0,0.12)] border-slate-200"
+          }
+          ${
+            active && !isRead
+              ? "border-blue-300 ring-1 ring-blue-300/40"
+              : ""
+          }
+        `}
+        style={{
+          width: `${pageWidth}px`,
+          minWidth: `${pageWidth}px`,
+          height: isWeb ? "auto" : `${pageHeight}px`,
+          maxHeight: isWeb ? "none" : `${pageHeight}px`,
+          transform: `scale(${zoom / 100})`,
+          transformOrigin: "top center",
+          backgroundColor: section?.pageColor || "#ffffff",
+        }}
+      >
+        {/* WORD-STYLE PAGE BORDER OVERLAY */}
+        {!isDraft && (() => {
         if (!pageBorders || pageBorders.setting === "none" || pageBorders.style === "none") {
           return null;
         }
@@ -1358,7 +1382,7 @@ function DocumentPage({
       })()}
 
       {/* WATERMARK OVERLAY */}
-      {section?.watermark?.text && (
+      {!isDraft && section?.watermark?.text && (
         <div
           className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden"
           style={{ opacity: section.watermark.opacity ?? 0.12 }}
@@ -1387,7 +1411,7 @@ function DocumentPage({
           </span>
         </div>
       )}
-      {section?.watermark?.image && (
+      {!isDraft && section?.watermark?.image && (
         <div
           className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden p-12"
           style={{ opacity: section.watermark.opacity ?? 0.15 }}
@@ -1428,8 +1452,9 @@ function DocumentPage({
       </div>
 
       {/* DOCUMENT HEADER */}
-      <div
-        data-hf-container="header"
+      {!isDraft && (
+        <div
+          data-hf-container="header"
         data-page-id={pageId}
         onDoubleClick={(e) => {
           e.stopPropagation();
@@ -1568,6 +1593,7 @@ function DocumentPage({
           )}
         </div>
       </div>
+      )}
 
       {/* EDITABLE DOCUMENT WRITING AREA (Dynamically calculated based on paper dimensions & margins) */}
       <div
@@ -1698,8 +1724,9 @@ function DocumentPage({
       )}
 
       {/* DOCUMENT FOOTER */}
-      <div
-        data-hf-container="footer"
+      {!isDraft && (
+        <div
+          data-hf-container="footer"
         data-page-id={pageId}
         onDoubleClick={(e) => {
           e.stopPropagation();
@@ -1838,7 +1865,9 @@ function DocumentPage({
           )}
         </div>
       </div>
+      )}
     </section>
+  </div>
   );
 }
 

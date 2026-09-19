@@ -31,6 +31,7 @@ import {
   Minimize2,
 } from "lucide-react";
 import { useTable } from "../hooks";
+import { cn } from "@/lib/utils";
 
 export function TableActionsToolbar() {
   const {
@@ -48,6 +49,7 @@ export function TableActionsToolbar() {
     setCellHorizontalAlign,
     setCellVerticalAlign,
     toggleCellTextDirection,
+    activeCellFormat,
     autoFitWindow,
     autoFitContent,
     distributeColumns,
@@ -172,13 +174,18 @@ export function TableActionsToolbar() {
 
         {/* Horizontal Alignment */}
         <div className="space-y-1">
-          <div className="text-[10px] font-medium text-slate-500">Horizontal Align</div>
+          <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Horizontal Align</div>
           <div className="grid grid-cols-3 gap-1">
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setCellHorizontalAlign("left")}
-              className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className={cn(
+                "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
+                activeCellFormat?.horizontalAlign === "left"
+                  ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              )}
               title="Align Left"
             >
               <AlignLeft className="h-3.5 w-3.5" />
@@ -188,7 +195,12 @@ export function TableActionsToolbar() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setCellHorizontalAlign("center")}
-              className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className={cn(
+                "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
+                activeCellFormat?.horizontalAlign === "center"
+                  ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              )}
               title="Align Center"
             >
               <AlignCenter className="h-3.5 w-3.5" />
@@ -198,7 +210,12 @@ export function TableActionsToolbar() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setCellHorizontalAlign("right")}
-              className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className={cn(
+                "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
+                activeCellFormat?.horizontalAlign === "right"
+                  ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              )}
               title="Align Right"
             >
               <AlignRight className="h-3.5 w-3.5" />
@@ -209,13 +226,18 @@ export function TableActionsToolbar() {
 
         {/* Vertical Alignment */}
         <div className="space-y-1">
-          <div className="text-[10px] font-medium text-slate-500">Vertical Align</div>
+          <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Vertical Align</div>
           <div className="grid grid-cols-3 gap-1">
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setCellVerticalAlign("top")}
-              className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className={cn(
+                "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
+                activeCellFormat?.verticalAlign === "top"
+                  ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              )}
               title="Align Top"
             >
               <ArrowUp className="h-3.5 w-3.5" />
@@ -225,8 +247,13 @@ export function TableActionsToolbar() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setCellVerticalAlign("middle")}
-              className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-              title="Align Middle"
+              className={cn(
+                "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
+                activeCellFormat?.verticalAlign === "middle"
+                  ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              )}
+              title="Align Middle (Center)"
             >
               <MoveVertical className="h-3.5 w-3.5" />
               <span>Middle</span>
@@ -235,7 +262,12 @@ export function TableActionsToolbar() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setCellVerticalAlign("bottom")}
-              className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className={cn(
+                "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
+                activeCellFormat?.verticalAlign === "bottom"
+                  ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              )}
               title="Align Bottom"
             >
               <ArrowDown className="h-3.5 w-3.5" />
@@ -249,11 +281,25 @@ export function TableActionsToolbar() {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={toggleCellTextDirection}
-          className="flex h-8 w-full items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-          title="Toggle Text Direction (Horizontal / Vertical)"
+          className={cn(
+            "flex h-8 w-full items-center justify-center gap-2 rounded-md border text-xs font-medium transition-colors",
+            activeCellFormat?.isVerticalText
+              ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+              : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          )}
+          title={
+            activeCellFormat?.isVerticalText
+              ? "Current: Vertical (Click to switch to Horizontal)"
+              : "Toggle Text Direction (Horizontal / Vertical)"
+          }
         >
-          <RotateCw className="h-3.5 w-3.5 text-blue-500" />
-          <span>Toggle Text Direction</span>
+          <RotateCw
+            className={cn(
+              "h-3.5 w-3.5 text-blue-500 transition-transform duration-200",
+              activeCellFormat?.isVerticalText && "rotate-90 text-blue-600 dark:text-blue-400"
+            )}
+          />
+          <span>{activeCellFormat?.isVerticalText ? "Vertical Text (Active)" : "Toggle Text Direction"}</span>
         </button>
       </div>
 
