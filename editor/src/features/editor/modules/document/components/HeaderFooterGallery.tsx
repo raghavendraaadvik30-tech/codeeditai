@@ -25,11 +25,13 @@ import { useHeaderFooter } from "../context/HeaderFooterContext";
 interface HeaderGalleryProps {
   buttonClassName?: string;
   showIcon?: boolean;
+  customTrigger?: React.ReactNode;
 }
 
 export function HeaderGallery({
   buttonClassName = "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer",
   showIcon = true,
+  customTrigger,
 }: HeaderGalleryProps) {
   const { model, activePage, updateSection } = useDocumentModel();
   const { enterHeaderFooterMode, isHeaderFooterActive } = useHeaderFooter();
@@ -73,27 +75,31 @@ export function HeaderGallery({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className={`${buttonClassName} ${
-            isHeaderFooterActive ? "bg-blue-50 text-[#0078d4] font-semibold dark:bg-blue-950/50" : ""
-          }`}
-          title="Built-in Header Gallery"
-        >
-          {showIcon && (
-            <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 8V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M4 16h16" />
-            </svg>
-          )}
-          <span>Header</span>
-          <ChevronDown className="h-3 w-3 text-slate-400" />
-        </button>
+        {customTrigger ? (
+          customTrigger
+        ) : (
+          <button
+            type="button"
+            className={`${buttonClassName} ${
+              isHeaderFooterActive ? "bg-blue-50 text-[#0078d4] font-semibold dark:bg-blue-950/50" : ""
+            }`}
+            title="Built-in Header Gallery"
+          >
+            {showIcon && (
+              <svg
+                className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M4 8V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M4 16h16" />
+              </svg>
+            )}
+            <span>Header</span>
+            <ChevronDown className="h-3 w-3 text-slate-400" />
+          </button>
+        )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a]">
@@ -149,11 +155,13 @@ export function HeaderGallery({
 interface FooterGalleryProps {
   buttonClassName?: string;
   showIcon?: boolean;
+  customTrigger?: React.ReactNode;
 }
 
 export function FooterGallery({
   buttonClassName = "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer",
   showIcon = true,
+  customTrigger,
 }: FooterGalleryProps) {
   const { model, activePage, updateSection } = useDocumentModel();
   const { enterHeaderFooterMode, isHeaderFooterActive } = useHeaderFooter();
@@ -197,27 +205,31 @@ export function FooterGallery({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className={`${buttonClassName} ${
-            isHeaderFooterActive ? "bg-blue-50 text-[#0078d4] font-semibold dark:bg-blue-950/50" : ""
-          }`}
-          title="Built-in Footer Gallery"
-        >
-          {showIcon && (
-            <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 16v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4M4 8h16" />
-            </svg>
-          )}
-          <span>Footer</span>
-          <ChevronDown className="h-3 w-3 text-slate-400" />
-        </button>
+        {customTrigger ? (
+          customTrigger
+        ) : (
+          <button
+            type="button"
+            className={`${buttonClassName} ${
+              isHeaderFooterActive ? "bg-blue-50 text-[#0078d4] font-semibold dark:bg-blue-950/50" : ""
+            }`}
+            title="Built-in Footer Gallery"
+          >
+            {showIcon && (
+              <svg
+                className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M4 16v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4M4 8h16" />
+              </svg>
+            )}
+            <span>Footer</span>
+            <ChevronDown className="h-3 w-3 text-slate-400" />
+          </button>
+        )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a]">
