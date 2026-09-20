@@ -19,7 +19,7 @@ and provides true Word-style content-overflow pagination across pages.
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { useEditor, type ViewMode } from "../../context/EditorContext";
+import { useEditor, getCaretCharacterOffsetWithin, type ViewMode } from "../../context/EditorContext";
 import { useDocumentModel, type PageModel, type SectionModel, type PageBorderConfig } from "../../store/documentModel";
 import { useHeaderFooter } from "../../modules/document/context/HeaderFooterContext";
 import {
@@ -579,6 +579,12 @@ function DocumentPage({
   const localEditorRef = useRef<HTMLDivElement | null>(null);
   const lastHtmlRef = useRef<string>(html);
 
+  const { undo, redo, recordSnapshot, initHistory } = useEditor();
+
+  useEffect(() => {
+    initHistory(pageId, html || "<p><br></p>");
+  }, [pageId, initHistory]);
+
   const marginL = section?.marginConfig?.left ?? 96;
   const marginR = section?.marginConfig?.right ?? 96;
   const marginT = Math.max(16, (section?.marginConfig?.top ?? 96) - 24);
@@ -768,6 +774,8 @@ function DocumentPage({
     if (normalize(element.innerHTML) !== normalize(html)) {
       element.innerHTML = html || "<p><br></p>";
       lastHtmlRef.current = html;
+    } else {
+      lastHtmlRef.current = html;
     }
   }, [html]);
 
@@ -908,6 +916,24 @@ function DocumentPage({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const container = localEditorRef.current;
     if (!container) return;
+
+    // ------------------------------------------------------------------
+    // Undo / Redo: Move down or up single letter
+    // ------------------------------------------------------------------
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "z" || e.key === "Z")) {
+      e.preventDefault();
+      undo();
+      return;
+    }
+
+    if (
+      ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "Y")) ||
+      ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "z" || e.key === "Z"))
+    ) {
+      e.preventDefault();
+      redo();
+      return;
+    }
 
     // ------------------------------------------------------------------
     // 1. Manual Page Break: Ctrl + Enter / Cmd + Enter
@@ -1087,6 +1113,7 @@ function DocumentPage({
     const currentHtml = element.innerHTML;
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
+    recordSnapshot(pageId, currentHtml, getCaretCharacterOffsetWithin(element));
   };
 
   const handleFocus = () => {
@@ -1606,6 +1633,8 @@ function DocumentPage({
             ).current = element;
           }
         }}
+        data-page-id={pageId}
+        data-editor-page={pageId}
         contentEditable={editable && !isHeaderFooterActive}
         suppressContentEditableWarning
         onFocus={handleFocus}

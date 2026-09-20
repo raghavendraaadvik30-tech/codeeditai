@@ -24,7 +24,6 @@ import {
   X,
   Lock,
   Camera,
-  ChevronDown,
   Shield,
   Eye,
   Trash2,
@@ -34,7 +33,6 @@ import { SettingsProvider, useSettingsContext } from "../context";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ROUTE_PATHS } from "@/app/router/routePaths";
-import { AVAILABLE_LANGUAGES } from "../constants";
 
 type SettingsTab = "profile" | "preferences" | "security";
 
@@ -49,7 +47,6 @@ function SettingsPageContent() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isViewPhotoModalOpen, setIsViewPhotoModalOpen] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const showToast = (msg: string) => {
@@ -84,43 +81,6 @@ function SettingsPageContent() {
     }
   };
 
-  const handleExportJson = () => {
-    const dataStr =
-      "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(settings, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute(
-      "download",
-      `editor-settings-${new Date().toISOString().slice(0, 10)}.json`
-    );
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    showToast("Settings exported successfully");
-  };
-
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const content = event.target?.result as string;
-        const parsed = JSON.parse(content);
-        await updateSettings(parsed);
-        showToast("Settings imported successfully");
-      } catch {
-        showToast("Invalid JSON configuration file");
-      }
-    };
-    reader.readAsText(file);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
   return (
     <div className="flex h-full flex-col bg-white dark:bg-[#0c1929] overflow-y-auto">
       {/* Toast Notification */}
@@ -130,15 +90,6 @@ function SettingsPageContent() {
           <span>{toastMessage}</span>
         </div>
       )}
-
-      {/* Hidden File Input for Settings JSON Import */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleImportJson}
-        accept="application/json"
-        className="hidden"
-      />
 
       {/* Hidden File Input for Avatar Photo Upload */}
       <input
@@ -334,15 +285,6 @@ function SettingsPageContent() {
 
               <button
                 type="button"
-                onClick={() => setIsPasswordModalOpen(true)}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors shadow-sm"
-              >
-                <Key className="h-3.5 w-3.5" />
-                <span>Password</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={handleLogout}
                 title="Logout"
                 aria-label="Logout"
@@ -366,25 +308,6 @@ function SettingsPageContent() {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
                   User Preferences & Appearance
                 </h3>
-              </div>
-
-              {/* Export / Import JSON Actions */}
-              <div className="flex items-center gap-1.5 text-xs">
-                <button
-                  type="button"
-                  onClick={handleExportJson}
-                  className="font-bold text-[#0078d4] hover:underline"
-                >
-                  Export JSON
-                </button>
-                <span className="text-slate-300 dark:text-slate-600">|</span>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="font-bold text-[#0078d4] hover:underline"
-                >
-                  Import JSON
-                </button>
               </div>
             </div>
 
@@ -505,30 +428,6 @@ function SettingsPageContent() {
                     <span>System</span>
                   </span>
                 </button>
-              </div>
-            </div>
-
-            {/* Language & Regional */}
-            <div className="space-y-1.5 pt-1">
-              <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200">
-                Language & Regional
-              </label>
-              <div className="relative">
-                <select
-                  value={settings.language || "English (US)"}
-                  onChange={(e) => {
-                    updateSettings({ language: e.target.value });
-                    showToast("Language updated");
-                  }}
-                  className="h-9 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 pr-8 text-xs font-medium text-slate-800 outline-none focus:border-[#0078d4] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 cursor-pointer shadow-sm"
-                >
-                  {AVAILABLE_LANGUAGES.map((lang) => (
-                    <option key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-4 w-4 text-slate-400" />
               </div>
             </div>
 
