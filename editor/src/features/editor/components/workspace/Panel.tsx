@@ -11,6 +11,7 @@ import { StylesPage } from "../../modules/styles";
 import { DocumentPage } from "../../modules/document";
 import { TablesPage } from "../../modules/tables";
 import { SettingsPage } from "../../modules/settings";
+import { LinksPage } from "../../modules/links";
 
 export interface PanelProps {
   moduleId: ModuleId;
@@ -22,13 +23,13 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
   tables: TablesPage,
   settings: SettingsPage,
   writing: WritingPanel,
-  links: LinksPanel,
+  links: LinksPage,
 };
 
 export default function Panel({ moduleId }: PanelProps) {
   const ActiveComponent = PANEL_MAP[moduleId];
 
-  if (moduleId === "document" || moduleId === "styles" || moduleId === "tables" || moduleId === "settings") {
+  if (moduleId === "document" || moduleId === "styles" || moduleId === "tables" || moduleId === "settings" || moduleId === "links") {
     return ActiveComponent ? <ActiveComponent /> : <GenericPanel title={moduleId} />;
   }
 

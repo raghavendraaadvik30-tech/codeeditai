@@ -1,0 +1,196 @@
+/**
+ * --------------------------------------------------------
+ * Module: Links
+ * Feature: LinksPage / Master Links Management Panel
+ * Description:
+ * Compact, tabbed Links Panel layout showing:
+ * Top Tabs: 1. INTERNAL REF | 2. DOCUMENTS | 3. CROSS REFERENCES
+ * Only ONE active section expanded at a time.
+ * Controls below active section:
+ *  - SET ALL REFERENCES TO BLUE TEXT (Visual formatting)
+ *  - BARE LINKS (Detects raw URLs in doc text & converts to real clickable hyperlinks)
+ * Bottom: LINKS HISTORY.
+ * --------------------------------------------------------
+ */
+
+import { useState, useCallback } from 'react';
+import { Link as LinkIcon, CheckCircle2, AlertCircle } from 'lucide-react';
+import { InternalRefColumn } from '../components/internalRef';
+import { CrossReferenceColumn } from '../components/crossReference';
+import { LinksHistorySection } from '../components/history';
+import { useLinksHistory } from '../hooks/useLinksHistory';
+import { bareLinksService } from '../services/BareLinksService';
+import { useEditor } from '@/features/editor/context/EditorContext';
+import { cn } from '@/lib/utils';
+import type { LinkHistoryType } from '../types';
+
+export type MainSectionTab = 'internal' | 'crossRef';
+
+export default function LinksPage() {
+  const { editorRef } = useEditor();
+  const [activeMainTab, setActiveMainTab] = useState<MainSectionTab>('internal');
+  const [internalSubTab, setInternalSubTab] = useState<'web' | 'email'>('web');
+  const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const {
+    history,
+    isRefreshing,
+    addHistoryEntry,
+    removeHistoryEntry,
+    clearAllHistory,
+    refreshHistory,
+    executeHistoryAction,
+  } = useLinksHistory();
+
+  const handleLinkInserted = useCallback(
+    (item: {
+      displayText: string;
+      target: string;
+      targetId?: string;
+      type: LinkHistoryType;
+      metadata?: Record<string, unknown>;
+    }) => {
+      addHistoryEntry({
+        type: item.type,
+        displayText: item.displayText,
+        target: item.target,
+        targetId: item.targetId,
+        createdBy: 'Dr. Sarah Mitchell',
+        metadata: item.metadata,
+      });
+    },
+    [addHistoryEntry]
+  );
+
+  // Action: Bare Links conversion (Detect raw URLs in doc text & convert to real hyperlinks)
+  const handleConvertBareLinks = () => {
+    setFeedbackMsg(null);
+    const root = editorRef.current || (typeof document !== 'undefined' ? document.body : null);
+    if (!root) {
+      setFeedbackMsg({ text: 'Document editor container not found.', type: 'error' });
+      return;
+    }
+
+    const result = bareLinksService.convertBareLinks(root);
+
+    if (result.count === 0) {
+      setFeedbackMsg({
+        text: 'No raw bare URLs detected in document text.',
+        type: 'error',
+      });
+    } else {
+      // Add each converted URL into Links History
+      result.converted.forEach((item) => {
+        addHistoryEntry({
+          type: 'Web URL',
+          displayText: item.displayText,
+          target: item.target,
+          createdBy: 'Bare Links Convertor',
+        });
+      });
+
+      setFeedbackMsg({
+        text: `Converted ${result.count} bare URL${result.count === 1 ? '' : 's'} into clickable hyperlinks.`,
+        type: 'success',
+      });
+    }
+
+    setTimeout(() => setFeedbackMsg(null), 3500);
+  };
+
+  const mainTabs: { id: MainSectionTab; label: string; number: string }[] = [
+    { id: 'internal', label: 'INTERNAL REFERENCE', number: '1' },
+    { id: 'crossRef', label: 'CROSS REFERENCES', number: '2' },
+  ];
+
+  return (
+    <div className="flex h-full w-full flex-col select-none overflow-hidden bg-[#F8FAFC] dark:bg-[#07131E] text-slate-800 dark:text-slate-100">
+      {/* Top Fixed Area (Tabs + Form + Controls) - Fits neatly without scrollbar */}
+      <div className="shrink-0 p-2.5 space-y-2">
+        {/* Main Selectable Tabs (Side-by-Side: 1. INTERNAL REFERENCE | 2. CROSS REFERENCES) */}
+        <div className="flex gap-1 p-0.5 rounded-lg bg-slate-200/80 dark:bg-[#111D29] border border-slate-200 dark:border-slate-800">
+          {mainTabs.map((tab) => {
+            const isActive = activeMainTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveMainTab(tab.id)}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-0.5 py-1 px-0.5 rounded-md text-[10px] font-bold tracking-tight transition-all select-none whitespace-nowrap',
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-300/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'
+                )}
+              >
+                <span>{tab.number}.</span>
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ACTIVE SECTION CONTENT (Only ONE open at a time) */}
+        <div className="w-full">
+          {activeMainTab === 'internal' && (
+            <InternalRefColumn
+              activeSubTab={internalSubTab}
+              onSubTabChange={setInternalSubTab}
+              onLinkInserted={handleLinkInserted}
+            />
+          )}
+
+          {activeMainTab === 'crossRef' && (
+            <CrossReferenceColumn onLinkInserted={handleLinkInserted} />
+          )}
+        </div>
+
+        {/* FEEDBACK TOAST MESSAGE */}
+        {feedbackMsg && (
+          <div
+            className={cn(
+              'flex items-center gap-1.5 p-1.5 rounded-md border text-[11px] font-medium transition-all',
+              feedbackMsg.type === 'success'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300'
+                : 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300'
+            )}
+          >
+            {feedbackMsg.type === 'success' ? (
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
+            )}
+            <span>{feedbackMsg.text}</span>
+          </div>
+        )}
+
+        {/* CONTROLS BELOW MAIN SECTIONS */}
+        <div className="w-full pt-0.5">
+          {/* BARE LINKS CONVERTOR */}
+          <button
+            type="button"
+            onClick={handleConvertBareLinks}
+            className="w-full h-7.5 flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            <LinkIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+            <span>BARE LINKS (Convert Raw URLs)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* BOTTOM SECTION: LINKS HISTORY (Hidden in Email part only) */}
+      {!(activeMainTab === 'internal' && internalSubTab === 'email') && (
+        <div className="flex-1 min-h-0 flex flex-col px-2.5 pb-2.5 pt-0">
+          <LinksHistorySection
+            history={history}
+            isRefreshing={isRefreshing}
+            onRefresh={refreshHistory}
+            onExecuteAction={executeHistoryAction}
+            onRemoveItem={removeHistoryEntry}
+            onClearHistory={clearAllHistory}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
