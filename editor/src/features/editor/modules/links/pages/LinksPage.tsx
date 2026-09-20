@@ -13,24 +13,71 @@
  * --------------------------------------------------------
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link as LinkIcon, CheckCircle2, AlertCircle } from 'lucide-react';
 import { InternalRefColumn } from '../components/internalRef';
 import { CrossReferenceColumn } from '../components/crossReference';
 import { LinksHistorySection } from '../components/history';
 import { useLinksHistory } from '../hooks/useLinksHistory';
 import { bareLinksService } from '../services/BareLinksService';
+import { crossReferenceService } from '../services/CrossReferenceService';
 import { useEditor } from '@/features/editor/context/EditorContext';
 import { cn } from '@/lib/utils';
+import { BookmarkProvider } from '../context/BookmarkContext';
 import type { LinkHistoryType } from '../types';
 
 export type MainSectionTab = 'internal' | 'crossRef';
 
-export default function LinksPage() {
+function LinksPageContent() {
   const { editorRef } = useEditor();
   const [activeMainTab, setActiveMainTab] = useState<MainSectionTab>('internal');
   const [internalSubTab, setInternalSubTab] = useState<'web' | 'email'>('web');
   const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Delegated click listener to enable clicking links inside contenteditable document pages
+  useEffect(() => {
+    const handleDocumentLinkClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      const link = target.closest('a') as HTMLAnchorElement | null;
+      if (!link) return;
+
+      const inEditor = link.closest('[contenteditable="true"]') || link.closest('section[data-page-id]');
+      if (!inEditor) return;
+
+      const href = link.getAttribute('href');
+      if (!href) return;
+
+      // Internal cross-reference anchor (e.g. #hd_1_..., #fig_1_..., #tbl_1_...)
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const targetId = link.getAttribute('data-target-id') || href.substring(1);
+        crossReferenceService.navigateToTarget(null, targetId);
+        return;
+      }
+
+      // External Web URL
+      if (/^https?:\/\//i.test(href)) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(href, '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      // Mailto link
+      if (href.startsWith('mailto:')) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href = href;
+        return;
+      }
+    };
+
+    document.addEventListener('click', handleDocumentLinkClick, true);
+    return () => document.removeEventListener('click', handleDocumentLinkClick, true);
+  }, []);
 
   const {
     history,
@@ -192,5 +239,13 @@ export default function LinksPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function LinksPage() {
+  return (
+    <BookmarkProvider>
+      <LinksPageContent />
+    </BookmarkProvider>
   );
 }

@@ -67,7 +67,14 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
     const targetUrl = validation.normalizedUrl;
     const finalDisplayText = displayText.trim() || targetUrl;
 
-    const editor = editorRef.current;
+    const editor =
+      editorRef.current ||
+      (typeof document !== 'undefined'
+        ? (document.querySelector('[contenteditable="true"]:focus') as HTMLElement) ||
+          (document.querySelector('section[data-page-id] [contenteditable="true"]') as HTMLElement) ||
+          (document.querySelector('[contenteditable="true"]') as HTMLElement)
+        : null);
+
     if (!editor) {
       setError('Document editor not found. Please click inside the document first.');
       return;

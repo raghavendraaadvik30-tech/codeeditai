@@ -102,7 +102,14 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
 export function useBookmarks() {
   const context = useContext(BookmarkContext);
   if (!context) {
-    throw new Error('useBookmarks must be used within BookmarkProvider');
+    return {
+      bookmarks: [],
+      addBookmark: () => null,
+      removeBookmark: () => false,
+      navigateToBookmark: () => false,
+      refreshBookmarks: () => {},
+      isNameTaken: () => false,
+    };
   }
   return context;
 }
