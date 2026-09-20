@@ -196,6 +196,9 @@ const createDefaultSection = (
   evenHeader: "",
   evenFooter: "",
   showPageNumbers: true,
+  pageNumberPosition: "footer",
+  pageNumberAlignment: "right",
+  pageNumberFormat: "1",
   marginPreset: "normal",
   marginConfig: { top: 96, bottom: 96, left: 96, right: 96 },
   columns: { type: "one", count: 1 },
@@ -443,7 +446,14 @@ interface DocumentContextType {
   createNewDocument: (title?: string) => void;
   resetDocument: () => void;
   refreshHistory: () => void;
-  importDocumentPages: (title: string, pagesHtml: string[]) => void;
+  importDocumentPages: (
+    title: string,
+    pagesHtml: string[],
+    options?: {
+      insertPosition?: "append" | "afterActive" | "replace";
+      autoEnablePageNumbers?: boolean;
+    }
+  ) => void;
 }
 
 const DocumentContext =
@@ -1147,7 +1157,14 @@ export function DocumentModelProvider({
   ============================================================ */
 
   const importDocumentPages = useCallback(
-    (title: string, pagesHtml: string[]) => {
+    (
+      title: string,
+      pagesHtml: string[],
+      options?: {
+        insertPosition?: "append" | "afterActive" | "replace";
+        autoEnablePageNumbers?: boolean;
+      }
+    ) => {
       setModel((prev) => {
         const section = prev.sections[0] || createDefaultSection();
         const validPages =
@@ -1155,9 +1172,10 @@ export function DocumentModelProvider({
             ? pagesHtml.map((h) => (h && h.trim() ? h.trim() : DEFAULT_HTML))
             : [DEFAULT_HTML];
 
+        const targetSectionId = section.id;
         const newPages: PageModel[] = validPages.map(() => ({
           id: "page_" + uid(),
-          sectionId: section.id,
+          sectionId: targetSectionId,
         }));
 
         const newPageHtml: Record<string, string> = {};
@@ -1165,12 +1183,67 @@ export function DocumentModelProvider({
           newPageHtml[p.id] = validPages[idx];
         });
 
+        // Determine if existing document has user-added content
+        const isDocEmpty = (doc: DocumentModel): boolean => {
+          if (doc.pages.length > 1) return false;
+          const firstId = doc.pages[0]?.id;
+          if (!firstId) return true;
+          const html = doc.pageHtml[firstId];
+          if (!html) return true;
+          const clean = html
+            .replace(/<[^>]+>/g, "")
+            .replace(/&nbsp;/g, " ")
+            .trim();
+          const hasMedia = /<img|<table|<iframe|<svg/i.test(html);
+          return clean.length === 0 && !hasMedia;
+        };
+
+        const existingIsEmpty = isDocEmpty(prev);
+        const mode = options?.insertPosition || (existingIsEmpty ? "replace" : "afterActive");
+
+        let combinedPages: PageModel[];
+        let combinedPageHtml: Record<string, string>;
+
+        if (mode === "replace" || existingIsEmpty) {
+          combinedPages = newPages;
+          combinedPageHtml = newPageHtml;
+        } else if (mode === "afterActive") {
+          const activeIdx = prev.pages.findIndex((p) => p.id === activePage);
+          if (activeIdx >= 0) {
+            combinedPages = [
+              ...prev.pages.slice(0, activeIdx + 1),
+              ...newPages,
+              ...prev.pages.slice(activeIdx + 1),
+            ];
+          } else {
+            combinedPages = [...prev.pages, ...newPages];
+          }
+          combinedPageHtml = { ...prev.pageHtml, ...newPageHtml };
+        } else {
+          // "append"
+          combinedPages = [...prev.pages, ...newPages];
+          combinedPageHtml = { ...prev.pageHtml, ...newPageHtml };
+        }
+
+        // Always enable inbuilt page number on all sections
+        const updatedSections = (
+          prev.sections.length > 0 ? prev.sections : [section]
+        ).map((sec) => ({
+          ...sec,
+          showPageNumbers: true,
+          pageNumberPosition: sec.pageNumberPosition || "footer",
+          pageNumberAlignment: sec.pageNumberAlignment || "right",
+          pageNumberFormat: sec.pageNumberFormat || "1",
+        }));
+
         const newModel: DocumentModel = {
           ...prev,
-          title: title.trim() || prev.title || "Uploaded Document",
-          pages: newPages,
-          sections: prev.sections.length > 0 ? prev.sections : [section],
-          pageHtml: newPageHtml,
+          title: existingIsEmpty
+            ? title.trim() || prev.title || "Uploaded Document"
+            : prev.title,
+          pages: combinedPages,
+          sections: updatedSections,
+          pageHtml: combinedPageHtml,
           savedAt: Date.now(),
         };
 
@@ -1180,11 +1253,11 @@ export function DocumentModelProvider({
           // ignore
         }
 
-        setActivePage(newPages[0]?.id || null);
+        setActivePage(newPages[0]?.id || combinedPages[0]?.id || null);
         return newModel;
       });
     },
-    []
+    [activePage]
   );
 
   /* ============================================================

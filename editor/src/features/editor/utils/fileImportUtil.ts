@@ -3,14 +3,17 @@
  * 
  * Comprehensive document file parser for the Document Editor.
  * Supports:
- * - Word documents (.docx) via native zip header traversal and deflate decompression
+ * - Word documents (.docx) via JSZip and OpenXML parsing
+ * - PDF documents (.pdf) via native text stream extraction
  * - HTML documents (.html, .htm) via DOMParser
  * - Markdown files (.md, .markdown)
  * - Structured JSON documents (.json)
  * - Plain text (.txt, .text, .rtf)
  * 
- * Completely zero npm dependencies; uses standard Web APIs.
+ * Accurately parses and paginates continuous multi-page documents.
  */
+
+import JSZip from "jszip";
 
 export interface ParsedDocument {
   title: string;
@@ -32,6 +35,12 @@ export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
       const rawHtml = await parseDocxBuffer(buffer);
       const html = rawHtml || "<p><br/></p>";
       const pages = splitHtmlIntoPages(html);
+      return { title: cleanTitle, html, pages };
+    }
+
+    if (lowerName.endsWith(".pdf")) {
+      const buffer = await file.arrayBuffer();
+      const { html, pages } = parsePdfBuffer(buffer);
       return { title: cleanTitle, html, pages };
     }
 
@@ -73,43 +82,54 @@ export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
 
 /**
  * Splits HTML content into individual pages based on explicit page-break markers,
- * or auto-paginates continuous content to fit document page dimensions.
+ * and auto-paginates continuous content to fit document page dimensions without cutoffs.
  */
 export function splitHtmlIntoPages(html: string): string[] {
   if (!html || !html.trim()) return ["<p><br/></p>"];
 
-  // 1. Check for explicit page-break markers
   const breakPattern = /(?:<div[^>]*data-page-break="true"[^>]*><\/div>|<hr[^>]*class="[^"]*page-break[^"]*"[^>]*\/?>|<!--\s*page[-_]?break\s*-->|<div[^>]*style="[^"]*page-break-before:\s*always[^"]*"[^>]*><\/div>|<div[^>]*style="[^"]*break-before:\s*page[^"]*"[^>]*><\/div>)/i;
 
-  if (breakPattern.test(html)) {
-    const rawParts = html.split(breakPattern);
-    const pages = rawParts
-      .map((p) => p.trim())
-      .filter((p) => p.length > 0 && p !== "<p><br/></p>" && p !== "<p><br></p>");
-    if (pages.length > 0) {
-      return pages;
+  // If there are explicit breaks, divide into segments
+  const rawSegments = breakPattern.test(html) ? html.split(breakPattern) : [html];
+  const finalPages: string[] = [];
+
+  for (const seg of rawSegments) {
+    const trimmed = seg.trim();
+    if (!trimmed || trimmed === "<p><br/></p>" || trimmed === "<p><br></p>") {
+      continue;
     }
+    // Paginate this segment if needed
+    const subPages = paginateContinuousHtml(trimmed);
+    finalPages.push(...subPages);
   }
 
-  // 2. DOM-based pagination for continuous content
+  return finalPages.length > 0 ? finalPages : ["<p><br/></p>"];
+}
+
+/**
+ * Continuous HTML paginator that measures block heights and splits across page boundaries.
+ */
+function paginateContinuousHtml(html: string): string[] {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    const children = Array.from(doc.body.children);
 
-    if (children.length <= 1) {
+    // Extract all flat block elements (unpacking any wrappers like div.WordSection1, main, article, section)
+    const blocks = extractTopBlockElements(doc.body);
+
+    if (blocks.length === 0) {
       return [html];
     }
 
     const pages: string[] = [];
     let currentPageHtml: string[] = [];
     let currentHeight = 0;
-    const MAX_PAGE_HEIGHT = 800; // Target page content writing area height in px
+    const MAX_PAGE_HEIGHT = 760; // Standard Word printable writing height in px (1056 - 96 - 96 - 48 - 48)
 
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
+    for (let i = 0; i < blocks.length; i++) {
+      const child = blocks[i];
 
-      // Check if child has style or attribute indicating page break
+      // Check explicit break indicator
       const style = child.getAttribute("style") || "";
       const isExplicitBreak =
         child.getAttribute("data-page-break") === "true" ||
@@ -117,17 +137,19 @@ export function splitHtmlIntoPages(html: string): string[] {
         /page-break-before:\s*always/i.test(style) ||
         /break-before:\s*page/i.test(style);
 
-      if (isExplicitBreak && currentPageHtml.length > 0) {
-        pages.push(currentPageHtml.join(""));
-        currentPageHtml = [];
-        currentHeight = 0;
+      if (isExplicitBreak) {
+        if (currentPageHtml.length > 0) {
+          pages.push(currentPageHtml.join(""));
+          currentPageHtml = [];
+          currentHeight = 0;
+        }
         continue;
       }
 
       // Estimate rendered height
-      let elementHeight = 35;
       const tag = child.tagName.toLowerCase();
       const textLen = child.textContent?.length || 0;
+      let elementHeight = 35;
 
       if (tag === "h1") {
         elementHeight = 65;
@@ -143,13 +165,28 @@ export function splitHtmlIntoPages(html: string): string[] {
         elementHeight = Math.max(30, itemCount * 28);
       } else if (tag === "p") {
         const lines = Math.max(1, Math.ceil(textLen / 70));
-        elementHeight = 16 + lines * 28;
+        elementHeight = 16 + lines * 26;
       } else {
         const lines = Math.max(1, Math.ceil(textLen / 70));
-        elementHeight = Math.max(35, lines * 28);
+        elementHeight = Math.max(35, lines * 26);
       }
 
-      // If adding this element exceeds the page height, and we already have content on this page
+      // Handle extra-large paragraphs that exceed a page by themselves
+      if (tag === "p" && elementHeight > MAX_PAGE_HEIGHT && textLen > 700) {
+        if (currentPageHtml.length > 0) {
+          pages.push(currentPageHtml.join(""));
+          currentPageHtml = [];
+          currentHeight = 0;
+        }
+        // Split long paragraph into chunks
+        const pChunks = splitLongParagraph(child.innerHTML, 600);
+        for (const pChunk of pChunks) {
+          pages.push(pChunk);
+        }
+        continue;
+      }
+
+      // If adding element exceeds MAX_PAGE_HEIGHT
       if (currentHeight + elementHeight > MAX_PAGE_HEIGHT && currentPageHtml.length > 0) {
         pages.push(currentPageHtml.join(""));
         currentPageHtml = [child.outerHTML];
@@ -171,90 +208,133 @@ export function splitHtmlIntoPages(html: string): string[] {
 }
 
 /**
- * Parses DOCX ArrayBuffer by reading the ZIP archive and extracting word/document.xml.
+ * Extracts top-level content elements, unpacking any container divs, sections, articles, or WordSection1 wrappers.
  */
-async function parseDocxBuffer(buffer: ArrayBuffer): Promise<string> {
-  const bytes = new Uint8Array(buffer);
-  let pos = 0;
+function extractTopBlockElements(root: Element): Element[] {
+  const blocks: Element[] = [];
+  const containerTags = new Set(["div", "section", "article", "main"]);
 
-  while (pos < bytes.length - 30) {
-    // Check for ZIP local file header signature: PK\x03\x04
-    if (bytes[pos] === 0x50 && bytes[pos + 1] === 0x4b && bytes[pos + 2] === 0x03 && bytes[pos + 3] === 0x04) {
-      const compressionMethod = bytes[pos + 8] | (bytes[pos + 9] << 8);
-      const compressedSize =
-        bytes[pos + 18] |
-        (bytes[pos + 19] << 8) |
-        (bytes[pos + 20] << 16) |
-        (bytes[pos + 21] << 24);
-      const fileNameLen = bytes[pos + 26] | (bytes[pos + 27] << 8);
-      const extraLen = bytes[pos + 28] | (bytes[pos + 29] << 8);
+  function walk(node: Element) {
+    const tag = node.tagName.toLowerCase();
 
-      const fileNameBytes = bytes.subarray(pos + 30, pos + 30 + fileNameLen);
-      const entryName = new TextDecoder().decode(fileNameBytes);
+    // If it's a page break element, treat as block
+    if (
+      node.getAttribute("data-page-break") === "true" ||
+      node.classList.contains("page-break") ||
+      node.getAttribute("style")?.includes("page-break") ||
+      node.getAttribute("style")?.includes("break-before")
+    ) {
+      blocks.push(node);
+      return;
+    }
 
-      const dataStart = pos + 30 + fileNameLen + extraLen;
-      const dataEnd = dataStart + compressedSize;
-
-      if (entryName === "word/document.xml" && dataEnd <= bytes.length) {
-        const fileData = bytes.subarray(dataStart, dataEnd);
-        let xmlText = "";
-
-        if (compressionMethod === 0) {
-          // Stored without compression
-          xmlText = new TextDecoder().decode(fileData);
-        } else if (compressionMethod === 8 && typeof DecompressionStream !== "undefined") {
-          // Deflate compressed
-          try {
-            const stream = new Response(fileData as unknown as BodyInit).body!.pipeThrough(
-              new DecompressionStream("deflate-raw")
-            );
-            xmlText = await new Response(stream).text();
-          } catch (decompErr) {
-            console.warn("DecompressionStream error:", decompErr);
-          }
-        }
-
-        if (xmlText) {
-          const html = convertDocxXmlToHtml(xmlText);
-          if (html.trim()) return html;
+    // If it's a container wrapper (e.g. WordSection1 or div)
+    if (containerTags.has(tag) && node.children.length > 0) {
+      let hasBlockChild = false;
+      for (let i = 0; i < node.children.length; i++) {
+        const childTag = node.children[i].tagName.toLowerCase();
+        if (/^(p|h[1-6]|table|ul|ol|blockquote|pre|div|section|article|figure|hr)$/.test(childTag)) {
+          hasBlockChild = true;
+          break;
         }
       }
-
-      pos = dataEnd > pos ? dataEnd : pos + 1;
-    } else {
-      pos++;
+      if (hasBlockChild) {
+        for (let i = 0; i < node.children.length; i++) {
+          walk(node.children[i]);
+        }
+        return;
+      }
     }
+
+    blocks.push(node);
   }
 
-  // Fallback: extract readable strings from the buffer
-  return extractPrintableStrings(bytes);
+  for (let i = 0; i < root.children.length; i++) {
+    walk(root.children[i]);
+  }
+
+  return blocks;
 }
 
 /**
- * Converts Word document.xml into HTML elements (headings, paragraphs, bold/italic, tables).
+ * Splits extra-large paragraph HTML into smaller paragraphs by sentence boundaries.
+ */
+function splitLongParagraph(innerHtml: string, maxCharsPerChunk = 600): string[] {
+  const sentences = innerHtml.split(/(?<=[.!?])\s+(?=[A-Z0-9<])/);
+  const chunks: string[] = [];
+  let currentChunk: string[] = [];
+  let currentLen = 0;
+
+  for (const s of sentences) {
+    if (currentLen + s.length > maxCharsPerChunk && currentChunk.length > 0) {
+      chunks.push(`<p>${currentChunk.join(" ")}</p>`);
+      currentChunk = [s];
+      currentLen = s.length;
+    } else {
+      currentChunk.push(s);
+      currentLen += s.length;
+    }
+  }
+
+  if (currentChunk.length > 0) {
+    chunks.push(`<p>${currentChunk.join(" ")}</p>`);
+  }
+
+  return chunks.length > 0 ? chunks : [`<p>${innerHtml}</p>`];
+}
+
+/**
+ * Parses DOCX ArrayBuffer by reading the ZIP archive via JSZip and extracting word/document.xml.
+ */
+async function parseDocxBuffer(buffer: ArrayBuffer): Promise<string> {
+  try {
+    const zip = await JSZip.loadAsync(buffer);
+    const docXmlFile = zip.file("word/document.xml");
+    if (docXmlFile) {
+      const xmlText = await docXmlFile.async("text");
+      if (xmlText) {
+        const html = convertDocxXmlToHtml(xmlText);
+        if (html && html.trim()) return html;
+      }
+    }
+  } catch (err) {
+    console.warn("JSZip DOCX reading failed, attempting fallback extraction:", err);
+  }
+
+  // Fallback: extract readable strings from the buffer
+  return extractPrintableStrings(new Uint8Array(buffer));
+}
+
+/**
+ * Converts Word document.xml into HTML elements (headings, paragraphs, bold/italic, tables, page breaks).
  */
 function convertDocxXmlToHtml(xml: string): string {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, "application/xml");
-    const body = doc.querySelector("body");
+    const body =
+      doc.querySelector("body") ||
+      doc.getElementsByTagName("w:body")[0] ||
+      doc.getElementsByTagName("body")[0];
+
     if (!body) return fallbackRegexXmlExtract(xml);
 
     const htmlParts: string[] = [];
+    const nodes = Array.from(body.childNodes);
 
-    // Process direct children of body
-    body.childNodes.forEach((node) => {
-      if (node.nodeType !== Node.ELEMENT_NODE) return;
+    for (const node of nodes) {
+      if (node.nodeType !== Node.ELEMENT_NODE) continue;
       const el = node as Element;
+      const localName = el.localName || el.nodeName.replace(/^w:/, "");
 
-      if (el.localName === "p") {
+      if (localName === "p") {
         htmlParts.push(processParagraphElement(el));
-      } else if (el.localName === "tbl") {
+      } else if (localName === "tbl") {
         htmlParts.push(processTableElement(el));
-      } else if (el.localName === "sectPr") {
+      } else if (localName === "sectPr") {
         htmlParts.push('<div data-page-break="true"></div>');
       }
-    });
+    }
 
     const result = htmlParts.join("");
     return result.trim() ? result : fallbackRegexXmlExtract(xml);
@@ -265,47 +345,83 @@ function convertDocxXmlToHtml(xml: string): string {
 
 function processParagraphElement(p: Element): string {
   let styleTag = "p";
-  const pStyle = p.querySelector("pStyle");
-  const val = pStyle?.getAttribute("w:val") || pStyle?.getAttribute("val") || "";
+  const pStyle = p.querySelector("pStyle") || p.getElementsByTagName("w:pStyle")[0];
+  const val =
+    pStyle?.getAttribute("w:val") ||
+    pStyle?.getAttribute("val") ||
+    "";
   if (/heading\s*1/i.test(val)) styleTag = "h1";
   else if (/heading\s*2/i.test(val)) styleTag = "h2";
   else if (/heading\s*3/i.test(val)) styleTag = "h3";
+  else if (/heading\s*4/i.test(val)) styleTag = "h4";
 
   // Check for pageBreakBefore in paragraph properties
-  const hasPageBreakBefore = p.querySelector("pageBreakBefore") !== null;
+  const hasPageBreakBefore =
+    p.querySelector("pageBreakBefore") !== null ||
+    p.getElementsByTagName("w:pageBreakBefore").length > 0 ||
+    p.getElementsByTagName("pageBreakBefore").length > 0;
 
   const runParts: string[] = [];
-  p.childNodes.forEach((node) => {
-    if (node.nodeType !== Node.ELEMENT_NODE) return;
-    const child = node as Element;
+  const nodes = Array.from(p.childNodes);
 
-    if (child.localName === "r") {
-      // Check for page break in run: <w:br w:type="page"/> or <w:lastRenderedPageBreak/>
-      const brPage = child.querySelector('br[w\\:type="page"], br[type="page"]');
-      const hasLastRenderedBreak = child.querySelector("lastRenderedPageBreak") !== null;
-      if (brPage || hasLastRenderedBreak) {
+  for (const node of nodes) {
+    if (node.nodeType !== Node.ELEMENT_NODE) continue;
+    const child = node as Element;
+    const childName = child.localName || child.nodeName.replace(/^w:/, "");
+
+    if (childName === "r") {
+      // Check for page breaks in run
+      const brs = Array.from(child.getElementsByTagName("w:br")).concat(
+        Array.from(child.getElementsByTagName("br"))
+      );
+      for (const br of brs) {
+        const t = br.getAttribute("w:type") || br.getAttribute("type");
+        if (t === "page") {
+          runParts.push('<div data-page-break="true"></div>');
+        } else {
+          runParts.push("<br/>");
+        }
+      }
+
+      const hasLastRendered =
+        child.getElementsByTagName("w:lastRenderedPageBreak").length > 0 ||
+        child.getElementsByTagName("lastRenderedPageBreak").length > 0;
+      if (hasLastRendered) {
         runParts.push('<div data-page-break="true"></div>');
       }
 
       let text = "";
-      child.querySelectorAll("t").forEach((t) => {
+      const textNodes = Array.from(child.getElementsByTagName("w:t")).concat(
+        Array.from(child.getElementsByTagName("t"))
+      );
+      for (const t of textNodes) {
         text += t.textContent || "";
-      });
+      }
 
-      if (!text) return;
+      if (!text) continue;
 
-      const isBold = child.querySelector("b") !== null;
-      const isItalic = child.querySelector("i") !== null;
-      const isUnderline = child.querySelector("u") !== null;
+      const isBold =
+        child.getElementsByTagName("w:b").length > 0 ||
+        child.getElementsByTagName("b").length > 0;
+      const isItalic =
+        child.getElementsByTagName("w:i").length > 0 ||
+        child.getElementsByTagName("i").length > 0;
+      const isUnderline =
+        child.getElementsByTagName("w:u").length > 0 ||
+        child.getElementsByTagName("u").length > 0;
+      const isStrike =
+        child.getElementsByTagName("w:strike").length > 0 ||
+        child.getElementsByTagName("strike").length > 0;
 
       let formatted = escapeHtml(text);
       if (isBold) formatted = `<strong>${formatted}</strong>`;
       if (isItalic) formatted = `<em>${formatted}</em>`;
       if (isUnderline) formatted = `<u>${formatted}</u>`;
+      if (isStrike) formatted = `<s>${formatted}</s>`;
 
       runParts.push(formatted);
     }
-  });
+  }
 
   const content = runParts.join("");
   const pPrefix = hasPageBreakBefore ? '<div data-page-break="true"></div>' : "";
@@ -314,7 +430,9 @@ function processParagraphElement(p: Element): string {
   }
 
   // Check for section break at paragraph end
-  const hasSectPr = p.querySelector("sectPr") !== null;
+  const hasSectPr =
+    p.getElementsByTagName("w:sectPr").length > 0 ||
+    p.getElementsByTagName("sectPr").length > 0;
   const pSuffix = hasSectPr ? '<div data-page-break="true"></div>' : "";
 
   return `${pPrefix}<${styleTag}>${content}</${styleTag}>${pSuffix}`;
@@ -322,18 +440,29 @@ function processParagraphElement(p: Element): string {
 
 function processTableElement(tbl: Element): string {
   const rows: string[] = [];
-  tbl.querySelectorAll("tr").forEach((tr) => {
+  const trList = Array.from(tbl.getElementsByTagName("w:tr")).concat(
+    Array.from(tbl.getElementsByTagName("tr"))
+  );
+
+  for (const tr of trList) {
     const cells: string[] = [];
-    tr.querySelectorAll("tc").forEach((tc) => {
+    const tcList = Array.from(tr.getElementsByTagName("w:tc")).concat(
+      Array.from(tr.getElementsByTagName("tc"))
+    );
+
+    for (const tc of tcList) {
       const cellTextParts: string[] = [];
-      tc.querySelectorAll("p").forEach((p) => {
+      const pList = Array.from(tc.getElementsByTagName("w:p")).concat(
+        Array.from(tc.getElementsByTagName("p"))
+      );
+      for (const p of pList) {
         cellTextParts.push(processParagraphElement(p));
-      });
+      }
       const cellContent = cellTextParts.join("") || "<p><br/></p>";
       cells.push(`<td class="border border-slate-300 dark:border-slate-700 p-2">${cellContent}</td>`);
-    });
+    }
     rows.push(`<tr>${cells.join("")}</tr>`);
-  });
+  }
 
   return `<table class="document-table border-collapse border border-slate-300 dark:border-slate-700 w-full my-3">${rows.join("")}</table>`;
 }
@@ -352,7 +481,6 @@ function extractPrintableStrings(bytes: Uint8Array): string {
 
   for (let i = 0; i < bytes.length; i++) {
     const b = bytes[i];
-    // Printable ASCII
     if ((b >= 32 && b <= 126) || b === 10 || b === 13) {
       current.push(b);
     } else {
@@ -368,9 +496,79 @@ function extractPrintableStrings(bytes: Uint8Array): string {
 
   const valid = chunks
     .filter((c) => !c.includes("[Content_Types]") && !c.includes("word/") && !c.includes("schemas."))
-    .slice(0, 50);
+    .slice(0, 500);
 
   return valid.map((t) => `<p>${escapeHtml(t)}</p>`).join("") || "<p><br/></p>";
+}
+
+/**
+ * Parses PDF documents by extracting page streams and text blocks into document pages.
+ */
+function parsePdfBuffer(buffer: ArrayBuffer): { html: string; pages: string[] } {
+  try {
+    const bytes = new Uint8Array(buffer);
+    const text = new TextDecoder("latin1").decode(bytes);
+
+    // Count /Type /Page objects
+    const pageMatches = text.match(/\/Type\s*\/Page\b/g);
+    const pageCount = pageMatches ? pageMatches.length : 1;
+
+    // Extract text streams: BT ... ET
+    const streamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
+    const textChunks: string[] = [];
+    let match: RegExpExecArray | null;
+
+    while ((match = streamRegex.exec(text)) !== null) {
+      const streamContent = match[1];
+      const btRegex = /BT([\s\S]*?)ET/g;
+      let btMatch: RegExpExecArray | null;
+      while ((btMatch = btRegex.exec(streamContent)) !== null) {
+        const block = btMatch[1];
+        const tjRegex = /\((.*?)\)\s*Tj/g;
+        let tjMatch: RegExpExecArray | null;
+        while ((tjMatch = tjRegex.exec(block)) !== null) {
+          const raw = tjMatch[1].replace(/\\([()\\])/g, "$1").trim();
+          if (raw) textChunks.push(raw);
+        }
+
+        const tjArrayRegex = /\[(.*?)\]\s*TJ/g;
+        let tjArrayMatch: RegExpExecArray | null;
+        while ((tjArrayMatch = tjArrayRegex.exec(block)) !== null) {
+          const inner = tjArrayMatch[1];
+          const partRegex = /\((.*?)\)/g;
+          let partMatch: RegExpExecArray | null;
+          let combined = "";
+          while ((partMatch = partRegex.exec(inner)) !== null) {
+            combined += partMatch[1].replace(/\\([()\\])/g, "$1");
+          }
+          if (combined.trim()) textChunks.push(combined.trim());
+        }
+      }
+    }
+
+    if (textChunks.length === 0) {
+      const extracted = extractPrintableStrings(bytes);
+      const pages = splitHtmlIntoPages(extracted);
+      return { html: extracted, pages };
+    }
+
+    const chunkSizePerPage = Math.max(1, Math.ceil(textChunks.length / pageCount));
+    const pages: string[] = [];
+
+    for (let p = 0; p < pageCount; p++) {
+      const slice = textChunks.slice(p * chunkSizePerPage, (p + 1) * chunkSizePerPage);
+      if (slice.length > 0) {
+        const pHtml = slice.map((t) => `<p>${escapeHtml(t)}</p>`).join("");
+        pages.push(pHtml);
+      }
+    }
+
+    const validPages = pages.length > 0 ? pages : [textChunks.map((t) => `<p>${escapeHtml(t)}</p>`).join("")];
+    return { html: validPages.join(""), pages: validPages };
+  } catch {
+    const errHtml = "<p>Unable to parse PDF content.</p>";
+    return { html: errHtml, pages: [errHtml] };
+  }
 }
 
 /**
@@ -419,7 +617,6 @@ function parseJsonText(jsonStr: string): { html: string; pages: string[] } {
   try {
     const parsed = JSON.parse(jsonStr);
 
-    // Case A: { pages: [...], pageHtml: { page_1: "...", page_2: "..." } }
     if (parsed.pageHtml && typeof parsed.pageHtml === "object") {
       if (Array.isArray(parsed.pages) && parsed.pages.length > 0) {
         const pages = parsed.pages
@@ -437,7 +634,6 @@ function parseJsonText(jsonStr: string): { html: string; pages: string[] } {
       }
     }
 
-    // Case B: { pages: [ "html1", "html2" ] } or { pages: [ { html: "..." }, { content: "..." } ] }
     if (Array.isArray(parsed.pages) && parsed.pages.length > 0) {
       const pages = parsed.pages
         .map((p: any) =>
@@ -447,7 +643,6 @@ function parseJsonText(jsonStr: string): { html: string; pages: string[] } {
       if (pages.length > 0) return { html: pages.join(""), pages };
     }
 
-    // Case C: { content: "..." } or { html: "..." }
     const content =
       typeof parsed.content === "string"
         ? parsed.content
