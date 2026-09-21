@@ -7,10 +7,11 @@ import type { ComponentType } from "react";
 import { Search } from "lucide-react";
 
 import type { ModuleId } from "../../data/workspaceModules";
-import { StylesPage } from "../../modules/styles";
-import { DocumentPage } from "../../modules/document";
-import { TablesPage } from "../../modules/tables";
-import { SettingsPage } from "../../modules/settings";
+import { StylesPage } from "../../styles";
+import { DocumentPage } from "../../document";
+import { TablesPage } from "../../tables";
+import { SettingsPage } from "../../settings";
+import { FiguresPage } from "../../figures";
 
 export interface PanelProps {
   moduleId: ModuleId;
@@ -21,6 +22,7 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
   document: DocumentPage,
   tables: TablesPage,
   settings: SettingsPage,
+  figures: FiguresPage,
   writing: WritingPanel,
   links: LinksPanel,
 };
@@ -28,7 +30,13 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
 export default function Panel({ moduleId }: PanelProps) {
   const ActiveComponent = PANEL_MAP[moduleId];
 
-  if (moduleId === "document" || moduleId === "styles" || moduleId === "tables" || moduleId === "settings") {
+  if (
+    moduleId === "document" ||
+    moduleId === "styles" ||
+    moduleId === "tables" ||
+    moduleId === "settings" ||
+    moduleId === "figures"
+  ) {
     return ActiveComponent ? <ActiveComponent /> : <GenericPanel title={moduleId} />;
   }
 

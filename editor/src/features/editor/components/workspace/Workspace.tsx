@@ -21,7 +21,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useEditor } from "../../context/EditorContext";
 import { useDocumentModel, type PageModel, type SectionModel } from "../../store/documentModel";
-import { TableControlsOverlay, TableFloatingFormatToolbar } from "../../modules/tables/components";
+import { TableControlsOverlay, TableFloatingFormatToolbar } from "@/features/editor/tables/components";
+import { IconHydration, PictureHydration, ShapeHydration } from "@/features/editor/figures";
+import { ChartHydration, useChartContext } from "@/features/editor/charts";
+import { SmartArtHydration } from "@/features/editor/smart-art";
+
 
 export default function Workspace() {
   const {
@@ -205,6 +209,13 @@ export default function Workspace() {
         })()}
       </div>
 
+      {/* DOCUMENT CHART, SMARTART, ICON & SHAPE HYDRATION */}
+      <ChartHydration />
+      <SmartArtHydration />
+      <IconHydration />
+      <ShapeHydration />
+      <PictureHydration />
+
       {/* WORD-STYLE CONTEXTUAL TABLE TEXT FORMATTING TOOLBAR
           Appears automatically near selection when text inside a table cell is selected
       */}
@@ -336,6 +347,26 @@ function isCursorAtStart(container: HTMLElement): boolean {
   return true;
 }
 
+/**
+ * Strips rendered React portal contents from .editor-chart-mount and .editor-smartart-mount
+ * so that live interactive DOM is never baked into static page HTML.
+ */
+export function cleanChartMountsForHtml(html: string): string {
+  if (!html || (!html.includes("editor-chart-mount") && !html.includes("editor-smartart-mount"))) return html;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<body>${html}</body>`, "text/html");
+    const mounts = doc.querySelectorAll(".editor-chart-mount, .editor-smartart-mount");
+    if (mounts.length === 0) return html;
+    mounts.forEach((m) => {
+      m.innerHTML = "";
+    });
+    return doc.body.innerHTML;
+  } catch {
+    return html;
+  }
+}
+
 interface DocumentPageProps {
   pageId: string;
   pageIndex: number;
@@ -394,6 +425,11 @@ function DocumentPage({
   const localEditorRef = useRef<HTMLDivElement | null>(null);
   const lastHtmlRef = useRef<string>(html);
 
+  const { activeChartId, isSpreadsheetOpen } = useChartContext();
+  const isEditingChartOnThisPage = Boolean(
+    isSpreadsheetOpen && activeChartId && html.includes(activeChartId)
+  );
+
 
   /*
    * Keep the page HTML synchronized with the document model
@@ -403,7 +439,11 @@ function DocumentPage({
     const element = localEditorRef.current;
     if (!element) return;
 
-    const normalize = (s: string) => s.replace(/<br\s*\/?>/gi, "<br>").replace(/\s+/g, " ").trim();
+    const normalize = (s: string) =>
+      cleanChartMountsForHtml(s)
+        .replace(/<br\s*\/?>/gi, "<br>")
+        .replace(/\s+/g, " ")
+        .trim();
 
     // If active element is inside this editor, avoid destroying the user's cursor
     const hasFocus = element === document.activeElement || element.contains(document.activeElement);
@@ -414,7 +454,7 @@ function DocumentPage({
     }
 
     if (normalize(element.innerHTML) !== normalize(html)) {
-      element.innerHTML = html || "<p><br></p>";
+      element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
       lastHtmlRef.current = html;
     }
   }, [html]);
@@ -449,6 +489,8 @@ function DocumentPage({
   // If content overflows -> moves ONLY the overflowing children to next page.
   // ------------------------------------------------------------------------
   const checkAndPaginateOverflow = useCallback(() => {
+    if (isEditingChartOnThisPage) return;
+
     const container = localEditorRef.current;
     if (!container) return;
 
@@ -488,11 +530,11 @@ function DocumentPage({
     // Build HTML for overflowing content
     const tempDiv = document.createElement("div");
     overflowNodes.forEach((node) => tempDiv.appendChild(node.cloneNode(true)));
-    const overflowHtml = tempDiv.innerHTML.trim();
+    const overflowHtml = cleanChartMountsForHtml(tempDiv.innerHTML.trim());
 
     // Remove overflowing content from current page
     overflowNodes.forEach((node) => node.remove());
-    const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
+    const remainingHtml = cleanChartMountsForHtml(container.innerHTML.trim()) || "<p><br/></p>";
     lastHtmlRef.current = remainingHtml;
     onChange(remainingHtml);
 
@@ -637,12 +679,12 @@ function DocumentPage({
     const tempDiv = document.createElement("div");
     tempDiv.appendChild(fragment);
 
-    let trailingHtml = tempDiv.innerHTML.trim();
+    let trailingHtml = cleanChartMountsForHtml(tempDiv.innerHTML.trim());
     if (!trailingHtml || trailingHtml === "<br>" || trailingHtml === "<p></p>") {
       trailingHtml = "<p><br/></p>";
     }
 
-    const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
+    const remainingHtml = cleanChartMountsForHtml(container.innerHTML.trim()) || "<p><br/></p>";
     lastHtmlRef.current = remainingHtml;
     onChange(remainingHtml);
 
@@ -706,7 +748,7 @@ function DocumentPage({
   const handleInput = () => {
     const element = localEditorRef.current;
     if (!element) return;
-    const currentHtml = element.innerHTML;
+    const currentHtml = cleanChartMountsForHtml(element.innerHTML);
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
   };
@@ -804,7 +846,7 @@ function DocumentPage({
         targetP = lastChild;
       }
 
-      const updatedHtml = container.innerHTML;
+      const updatedHtml = cleanChartMountsForHtml(container.innerHTML);
       lastHtmlRef.current = updatedHtml;
       onChange(updatedHtml);
 
@@ -911,13 +953,47 @@ function DocumentPage({
   const marginT = section?.marginConfig?.top ?? 32;
   const marginB = section?.marginConfig?.bottom ?? 32;
 
+  const handlePageDrop = (e: React.DragEvent<HTMLElement>) => {
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith("image/")) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const src = reader.result as string;
+          if (src) {
+            window.dispatchEvent(
+              new CustomEvent("pf-insert-picture", {
+                detail: {
+                  src,
+                  name: file.name,
+                  mode: "withTitle",
+                },
+              })
+            );
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
   return (
     <section
       data-page-id={pageId}
       onMouseDown={handlePageMouseDown}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes("Files")) {
+          e.preventDefault();
+        }
+      }}
+      onDrop={handlePageDrop}
       className={`
         relative
-        overflow-hidden
+        ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
         shrink-0
         cursor-text
         shadow-[0_4px_20px_rgba(0,0,0,0.12)]
@@ -935,8 +1011,9 @@ function DocumentPage({
       style={{
         width: `${pageWidth}px`,
         minWidth: `${pageWidth}px`,
-        height: `${pageHeight}px`,
-        maxHeight: `${pageHeight}px`,
+        minHeight: `${pageHeight}px`,
+        height: isEditingChartOnThisPage ? "auto" : `${pageHeight}px`,
+        maxHeight: isEditingChartOnThisPage ? undefined : `${pageHeight}px`,
         transform: `scale(${zoom / 100})`,
         transformOrigin: "top center",
         marginBottom: `${(pageHeight * zoom) / 100 - pageHeight}px`,
@@ -1079,8 +1156,9 @@ function DocumentPage({
           }
         }}
         style={{
-          height: `${contentHeight}px`,
-          maxHeight: `${contentHeight}px`,
+          minHeight: `${contentHeight}px`,
+          height: isEditingChartOnThisPage ? "auto" : `${contentHeight}px`,
+          maxHeight: isEditingChartOnThisPage ? undefined : `${contentHeight}px`,
           paddingTop: `${marginT}px`,
           paddingBottom: `${marginB}px`,
           paddingLeft: `${marginL}px`,
@@ -1092,8 +1170,8 @@ function DocumentPage({
               }
             : {}),
         }}
-        className="
-          overflow-hidden
+        className={`
+          ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
           box-border
           outline-none
           cursor-text
@@ -1150,7 +1228,7 @@ function DocumentPage({
           [&_th]:min-w-[48px]
           [&_th]:break-words
           [&_th]:whitespace-normal
-        "
+        `}
       />
 
       {/* WORD-STYLE TABLE MOVE & RESIZE OVERLAY (Editor UI only, not in saved document) */}
@@ -1161,7 +1239,7 @@ function DocumentPage({
           zoom={zoom}
           onUpdate={() => {
             if (localEditorRef.current) {
-              const updatedHtml = localEditorRef.current.innerHTML;
+              const updatedHtml = cleanChartMountsForHtml(localEditorRef.current.innerHTML);
               lastHtmlRef.current = updatedHtml;
               onChange(updatedHtml);
             }

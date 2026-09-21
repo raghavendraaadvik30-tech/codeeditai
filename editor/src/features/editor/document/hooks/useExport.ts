@@ -9,9 +9,9 @@
  */
 
 import { useState, useCallback } from "react";
-import { useDocumentModel, type PageModel } from "../../../store/documentModel";
-import { generateWordDocx } from "../../../services/docxGeneratorService";
-import { printService } from "../../../services/printService";
+import { useDocumentModel, type PageModel } from "../../store/documentModel";
+import { generateWordDocx } from "../../services/docxGeneratorService";
+import { printService } from "../../services/printService";
 
 export type ExportFormat = "pdf" | "docx" | "html" | "txt";
 
