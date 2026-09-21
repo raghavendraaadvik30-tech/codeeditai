@@ -424,6 +424,10 @@ interface DocumentContextType {
     pageId: string,
     patch: Partial<PageModel>
   ) => void;
+  applySectionPatchToPage: (
+    pageId: string,
+    patch: Partial<SectionModel>
+  ) => void;
   applyPageBorders: (
     borderConfig: PageBorderConfig,
     applyTo: "document" | "section" | "page" | "firstPage" | "exceptFirstPage",
@@ -757,6 +761,96 @@ export function DocumentModelProvider({
       ),
     }));
   }, []);
+
+  /* ============================================================
+     Apply Section Patch to a Single Page (Isolating Page Section)
+  ============================================================ */
+
+  const applySectionPatchToPage = useCallback(
+    (pageId: string, patch: Partial<SectionModel>) => {
+      setModel((prev) => {
+        const pageIndex = prev.pages.findIndex((p) => p.id === pageId);
+        if (pageIndex === -1) return prev;
+
+        const targetPage = prev.pages[pageIndex];
+        const currentSection =
+          prev.sections.find((s) => s.id === targetPage.sectionId) ??
+          prev.sections[0];
+
+        const pagesInThisSection = prev.pages.filter(
+          (p) => p.sectionId === targetPage.sectionId
+        );
+
+        // Case 1: Target page is already the ONLY page in its section
+        if (pagesInThisSection.length <= 1) {
+          return {
+            ...prev,
+            sections: prev.sections.map((sec) =>
+              sec.id === targetPage.sectionId ? { ...sec, ...patch } : sec
+            ),
+          };
+        }
+
+        // Case 2: Target page shares section with other pages
+        // Create an isolated section specifically for targetPage
+        const newSectionId = "section_" + uid();
+        const newSection: SectionModel = {
+          ...currentSection,
+          ...patch,
+          id: newSectionId,
+          header: "Section " + (prev.sections.length + 1),
+        };
+
+        const pagesBefore = prev.pages.slice(0, pageIndex);
+        const pagesAfter = prev.pages.slice(pageIndex + 1);
+
+        const hasBeforeInSameSection = pagesBefore.some(
+          (p) => p.sectionId === targetPage.sectionId
+        );
+        const hasAfterInSameSection = pagesAfter.some(
+          (p) => p.sectionId === targetPage.sectionId
+        );
+
+        let postSection: SectionModel | null = null;
+        let postSectionId: string | null = null;
+
+        if (hasAfterInSameSection) {
+          if (hasBeforeInSameSection) {
+            // Target was in the middle of this section:
+            // pagesBefore keeps currentSection, target gets newSection, pagesAfter gets postSection
+            postSectionId = "section_" + uid();
+            postSection = {
+              ...currentSection,
+              id: postSectionId,
+              header: "Section " + (prev.sections.length + 2),
+            };
+          }
+        }
+
+        const newPages = prev.pages.map((p, idx) => {
+          if (idx === pageIndex) {
+            return { ...p, sectionId: newSectionId };
+          }
+          if (idx > pageIndex && postSectionId && p.sectionId === targetPage.sectionId) {
+            return { ...p, sectionId: postSectionId };
+          }
+          return p;
+        });
+
+        const newSections = [...prev.sections, newSection];
+        if (postSection) {
+          newSections.push(postSection);
+        }
+
+        return {
+          ...prev,
+          pages: newPages,
+          sections: newSections,
+        };
+      });
+    },
+    []
+  );
 
   const applyPageBorders = useCallback(
     (
@@ -1282,6 +1376,7 @@ export function DocumentModelProvider({
         updateSection,
         updateAllSections,
         updatePage,
+        applySectionPatchToPage,
         applyPageBorders,
         save,
         saveAs,
