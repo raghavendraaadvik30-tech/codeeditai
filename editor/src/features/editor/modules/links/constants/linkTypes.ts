@@ -37,8 +37,8 @@ export const LINK_TYPES: Record<LinkType, { label: string; description: string; 
     icon: 'Mail',
   },
   citation: {
-    label: 'Citation & Bibliography',
-    description: 'Scholarly citation reference linked to bibliography',
+    label: 'Citation',
+    description: 'Scholarly citation reference',
     icon: 'Quote',
   },
 };
