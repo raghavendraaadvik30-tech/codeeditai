@@ -515,6 +515,97 @@ function isCursorAtStart(container: HTMLElement): boolean {
   return true;
 }
 
+interface SavedSelection {
+  start: number;
+  end: number;
+}
+
+function saveSelection(container: HTMLElement): SavedSelection | null {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  const range = sel.getRangeAt(0);
+  if (!container.contains(range.startContainer) || !container.contains(range.endContainer)) {
+    return null;
+  }
+
+  const preStartRange = range.cloneRange();
+  preStartRange.selectNodeContents(container);
+  preStartRange.setEnd(range.startContainer, range.startOffset);
+  const start = preStartRange.toString().length;
+
+  const preEndRange = range.cloneRange();
+  preEndRange.selectNodeContents(container);
+  preEndRange.setEnd(range.endContainer, range.endOffset);
+  const end = preEndRange.toString().length;
+
+  return { start, end };
+}
+
+function restoreSelection(container: HTMLElement, saved: SavedSelection | null): void {
+  if (!saved) return;
+  const sel = window.getSelection();
+  if (!sel) return;
+
+  const savedStart = saved.start;
+  const savedEnd = saved.end;
+
+  let charIndex = 0;
+  const found = {
+    startNode: null as Node | null,
+    startOffset: 0,
+    endNode: null as Node | null,
+    endOffset: 0,
+  };
+
+  function traverse(node: Node) {
+    if (found.startNode && found.endNode) return;
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const textLen = (node as Text).length ?? node.textContent?.length ?? 0;
+      const nextCharIndex = charIndex + textLen;
+
+      if (!found.startNode && savedStart >= charIndex && savedStart <= nextCharIndex) {
+        found.startNode = node;
+        found.startOffset = savedStart - charIndex;
+      }
+      if (!found.endNode && savedEnd >= charIndex && savedEnd <= nextCharIndex) {
+        found.endNode = node;
+        found.endOffset = savedEnd - charIndex;
+      }
+
+      charIndex = nextCharIndex;
+    } else {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        traverse(node.childNodes[i]);
+        if (found.startNode && found.endNode) return;
+      }
+    }
+  }
+
+  traverse(container);
+
+  try {
+    const range = document.createRange();
+    if (found.startNode && found.endNode) {
+      const sLen = found.startNode.textContent?.length ?? 0;
+      const eLen = found.endNode.textContent?.length ?? 0;
+      range.setStart(found.startNode, Math.min(found.startOffset, sLen));
+      range.setEnd(found.endNode, Math.min(found.endOffset, eLen));
+    } else if (found.startNode) {
+      const sLen = found.startNode.textContent?.length ?? 0;
+      range.setStart(found.startNode, Math.min(found.startOffset, sLen));
+      range.collapse(true);
+    } else {
+      range.selectNodeContents(container);
+      range.collapse(false);
+    }
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch {
+    // ignore
+  }
+}
+
 interface DocumentPageProps {
   pageId: string;
   pageIndex: number;
@@ -578,6 +669,8 @@ function DocumentPage({
 }: DocumentPageProps) {
   const localEditorRef = useRef<HTMLDivElement | null>(null);
   const lastHtmlRef = useRef<string>(html);
+  const consecutiveEnterRef = useRef<boolean>(false);
+  const lastEnterTimeRef = useRef<number>(0);
 
   const { undo, redo, recordSnapshot, initHistory } = useEditor();
 
@@ -772,8 +865,12 @@ function DocumentPage({
     }
 
     if (normalize(element.innerHTML) !== normalize(html)) {
+      const savedSel = hasFocus ? saveSelection(element) : null;
       element.innerHTML = html || "<p><br></p>";
       lastHtmlRef.current = html;
+      if (savedSel) {
+        restoreSelection(element, savedSel);
+      }
     } else {
       lastHtmlRef.current = html;
     }
@@ -815,11 +912,17 @@ function DocumentPage({
     const children = Array.from(container.children) as HTMLElement[];
     if (children.length <= 1) return;
 
+    // Only paginate if container content genuinely exceeds its usable height
+    if (container.scrollHeight <= container.clientHeight + 2) {
+      return;
+    }
+
     const containerRect = container.getBoundingClientRect();
     if (containerRect.height === 0) return;
 
-    // Available writing boundary: container bottom minus bottom margin tolerance
-    const maxBottom = containerRect.bottom - Math.max(16, marginB);
+    const scale = zoom / 100;
+    // Available writing boundary: container bottom minus bottom margin tolerance (scaled with zoom)
+    const maxBottom = containerRect.bottom - Math.max(16, marginB) * scale;
 
     const columnCount = section?.columns?.count ?? 1;
     const isMultiColumn = columnCount > 1;
@@ -833,14 +936,14 @@ function DocumentPage({
         // Multi-column layout overflow check:
         // 1. Child spilled past the right edge of container into an overflow column
         const isPastRightBoundary =
-          childRect.right > containerRect.right - marginR + 10 ||
-          childRect.left >= containerRect.right - marginR;
+          childRect.right > containerRect.right - marginR * scale + 10 ||
+          childRect.left >= containerRect.right - marginR * scale;
 
         // 2. Child is in the last column and exceeds bottom boundary
         const approxColWidth =
-          (containerRect.width - marginL - marginR - (columnCount - 1) * (section?.columns?.gap ?? 32)) /
+          (containerRect.width - (marginL + marginR) * scale - (columnCount - 1) * (section?.columns?.gap ?? 32) * scale) /
           columnCount;
-        const lastColLeftThreshold = containerRect.right - marginR - approxColWidth - 15;
+        const lastColLeftThreshold = containerRect.right - marginR * scale - approxColWidth - 15;
         const isInLastColumn = childRect.left >= lastColLeftThreshold;
         const isPastBottomInLastCol = isInLastColumn && childRect.bottom > maxBottom;
 
@@ -871,6 +974,13 @@ function DocumentPage({
     const overflowNodes = children.slice(safeSplitIdx);
     if (overflowNodes.length === 0) return;
 
+    const sel = window.getSelection();
+    const isCaretInOverflow = Boolean(
+      sel &&
+      sel.rangeCount > 0 &&
+      overflowNodes.some((node) => node.contains(sel.anchorNode))
+    );
+
     // Build HTML for overflowing content
     const tempDiv = document.createElement("div");
     overflowNodes.forEach((node) => tempDiv.appendChild(node.cloneNode(true)));
@@ -890,10 +1000,12 @@ function DocumentPage({
       // Current page is the LAST page and genuinely overflowed:
       // Create EXACTLY ONE new page using existing addPage function
       const newPageId = onAddPage(pageId, overflowHtml);
-      setTimeout(() => {
-        onSetActivePage(newPageId);
-        focusPage(newPageId, "start");
-      }, 50);
+      if (isCaretInOverflow) {
+        setTimeout(() => {
+          onSetActivePage(newPageId);
+          focusPage(newPageId, "start");
+        }, 50);
+      }
     } else {
       // Next page already exists: prepend overflowing content to next page
       const existingNextHtml = pageHtmlMap[nextPage.id] || "";
@@ -903,12 +1015,14 @@ function DocumentPage({
           : existingNextHtml;
       const mergedHtml = overflowHtml + (cleanExisting ? cleanExisting : "");
       onSetPageHtml(nextPage.id, mergedHtml);
-      setTimeout(() => {
-        onSetActivePage(nextPage.id);
-        focusPage(nextPage.id, "start");
-      }, 50);
+      if (isCaretInOverflow) {
+        setTimeout(() => {
+          onSetActivePage(nextPage.id);
+          focusPage(nextPage.id, "start");
+        }, 50);
+      }
     }
-  }, [allPages, marginB, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section]);
+  }, [allPages, marginB, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section, zoom]);
 
   // ------------------------------------------------------------------------
   // KeyDown: Enter, Ctrl+Enter, and Backspace Handlers
@@ -916,6 +1030,11 @@ function DocumentPage({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const container = localEditorRef.current;
     if (!container) return;
+
+    // Reset consecutive enter tracking on any key other than Enter
+    if (e.key !== "Enter") {
+      consecutiveEnterRef.current = false;
+    }
 
     // ------------------------------------------------------------------
     // Undo / Redo: Move down or up single letter
@@ -936,20 +1055,35 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
+    // Select All in Current Page: Ctrl + A / Cmd + A
+    // ------------------------------------------------------------------
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "a" || e.key === "A")) {
+      e.preventDefault();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(container);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
+    // ------------------------------------------------------------------
     // 1. Manual Page Break: Ctrl + Enter / Cmd + Enter
     // Intentionally splits content at cursor and creates a new page immediately
     // ------------------------------------------------------------------
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
+      consecutiveEnterRef.current = false;
       handleManualPageBreak();
       return;
     }
 
     // ------------------------------------------------------------------
     // 2. Normal Enter:
-    // Enter does NOT mean "create a new page"!
-    // Allow normal browser paragraph creation.
-    // If inside a table cell, allow creating a new line in the cell without paginating!
+    // Single Enter creates normal paragraph break on current page.
+    // Double Enter (consecutive Enter on empty paragraph) creates page break.
     // ------------------------------------------------------------------
     if (e.key === "Enter" && !e.shiftKey) {
       const sel = window.getSelection();
@@ -958,12 +1092,66 @@ function DocumentPage({
       const cell = el?.closest("td, th") as HTMLTableCellElement | null;
       if (cell) {
         // Normal Enter in table cell: keep typing inside the cell without pagination
+        consecutiveEnterRef.current = false;
         return;
       }
 
+      // Identify the current block element where cursor is positioned
+      const currentBlock = (el?.closest("p, div, h1, h2, h3, li, blockquote") as HTMLElement | null) || el;
+      const isBlockEmpty = Boolean(
+        currentBlock &&
+        currentBlock !== container &&
+        (currentBlock.textContent?.trim() === "" ||
+          currentBlock.innerHTML === "<br>" ||
+          currentBlock.innerHTML === "<br/>" ||
+          currentBlock.innerHTML.trim() === "")
+      );
+
+      const now = Date.now();
+      const isConsecutive = consecutiveEnterRef.current && now - lastEnterTimeRef.current < 2500;
+
+      if (isConsecutive && isBlockEmpty) {
+        // DOUBLE ENTER: Consecutive Enter on empty line -> Page break to next page
+        e.preventDefault();
+        consecutiveEnterRef.current = false;
+
+        // Clean up the empty paragraph so no unwanted empty paragraph or blank space is left behind
+        if (currentBlock && currentBlock !== container && container.contains(currentBlock)) {
+          if (container.children.length > 1) {
+            currentBlock.remove();
+          } else {
+            currentBlock.innerHTML = "<br>";
+          }
+        }
+
+        const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
+        lastHtmlRef.current = remainingHtml;
+        onChange(remainingHtml);
+
+        const nextPage = allPages[pageIndex + 1];
+        if (!nextPage) {
+          const newPageId = onAddPage(pageId, "<p><br></p>");
+          setTimeout(() => {
+            onSetActivePage(newPageId);
+            focusPage(newPageId, "start");
+          }, 50);
+        } else {
+          onSetActivePage(nextPage.id);
+          setTimeout(() => {
+            focusPage(nextPage.id, "start");
+          }, 50);
+        }
+        return;
+      }
+
+      // SINGLE ENTER: Normal paragraph break on current page
+      consecutiveEnterRef.current = true;
+      lastEnterTimeRef.current = now;
+
+      // Allow browser native paragraph creation on current page
       setTimeout(() => {
         checkAndPaginateOverflow();
-      }, 20);
+      }, 100);
       return;
     }
 
@@ -1108,6 +1296,7 @@ function DocumentPage({
   };
 
   const handleInput = () => {
+    consecutiveEnterRef.current = false;
     const element = localEditorRef.current;
     if (!element) return;
     const currentHtml = element.innerHTML;
@@ -1118,8 +1307,9 @@ function DocumentPage({
 
   const handleFocus = () => {
     onActivate();
+    consecutiveEnterRef.current = false;
 
-    if (!editorRef.current) {
+    if (editorRef) {
       (
         editorRef as React.MutableRefObject<HTMLDivElement | null>
       ).current = localEditorRef.current;
@@ -1132,6 +1322,7 @@ function DocumentPage({
   // ------------------------------------------------------------------------
   const handlePageMouseDown = (e: React.MouseEvent<HTMLElement>) => {
     onActivate();
+    consecutiveEnterRef.current = false;
 
     const container = localEditorRef.current;
     if (!container || !editable) return;
@@ -1147,115 +1338,44 @@ function DocumentPage({
       return;
     }
 
-    // If the click is directly on an existing text block (p, h1, h2, li, etc.)
-    if (
-      target &&
-      target !== container &&
-      target.closest("p, h1, h2, h3, ul, ol, li, blockquote")
-    ) {
-      // Allow browser native caret placement to handle direct text clicks
+    // If the click is inside the editable container or on any of its content:
+    if (container.contains(target) || target === container) {
+      // Ensure the container has at least one paragraph if completely empty
+      if (!container.firstElementChild) {
+        container.innerHTML = "<p><br></p>";
+        lastHtmlRef.current = container.innerHTML;
+        onChange(container.innerHTML);
+      }
+
+      // Check if clicking in empty whitespace well below the last paragraph
+      const children = Array.from(container.children) as HTMLElement[];
+      const lastChild = children[children.length - 1];
+      if (lastChild) {
+        const lastChildRect = lastChild.getBoundingClientRect();
+        if (e.clientY > lastChildRect.bottom + 10) {
+          e.preventDefault();
+          container.focus();
+          const sel = window.getSelection();
+          if (sel) {
+            const range = document.createRange();
+            range.selectNodeContents(lastChild);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+          return;
+        }
+      }
+
+      // Click is within normal text area: DO NOT call e.preventDefault(), DO NOT collapse selection!
+      // Let the browser's native text selection, double-click word selection,
+      // and exact caret placement work naturally!
       return;
     }
 
-    // Otherwise, the user clicked on empty space on the page (container whitespace, margins, etc.)
-    e.preventDefault();
-    container.focus();
-
-    if (!container.firstElementChild) {
-      container.innerHTML = "<p><br></p>";
-    }
-
-    const containerRect = container.getBoundingClientRect();
-    const children = Array.from(container.children) as HTMLElement[];
-    const lastChild = children[children.length - 1];
-
-    if (!lastChild) {
-      focusPage(pageId, "start");
-      return;
-    }
-
-    const lastChildRect = lastChild.getBoundingClientRect();
-    const effectiveLineHeight = 28 * (zoom / 100);
-
-    // Case 1: Click is below the last paragraph on the page
-    if (e.clientY > lastChildRect.bottom + 6) {
-      const maxAllowedBottom = containerRect.bottom - 28;
-      const diffY = e.clientY - lastChildRect.bottom;
-      let linesToAdd = Math.max(1, Math.round(diffY / effectiveLineHeight));
-
-      // Ensure we don't exceed the page boundary
-      const maxPossibleLines = Math.max(
-        1,
-        Math.floor((maxAllowedBottom - lastChildRect.bottom) / effectiveLineHeight)
-      );
-      linesToAdd = Math.min(linesToAdd, maxPossibleLines);
-
-      let targetP: HTMLElement = lastChild;
-      const isLastEmpty =
-        lastChild.tagName === "P" &&
-        (lastChild.innerHTML === "<br>" ||
-          lastChild.innerHTML === "<br/>" ||
-          lastChild.textContent?.trim() === "");
-
-      const startCount = isLastEmpty ? 1 : 0;
-      for (let i = startCount; i < linesToAdd; i++) {
-        const p = document.createElement("p");
-        p.innerHTML = "<br>";
-        container.appendChild(p);
-        targetP = p;
-      }
-
-      if (isLastEmpty && linesToAdd === 1) {
-        targetP = lastChild;
-      }
-
-      const updatedHtml = container.innerHTML;
-      lastHtmlRef.current = updatedHtml;
-      onChange(updatedHtml);
-
-      // Place caret '|' inside target paragraph
-      const sel = window.getSelection();
-      if (sel) {
-        const range = document.createRange();
-        range.selectNodeContents(targetP);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-      return;
-    }
-
-    // Case 2: Click is alongside or between existing paragraphs
-    let closestChild: HTMLElement = children[0];
-    let minDistance = Infinity;
-
-    for (const child of children) {
-      const rect = child.getBoundingClientRect();
-      if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
-        closestChild = child;
-        minDistance = 0;
-        break;
-      }
-      const dist = Math.min(
-        Math.abs(e.clientY - rect.top),
-        Math.abs(e.clientY - rect.bottom)
-      );
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestChild = child;
-      }
-    }
-
-    const sel = window.getSelection();
-    if (sel && closestChild) {
-      const range = document.createRange();
-      const rect = closestChild.getBoundingClientRect();
-      const isLeft = e.clientX < rect.left + 20;
-
-      range.selectNodeContents(closestChild);
-      range.collapse(isLeft);
-      sel.removeAllRanges();
-      sel.addRange(range);
+    // Click is outside the editable container (e.g. on page margins in <section>):
+    if (!container.contains(document.activeElement)) {
+      container.focus();
     }
   };
 
