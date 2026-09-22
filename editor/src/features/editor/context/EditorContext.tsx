@@ -56,7 +56,24 @@ export function setCaretCharacterOffsetWithin(element: HTMLElement, offset: numb
           return;
         }
         currentOffset += textLength;
+      } else if (node.nodeName === "BR" && currentOffset >= offset) {
+        const range = document.createRange();
+        range.setStartBefore(node);
+        range.collapse(true);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+        found = true;
+        return;
       } else {
+        if (node.childNodes.length === 0 && currentOffset >= offset) {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          range.collapse(true);
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+          found = true;
+          return;
+        }
         for (let i = 0; i < node.childNodes.length; i++) {
           traverse(node.childNodes[i]);
           if (found) return;
