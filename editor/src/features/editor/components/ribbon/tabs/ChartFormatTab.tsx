@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
 } from '@/shared/components/ui/dropdown-menu';
 import RibbonDivider from '../controls/RibbonDivider';
-import { useChartContext } from '@/features/editor/charts';
+import { useChartContext } from '@/features/editor/modules/figures/modules/chart';
 
 export default function ChartFormatTab() {
   const { activeChart, updateActiveChart, deleteActiveChart } = useChartContext();

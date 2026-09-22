@@ -28,7 +28,7 @@ import {
   QUICK_LAYOUTS,
   ChangeChartTypeModal,
   SelectDataModal,
-} from '@/features/editor/charts';
+} from '@/features/editor/modules/figures/modules/chart';
 
 export default function ChartDesignTab() {
   const {

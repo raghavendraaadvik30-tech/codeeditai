@@ -22,9 +22,11 @@ import { Sparkles } from "lucide-react";
 import { useEditor } from "../../context/EditorContext";
 import { useDocumentModel, type PageModel, type SectionModel } from "../../store/documentModel";
 import { TableControlsOverlay, TableFloatingFormatToolbar } from "@/features/editor/tables/components";
-import { IconHydration, PictureHydration, ShapeHydration } from "@/features/editor/figures";
-import { ChartHydration, useChartContext } from "@/features/editor/charts";
-import { SmartArtHydration } from "@/features/editor/smart-art";
+import { PictureHydration } from "@/features/editor/modules/figures/modules/pictures";
+import { IconHydration } from "@/features/editor/modules/figures/modules/icons";
+import { ShapeHydration } from "@/features/editor/modules/figures/modules/shapes";
+import { ChartHydration, useChartContext } from "@/features/editor/modules/figures/modules/chart";
+import { SmartArtHydration } from "@/features/editor/modules/figures/modules/smartart";
 
 
 export default function Workspace() {

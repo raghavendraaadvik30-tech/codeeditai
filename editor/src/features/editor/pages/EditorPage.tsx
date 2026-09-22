@@ -20,9 +20,9 @@ Acts as the **entry point for the document editor page** by setting up the requi
 import { EditorProvider } from "../context/EditorContext";
 import { DocumentModelProvider } from "../store/documentModel";
 import { TableProvider } from "../tables/context";
-import { FigureProvider } from "../figures/context";
-import { ChartProvider } from "../charts/context";
-import { SmartArtProvider } from "../smart-art/context";
+import { FigureProvider } from "../modules/figures/context";
+import { ChartProvider } from "../modules/figures/modules/chart/context";
+import { SmartArtProvider } from "../modules/figures/modules/smartart/context";
 import EditorLayout from "../layouts/EditorLayout";
 
 export default function EditorPage() {

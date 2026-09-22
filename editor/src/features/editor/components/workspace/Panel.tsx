@@ -11,7 +11,7 @@ import { StylesPage } from "../../styles";
 import { DocumentPage } from "../../document";
 import { TablesPage } from "../../tables";
 import { SettingsPage } from "../../settings";
-import { FiguresPage } from "../../figures";
+import { FiguresPage } from "../../modules/figures";
 
 export interface PanelProps {
   moduleId: ModuleId;

@@ -1,0 +1,10 @@
+export { default as DocumentShapeRenderer } from './DocumentShapeRenderer';
+export * from './DocumentShapeRenderer';
+export { default as ShapeIcon } from './ShapeIcon';
+export * from './ShapeIcon';
+export { default as ShapePicker } from './ShapePicker';
+export * from './ShapePicker';
+export { default as ShapePickerModal } from './ShapePickerModal';
+export * from './ShapePickerModal';
+export * from './ShapeHydration';
+export * from './ShapesSection';
