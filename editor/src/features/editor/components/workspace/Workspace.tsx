@@ -515,6 +515,74 @@ function isCursorAtStart(container: HTMLElement): boolean {
   return true;
 }
 
+// --------------------------------------------------------------------------
+// Helper: Check if current typing position should auto-capitalize (Sentence Case)
+// Word-style auto-capitalization:
+// 1. At start of block/paragraph (or empty block, or only whitespace before caret)
+// 2. Immediately after Enter or line break (<br>, \r, \n)
+// 3. After sentence-ending punctuation (.?! or …) followed by whitespace
+// --------------------------------------------------------------------------
+function shouldAutoCapitalize(container: HTMLElement): boolean {
+  try {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return false;
+    const range = sel.getRangeAt(0);
+    if (!container.contains(range.startContainer)) return false;
+
+    // Find the enclosing block element (p, h1-h6, li, blockquote, td, th, div)
+    const node = range.startContainer;
+    const el = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+    if (!el) return false;
+
+    const block =
+      (el.closest("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th") as HTMLElement | null) ||
+      (el === container ? container : (el.closest("div") as HTMLElement | null) || container);
+
+    // Check if directly preceded by a <br>
+    if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+      if (range.startOffset > 0) {
+        const prevChild = range.startContainer.childNodes[range.startOffset - 1];
+        if (prevChild && prevChild.nodeName === "BR") {
+          return true;
+        }
+      }
+    } else if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset === 0) {
+      let prev: Node | null = range.startContainer.previousSibling;
+      while (prev && prev.nodeType === Node.TEXT_NODE && (prev.textContent || "") === "") {
+        prev = prev.previousSibling;
+      }
+      if (prev && prev.nodeName === "BR") {
+        return true;
+      }
+    }
+
+    // Get text before caret inside the block
+    const preRange = document.createRange();
+    preRange.setStart(block, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const textBefore = preRange.toString();
+
+    // 1. At the start of the block (empty or only whitespace/quotes/brackets)
+    if (/^[\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    // 2. Directly after a newline
+    if (/[\r\n][\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    // 3. After sentence-ending punctuation (. ? !) followed by at least one space
+    if (/[.?!][\s\u00A0]+["'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 interface SavedSelection {
   start: number;
   end: number;
@@ -1060,6 +1128,47 @@ function DocumentPage({
     // Reset consecutive enter tracking on any key other than Enter
     if (e.key !== "Enter") {
       consecutiveEnterRef.current = false;
+    }
+
+    // ------------------------------------------------------------------
+    // Word-style Sentence Auto-Capitalization:
+    // When typing a lowercase letter at the start of a block, after Enter,
+    // or after sentence-ending punctuation (. ? !), auto-capitalize it.
+    // ------------------------------------------------------------------
+    if (
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      e.key.length === 1 &&
+      e.key >= "a" &&
+      e.key <= "z"
+    ) {
+      if (shouldAutoCapitalize(container)) {
+        e.preventDefault();
+        const upper = e.key.toUpperCase();
+        let inserted = false;
+        try {
+          inserted = document.execCommand("insertText", false, upper);
+        } catch {
+          inserted = false;
+        }
+
+        if (!inserted) {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            const textNode = document.createTextNode(upper);
+            range.insertNode(textNode);
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+        handleInput();
+        return;
+      }
     }
 
     // ------------------------------------------------------------------
