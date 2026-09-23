@@ -328,24 +328,83 @@ export default function DocumentPage() {
     let characters = 0;
     let charactersNoSpaces = 0;
     let paragraphs = 0;
+    let tables = 0;
+    let images = 0;
 
     if (typeof window === "undefined" || typeof DOMParser === "undefined") {
-      return { words: 0, characters: 0, charactersNoSpaces: 0, paragraphs: 0, pages: 1, tables: 0, images: 0, sections: 1 };
+      return {
+        words: 0,
+        characters: 0,
+        charactersNoSpaces: 0,
+        paragraphs: 0,
+        pages: model.pages?.length || 1,
+        tables: 0,
+        images: 0,
+        sections: model.sections?.length || 1,
+      };
     }
 
     const parser = new DOMParser();
-    Object.values(model.pageHtml || {}).forEach((html) => {
-      if (!html) return;
-      const doc = parser.parseFromString(html, "text/html");
-      const text = doc.body.textContent || "";
-      const trimmed = text.trim();
-      words += trimmed ? trimmed.split(/\s+/).filter(Boolean).length : 0;
-      characters += text.length;
-      charactersNoSpaces += text.replace(/\s+/g, "").length;
+    const pages = model.pages && model.pages.length > 0 ? model.pages : [{ id: "page_1" }];
 
-      const nodes = doc.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6");
-      nodes.forEach((n) => {
-        if ((n.textContent || "").trim().length > 0) paragraphs++;
+    pages.forEach((page) => {
+      const html = model.pageHtml?.[page.id];
+      if (!html || !html.trim()) return;
+
+      const doc = parser.parseFromString(html, "text/html");
+
+      // 1. Remove editor UI markers, page breaks, and overlays from stats
+      doc.querySelectorAll(
+        "[data-editor-ui], [data-table-control], .page-break, .column-break, script, style"
+      ).forEach((el) => el.remove());
+
+      tables += doc.querySelectorAll("table").length;
+      images += doc.querySelectorAll("img").length;
+
+      // 2. Query all text-bearing block elements
+      const allCandidateBlocks = Array.from(
+        doc.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th")
+      );
+
+      // Keep only leaf block elements so nested blocks (e.g. td > p) are never double counted
+      const leafBlocks = allCandidateBlocks.filter((block) => {
+        return block.querySelector("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th") === null;
+      });
+
+      const blocks = leafBlocks.length > 0 ? leafBlocks : [doc.body];
+
+      blocks.forEach((block) => {
+        // Clone block to safely remove trailing placeholder <br> elements inserted by contentEditable
+        const clone = block.cloneNode(true) as HTMLElement;
+        while (clone.lastChild && clone.lastChild.nodeName === "BR") {
+          clone.removeChild(clone.lastChild);
+        }
+
+        // Clean out zero-width characters and normalize non-breaking spaces
+        const rawText = (clone.textContent || "")
+          .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+          .replace(/\u00A0/g, " ");
+
+        // Trim leading and trailing whitespace to determine if block has genuine content
+        const trimmed = rawText.trim();
+        if (!trimmed) {
+          // Empty paragraph or whitespace-only block: does not count towards words, characters, or paragraphs
+          return;
+        }
+
+        paragraphs++;
+
+        // Words: count words delimited by whitespace
+        const blockWords = trimmed.split(/\s+/).filter(Boolean);
+        words += blockWords.length;
+
+        // Characters (no spaces): count of non-whitespace characters
+        const noSpacesCount = trimmed.replace(/\s+/g, "").length;
+        charactersNoSpaces += noSpacesCount;
+
+        // Characters (with spaces): length of content without phantom placeholder newlines
+        const cleanContent = rawText.replace(/^[\r\n]+|[\r\n]+$/g, "");
+        characters += cleanContent.length;
       });
     });
 
@@ -355,8 +414,8 @@ export default function DocumentPage() {
       charactersNoSpaces,
       paragraphs,
       pages: model.pages?.length || 1,
-      tables: 0,
-      images: 0,
+      tables,
+      images,
       sections: model.sections?.length || 1,
     };
   }, [model.pageHtml, model.pages, model.sections]);
@@ -636,15 +695,15 @@ export default function DocumentPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">No spaces:</span>
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        {stats.charactersNoSpaces}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-slate-400">Paragraphs:</span>
                       <span className="font-bold text-slate-900 dark:text-white">
                         {stats.paragraphs}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Sections:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.sections}
                       </span>
                     </div>
                   </div>
@@ -653,12 +712,6 @@ export default function DocumentPage() {
                       <span className="text-slate-400">Total Pages:</span>
                       <span className="font-bold text-slate-900 dark:text-white">
                         {stats.pages}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Sections:</span>
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        {stats.sections}
                       </span>
                     </div>
                   </div>
