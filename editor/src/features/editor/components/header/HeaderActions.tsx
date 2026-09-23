@@ -394,6 +394,12 @@ export default function HeaderActions() {
               onChange={(e) =>
                 setSaveAsName(e.target.value)
               }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  doSaveAs();
+                }
+              }}
               placeholder="Enter document title"
               className="
                 border-slate-300
@@ -405,6 +411,7 @@ export default function HeaderActions() {
                 dark:text-slate-100
                 dark:placeholder:text-slate-500
               "
+              autoFocus
             />
           </div>
 
