@@ -68,7 +68,7 @@ export function StandardTablesDropdown() {
   const [alignRight, setAlignRight] = useState(false);
   const savedRangeRef = useRef<Range | null>(null);
 
-  const { insertCustomTableHTML, splitCurrentTable } = useTable();
+  const { insertCustomTableHTML } = useTable();
 
   // Save current editor caret position
   const saveSelection = useCallback(() => {
@@ -196,45 +196,11 @@ export function StandardTablesDropdown() {
           break;
         }
 
-        case 5: {
-          // OPTION 5: Split Table (Continue Table Title)
-          const sel = window.getSelection();
-          const targetTable = sel?.anchorNode
-            ? (sel.anchorNode.nodeType === Node.ELEMENT_NODE
-                ? (sel.anchorNode as HTMLElement)
-                : sel.anchorNode.parentElement
-              )?.closest("table")
-            : null;
-
-          if (targetTable || document.querySelector('[contenteditable="true"] table')) {
-            splitCurrentTable();
-          } else {
-            const contCaption = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">Table 1: Table Title (Continued)</p>`;
-            const tablePart = buildCustomTableHTML({
-              rows: 3,
-              columns: 3,
-              headingSize: "10pt",
-              textSize: "10pt",
-              titleOption: "without",
-              autoFit: true,
-            });
-            insertCustomTableHTML(`${contCaption}${tablePart}`);
-          }
-          break;
-        }
-
-        case 6: {
-          // OPTION 6: Insert Table (History Signature)
-          const html = buildHistorySignatureTableHTML();
-          insertCustomTableHTML(html);
-          break;
-        }
-
         default:
           break;
       }
     },
-    [insertCustomTableHTML, restoreSelection, splitCurrentTable]
+    [insertCustomTableHTML, restoreSelection]
   );
 
   return (
@@ -371,47 +337,7 @@ export function StandardTablesDropdown() {
               </div>
             </button>
 
-            <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
 
-            {/* OPTION 5: Split Table (Continue Table Title) */}
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleSelectOption(5)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
-                <Table2 className="h-4 w-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
-                  Split Table
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Continue Table Title
-                </span>
-              </div>
-            </button>
-
-            {/* OPTION 6: Insert Table (History Signature) */}
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleSelectOption(6)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
-                <Table2 className="h-4 w-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
-                  Insert Table
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  History Signature
-                </span>
-              </div>
-            </button>
           </div>
         </div>
       )}
