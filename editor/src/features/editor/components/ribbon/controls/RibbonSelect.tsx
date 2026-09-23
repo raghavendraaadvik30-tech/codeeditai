@@ -9,17 +9,12 @@ Receives dropdown options through the options prop.
 Executes option.onSelect when an option is clicked.
 Allows configurable width.
 Supports disabled state.
-Dropdown appears on hover/focus.
+Dropdown appears on click or hover.
 Prevents editor focus loss when interacting with the ribbon.
-
-This means the component itself doesn't hardcode the dropdown options.
-
-In simple terms:
-
-Used for ribbon controls where the user needs to choose one option from a dropdown.
+Scrollable list for long options (font families, font sizes).
 */
 
-import type { MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { ChevronDown } from "lucide-react";
 
 export interface RibbonSelectOption {
@@ -40,24 +35,39 @@ export default function RibbonSelect({
   width = 120,
   disabled = false,
 }: RibbonSelectProps) {
-  const handleMouseDown = (
-    event: MouseEvent<HTMLButtonElement>
-  ) => {
-    // Keep editor focused
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const preventFocusLoss = (event: MouseEvent<HTMLElement>) => {
+    // Keep editor focused and preserve active selection
     event.preventDefault();
   };
 
-  return (
-    <div className="relative group">
+  useEffect(() => {
+    const handleOutsideClick = (e: globalThis.MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
 
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseDown={preventFocusLoss}
+      className="relative select-none"
+    >
       {/* --------------------------------
           SELECT BUTTON
       -------------------------------- */}
-
       <button
         type="button"
         disabled={disabled}
-        onMouseDown={handleMouseDown}
+        onMouseDown={preventFocusLoss}
+        onClick={() => setIsOpen((prev) => !prev)}
         className="
           flex
           h-8
@@ -77,81 +87,77 @@ export default function RibbonSelect({
           dark:hover:bg-slate-800
           disabled:opacity-50
           disabled:pointer-events-none
+          cursor-pointer
         "
         style={{ minWidth: width }}
       >
-        <span
-          className="
-            flex-1
-            truncate
-            text-left
-          "
-        >
+        <span className="flex-1 truncate text-left">
           {label}
         </span>
 
         <ChevronDown
-          className="
-            h-3.5
-            w-3.5
-            shrink-0
-            text-slate-500
-            dark:text-slate-400
-          "
+          className={`h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-slate-400 transition-transform duration-150 ${
+            isOpen ? "rotate-180" : ""
+          }`}
         />
       </button>
 
       {/* --------------------------------
           DROPDOWN
       -------------------------------- */}
-
-      <div
-        className="
-          absolute
-          left-0
-          top-full
-          z-50
-          mt-1
-          hidden
-          min-w-full
-          overflow-hidden
-          rounded-md
-          border
-          border-slate-200
-          dark:border-slate-700
-          bg-white
-          dark:bg-[#0D1A26]
-          shadow-lg
-          group-hover:block
-          group-focus-within:block
-        "
-      >
-        {options.map((option) => (
-          <button
-            key={option.label}
-            type="button"
-            onMouseDown={handleMouseDown}
-            onClick={option.onSelect}
-            className="
-              block
-              w-full
-              px-3
-              py-2
-              text-left
-              text-xs
-              text-slate-700
-              hover:bg-slate-100
-              hover:text-slate-900
-              dark:text-slate-200
-              dark:hover:bg-slate-800
-              dark:hover:text-white
-            "
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
+      {isOpen && (
+        <div
+          onMouseDown={preventFocusLoss}
+          className="
+            absolute
+            left-0
+            top-full
+            z-50
+            mt-1
+            max-h-60
+            overflow-y-auto
+            min-w-full
+            rounded-md
+            border
+            border-slate-200
+            dark:border-slate-700
+            bg-white
+            dark:bg-[#0D1A26]
+            shadow-lg
+            py-1
+          "
+        >
+          {options.map((option) => (
+            <button
+              key={option.label}
+              type="button"
+              onMouseDown={preventFocusLoss}
+              onClick={() => {
+                option.onSelect();
+                setIsOpen(false);
+              }}
+              className="
+                block
+                w-full
+                px-3
+                py-1.5
+                text-left
+                text-xs
+                text-slate-700
+                hover:bg-blue-50
+                hover:text-blue-600
+                dark:text-slate-200
+                dark:hover:bg-slate-800
+                dark:hover:text-white
+                cursor-pointer
+                transition-colors
+              "
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -65,6 +65,7 @@ export function StyleCard({
 
         {/* Style preview */}
         <button
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onApply}
           title={`Apply "${token.name}"`}
           className="

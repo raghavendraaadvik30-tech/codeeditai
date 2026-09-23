@@ -51,8 +51,8 @@ export function buildCustomTableHTML(config: {
   const cellWidth = `width: ${100 / columns}%;`;
   const baseCellBorder = `border: 1px solid #8a8886;`;
 
-  const headerCSS = `${baseCellBorder} font-size: ${hSize}; font-weight: 700; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; background-color: #f3f2f1; ${cellWidth}`;
-  const bodyCSS = `border: 1px solid #a19f9d; font-size: ${tSize}; font-weight: 400; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; ${cellWidth}`;
+  const headerCSS = `${baseCellBorder} font-size: ${hSize}; font-weight: 700; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; background-color: #f3f2f1; box-sizing: border-box; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere; ${cellWidth}`;
+  const bodyCSS = `border: 1px solid #a19f9d; font-size: ${tSize}; font-weight: 400; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; box-sizing: border-box; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere; ${cellWidth}`;
 
   // Headers
   const headerCells = Array.from({ length: columns })

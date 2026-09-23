@@ -298,6 +298,53 @@ function normalizeDoc(doc: DocumentModel): DocumentModel {
   };
 }
 
+export const MAX_DOCUMENTS = 10;
+
+/**
+ * Derives a reliable creation timestamp (in milliseconds) for a document.
+ * Checks in order:
+ * 1. metadata.createdDate
+ * 2. Timestamp encoded in ID (format: doc_<base36_timestamp>_...)
+ * 3. savedAt
+ * 4. Inverse of list position as fallback
+ */
+export function getDocumentCreationTime(doc: DocumentModel, fallbackIndex: number = 0): number {
+  let baseTime = 0;
+  if (doc?.metadata?.createdDate && typeof doc.metadata.createdDate === "number" && !isNaN(doc.metadata.createdDate)) {
+    baseTime = doc.metadata.createdDate;
+  } else if (doc?.id && typeof doc.id === "string") {
+    const raw = doc.id.startsWith("doc_") ? doc.id.slice(4) : doc.id;
+    const timePart = raw.split("_")[0];
+    const parsed = parseInt(timePart, 36);
+    if (!isNaN(parsed) && parsed > 0) {
+      baseTime = parsed;
+    }
+  } else if (doc?.savedAt && typeof doc.savedAt === "number" && !isNaN(doc.savedAt)) {
+    baseTime = doc.savedAt;
+  }
+  // Tie-breaker: documents with a larger fallbackIndex (further down in list) were inserted earlier, so they are older
+  return baseTime > 0 ? baseTime - fallbackIndex * 0.001 : -fallbackIndex;
+}
+
+/**
+ * Identifies the single oldest document from a document list.
+ */
+export function findOldestDocument(docs: DocumentModel[]): DocumentModel | null {
+  if (!docs || docs.length === 0) return null;
+  let oldest = docs[0];
+  let oldestTime = getDocumentCreationTime(oldest, 0);
+
+  for (let i = 1; i < docs.length; i++) {
+    const doc = docs[i];
+    const time = getDocumentCreationTime(doc, i);
+    if (time < oldestTime) {
+      oldest = doc;
+      oldestTime = time;
+    }
+  }
+  return oldest;
+}
+
 function createEmptyDocument(): DocumentModel {
   const section = createDefaultSection();
 
@@ -306,6 +353,7 @@ function createEmptyDocument(): DocumentModel {
     sectionId: section.id,
   };
 
+  const now = Date.now();
   return {
     id: "doc_" + uid(),
     title: "Untitled Document",
@@ -315,6 +363,12 @@ function createEmptyDocument(): DocumentModel {
       [page.id]: DEFAULT_HTML,
     },
     styleOverrides: {},
+    metadata: {
+      title: "Untitled Document",
+      author: "User",
+      createdDate: now,
+      modifiedDate: now,
+    },
   };
 }
 
@@ -332,7 +386,7 @@ function getStoredSavedDocuments(): DocumentModel[] {
             unique.push(normalizeDoc(doc));
           }
         }
-        return unique;
+        return unique.slice(0, MAX_DOCUMENTS);
       }
     }
   } catch {
@@ -448,6 +502,7 @@ interface DocumentContextType {
     documentId: string
   ) => void;
   createNewDocument: (title?: string) => void;
+  insertDocument: (title?: string) => void;
   resetDocument: () => void;
   refreshHistory: () => void;
   importDocumentPages: (
@@ -1036,7 +1091,14 @@ export function DocumentModelProvider({
             // If not found in existingSaved, filter out any unsaved entry with matching id before adding
             const filtered = existingSaved.filter((d) => d.id !== currentModel.id);
             nextSaved = [saved, ...filtered];
+            if (nextSaved.length > MAX_DOCUMENTS) {
+              const oldestDoc = findOldestDocument(nextSaved.filter((d) => d.id !== saved.id));
+              if (oldestDoc) {
+                nextSaved = nextSaved.filter((d) => d.id !== oldestDoc.id);
+              }
+            }
           }
+          nextSaved = nextSaved.slice(0, MAX_DOCUMENTS);
 
           localStorage.setItem(
             SAVED_DOCS_KEY,
@@ -1128,19 +1190,22 @@ export function DocumentModelProvider({
   }, [loadDocument]);
 
   /* ============================================================
-     Create New Document (Temporary / Unsaved)
+     Create New Document (Temporary / Unsaved) - Max 10 Documents
   ============================================================ */
 
   const createNewDocument = useCallback((customTitle?: string) => {
     const fresh = createEmptyDocument();
     fresh.title =
       customTitle && customTitle.trim() ? customTitle.trim() : "Untitled Document";
+    if (fresh.metadata) {
+      fresh.metadata.title = fresh.title;
+    }
 
     setModel((currentModel) => {
       try {
         const savedList = getStoredSavedDocuments();
 
-        // 1. Preserve current document in list
+        // 1. Preserve current document in list with latest content
         const existingIdx = savedList.findIndex((d) => d.id === currentModel.id);
         let baseList: DocumentModel[];
         if (existingIdx >= 0) {
@@ -1150,11 +1215,49 @@ export function DocumentModelProvider({
           baseList = [currentModel, ...savedList];
         }
 
-        // 2. Prepend fresh document to the document list
-        const nextSaved = [
-          fresh,
-          ...baseList.filter((d) => d && d.id && d.id !== fresh.id),
-        ];
+        // Deduplicate baseList and exclude any doc matching fresh.id
+        const seenIds = new Set<string>();
+        const uniqueBaseList: DocumentModel[] = [];
+        for (const doc of baseList) {
+          if (doc && doc.id && doc.id !== fresh.id && !seenIds.has(doc.id)) {
+            seenIds.add(doc.id);
+            uniqueBaseList.push(doc);
+          }
+        }
+
+        // 2. Enforce MAX_DOCUMENTS (10):
+        // If current count is >= 10, identify and delete the single oldest document(s)
+        // so that adding fresh leaves the total count at exactly MAX_DOCUMENTS (10).
+        const targetRetainCount = MAX_DOCUMENTS - 1; // 9
+        let prunedList = [...uniqueBaseList];
+
+        while (prunedList.length > targetRetainCount) {
+          const oldestDoc = findOldestDocument(prunedList);
+          if (!oldestDoc) break;
+
+          // Remove only the oldest document
+          prunedList = prunedList.filter((d) => d.id !== oldestDoc.id);
+
+          // Clean up snapshots for the deleted oldest document
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(`editor_snapshot.${oldestDoc.id}.`)) {
+              localStorage.removeItem(key);
+            }
+          }
+
+          // Clean up history for the deleted oldest document
+          try {
+            const nextHistory = getInitialHistory().filter((h) => h.id !== oldestDoc.id);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+            setHistory(nextHistory);
+          } catch {
+            // ignore
+          }
+        }
+
+        // 3. Prepend fresh document to the document list
+        const nextSaved = [fresh, ...prunedList].slice(0, MAX_DOCUMENTS);
 
         localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
         setSavedDocuments(nextSaved);
@@ -1204,7 +1307,9 @@ export function DocumentModelProvider({
             } else {
               const fresh = createEmptyDocument();
               setActivePage(fresh.pages[0]?.id ?? null);
-              localStorage.removeItem(STORAGE_KEY);
+              localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify([fresh]));
+              setSavedDocuments([fresh]);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
               return fresh;
             }
           }
@@ -1384,6 +1489,7 @@ export function DocumentModelProvider({
         loadDocument,
         deleteDocument,
         createNewDocument,
+        insertDocument: createNewDocument,
         resetDocument,
         refreshHistory,
         importDocumentPages,
