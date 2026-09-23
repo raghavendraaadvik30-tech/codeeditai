@@ -30,12 +30,92 @@ export const PictureHydration: React.FC = () => {
         !fig.hasAttribute("data-icon-figure")
     );
 
-    // Also look for un-annotated figures that contain images inside contenteditable pages (and are not shapes/icons)
+    // Also look for un-annotated figures and standalone <img> tags inside contenteditable pages (excluding shapes/icons)
     const editablePages = document.querySelectorAll('[contenteditable="true"]');
     editablePages.forEach((page) => {
-      const figureImgs = page.querySelectorAll("figure img");
-      figureImgs.forEach((img) => {
-        const fig = img.closest("figure") as HTMLElement | null;
+      const allImgs = Array.from(page.querySelectorAll("img")) as HTMLImageElement[];
+      allImgs.forEach((img) => {
+        // Skip images inside React portal mounts of non-picture modules
+        if (
+          img.closest(".editor-shape-mount") ||
+          img.closest(".editor-icon-mount") ||
+          img.closest(".editor-chart-mount") ||
+          img.closest(".editor-smartart-mount")
+        ) {
+          return;
+        }
+
+        let fig = img.closest("figure") as HTMLElement | null;
+        if (!fig) {
+          // Auto-wrap standalone <img> in figure structure for full interactive editor hydration
+          fig = document.createElement("figure");
+          fig.className = "editor-figure editor-picture-figure";
+          fig.setAttribute("data-picture-figure", "true");
+          const picId = `figure-pic-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+          fig.id = picId;
+          fig.setAttribute("data-picture-id", picId);
+          fig.setAttribute("data-picture-selected", "true");
+          fig.setAttribute("contenteditable", "false");
+          fig.style.margin = "14px auto";
+          fig.style.textAlign = "center";
+          fig.style.display = "inline-block";
+          fig.style.position = "relative";
+          fig.style.userSelect = "none";
+          fig.style.maxWidth = "100%";
+
+          const parent = img.parentNode;
+          if (parent) {
+            parent.insertBefore(fig, img);
+            const mount = document.createElement("div");
+            mount.className = "editor-picture-mount";
+            mount.setAttribute("data-picture-mount-id", picId);
+            mount.style.width = "100%";
+            mount.style.display = "block";
+            mount.appendChild(img);
+            fig.appendChild(mount);
+
+            // Add editable figcaption for dynamic image title
+            const figcaption = document.createElement("figcaption");
+            figcaption.setAttribute("contenteditable", "true");
+            figcaption.style.marginTop = "6px";
+            figcaption.style.fontSize = "10.5pt";
+            figcaption.style.fontWeight = "600";
+            figcaption.style.color = "#475569";
+            figcaption.style.textAlign = "center";
+            figcaption.style.fontFamily = "Calibri, 'Segoe UI', Arial, sans-serif";
+            figcaption.style.outline = "none";
+            figcaption.style.borderBottom = "1px dashed transparent";
+            figcaption.style.cursor = "text";
+            figcaption.onkeydown = (e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                (e.target as HTMLElement).blur();
+              }
+            };
+            figcaption.onmousedown = (e) => e.stopPropagation();
+            figcaption.onclick = (e) => e.stopPropagation();
+            figcaption.onfocus = (e) => {
+              (e.target as HTMLElement).style.borderBottomColor = "#3b82f6";
+            };
+            figcaption.onblur = (e) => {
+              (e.target as HTMLElement).style.borderBottomColor = "transparent";
+            };
+
+            let titleText = img.alt?.trim();
+            if (!titleText || titleText === "Picture" || titleText === "Image") {
+              const src = img.src || "";
+              if (!src.startsWith("data:")) {
+                const match = src.match(/\/([^\/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
+                if (match && match[1]) {
+                  titleText = decodeURIComponent(match[1]).replace(/[-_]/g, " ");
+                }
+              }
+            }
+            figcaption.textContent = titleText || "Picture";
+            fig.appendChild(figcaption);
+          }
+        }
+
         if (
           fig &&
           !fig.classList.contains("editor-shape-figure") &&
@@ -81,17 +161,22 @@ export const PictureHydration: React.FC = () => {
         }
       }
 
+      const pictureSelectedAttr = figEl.getAttribute("data-picture-selected");
+      const isSel = pictureSelectedAttr !== "false";
+
       const rawConfig = figEl.getAttribute("data-picture-config");
+      const imgEl = figEl.querySelector("img");
+
       let config: CanvasPicture = {
         id: pictureId,
         x: 0,
         y: 0,
-        width: figEl.offsetWidth || 360,
+        width: figEl.offsetWidth || (imgEl?.naturalWidth ? Math.min(imgEl.naturalWidth, 600) : 360),
         height: 240,
         rotate: 0,
+        selected: isSel,
       };
 
-      const imgEl = mountEl.querySelector("img");
       if (imgEl && imgEl.src) {
         config.src = imgEl.src;
         config.title = imgEl.alt || "Picture";
@@ -100,6 +185,9 @@ export const PictureHydration: React.FC = () => {
       if (rawConfig) {
         try {
           config = { ...config, ...JSON.parse(decodeURIComponent(rawConfig)) };
+          if (pictureSelectedAttr !== null) {
+            config.selected = isSel;
+          }
         } catch {
           // fallback
         }
@@ -130,7 +218,8 @@ export const PictureHydration: React.FC = () => {
           (p, i) =>
             p.id === newMounts[i].id &&
             p.mountEl === newMounts[i].mountEl &&
-            p.config.src === newMounts[i].config.src
+            p.config.src === newMounts[i].config.src &&
+            p.config.selected === newMounts[i].config.selected
         )
       ) {
         return prev;
@@ -162,3 +251,4 @@ export const PictureHydration: React.FC = () => {
     </>
   );
 };
+

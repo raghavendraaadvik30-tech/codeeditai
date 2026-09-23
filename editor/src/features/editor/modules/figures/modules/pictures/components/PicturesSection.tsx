@@ -1,15 +1,16 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Image as ImageIcon, ChevronDown, HardDrive, Globe, Type, FileImage, UploadCloud } from 'lucide-react';
+import { Image as ImageIcon, ChevronDown, HardDrive, Globe, Type, FileImage } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/shared/components/ui/dropdown-menu';
 import { useEditor } from '@/features/editor/context/EditorContext';
 import { generatePictureHTML } from '@/features/editor/modules/figures/utils/figureUtil';
-import { OnlinePicturesDialog } from './OnlinePicturesDialog';
 
 export type PictureInsertMode = "withTitle" | "withoutTitle" | "titleOnly";
 
@@ -18,7 +19,6 @@ export const PicturesSection: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedMode, setSelectedMode] = useState<PictureInsertMode>("withTitle");
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isOnlineModalOpen, setIsOnlineModalOpen] = useState(false);
 
   // Listen for pf-insert-picture CustomEvents across the window
   useEffect(() => {
@@ -120,6 +120,14 @@ export const PicturesSection: React.FC = () => {
     }
   };
 
+  const handleOnlinePicturesClick = () => {
+    window.open(
+      'https://www.google.com/search?tbm=isch',
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
   return (
     <div
       onDragOver={handleDragOver}
@@ -169,81 +177,50 @@ export const PicturesSection: React.FC = () => {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem
-              onClick={() => triggerFilePicker("withTitle")}
-              className="cursor-pointer font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2"
-            >
-              <HardDrive className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span>This Device...</span>
-            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="cursor-pointer font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 text-xs">
+                <HardDrive className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span>This Device...</span>
+              </DropdownMenuSubTrigger>
+
+              <DropdownMenuSubContent className="w-52">
+                <DropdownMenuItem
+                  onClick={() => triggerFilePicker("withTitle")}
+                  className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                >
+                  <FileImage className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Insert image with title</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => triggerFilePicker("withoutTitle")}
+                  className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                >
+                  <ImageIcon className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Insert image without title</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => triggerFilePicker("titleOnly")}
+                  className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                >
+                  <Type className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Title only</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
 
             <DropdownMenuItem
-              onClick={() => setIsOnlineModalOpen(true)}
-              className="cursor-pointer font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2"
+              onClick={handleOnlinePicturesClick}
+              className="cursor-pointer font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 text-xs"
             >
               <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <span>Online Pictures...</span>
             </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem
-              onClick={() => triggerFilePicker("withTitle")}
-              className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
-            >
-              <FileImage className="h-3.5 w-3.5 text-slate-500" />
-              <span>Insert image with title</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              onClick={() => triggerFilePicker("withoutTitle")}
-              className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
-            >
-              <ImageIcon className="h-3.5 w-3.5 text-slate-500" />
-              <span>Insert image without title</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              onClick={() => triggerFilePicker("titleOnly")}
-              className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
-            >
-              <Type className="h-3.5 w-3.5 text-slate-500" />
-              <span>Title only</span>
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* Visual Drag & Drop Hint Zone */}
-      <div
-        onClick={() => triggerFilePicker(selectedMode)}
-        className="mt-3 flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-slate-700 p-3 text-center hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-all"
-      >
-        <UploadCloud className="h-5 w-5 text-blue-500 mb-1" />
-        <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
-          Drag & drop image here or <span className="text-blue-600 font-semibold underline">browse</span>
-        </p>
-        <p className="text-[10px] text-slate-400 mt-0.5">
-          Click title in document anytime to edit image title
-        </p>
-      </div>
-
-      {/* Online Pictures Dialog */}
-      <OnlinePicturesDialog
-        isOpen={isOnlineModalOpen}
-        onClose={() => setIsOnlineModalOpen(false)}
-        onInsert={(url) => {
-          window.dispatchEvent(
-            new CustomEvent("pf-insert-picture", {
-              detail: {
-                src: url,
-                name: "Online Picture",
-                mode: selectedMode,
-              },
-            })
-          );
-        }}
-      />
     </div>
   );
 };
+

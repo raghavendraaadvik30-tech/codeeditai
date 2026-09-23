@@ -11,6 +11,7 @@ export interface CanvasPicture {
   width?: number;
   height?: number;
   rotate?: number;
+  selected?: boolean;
 }
 
 interface DocumentPictureRendererProps {
@@ -29,17 +30,53 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
   const [width, setWidth] = useState<number>(config.width || 320);
   const [height, setHeight] = useState<number>(config.height || 220);
   const [rotate, setRotate] = useState<number>(config.rotate || 0);
-  const [isSelected, setIsSelected] = useState(false);
+
+  const initialSelected =
+    config.selected !== undefined
+      ? config.selected
+      : figureEl.getAttribute("data-picture-selected") !== "false";
+
+  const [isSelected, setIsSelectedState] = useState<boolean>(initialSelected);
+
+  // Sync state if config prop updates from PictureHydration scanner
+  useEffect(() => {
+    if (config.selected !== undefined) {
+      setIsSelectedState(config.selected);
+    }
+  }, [config.selected]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Synchronize figure element styles (dimensions, position transform)
+  const setIsSelected = (val: boolean) => {
+    setIsSelectedState(val);
+    figureEl.setAttribute("data-picture-selected", String(val));
+    updateDOMConfig({ selected: val });
+
+    if (val) {
+      // Deselect all other pictures when this picture is selected
+      const allPics = document.querySelectorAll(".editor-picture-figure");
+      allPics.forEach((otherFig) => {
+        if (otherFig !== figureEl) {
+          otherFig.setAttribute("data-picture-selected", "false");
+        }
+      });
+    }
+  };
+
+  // Synchronize figure element styles (dimensions, position transform, mount height)
   useEffect(() => {
     figureEl.style.width = `${width}px`;
     figureEl.style.height = `${height}px`;
     figureEl.style.position = "relative";
     figureEl.style.display = "inline-block";
     figureEl.style.transform = `translate(${x}px, ${y}px)`;
+
+    const mountEl = figureEl.querySelector(".editor-picture-mount") as HTMLElement | null;
+    if (mountEl) {
+      mountEl.style.width = "100%";
+      mountEl.style.height = "100%";
+      mountEl.style.minHeight = `${height}px`;
+    }
   }, [width, height, x, y, figureEl]);
 
   // Pointer listener on figure element to select picture when clicked
@@ -86,6 +123,35 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
     };
   }, [isSelected, figureEl]);
 
+  // Keyboard Delete & Backspace listener when picture is selected
+  useEffect(() => {
+    if (!isSelected) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        figureEl.remove();
+        notifyDocumentChange();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [isSelected, figureEl]);
+
   const updateDOMConfig = (updates: Partial<CanvasPicture>) => {
     try {
       const raw = figureEl.getAttribute("data-picture-config");
@@ -117,6 +183,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
   };
 
   const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     figureEl.remove();
     notifyDocumentChange();
@@ -407,11 +474,12 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
 
       {/* RENDER PICTURE IMAGE */}
       {config.src && (
-        <div className="w-full h-full flex items-center justify-center relative overflow-hidden rounded-xs">
+        <div className="w-full h-full flex items-center justify-center relative overflow-hidden rounded-xs pointer-events-none">
           <img
             src={config.src}
             alt={config.title || "Picture"}
-            className="w-full h-full object-contain pointer-events-none"
+            className="w-full h-full object-contain pointer-events-none select-none"
+            draggable={false}
           />
         </div>
       )}

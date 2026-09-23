@@ -264,6 +264,19 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
         setContextMenuPos({ x: e.clientX, y: e.clientY });
       }}
     >
+      {/* SCOPED STYLES TO HIDE NATIVE NUMBER INPUT SPINNER ARROWS (▲/▼) */}
+      <style>{`
+        .chart-data-editor-container input[type="number"]::-webkit-outer-spin-button,
+        .chart-data-editor-container input[type="number"]::-webkit-inner-spin-button {
+          -webkit-appearance: none !important;
+          margin: 0 !important;
+        }
+        .chart-data-editor-container input[type="number"] {
+          -moz-appearance: textfield !important;
+          appearance: textfield !important;
+        }
+      `}</style>
+
       {/* 1. COMPACT EXCEL WINDOW HEADER */}
       <div className="flex items-center justify-between px-3 py-1.5 bg-[#107c41] text-white">
         <div className="flex items-center gap-2">
@@ -415,7 +428,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                         value={val}
                         onChange={(e) => handleValueChange(catIdx, sIdx, e.target.value)}
                         onFocus={() => setActiveCell({ row: catIdx + 1, col: sIdx + 1 })}
-                        className="w-full h-7 px-2 text-xs text-right text-slate-900 bg-transparent outline-none"
+                        className="w-full h-7 px-2 text-xs text-right text-slate-900 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </td>
                   );

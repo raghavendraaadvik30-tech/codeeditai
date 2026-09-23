@@ -64,13 +64,14 @@ export const generatePictureHTML = (options: {
     width,
     height,
     rotate: 0,
+    selected: true,
   };
 
   const encodedConfig = encodeURIComponent(JSON.stringify(config));
 
   if (mode === "titleOnly") {
     return `
-<figure id="${figureId}" class="editor-figure editor-picture-figure" data-picture-figure="true" data-picture-id="${figureId}" data-picture-config="${encodedConfig}" contenteditable="false" oncontextmenu="event.preventDefault();" style="margin: 14px auto; text-align: center; width: ${width}px; max-width: 100%; display: inline-block; position: relative; user-select: none;">
+<figure id="${figureId}" class="editor-figure editor-picture-figure" data-picture-figure="true" data-picture-id="${figureId}" data-picture-selected="true" data-picture-config="${encodedConfig}" contenteditable="false" oncontextmenu="event.preventDefault();" style="margin: 14px auto; text-align: center; width: ${width}px; max-width: 100%; display: inline-block; position: relative; user-select: none;">
   <div class="editor-picture-mount" data-picture-mount-id="${figureId}" style="width: 100%; display: block;"></div>
   <figcaption contenteditable="true" style="margin-top: 6px; font-size: 10.5pt; font-weight: 600; color: #475569; text-align: center; font-family: Calibri, 'Segoe UI', Arial, sans-serif; outline: none; border-bottom: 1px dashed transparent; cursor: text;" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" onmousedown="event.stopPropagation();" onclick="event.stopPropagation();" onfocus="this.style.borderBottomColor='#3b82f6'" onblur="this.style.borderBottomColor='transparent'">${title}</figcaption>
 </figure>
@@ -80,7 +81,7 @@ export const generatePictureHTML = (options: {
 
   if (mode === "withoutTitle") {
     return `
-<figure id="${figureId}" class="editor-figure editor-picture-figure" data-picture-figure="true" data-picture-id="${figureId}" data-picture-config="${encodedConfig}" contenteditable="false" oncontextmenu="event.preventDefault();" style="margin: 14px auto; text-align: center; width: ${width}px; max-width: 100%; display: inline-block; position: relative; user-select: none;">
+<figure id="${figureId}" class="editor-figure editor-picture-figure" data-picture-figure="true" data-picture-id="${figureId}" data-picture-selected="true" data-picture-config="${encodedConfig}" contenteditable="false" oncontextmenu="event.preventDefault();" style="margin: 14px auto; text-align: center; width: ${width}px; max-width: 100%; display: inline-block; position: relative; user-select: none;">
   <div class="editor-picture-mount" data-picture-mount-id="${figureId}" style="width: 100%; display: block;">
     <img src="${src}" alt="${title}" style="width: 100%; height: auto; border-radius: 4px; display: block;" />
   </div>
@@ -91,7 +92,7 @@ export const generatePictureHTML = (options: {
 
   // Default: withTitle
   return `
-<figure id="${figureId}" class="editor-figure editor-picture-figure" data-picture-figure="true" data-picture-id="${figureId}" data-picture-config="${encodedConfig}" contenteditable="false" oncontextmenu="event.preventDefault();" style="margin: 14px auto; text-align: center; width: ${width}px; max-width: 100%; display: inline-block; position: relative; user-select: none;">
+<figure id="${figureId}" class="editor-figure editor-picture-figure" data-picture-figure="true" data-picture-id="${figureId}" data-picture-selected="true" data-picture-config="${encodedConfig}" contenteditable="false" oncontextmenu="event.preventDefault();" style="margin: 14px auto; text-align: center; width: ${width}px; max-width: 100%; display: inline-block; position: relative; user-select: none;">
   <div class="editor-picture-mount" data-picture-mount-id="${figureId}" style="width: 100%; display: block;">
     <img src="${src}" alt="${title}" style="width: 100%; height: auto; border-radius: 4px; display: block;" />
   </div>

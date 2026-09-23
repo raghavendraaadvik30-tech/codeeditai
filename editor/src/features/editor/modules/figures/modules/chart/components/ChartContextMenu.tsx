@@ -2,13 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Trash2,
-  BarChart2,
   FileSpreadsheet,
   Palette,
   LayoutGrid,
   Table,
-  ArrowUpDown,
-  RefreshCw,
 } from 'lucide-react';
 
 export interface ChartContextMenuProps {
@@ -17,13 +14,13 @@ export interface ChartContextMenuProps {
   isSpreadsheetOpen: boolean;
   onClose: () => void;
   onDelete: () => void;
-  onChangeType: () => void;
   onSelectData: () => void;
   onChangeColors: () => void;
   onChartStyle: () => void;
-  onSwitchRowColumn: () => void;
-  onRefresh: () => void;
   onToggleEditData: () => void;
+  onChangeType?: () => void;
+  onSwitchRowColumn?: () => void;
+  onRefresh?: () => void;
 }
 
 export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
@@ -32,12 +29,9 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
   isSpreadsheetOpen,
   onClose,
   onDelete,
-  onChangeType,
   onSelectData,
   onChangeColors,
   onChartStyle,
-  onSwitchRowColumn,
-  onRefresh,
   onToggleEditData,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -90,14 +84,6 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
       },
     },
     {
-      label: 'Change Chart Type...',
-      icon: <BarChart2 className="w-4 h-4 text-blue-600" />,
-      action: () => {
-        onChangeType();
-        onClose();
-      },
-    },
-    {
       label: 'Change Colors',
       icon: <Palette className="w-4 h-4 text-emerald-600" />,
       action: () => {
@@ -110,22 +96,6 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
       icon: <LayoutGrid className="w-4 h-4 text-indigo-600" />,
       action: () => {
         onChartStyle();
-        onClose();
-      },
-    },
-    {
-      label: 'Switch Row/Column',
-      icon: <ArrowUpDown className="w-4 h-4 text-purple-600" />,
-      action: () => {
-        onSwitchRowColumn();
-        onClose();
-      },
-    },
-    {
-      label: 'Refresh',
-      icon: <RefreshCw className="w-4 h-4 text-slate-500" />,
-      action: () => {
-        onRefresh();
         onClose();
       },
     },

@@ -354,11 +354,21 @@ function isCursorAtStart(container: HTMLElement): boolean {
  * so that live interactive DOM is never baked into static page HTML.
  */
 export function cleanChartMountsForHtml(html: string): string {
-  if (!html || (!html.includes("editor-chart-mount") && !html.includes("editor-smartart-mount"))) return html;
+  if (
+    !html ||
+    (!html.includes("editor-chart-mount") &&
+      !html.includes("editor-smartart-mount") &&
+      !html.includes("editor-picture-mount") &&
+      !html.includes("editor-icon-mount") &&
+      !html.includes("editor-shape-mount"))
+  )
+    return html;
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(`<body>${html}</body>`, "text/html");
-    const mounts = doc.querySelectorAll(".editor-chart-mount, .editor-smartart-mount");
+    const mounts = doc.querySelectorAll(
+      ".editor-chart-mount, .editor-smartart-mount, .editor-picture-mount, .editor-icon-mount, .editor-shape-mount"
+    );
     if (mounts.length === 0) return html;
     mounts.forEach((m) => {
       m.innerHTML = "";
@@ -955,6 +965,26 @@ function DocumentPage({
   const marginT = section?.marginConfig?.top ?? 32;
   const marginB = section?.marginConfig?.bottom ?? 32;
 
+  const extractCleanTitle = (src?: string, fileName?: string): string => {
+    if (fileName && fileName.trim() && fileName !== "Online Picture") {
+      return fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+    }
+    if (src && !src.startsWith("data:")) {
+      try {
+        const match = src.match(/\/([^\/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
+        if (match && match[1]) {
+          const decoded = decodeURIComponent(match[1]).replace(/[-_]/g, " ");
+          if (decoded.length > 1 && !/^[0-9a-f]{20,}$/i.test(decoded)) {
+            return decoded;
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return fileName || "Picture";
+  };
+
   const handlePageDrop = (e: React.DragEvent<HTMLElement>) => {
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
@@ -971,7 +1001,7 @@ function DocumentPage({
               new CustomEvent("pf-insert-picture", {
                 detail: {
                   src,
-                  name: file.name,
+                  name: extractCleanTitle(src, file.name),
                   mode: "withTitle",
                 },
               })
@@ -979,7 +1009,85 @@ function DocumentPage({
           }
         };
         reader.readAsDataURL(file);
+        return;
       }
+    }
+
+    let uri = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain");
+    const htmlData = e.dataTransfer.getData("text/html");
+
+    if (!uri && htmlData) {
+      const match = htmlData.match(/src=["'](https?:\/\/[^"']+|data:image\/[^"']+)["']/i);
+      if (match) {
+        uri = match[1];
+      }
+    }
+
+    if (uri && (uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("data:image/"))) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.dispatchEvent(
+        new CustomEvent("pf-insert-picture", {
+          detail: {
+            src: uri,
+            name: extractCleanTitle(uri),
+            mode: "withTitle",
+          },
+        })
+      );
+    }
+  };
+
+  const handlePagePaste = (e: React.ClipboardEvent<HTMLElement>) => {
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) return;
+
+    const items = Array.from(clipboardData.items);
+    const imageItem = items.find((item) => item.type.startsWith("image/"));
+    if (imageItem) {
+      const file = imageItem.getAsFile();
+      if (file) {
+        e.preventDefault();
+        e.stopPropagation();
+        const reader = new FileReader();
+        reader.onload = () => {
+          const src = reader.result as string;
+          if (src) {
+            window.dispatchEvent(
+              new CustomEvent("pf-insert-picture", {
+                detail: {
+                  src,
+                  name: extractCleanTitle(src, file.name || "Pasted Image"),
+                  mode: "withTitle",
+                },
+              })
+            );
+          }
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+
+    const pastedText = clipboardData.getData("text/plain")?.trim();
+    if (
+      pastedText &&
+      (pastedText.startsWith("http://") ||
+        pastedText.startsWith("https://") ||
+        pastedText.startsWith("data:image/")) &&
+      /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(pastedText)
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.dispatchEvent(
+        new CustomEvent("pf-insert-picture", {
+          detail: {
+            src: pastedText,
+            name: extractCleanTitle(pastedText),
+            mode: "withTitle",
+          },
+        })
+      );
     }
   };
 
@@ -987,8 +1095,14 @@ function DocumentPage({
     <section
       data-page-id={pageId}
       onMouseDown={handlePageMouseDown}
+      onPaste={handlePagePaste}
       onDragOver={(e) => {
-        if (e.dataTransfer.types.includes("Files")) {
+        if (
+          e.dataTransfer.types.includes("Files") ||
+          e.dataTransfer.types.includes("text/uri-list") ||
+          e.dataTransfer.types.includes("text/plain") ||
+          e.dataTransfer.types.includes("text/html")
+        ) {
           e.preventDefault();
         }
       }}
