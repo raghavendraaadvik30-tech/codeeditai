@@ -891,13 +891,6 @@ function DocumentPage({
     }
   }, [html]);
 
-  // Sync editorRef with active page
-  useEffect(() => {
-    if (active && localEditorRef.current && editorRef) {
-      (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = localEditorRef.current;
-    }
-  }, [active, editorRef]);
-
   // Native DOM event listeners for Track Changes engine:
   // Native beforeinput interception ensures synchronous cancellation before browser DOM mutation
   useEffect(() => {
@@ -932,6 +925,13 @@ function DocumentPage({
       el.removeEventListener("click", onNativeClick);
     };
   }, [pageId, handleBeforeInput, handleTcKeyDown, handleTcInput, handleTcClick]);
+
+  // Sync editorRef with active page
+  useEffect(() => {
+    if (active && localEditorRef.current && editorRef) {
+      (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = localEditorRef.current;
+    }
+  }, [active, editorRef]);
 
   // External activation focus guard:
   // Never steal focus or collapse cursor if interacting with toolbar/ribbon or if selection already exists

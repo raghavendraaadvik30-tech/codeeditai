@@ -371,8 +371,8 @@ export default function Panel({ moduleId }: PanelProps) {
     moduleId === "tables" ||
     moduleId === "settings" ||
     moduleId === "links" ||
-    moduleId === "writing" ||
-    moduleId === "trackChanges"
+    moduleId === "trackChanges" ||
+    moduleId === "writing"
   ) {
     return ActiveComponent ? (
       <ActiveComponent />
