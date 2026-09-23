@@ -337,6 +337,7 @@ import type { ComponentType } from "react";
 import { Search } from "lucide-react";
 
 import type { ModuleId } from "../../data/workspaceModules";
+import { WritingPage } from "../../modules/writing";
 
 import { StylesPage } from "../../modules/styles";
 import { DocumentPage } from "../../modules/document";
@@ -353,7 +354,7 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
   document: DocumentPage,
   tables: TablesPage,
   settings: SettingsPage,
-  writing: WritingPanel,
+  writing: WritingPage,
   links: LinksPage,
 };
 
@@ -367,7 +368,8 @@ export default function Panel({ moduleId }: PanelProps) {
     moduleId === "styles" ||
     moduleId === "tables" ||
     moduleId === "settings" ||
-    moduleId === "links"
+    moduleId === "links" ||
+    moduleId === "writing"
   ) {
     return ActiveComponent ? (
       <ActiveComponent />
@@ -420,112 +422,6 @@ export default function Panel({ moduleId }: PanelProps) {
           <GenericPanel title={moduleId} />
         )}
       </div>
-    </div>
-  );
-}
-
-/* --------------------------------
-   WRITING
--------------------------------- */
-
-export function WritingPanel() {
-  const tools = [
-    {
-      title: "Bold",
-      description: "Make selected text bold",
-      icon: "B",
-    },
-    {
-      title: "Italic",
-      description: "Italic text",
-      icon: "I",
-    },
-    {
-      title: "Underline",
-      description: "Underline text",
-      icon: "U",
-    },
-    {
-      title: "Align Left",
-      description: "Left alignment",
-      icon: "≡",
-    },
-    {
-      title: "Align Center",
-      description: "Center alignment",
-      icon: "≡",
-    },
-  ];
-
-  return (
-    <div className="space-y-3">
-      {tools.map((tool) => (
-        <button
-          key={tool.title}
-          type="button"
-          className="
-            flex
-            w-full
-            items-center
-            gap-3
-            rounded-xl
-            border
-            border-slate-200
-            bg-white
-            p-3
-            text-left
-            transition
-            hover:border-blue-300
-            hover:bg-blue-50/40
-            dark:border-slate-700
-            dark:bg-[#111D29]
-          "
-        >
-          <span
-            className="
-              flex
-              h-12
-              w-12
-              shrink-0
-              items-center
-              justify-center
-              rounded-xl
-              bg-blue-50
-              text-xl
-              font-semibold
-              text-blue-600
-              dark:bg-blue-950/50
-            "
-          >
-            {tool.icon}
-          </span>
-
-          <span className="min-w-0">
-            <span
-              className="
-                block
-                text-sm
-                font-semibold
-                text-slate-900
-                dark:text-white
-              "
-            >
-              {tool.title}
-            </span>
-
-            <span
-              className="
-                block
-                text-xs
-                text-slate-500
-                dark:text-slate-400
-              "
-            >
-              {tool.description}
-            </span>
-          </span>
-        </button>
-      ))}
     </div>
   );
 }
