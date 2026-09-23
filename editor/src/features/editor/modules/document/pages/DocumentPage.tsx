@@ -47,6 +47,7 @@ export default function DocumentPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [docToDelete, setDocToDelete] = useState<DocListItem | null>(null);
+  const [showLimitAlert, setShowLimitAlert] = useState(false);
 
   // Accordion state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -115,7 +116,7 @@ export default function DocumentPage() {
     );
   }, [allDocs, searchQuery]);
 
-  const handleCreateDoc = () => {
+  const executeCreateDoc = () => {
     createNewDocument();
     setTimeout(() => {
       const editable = document.querySelector('[contenteditable="true"]') as HTMLElement | null;
@@ -138,6 +139,19 @@ export default function DocumentPage() {
         }
       }
     }, 60);
+  };
+
+  const handleCreateDoc = () => {
+    if (allDocs.length >= 10) {
+      setShowLimitAlert(true);
+      return;
+    }
+    executeCreateDoc();
+  };
+
+  const handleConfirmCreateDoc = () => {
+    setShowLimitAlert(false);
+    executeCreateDoc();
   };
 
   const handleSelectDoc = (doc: { id: string }) => {
@@ -769,6 +783,60 @@ export default function DocumentPage() {
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================
+          DOCUMENT LIMIT REACHED MODAL (MAX 10 DOCUMENTS)
+      ============================================================ */}
+      {showLimitAlert && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="limit-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-amber-200 bg-white p-5 shadow-2xl dark:border-amber-900/60 dark:bg-[#0c1929]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 id="limit-dialog-title" className="text-sm font-bold text-slate-900 dark:text-white">
+                  Document Limit Reached
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Maximum 10 documents allowed
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-4 rounded-xl bg-amber-50/80 p-3.5 text-xs leading-relaxed text-amber-950 dark:bg-amber-950/30 dark:text-amber-200 border border-amber-200/80 dark:border-amber-900/40">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <span>
+                  You have reached the maximum limit of 10 documents. To insert a new document, the oldest document will be removed. If you want to keep any existing document, please save it in the File Manager before continuing.
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowLimitAlert(false)}
+                className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors shadow-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCreateDoc}
+                className="flex items-center gap-1.5 rounded-xl bg-[#0078d4] px-4 py-2 text-xs font-semibold text-white hover:bg-[#005a9e] transition-colors shadow-sm"
+              >
+                <span>Continue</span>
               </button>
             </div>
           </div>
