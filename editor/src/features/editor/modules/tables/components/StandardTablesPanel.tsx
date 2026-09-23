@@ -13,16 +13,14 @@
  * --------------------------------------------------------------------------
  */
 
-import { Table2, Plus, Scissors } from "lucide-react";
+import { Table2, Plus } from "lucide-react";
 import { useTable } from "../hooks";
 import { buildCustomTableHTML } from "./TableInsertDialog";
-import { buildHistorySignatureTableHTML } from "./StandardTablesDropdown";
 
 interface StandardTableItem {
   id: number;
   title: string;
   description: string;
-  isSplit?: boolean;
 }
 
 const STANDARD_TABLE_ITEMS: StandardTableItem[] = [
@@ -46,17 +44,6 @@ const STANDARD_TABLE_ITEMS: StandardTableItem[] = [
     title: "Insert Table",
     description: "No Title 12pt",
   },
-  {
-    id: 5,
-    title: "Split Table",
-    description: "Continue Table Title",
-    isSplit: true,
-  },
-  {
-    id: 6,
-    title: "Insert Table",
-    description: "History Signature",
-  },
 ];
 
 interface StandardTablesPanelProps {
@@ -64,7 +51,7 @@ interface StandardTablesPanelProps {
 }
 
 export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelProps) {
-  const { insertCustomTableHTML, splitCurrentTable } = useTable();
+  const { insertCustomTableHTML } = useTable();
 
   const handleSelect = (id: number) => {
     switch (id) {
@@ -116,36 +103,6 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
         insertCustomTableHTML(html);
         break;
       }
-      case 5: {
-        const sel = window.getSelection();
-        const targetTable = sel?.anchorNode
-          ? (sel.anchorNode.nodeType === Node.ELEMENT_NODE
-              ? (sel.anchorNode as HTMLElement)
-              : sel.anchorNode.parentElement
-            )?.closest("table")
-          : null;
-
-        if (targetTable || document.querySelector('[contenteditable="true"] table')) {
-          splitCurrentTable();
-        } else {
-          const contCaption = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">Table 1: Table Title (Continued)</p>`;
-          const tablePart = buildCustomTableHTML({
-            rows: 3,
-            columns: 3,
-            headingSize: "10pt",
-            textSize: "10pt",
-            titleOption: "without",
-            autoFit: true,
-          });
-          insertCustomTableHTML(`${contCaption}${tablePart}`);
-        }
-        break;
-      }
-      case 6: {
-        const html = buildHistorySignatureTableHTML();
-        insertCustomTableHTML(html);
-        break;
-      }
       default:
         break;
     }
@@ -179,11 +136,7 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#0078d4] dark:bg-blue-950/50 dark:text-blue-400 group-hover:scale-105 transition-transform">
-              {item.isSplit ? (
-                <Scissors className="h-3.5 w-3.5" />
-              ) : (
-                <Table2 className="h-3.5 w-3.5" />
-              )}
+              <Table2 className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0">
               <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">
@@ -204,12 +157,8 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
             }}
             className="flex h-6 shrink-0 items-center gap-1 rounded-md bg-[#0078d4]/10 px-2 text-[11px] font-medium text-[#0078d4] hover:bg-[#0078d4] hover:text-white transition-colors cursor-pointer"
           >
-            {item.isSplit ? (
-              <Scissors className="h-3 w-3" />
-            ) : (
-              <Plus className="h-3 w-3" />
-            )}
-            <span>{item.isSplit ? "Split" : "Insert"}</span>
+            <Plus className="h-3 w-3" />
+            <span>Insert</span>
           </button>
         </div>
       ))}
