@@ -669,7 +669,7 @@ function DocumentPage({
   viewMode,
 }: DocumentPageProps) {
   const localEditorRef = useRef<HTMLDivElement | null>(null);
-  const lastHtmlRef = useRef<string>(html);
+  const lastHtmlRef = useRef<string | null>(null);
   const consecutiveEnterRef = useRef<boolean>(false);
   const lastEnterTimeRef = useRef<number>(0);
 
@@ -688,8 +688,8 @@ function DocumentPage({
 
   const marginL = section?.marginConfig?.left ?? 96;
   const marginR = section?.marginConfig?.right ?? 96;
-  const marginT = Math.max(16, (section?.marginConfig?.top ?? 96) - 24);
-  const marginB = Math.max(16, (section?.marginConfig?.bottom ?? 96) - 24);
+  const bodyPaddingTop = 8;
+  const bodyPaddingBottom = Math.max(16, Math.min(32, (section?.marginConfig?.bottom ?? 96) - 64));
 
   const { model: docModel, updateSection: docUpdateSection } = useDocumentModel();
   const {
@@ -856,7 +856,7 @@ function DocumentPage({
 
   /*
    * Keep the page HTML synchronized with the document model
-   * only when external updates occur.
+   * only when genuine external updates occur (undo/redo, file load).
    */
   useEffect(() => {
     const element = localEditorRef.current;
@@ -864,25 +864,39 @@ function DocumentPage({
 
     const normalize = (s: string) => s.replace(/<br\s*\/?>/gi, "<br>").replace(/\s+/g, " ").trim();
 
-    // If active element is inside this editor, avoid destroying the user's cursor
-    const hasFocus = element === document.activeElement || element.contains(document.activeElement);
-    if (hasFocus) {
-      if (normalize(lastHtmlRef.current) === normalize(html)) {
-        return;
-      }
-    }
-
-    if (normalize(element.innerHTML) !== normalize(html)) {
-      const savedSel = hasFocus ? saveSelection(element) : null;
+    // If element in DOM is empty or not yet initialized, populate with incoming html
+    if (!element.hasChildNodes() || element.innerHTML.trim() === "" || lastHtmlRef.current === null) {
       element.innerHTML = html || "<p><br></p>";
       lastHtmlRef.current = html;
-      if (savedSel) {
-        restoreSelection(element, savedSel);
-      }
-    } else {
+      return;
+    }
+
+    // If html hasn't changed from our own last saved html, do not replace innerHTML
+    if (normalize(lastHtmlRef.current) === normalize(html)) {
+      return;
+    }
+
+    // If current element innerHTML already matches new html, do not replace innerHTML
+    if (normalize(element.innerHTML) === normalize(html)) {
       lastHtmlRef.current = html;
+      return;
+    }
+
+    // External change occurred - always attempt to preserve selection
+    const savedSel = saveSelection(element);
+    element.innerHTML = html || "<p><br></p>";
+    lastHtmlRef.current = html;
+    if (savedSel) {
+      restoreSelection(element, savedSel);
     }
   }, [html]);
+
+  // Sync editorRef with active page
+  useEffect(() => {
+    if (active && localEditorRef.current && editorRef) {
+      (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = localEditorRef.current;
+    }
+  }, [active, editorRef]);
 
   // Native DOM event listeners for Track Changes engine:
   // Native beforeinput interception ensures synchronous cancellation before browser DOM mutation
@@ -919,25 +933,37 @@ function DocumentPage({
     };
   }, [pageId, handleBeforeInput, handleTcKeyDown, handleTcInput, handleTcClick]);
 
-  // Initial focus only when activated externally and focus is not already inside
+  // External activation focus guard:
+  // Never steal focus or collapse cursor if interacting with toolbar/ribbon or if selection already exists
   useEffect(() => {
     if (active && editable && localEditorRef.current) {
       const el = localEditorRef.current;
-      if (document.activeElement !== el && !el.contains(document.activeElement)) {
-        el.focus();
-        try {
-          const sel = window.getSelection();
-          if (sel && sel.rangeCount === 0) {
-            const range = document.createRange();
-            const target = el.querySelector("p") || el.firstChild || el;
-            range.selectNodeContents(target);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-          }
-        } catch {
-          // ignore
+      // Do nothing if focus is already inside this editor
+      if (document.activeElement === el || el.contains(document.activeElement)) {
+        return;
+      }
+      // Never steal focus or reset cursor if user is interacting with toolbar, ribbon, controls, or dialogs
+      if (document.activeElement?.closest("[data-editor-ui], [data-ribbon], nav, header, [role='dialog'], .ribbon-toolbar")) {
+        return;
+      }
+      // Never reset cursor if selection already exists within this page
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && sel.anchorNode && el.contains(sel.anchorNode)) {
+        return;
+      }
+      // Only set initial caret for a newly activated empty page with no selection
+      try {
+        if (!sel || sel.rangeCount === 0) {
+          el.focus({ preventScroll: true });
+          const range = document.createRange();
+          const target = el.querySelector("p") || el.firstChild || el;
+          range.selectNodeContents(target);
+          range.collapse(true);
+          sel?.removeAllRanges();
+          sel?.addRange(range);
         }
+      } catch {
+        // ignore
       }
     }
   }, [active, pageId, editable]);
@@ -965,7 +991,7 @@ function DocumentPage({
 
     const scale = zoom / 100;
     // Available writing boundary: container bottom minus bottom margin tolerance (scaled with zoom)
-    const maxBottom = containerRect.bottom - Math.max(16, marginB) * scale;
+    const maxBottom = containerRect.bottom - Math.max(16, bodyPaddingBottom) * scale;
 
     const columnCount = section?.columns?.count ?? 1;
     const isMultiColumn = columnCount > 1;
@@ -1065,7 +1091,7 @@ function DocumentPage({
         }, 50);
       }
     }
-  }, [allPages, marginB, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section, zoom]);
+  }, [allPages, bodyPaddingBottom, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section, zoom]);
 
   // ------------------------------------------------------------------------
   // KeyDown: Enter, Ctrl+Enter, and Backspace Handlers
@@ -1381,6 +1407,10 @@ function DocumentPage({
       return;
     }
 
+    const children = Array.from(container.children) as HTMLElement[];
+    const firstChild = children[0];
+    const lastChild = children[children.length - 1];
+
     // If the click is inside the editable container or on any of its content:
     if (container.contains(target) || target === container) {
       // Ensure the container has at least one paragraph if completely empty
@@ -1390,24 +1420,34 @@ function DocumentPage({
         onChange(container.innerHTML);
       }
 
-      // Check if clicking in empty whitespace well below the last paragraph
-      const children = Array.from(container.children) as HTMLElement[];
-      const lastChild = children[children.length - 1];
-      if (lastChild) {
-        const lastChildRect = lastChild.getBoundingClientRect();
-        if (e.clientY > lastChildRect.bottom + 10) {
-          e.preventDefault();
-          container.focus();
-          const sel = window.getSelection();
-          if (sel) {
-            const range = document.createRange();
-            range.selectNodeContents(lastChild);
-            range.collapse(false);
-            sel.removeAllRanges();
-            sel.addRange(range);
-          }
-          return;
+      // If clicking in the vertical spacing directly below the header boundary (above first paragraph):
+      if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
+        e.preventDefault();
+        container.focus();
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(firstChild);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
         }
+        return;
+      }
+
+      // Check if clicking in empty whitespace well below the last paragraph
+      if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom + 10) {
+        e.preventDefault();
+        container.focus();
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(lastChild);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return;
       }
 
       // Click is within normal text area: DO NOT call e.preventDefault(), DO NOT collapse selection!
@@ -1417,6 +1457,54 @@ function DocumentPage({
     }
 
     // Click is outside the editable container (e.g. on page margins in <section>):
+    if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
+      e.preventDefault();
+      container.focus();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(firstChild);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
+    if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom) {
+      e.preventDefault();
+      container.focus();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(lastChild);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
+    const targetChild = children.find((child) => {
+      const rect = child.getBoundingClientRect();
+      return e.clientY >= rect.top && e.clientY <= rect.bottom;
+    });
+
+    if (targetChild) {
+      e.preventDefault();
+      container.focus();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(targetChild);
+        const rect = targetChild.getBoundingClientRect();
+        range.collapse(e.clientX < rect.left);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
     if (!container.contains(document.activeElement)) {
       container.focus();
     }
@@ -1433,7 +1521,42 @@ function DocumentPage({
   const pageHeight = isLandscape ? baseWidth : baseHeight;
   const scaledPageWidth = Math.round((pageWidth * zoom) / 100);
   const scaledPageHeight = Math.round((pageHeight * zoom) / 100);
-  const headerHeight = isDraft ? 0 : Math.max(45, section?.headerTopDistance ?? 48);
+
+  const hasPageNumberInHeader = section?.showPageNumbers !== false && pageNumberPosition === "header";
+  const hasHeaderContent = Boolean(
+    (effectiveHeaderText && effectiveHeaderText.trim().length > 0) ||
+    (effectiveHeaderHtml &&
+      effectiveHeaderHtml.trim().length > 0 &&
+      effectiveHeaderHtml.trim() !== "<p><br></p>" &&
+      effectiveHeaderHtml.trim() !== "<p><br/></p>" &&
+      effectiveHeaderHtml.trim() !== "<p></p>") ||
+    hasPageNumberInHeader
+  );
+
+  const headerHeight = isDraft
+    ? 0
+    : isHeaderFooterActive
+    ? Math.max(36, section?.headerTopDistance ?? 48)
+    : hasHeaderContent
+    ? Math.max(28, section?.headerTopDistance ?? 48)
+    : Math.max(18, Math.min(26, (section?.headerTopDistance ?? 48) - 22));
+
+  const headerPaddingTop = isDraft
+    ? 0
+    : isHeaderFooterActive
+    ? Math.max(8, (section?.headerTopDistance ?? 48) - 34)
+    : hasHeaderContent
+    ? Math.max(6, (section?.headerTopDistance ?? 48) - 34)
+    : 4;
+
+  const headerPaddingBottom = isDraft
+    ? 0
+    : isHeaderFooterActive
+    ? 8
+    : hasHeaderContent
+    ? 6
+    : 4;
+
   const footerHeight = isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
 
@@ -1665,8 +1788,8 @@ function DocumentPage({
         style={{
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
-          paddingTop: `${Math.max(8, (section?.headerTopDistance ?? 48) - 34)}px`,
-          paddingBottom: "8px",
+          paddingTop: `${headerPaddingTop}px`,
+          paddingBottom: `${headerPaddingBottom}px`,
           minHeight: `${headerHeight}px`,
         }}
       >
@@ -1816,8 +1939,8 @@ function DocumentPage({
         style={{
           height: `${contentHeight}px`,
           maxHeight: `${contentHeight}px`,
-          paddingTop: `${marginT}px`,
-          paddingBottom: `${marginB}px`,
+          paddingTop: `${bodyPaddingTop}px`,
+          paddingBottom: `${bodyPaddingBottom}px`,
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
           opacity: isHeaderFooterActive ? (showDocumentText ? 0.35 : 0) : 1,
@@ -1843,6 +1966,8 @@ function DocumentPage({
           text-slate-800
 
           [&_p]:my-2
+          [&_>_*:first-child]:mt-0
+          [&_p:first-child]:mt-0
           [&_p]:break-inside-avoid-column
           [&_table]:break-inside-avoid-column
           [&_h1]:break-after-avoid
@@ -1876,25 +2001,44 @@ function DocumentPage({
           [&_table]:box-border
           [&_table]:border-collapse
           [&_table]:table-fixed
+          [&_table]:max-w-full
 
           [&_td]:border
           [&_td]:border-slate-300
-          [&_td]:p-2.5
+          [&_td]:px-2.5
+          [&_td]:py-1.5
           [&_td]:text-left
           [&_td]:align-top
-          [&_td]:min-w-[32px]
+          [&_td]:min-w-0
+          [&_td]:box-border
+          [&_td]:overflow-hidden
           [&_td]:break-words
+          [&_td]:[overflow-wrap:anywhere]
+          [&_td]:[word-break:break-word]
           [&_td]:whitespace-normal
+          [&_td_p]:my-0
+          [&_td_p]:min-w-0
+          [&_td_p]:[overflow-wrap:anywhere]
+          [&_td_p]:[word-break:break-word]
 
           [&_th]:border
           [&_th]:border-slate-300
-          [&_th]:p-2.5
+          [&_th]:px-2.5
+          [&_th]:py-1.5
           [&_th]:text-left
           [&_th]:align-top
           [&_th]:font-semibold
-          [&_th]:min-w-[32px]
+          [&_th]:min-w-0
+          [&_th]:box-border
+          [&_th]:overflow-hidden
           [&_th]:break-words
+          [&_th]:[overflow-wrap:anywhere]
+          [&_th]:[word-break:break-word]
           [&_th]:whitespace-normal
+          [&_th_p]:my-0
+          [&_th_p]:min-w-0
+          [&_th_p]:[overflow-wrap:anywhere]
+          [&_th_p]:[word-break:break-word]
         "
       />
 

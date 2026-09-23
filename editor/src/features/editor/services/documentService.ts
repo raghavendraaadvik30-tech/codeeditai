@@ -127,25 +127,27 @@ export const documentService = {
       };
     } 
 
-    const text = editor.innerText ?? "";
+    const cleanText = (editor.innerText ?? "")
+      .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+      .replace(/\r?\n/g, " ");
 
-    const trimmed = text.trim();
+    const trimmed = cleanText.trim();
 
     const words = trimmed
       ? trimmed.split(/\s+/).filter(Boolean).length
       : 0;
 
-    const characters = text.length;
+    const charactersNoSpaces = trimmed.replace(/\s+/g, "").length;
+    const characters = trimmed ? cleanText.replace(/\s+$/, "").length : 0;
 
-    const charactersNoSpaces =
-      text.replace(/\s/g, "").length;
-
-    const paragraphs = Math.max(
-      1,
-      editor.querySelectorAll(
-        "p,h1,h2,h3,h4,h5,h6,li"
-      ).length
-    );
+    const paragraphs = trimmed
+      ? Math.max(
+          1,
+          Array.from(editor.querySelectorAll("p,h1,h2,h3,h4,h5,h6,li")).filter(
+            (el) => (el.textContent || "").trim().length > 0
+          ).length
+        )
+      : 0;
 
     const height =
       contentHeight ||

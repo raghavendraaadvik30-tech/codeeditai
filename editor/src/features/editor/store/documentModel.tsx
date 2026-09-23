@@ -137,7 +137,7 @@ export interface DocumentModel {
   sections: SectionModel[];
   pageHtml: Record<string, string>;
   savedAt?: number;
-  styleOverrides: StyleOverrides ;
+  styleOverrides: StyleOverrides;
   watermarkConfig?: {
     type: "none" | "text" | "image";
     text?: string;
@@ -211,26 +211,26 @@ function normalizeBorderConfig(b?: PageBorderConfig): PageBorderConfig | undefin
     (b.style === "none"
       ? "none"
       : b.style === "shadow"
-      ? "shadow"
-      : b.style === "3d"
-      ? "3d"
-      : b.top === false || b.bottom === false || b.left === false || b.right === false
-      ? "custom"
-      : "box");
+        ? "shadow"
+        : b.style === "3d"
+          ? "3d"
+          : b.top === false || b.bottom === false || b.left === false || b.right === false
+            ? "custom"
+            : "box");
 
   const lineStyle =
     b.lineStyle ||
     (b.style === "dashed"
       ? "dashed"
       : b.style === "dotted"
-      ? "dotted"
-      : b.style === "double"
-      ? "double"
-      : b.style === "dash-dot"
-      ? "dash-dot"
-      : b.style === "thick-solid"
-      ? "thick-solid"
-      : "solid");
+        ? "dotted"
+        : b.style === "double"
+          ? "double"
+          : b.style === "dash-dot"
+            ? "dash-dot"
+            : b.style === "thick-solid"
+              ? "thick-solid"
+              : "solid");
 
   const distance: PageBorderDistance = {
     top: typeof b.distance?.top === "number" ? b.distance.top : 24,
@@ -248,10 +248,10 @@ function normalizeBorderConfig(b?: PageBorderConfig): PageBorderConfig | undefin
       (setting === "none"
         ? "none"
         : setting === "shadow"
-        ? "shadow"
-        : setting === "3d"
-        ? "3d"
-        : lineStyle),
+          ? "shadow"
+          : setting === "3d"
+            ? "3d"
+            : lineStyle),
     color: b.color || "#000000",
     width: b.width ?? 2,
     top: setting !== "none" ? (b.top ?? true) : false,
@@ -298,6 +298,82 @@ function normalizeDoc(doc: DocumentModel): DocumentModel {
   };
 }
 
+export const MAX_DOCUMENTS = 10;
+
+/**
+ * Derives a reliable creation timestamp (in milliseconds) for a document.
+ * Checks in order:
+ * 1. metadata.createdDate
+ * 2. Timestamp encoded in ID (format: doc_<base36_timestamp>_...)
+ * 3. savedAt
+ * 4. Inverse of list position as fallback
+ */
+export function getDocumentCreationTime(doc: DocumentModel, fallbackIndex: number = 0): number {
+  let baseTime = 0;
+  if (doc?.metadata?.createdDate && typeof doc.metadata.createdDate === "number" && !isNaN(doc.metadata.createdDate)) {
+    baseTime = doc.metadata.createdDate;
+  } else if (doc?.id && typeof doc.id === "string") {
+    const raw = doc.id.startsWith("doc_") ? doc.id.slice(4) : doc.id;
+    const timePart = raw.split("_")[0];
+    const parsed = parseInt(timePart, 36);
+    if (!isNaN(parsed) && parsed > 0) {
+      baseTime = parsed;
+    }
+  } else if (doc?.savedAt && typeof doc.savedAt === "number" && !isNaN(doc.savedAt)) {
+    baseTime = doc.savedAt;
+  }
+  // Tie-breaker: documents with a larger fallbackIndex (further down in list) were inserted earlier, so they are older
+  return baseTime > 0 ? baseTime - fallbackIndex * 0.001 : -fallbackIndex;
+}
+
+/**
+ * Identifies the single oldest document from a document list.
+ */
+export function findOldestDocument(docs: DocumentModel[]): DocumentModel | null {
+  if (!docs || docs.length === 0) return null;
+  let oldest = docs[0];
+  let oldestTime = getDocumentCreationTime(oldest, 0);
+
+  for (let i = 1; i < docs.length; i++) {
+    const doc = docs[i];
+    const time = getDocumentCreationTime(doc, i);
+    if (time < oldestTime) {
+      oldest = doc;
+      oldestTime = time;
+    }
+  }
+  return oldest;
+}
+
+/**
+ * Synchronizes any live content in the active DOM contenteditable page elements
+ * into the DocumentModel so uncommitted edits are never lost on document switches or creation.
+ */
+function syncActiveDomToDoc(doc: DocumentModel): DocumentModel {
+  if (typeof document === "undefined") return doc;
+  const pageNodes = document.querySelectorAll<HTMLElement>(
+    '[data-editor-page], [contenteditable][data-page-id]'
+  );
+  if (!pageNodes || pageNodes.length === 0) return doc;
+
+  const nextHtml = { ...doc.pageHtml };
+  let changed = false;
+
+  pageNodes.forEach((node) => {
+    const pageId =
+      node.getAttribute("data-editor-page") ||
+      node.getAttribute("data-page-id");
+    if (pageId && node.innerHTML !== undefined) {
+      if (nextHtml[pageId] !== node.innerHTML) {
+        nextHtml[pageId] = node.innerHTML;
+        changed = true;
+      }
+    }
+  });
+
+  return changed ? { ...doc, pageHtml: nextHtml } : doc;
+}
+
 function createEmptyDocument(): DocumentModel {
   const section = createDefaultSection();
 
@@ -306,6 +382,7 @@ function createEmptyDocument(): DocumentModel {
     sectionId: section.id,
   };
 
+  const now = Date.now();
   return {
     id: "doc_" + uid(),
     title: "Untitled Document",
@@ -315,6 +392,12 @@ function createEmptyDocument(): DocumentModel {
       [page.id]: DEFAULT_HTML,
     },
     styleOverrides: {},
+    metadata: {
+      title: "Untitled Document",
+      author: "User",
+      createdDate: now,
+      modifiedDate: now,
+    },
   };
 }
 
@@ -332,7 +415,7 @@ function getStoredSavedDocuments(): DocumentModel[] {
             unique.push(normalizeDoc(doc));
           }
         }
-        return unique;
+        return unique.slice(0, MAX_DOCUMENTS);
       }
     }
   } catch {
@@ -397,7 +480,7 @@ interface DocumentContextType {
   updateStyleOverride: (
     styleId: string,
     update: Partial<StyleOverride>
-  ) => void; 
+  ) => void;
   revertStyleOverride: (
     styleId: string
   ) => void;
@@ -448,6 +531,11 @@ interface DocumentContextType {
     documentId: string
   ) => void;
   createNewDocument: (title?: string) => void;
+  insertDocument: (title?: string) => void;
+  insertUploadedDocument: (
+    title: string,
+    pagesHtml: string[]
+  ) => DocumentModel;
   resetDocument: () => void;
   refreshHistory: () => void;
   importDocumentPages: (
@@ -656,8 +744,8 @@ export function DocumentModelProvider({
       setModel((prev) => {
         const index = afterPageId
           ? prev.pages.findIndex(
-              (page) => page.id === afterPageId
-            )
+            (page) => page.id === afterPageId
+          )
           : prev.pages.length - 1;
 
         const insertIndex =
@@ -730,9 +818,9 @@ export function DocumentModelProvider({
           (section) =>
             section.id === sectionId
               ? {
-                  ...section,
-                  ...patch,
-                }
+                ...section,
+                ...patch,
+              }
               : section
         ),
       }));
@@ -1036,7 +1124,14 @@ export function DocumentModelProvider({
             // If not found in existingSaved, filter out any unsaved entry with matching id before adding
             const filtered = existingSaved.filter((d) => d.id !== currentModel.id);
             nextSaved = [saved, ...filtered];
+            if (nextSaved.length > MAX_DOCUMENTS) {
+              const oldestDoc = findOldestDocument(nextSaved.filter((d) => d.id !== saved.id));
+              if (oldestDoc) {
+                nextSaved = nextSaved.filter((d) => d.id !== oldestDoc.id);
+              }
+            }
           }
+          nextSaved = nextSaved.slice(0, MAX_DOCUMENTS);
 
           localStorage.setItem(
             SAVED_DOCS_KEY,
@@ -1074,16 +1169,17 @@ export function DocumentModelProvider({
   const loadDocument = useCallback((documentId: string) => {
     setModel((currentModel) => {
       try {
+        const syncedCurrent = syncActiveDomToDoc(currentModel);
         const savedList = getStoredSavedDocuments();
 
         // 1. Always preserve current active model in list before switching
-        const existingIdx = savedList.findIndex((d) => d.id === currentModel.id);
+        const existingIdx = savedList.findIndex((d) => d.id === syncedCurrent.id);
         let nextSaved: DocumentModel[];
         if (existingIdx >= 0) {
           nextSaved = [...savedList];
-          nextSaved[existingIdx] = currentModel;
+          nextSaved[existingIdx] = syncedCurrent;
         } else {
-          nextSaved = [currentModel, ...savedList];
+          nextSaved = [syncedCurrent, ...savedList];
         }
 
         // 2. Find target document to load
@@ -1128,33 +1224,75 @@ export function DocumentModelProvider({
   }, [loadDocument]);
 
   /* ============================================================
-     Create New Document (Temporary / Unsaved)
+     Create New Document (Temporary / Unsaved) - Max 10 Documents
   ============================================================ */
 
   const createNewDocument = useCallback((customTitle?: string) => {
     const fresh = createEmptyDocument();
     fresh.title =
       customTitle && customTitle.trim() ? customTitle.trim() : "Untitled Document";
+    if (fresh.metadata) {
+      fresh.metadata.title = fresh.title;
+    }
 
     setModel((currentModel) => {
       try {
+        const syncedCurrent = syncActiveDomToDoc(currentModel);
         const savedList = getStoredSavedDocuments();
 
-        // 1. Preserve current document in list
-        const existingIdx = savedList.findIndex((d) => d.id === currentModel.id);
+        // 1. Preserve current document in list with latest content
+        const existingIdx = savedList.findIndex((d) => d.id === syncedCurrent.id);
         let baseList: DocumentModel[];
         if (existingIdx >= 0) {
           baseList = [...savedList];
-          baseList[existingIdx] = currentModel;
+          baseList[existingIdx] = syncedCurrent;
         } else {
-          baseList = [currentModel, ...savedList];
+          baseList = [syncedCurrent, ...savedList];
         }
 
-        // 2. Prepend fresh document to the document list
-        const nextSaved = [
-          fresh,
-          ...baseList.filter((d) => d && d.id && d.id !== fresh.id),
-        ];
+        // Deduplicate baseList and exclude any doc matching fresh.id
+        const seenIds = new Set<string>();
+        const uniqueBaseList: DocumentModel[] = [];
+        for (const doc of baseList) {
+          if (doc && doc.id && doc.id !== fresh.id && !seenIds.has(doc.id)) {
+            seenIds.add(doc.id);
+            uniqueBaseList.push(doc);
+          }
+        }
+
+        // 2. Enforce MAX_DOCUMENTS (10):
+        // If current count is >= 10, identify and delete the single oldest document(s)
+        // so that adding fresh leaves the total count at exactly MAX_DOCUMENTS (10).
+        const targetRetainCount = MAX_DOCUMENTS - 1; // 9
+        let prunedList = [...uniqueBaseList];
+
+        while (prunedList.length > targetRetainCount) {
+          const oldestDoc = findOldestDocument(prunedList);
+          if (!oldestDoc) break;
+
+          // Remove only the oldest document
+          prunedList = prunedList.filter((d) => d.id !== oldestDoc.id);
+
+          // Clean up snapshots for the deleted oldest document
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(`editor_snapshot.${oldestDoc.id}.`)) {
+              localStorage.removeItem(key);
+            }
+          }
+
+          // Clean up history for the deleted oldest document
+          try {
+            const nextHistory = getInitialHistory().filter((h) => h.id !== oldestDoc.id);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+            setHistory(nextHistory);
+          } catch {
+            // ignore
+          }
+        }
+
+        // 3. Prepend fresh document to the document list
+        const nextSaved = [fresh, ...prunedList].slice(0, MAX_DOCUMENTS);
 
         localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
         setSavedDocuments(nextSaved);
@@ -1167,6 +1305,146 @@ export function DocumentModelProvider({
       return fresh;
     });
   }, []);
+
+  /* ============================================================
+     Insert Uploaded Document (Max 10 Documents, Oldest Pruned)
+  ============================================================ */
+
+  const insertUploadedDocument = useCallback(
+    (title: string, pagesHtml: string[]): DocumentModel => {
+      const section = createDefaultSection("section_1");
+      const validPages =
+        pagesHtml.length > 0
+          ? pagesHtml.map((h) => (h && h.trim() ? h.trim() : DEFAULT_HTML))
+          : [DEFAULT_HTML];
+
+      const newPages: PageModel[] = validPages.map(() => ({
+        id: "page_" + uid(),
+        sectionId: section.id,
+      }));
+
+      const newPageHtml: Record<string, string> = {};
+      newPages.forEach((p, idx) => {
+        newPageHtml[p.id] = validPages[idx];
+      });
+
+      const docTitle = title && title.trim() ? title.trim() : "Uploaded Document";
+      const now = Date.now();
+
+      const freshDoc: DocumentModel = {
+        id: "doc_" + uid(),
+        title: docTitle,
+        pages: newPages,
+        sections: [
+          {
+            ...section,
+            showPageNumbers: true,
+            pageNumberPosition: "footer",
+            pageNumberAlignment: "right",
+            pageNumberFormat: "1",
+          },
+        ],
+        pageHtml: newPageHtml,
+        styleOverrides: {},
+        savedAt: now,
+        metadata: {
+          title: docTitle,
+          author: "User",
+          createdDate: now,
+          modifiedDate: now,
+        },
+      };
+
+      setModel((currentModel) => {
+        try {
+          const syncedCurrent = syncActiveDomToDoc(currentModel);
+          const savedList = getStoredSavedDocuments();
+
+          // 1. Preserve current document in list with latest content
+          const existingIdx = savedList.findIndex((d) => d.id === syncedCurrent.id);
+          let baseList: DocumentModel[];
+          if (existingIdx >= 0) {
+            baseList = [...savedList];
+            baseList[existingIdx] = syncedCurrent;
+          } else {
+            baseList = [syncedCurrent, ...savedList];
+          }
+
+          // Deduplicate baseList and exclude any doc matching freshDoc.id
+          const seenIds = new Set<string>();
+          const uniqueBaseList: DocumentModel[] = [];
+          for (const doc of baseList) {
+            if (doc && doc.id && doc.id !== freshDoc.id && !seenIds.has(doc.id)) {
+              seenIds.add(doc.id);
+              uniqueBaseList.push(doc);
+            }
+          }
+
+          // 2. Enforce MAX_DOCUMENTS (10)
+          const targetRetainCount = MAX_DOCUMENTS - 1; // 9
+          let prunedList = [...uniqueBaseList];
+
+          while (prunedList.length > targetRetainCount) {
+            const oldestDoc = findOldestDocument(prunedList);
+            if (!oldestDoc) break;
+
+            prunedList = prunedList.filter((d) => d.id !== oldestDoc.id);
+
+            // Clean up snapshots for the deleted oldest document
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+              const key = localStorage.key(i);
+              if (key && key.startsWith(`editor_snapshot.${oldestDoc.id}.`)) {
+                localStorage.removeItem(key);
+              }
+            }
+
+            // Clean up history
+            try {
+              const nextHistory = getInitialHistory().filter((h) => h.id !== oldestDoc.id);
+              localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+              setHistory(nextHistory);
+            } catch {
+              // ignore
+            }
+          }
+
+          // 3. Prepend freshDoc to list
+          const nextSaved = [freshDoc, ...prunedList].slice(0, MAX_DOCUMENTS);
+
+          localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
+          setSavedDocuments(nextSaved);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(freshDoc));
+
+          // Save snapshot and update history
+          try {
+            localStorage.setItem(
+              `editor_snapshot.${freshDoc.id}.${freshDoc.savedAt}`,
+              JSON.stringify(freshDoc)
+            );
+            const historyItems = getInitialHistory().filter((h) => h.id !== freshDoc.id);
+            historyItems.unshift({
+              id: freshDoc.id,
+              title: freshDoc.title,
+              savedAt: freshDoc.savedAt!,
+            });
+            const latest = historyItems.slice(0, 50);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(latest));
+            setHistory(latest);
+          } catch {
+            // ignore
+          }
+        } catch {
+          // ignore
+        }
+
+        setActivePage(freshDoc.pages[0]?.id ?? null);
+        return freshDoc;
+      });
+
+      return freshDoc;
+    },
+    []
+  );
 
   /* ============================================================
      Delete Document
@@ -1204,7 +1482,9 @@ export function DocumentModelProvider({
             } else {
               const fresh = createEmptyDocument();
               setActivePage(fresh.pages[0]?.id ?? null);
-              localStorage.removeItem(STORAGE_KEY);
+              localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify([fresh]));
+              setSavedDocuments([fresh]);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
               return fresh;
             }
           }
@@ -1384,6 +1664,8 @@ export function DocumentModelProvider({
         loadDocument,
         deleteDocument,
         createNewDocument,
+        insertDocument: createNewDocument,
+        insertUploadedDocument,
         resetDocument,
         refreshHistory,
         importDocumentPages,

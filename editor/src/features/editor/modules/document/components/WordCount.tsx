@@ -20,21 +20,49 @@ export function WordCount() {
     let paragraphs = 0;
 
     if (typeof window === "undefined" || typeof DOMParser === "undefined") {
-      return { words: 0, characters: 0, paragraphs: 0, pages: 1 };
+      return { words: 0, characters: 0, paragraphs: 0, pages: model.pages?.length || 1 };
     }
 
     const parser = new DOMParser();
-    Object.values(model.pageHtml || {}).forEach((html) => {
-      if (!html) return;
-      const doc = parser.parseFromString(html, "text/html");
-      const text = doc.body.textContent || "";
-      const trimmed = text.trim();
-      words += trimmed ? trimmed.split(/\s+/).filter(Boolean).length : 0;
-      characters += text.length;
+    const pages = model.pages && model.pages.length > 0 ? model.pages : [{ id: "page_1" }];
 
-      const nodes = doc.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6");
-      nodes.forEach((n) => {
-        if ((n.textContent || "").trim().length > 0) paragraphs++;
+    pages.forEach((page) => {
+      const html = model.pageHtml?.[page.id];
+      if (!html || !html.trim()) return;
+
+      const doc = parser.parseFromString(html, "text/html");
+
+      doc.querySelectorAll(
+        "[data-editor-ui], [data-table-control], .page-break, .column-break, script, style"
+      ).forEach((el) => el.remove());
+
+      const allCandidateBlocks = Array.from(
+        doc.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th")
+      );
+
+      const leafBlocks = allCandidateBlocks.filter((block) => {
+        return block.querySelector("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th") === null;
+      });
+
+      const blocks = leafBlocks.length > 0 ? leafBlocks : [doc.body];
+
+      blocks.forEach((block) => {
+        const clone = block.cloneNode(true) as HTMLElement;
+        while (clone.lastChild && clone.lastChild.nodeName === "BR") {
+          clone.removeChild(clone.lastChild);
+        }
+
+        const rawText = (clone.textContent || "")
+          .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+          .replace(/\u00A0/g, " ");
+
+        const trimmed = rawText.trim();
+        if (!trimmed) return;
+
+        paragraphs++;
+        words += trimmed.split(/\s+/).filter(Boolean).length;
+        const cleanContent = rawText.replace(/^[\r\n]+|[\r\n]+$/g, "");
+        characters += cleanContent.length;
       });
     });
 
@@ -42,7 +70,7 @@ export function WordCount() {
       words,
       characters,
       paragraphs,
-      pages: model.pages.length || 1,
+      pages: model.pages?.length || 1,
     };
   }, [model.pageHtml, model.pages]);
 

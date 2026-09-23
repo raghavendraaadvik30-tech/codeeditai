@@ -231,6 +231,7 @@ export function StyleCard({
       >
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onApply}
           className="flex-1 min-w-0 px-3 py-2 text-left"
         >
