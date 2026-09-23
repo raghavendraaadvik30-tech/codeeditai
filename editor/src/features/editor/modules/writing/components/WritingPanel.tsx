@@ -34,17 +34,6 @@ export default function WritingPanel() {
 
   return (
     <div className="flex h-full flex-col bg-white">
-      {/* Header */}
-      <div className="border-b border-gray-200 px-4 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Writing
-        </h2>
-
-        <p className="mt-1 text-sm text-gray-500">
-          Casing, emphasis & paragraph control
-        </p>
-      </div>
-
       {/* Search */}
       <div className="px-4 py-3">
         <WritingSearch

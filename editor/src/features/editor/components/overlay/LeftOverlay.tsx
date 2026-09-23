@@ -102,7 +102,7 @@ export default function LeftOverlay() {
     <div className="flex h-full min-h-0 flex-col bg-background">
 
       {/* HEADER */}
-      <div
+      {/* <div
         className="
           flex
           h-[74px]
@@ -128,10 +128,10 @@ export default function LeftOverlay() {
               {description}
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* CLOSE */}
-        <button
+        {/* <button
           type="button"
           onClick={() => setLeftPanelOpen(false)}
           className="
@@ -151,7 +151,107 @@ export default function LeftOverlay() {
         >
           <X className="h-4 w-4" />
         </button>
+      </div> */}
+
+{/* HEADER */}
+{panelKey !== "writing" ? (
+  <div
+    className="
+      flex
+      h-[74px]
+      shrink-0
+      items-center
+      justify-between
+      border-b
+      border-slate-200
+      dark:border-slate-800
+      px-5
+    "
+  >
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600/10 text-blue-500 dark:bg-[#0078d4]/20 dark:text-[#0078d4]">
+        <HeaderIcon className="h-5 w-5" />
       </div>
+
+      <div>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+          {title}
+        </h2>
+
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          {description}
+        </p>
+      </div>
+    </div>
+
+    {/* CLOSE */}
+    <button
+      type="button"
+      onClick={() => setLeftPanelOpen(false)}
+      className="
+        flex
+        h-8
+        w-8
+        items-center
+        justify-center
+        rounded-md
+        text-slate-500
+        transition-colors
+        hover:bg-slate-100
+        hover:text-slate-900
+      "
+      aria-label="Close panel"
+      title="Close"
+    >
+      <X className="h-4 w-4" />
+    </button>
+  </div>
+) : (
+
+  /* WRITING HEADER */
+  <div className="shrink-0 px-5 pt-4 pb-4">
+    <div className="flex items-center justify-between">
+      {/* <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+        Writing
+      </h2> */}
+
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+       Writing
+      </h2>
+
+
+
+      <button
+        type="button"
+        onClick={() => setLeftPanelOpen(false)}
+        className="
+          flex
+          h-8
+          w-8
+          items-center
+          justify-center
+          rounded-md
+          text-slate-500
+          transition-colors
+          hover:bg-slate-100
+          hover:text-slate-900
+        "
+        aria-label="Close panel"
+        title="Close"
+      >
+        <X className="h-5 w-5" />
+      </button>
+    </div>
+
+    {/* <p className="mt-1 text-base text-slate-500 dark:text-slate-400">
+      Casing, emphasis & paragraph control
+    </p> */}
+
+    <p className="text-xs text-slate-500 dark:text-slate-400">
+  Casing, emphasis & paragraph control
+</p>
+  </div>
+)}
 
       {/* DYNAMIC CONTENT */}
       <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
