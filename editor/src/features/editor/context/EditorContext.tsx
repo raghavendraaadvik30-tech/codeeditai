@@ -180,6 +180,11 @@ export interface EditorContextType {
    * Executes a native formatting command (bold, italic, underline, align, etc.) preserving selection.
    */
   applyFormatCommand: (command: string, value?: string) => void;
+  exec: (command: string, value?: string) => void;
+  applyBulletStyle: (style?: any) => void;
+  applyNumberingStyle: (style?: any) => void;
+  applyMultilevelStyle: (style?: any) => void;
+  toggleMultilevelList: (type?: any) => void;
 
   /**
    * Formats paragraph block (p, h1, h2, h3, h4, blockquote) preserving selection.
@@ -660,8 +665,9 @@ export function EditorProvider({
     if (token.size) {
       applyFontSize(token.size);
     }
-    if (token.font) {
-      applyFontFamily(token.font);
+    const familyOrFont = token.family || token.font;
+    if (familyOrFont) {
+      applyFontFamily(familyOrFont);
     }
     if (token.weight && token.weight >= 600) {
       document.execCommand("bold", false);
@@ -677,10 +683,11 @@ export function EditorProvider({
     } else if (token.color === "primary") {
       document.execCommand("foreColor", false, "#0078d4");
     }
-    if (token.align) {
-      if (token.align === "center") document.execCommand("justifyCenter", false);
-      else if (token.align === "right") document.execCommand("justifyRight", false);
-      else if (token.align === "justify") document.execCommand("justifyFull", false);
+    const align = token.alignment || token.align;
+    if (align) {
+      if (align === "center") document.execCommand("justifyCenter", false);
+      else if (align === "right") document.execCommand("justifyRight", false);
+      else if (align === "justify") document.execCommand("justifyFull", false);
       else document.execCommand("justifyLeft", false);
     }
 
@@ -958,6 +965,12 @@ export function EditorProvider({
 
     pendingPermissionFile,
     setPendingPermissionFile,
+
+    exec: applyFormatCommand,
+    applyBulletStyle: (style?: any) => applyFormatCommand("insertUnorderedList", style),
+    applyNumberingStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
+    applyMultilevelStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
+    toggleMultilevelList: (type?: any) => applyFormatCommand("insertOrderedList", type),
 
     undo,
     redo,

@@ -1,16 +1,86 @@
+// import {
+//   useCallback,
+//   useEffect,
+//   useState,
+// } from "react";
+
+// import {
+//   stylesService,
+// } from "../services/StylesService";
+
+// import type {
+//   StyleToken,
+// } from "../types/styles.types";
+
+// export function useStyles() {
+//   const [styles, setStyles] =
+//     useState<StyleToken[]>([]);
+
+//   const [loading, setLoading] =
+//     useState(true);
+
+//   const [error, setError] =
+//     useState<Error | null>(null);
+
+//   const loadStyles = useCallback(
+//     async () => {
+//       try {
+//         setLoading(true);
+//         setError(null);
+
+//         const data =
+//           await stylesService.getStyles();
+
+//         setStyles(data);
+//       } catch (err) {
+//         setError(
+//           err instanceof Error
+//             ? err
+//             : new Error("Failed to load styles"),
+//         );
+//       } finally {
+//         setLoading(false);
+//       }
+//     },
+//     [],
+//   );
+
+//   useEffect(() => {
+//     loadStyles();
+//   }, [loadStyles]);
+
+//   return {
+//     styles,
+//     loading,
+//     error,
+//     reload: loadStyles,
+//   };
+// }
+
+
 import {
   useCallback,
   useEffect,
   useState,
 } from "react";
 
-import {
-  stylesService,
-} from "../services/StylesService";
-
 import type {
+  StyleOverride,
   StyleToken,
 } from "../types/styles.types";
+
+import {
+  StylesService,
+} from "../services/StylesService";
+
+import {
+  StyleRepository,
+} from "../repository/StyleRepository";
+
+const service =
+  new StylesService(
+    new StyleRepository(),
+  );
 
 export function useStyles() {
   const [styles, setStyles] =
@@ -20,39 +90,85 @@ export function useStyles() {
     useState(true);
 
   const [error, setError] =
-    useState<Error | null>(null);
+    useState<string | null>(null);
 
-  const loadStyles = useCallback(
-    async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  useEffect(() => {
+    let mounted = true;
 
-        const data =
-          await stylesService.getStyles();
+    service
+      .getStyles()
+      .then((result) => {
+        if (mounted) {
+          setStyles(result);
+        }
+      })
+      .catch((err) => {
+        if (mounted) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Failed to load styles",
+          );
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setLoading(false);
+        }
+      });
 
-        setStyles(data);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to load styles"),
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const updateStyle = useCallback(
+    async (
+      name: string,
+      update: StyleOverride,
+    ) => {
+      const updated =
+        await service.updateStyle(
+          name,
+          update,
         );
-      } finally {
-        setLoading(false);
-      }
+
+      setStyles((current) =>
+        current.map((style) =>
+          style.name === name
+            ? updated
+            : style,
+        ),
+      );
+
+      return updated;
     },
     [],
   );
 
-  useEffect(() => {
-    loadStyles();
-  }, [loadStyles]);
+  const resetStyle = useCallback(
+    async (name: string) => {
+      const reset =
+        await service.resetStyle(name);
+
+      setStyles((current) =>
+        current.map((style) =>
+          style.name === name
+            ? reset
+            : style,
+        ),
+      );
+
+      return reset;
+    },
+    [],
+  );
 
   return {
     styles,
     loading,
     error,
-    reload: loadStyles,
+    updateStyle,
+    resetStyle,
   };
 }
