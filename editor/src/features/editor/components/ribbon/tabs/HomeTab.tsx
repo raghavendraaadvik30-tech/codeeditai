@@ -3,38 +3,25 @@ Purpose:
 Provides font, font-size, Undo, and Redo controls in the editor Home ribbon.
 
 Responsibilities:
+- Changes font and font size without losing selection.
+- Tracks selected text formatting.
+- Handles Undo/Redo.
+- Prevents editor focus loss across all toolbar interactions.
+*/
 
-Changes font and font size.
-Tracks selected text formatting.
-Handles Undo/Redo.
-Uses EditorContext for the editor reference.
-
-Hardcoded? Partially — font options are defined in constant.ts.
-
-Backend needed? ❌ No. These features work on the frontend.
-
-Backend needed for: Saving, auto-save, document history, collaboration, and document synchronization.*/
-
-import { useEffect, useRef, useState } from "react";
-
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import {
   Undo2,
   Redo2,
   ChevronDown,
 } from "lucide-react";
-import {
-  FONTS,
-  FONT_SIZES,
-} from "../constant";
-
+import { FONTS, FONT_SIZES } from "../constant";
 import RibbonSelect from "../controls/RibbonSelect";
 import RibbonDivider from "../controls/RibbonDivider";
-
 import { useEditor } from "../../../context/EditorContext";
 
 export default function HomeTab() {
   const {
-    editorRef,
     undo,
     redo,
     undoMultiple,
@@ -43,13 +30,12 @@ export default function HomeTab() {
     getRedoActions,
     canUndo,
     canRedo,
+    applyFontSize,
+    applyFontFamily,
   } = useEditor();
 
-  const [fontName, setFontName] =
-    useState("Calibri");
-
-  const [fontSize, setFontSize] =
-    useState("12");
+  const [fontName, setFontName] = useState("Calibri");
+  const [fontSize, setFontSize] = useState("12");
 
   const [isUndoDropdownOpen, setIsUndoDropdownOpen] = useState(false);
   const [isRedoDropdownOpen, setIsRedoDropdownOpen] = useState(false);
@@ -62,8 +48,12 @@ export default function HomeTab() {
   const undoActions = isUndoDropdownOpen ? getUndoActions() : [];
   const redoActions = isRedoDropdownOpen ? getRedoActions() : [];
 
+  const preventFocusLoss = (e: MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+  };
+
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: globalThis.MouseEvent) => {
       if (
         undoDropdownRef.current &&
         !undoDropdownRef.current.contains(e.target as Node)
@@ -84,141 +74,92 @@ export default function HomeTab() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
- 
-
   /* =====================================================
-     Execute browser command
+     Read current selection formatting and update controls
   ====================================================== */
-
-  const exec = (
-    command: string,
-    value?: string 
-  ) => {
-    if (command === "undo") {
-      undo();
-      return;
-    }
-    if (command === "redo") {
-      redo();
-      return;
-    }
-
-    editorRef.current?.focus();
-
-    document.execCommand(
-      command,
-      false,
-      value
-    );
-
-    const el = editorRef.current;
-    if (el) {
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-  };
-
-  /* =====================================================
-     Read current selection formatting
-  ====================================================== */
-
   useEffect(() => {
     const updateToolbar = () => {
-      const font =
-        document.queryCommandValue("fontName");
+      try {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
 
-      if (font) {
-        setFontName(
-          font.replace(/['"]/g, "")
-        );
-      }
+        const anc = range.commonAncestorContainer;
+        const targetEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+        if (!targetEl) return;
 
-      const size =
-        document.queryCommandValue("fontSize");
+        const pageEl = targetEl.closest('[contenteditable="true"][data-page-id]');
+        if (!pageEl) return;
 
-      if (size) {
-        const match =
-          FONT_SIZES.find(
-            (item) =>
-              item.command === size
-          );
-
-        if (match) {
-          setFontSize(match.label);
+        // 1. Font Size: check inline style first, then computed
+        const sizeSpan = targetEl.closest<HTMLElement>("span[style*='font-size']");
+        if (sizeSpan && sizeSpan.style.fontSize) {
+          const ptMatch = sizeSpan.style.fontSize.match(/(\d+(?:\.\d+)?)\s*pt/i);
+          if (ptMatch) {
+            setFontSize(ptMatch[1]);
+          } else {
+            const pxVal = parseFloat(sizeSpan.style.fontSize);
+            if (!isNaN(pxVal)) {
+              setFontSize(String(Math.round(pxVal * 0.75)));
+            }
+          }
+        } else {
+          const computed = window.getComputedStyle(targetEl).fontSize;
+          const pxVal = parseFloat(computed);
+          if (!isNaN(pxVal)) {
+            setFontSize(String(Math.round(pxVal * 0.75)));
+          }
         }
+
+        // 2. Font Family
+        const fontSpan = targetEl.closest<HTMLElement>("span[style*='font-family']");
+        const rawFont = fontSpan?.style.fontFamily || window.getComputedStyle(targetEl).fontFamily;
+        const firstFont = rawFont.split(",")[0].replace(/['"]/g, "").trim();
+        const matchedFont = FONTS.find((f) => f.toLowerCase() === firstFont.toLowerCase());
+        if (matchedFont) {
+          setFontName(matchedFont);
+        }
+      } catch {
+        // ignore
       }
     };
 
-    document.addEventListener(
-      "selectionchange",
-      updateToolbar
-    );
-
+    document.addEventListener("selectionchange", updateToolbar);
     return () => {
-      document.removeEventListener(
-        "selectionchange",
-        updateToolbar
-      );
+      document.removeEventListener("selectionchange", updateToolbar);
     };
   }, []);
 
   return (
-    <div
-      className="
-        flex
-        items-center
-        gap-2
-
-        text-slate-700
-
-        dark:text-slate-200
-      "
-    >
-
+    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 select-none">
       {/* =====================================================
-          Font
+          Font Family
       ====================================================== */}
-
       <RibbonSelect
         width={170}
         label={fontName}
         options={FONTS.map((font) => ({
           label: font,
-
           onSelect: () => {
             setFontName(font);
-
-            exec(
-              "fontName",
-              font
-            );
+            applyFontFamily(font);
           },
         }))}
       />
 
-
       {/* =====================================================
           Font Size
       ====================================================== */}
-
       <RibbonSelect
         width={70}
         label={fontSize}
-        options={FONT_SIZES.map(
-          (size) => ({
-            label: size.label,
-
-            onSelect: () => {
-              setFontSize(
-                size.label
-              );
-
-              exec(
-                "fontSize",
-                size.command
-              );
-            },
-          })
-        )}
+        options={FONT_SIZES.map((size) => ({
+          label: size.label,
+          onSelect: () => {
+            setFontSize(size.label);
+            applyFontSize(size.label);
+          },
+        }))}
       />
 
       <RibbonDivider />
@@ -226,11 +167,10 @@ export default function HomeTab() {
       {/* =====================================================
           Undo / Redo with MS Word-Style Action History Dropdown
       ====================================================== */}
-
-      {/* Undo Split Button & Dropdown */}
       <div className="relative inline-flex items-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 shadow-2xs">
         <button
           type="button"
+          onMouseDown={preventFocusLoss}
           onClick={() => undo()}
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
@@ -243,6 +183,7 @@ export default function HomeTab() {
 
         <button
           type="button"
+          onMouseDown={preventFocusLoss}
           onClick={(e) => {
             e.stopPropagation();
             if (canUndo) {
@@ -263,6 +204,7 @@ export default function HomeTab() {
         {isUndoDropdownOpen && (
           <div
             ref={undoDropdownRef}
+            onMouseDown={preventFocusLoss}
             className="absolute left-0 top-full z-50 mt-1 min-w-[170px] w-48 border border-slate-400/90 bg-white shadow-xl dark:border-slate-600 dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
           >
             <div
@@ -301,6 +243,7 @@ export default function HomeTab() {
             <div className="border-t border-slate-300 dark:border-slate-700">
               <button
                 type="button"
+                onMouseDown={preventFocusLoss}
                 onClick={() => {
                   const count = undoHoverIndex !== null ? undoHoverIndex + 1 : 1;
                   undoMultiple(count);
@@ -315,6 +258,7 @@ export default function HomeTab() {
 
               <button
                 type="button"
+                onMouseDown={preventFocusLoss}
                 onClick={() => {
                   setIsUndoDropdownOpen(false);
                   setUndoHoverIndex(null);
@@ -328,10 +272,10 @@ export default function HomeTab() {
         )}
       </div>
 
-      {/* Redo Split Button & Dropdown */}
       <div className="relative inline-flex items-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 shadow-2xs">
         <button
           type="button"
+          onMouseDown={preventFocusLoss}
           onClick={() => redo()}
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
@@ -344,6 +288,7 @@ export default function HomeTab() {
 
         <button
           type="button"
+          onMouseDown={preventFocusLoss}
           onClick={(e) => {
             e.stopPropagation();
             if (canRedo) {
@@ -364,6 +309,7 @@ export default function HomeTab() {
         {isRedoDropdownOpen && (
           <div
             ref={redoDropdownRef}
+            onMouseDown={preventFocusLoss}
             className="absolute left-0 top-full z-50 mt-1 min-w-[170px] w-48 border border-slate-400/90 bg-white shadow-xl dark:border-slate-600 dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
           >
             <div
@@ -402,6 +348,7 @@ export default function HomeTab() {
             <div className="border-t border-slate-300 dark:border-slate-700">
               <button
                 type="button"
+                onMouseDown={preventFocusLoss}
                 onClick={() => {
                   const count = redoHoverIndex !== null ? redoHoverIndex + 1 : 1;
                   redoMultiple(count);
@@ -416,6 +363,7 @@ export default function HomeTab() {
 
               <button
                 type="button"
+                onMouseDown={preventFocusLoss}
                 onClick={() => {
                   setIsRedoDropdownOpen(false);
                   setRedoHoverIndex(null);
@@ -428,7 +376,6 @@ export default function HomeTab() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

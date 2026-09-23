@@ -9,7 +9,7 @@
  * --------------------------------------------------------
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -105,7 +105,7 @@ export default function DocumentPage() {
       });
     }
 
-    return list;
+    return list.slice(0, 10);
   }, [model, savedDocuments]);
 
   const filteredDocs = useMemo(() => {
@@ -172,32 +172,153 @@ export default function DocumentPage() {
     );
   };
 
-  // Find & Replace State
+  // Find & Replace State with Yellow Highlighting
   const [findText, setFindText] = useState("");
   const [replaceText, setReplaceText] = useState("");
+  const matchIndexRef = useRef<number>(0);
+  const lastSearchRef = useRef<string>("");
+
+  const clearFindHighlights = () => {
+    const oldMarks = document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]');
+    oldMarks.forEach((mark) => {
+      const parent = mark.parentNode;
+      if (!parent) return;
+      while (mark.firstChild) {
+        parent.insertBefore(mark.firstChild, mark);
+      }
+      mark.remove();
+      parent.normalize();
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      clearFindHighlights();
+    };
+  }, []);
 
   const handleFind = () => {
-    if (!findText || !editorRef.current) return;
-    const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT);
-    let n: Node | null;
-    while ((n = walker.nextNode())) {
-      if (n.nodeValue && n.nodeValue.toLowerCase().includes(findText.toLowerCase())) {
-        const parent = n.parentElement;
-        parent?.scrollIntoView({ behavior: "smooth", block: "center" });
-        break;
-      }
+    const query = findText.trim();
+    if (!query) {
+      clearFindHighlights();
+      lastSearchRef.current = "";
+      return;
     }
+
+    // Identify all editable page containers in the workspace
+    const containers = Array.from(
+      document.querySelectorAll<HTMLElement>('[contenteditable="true"][data-page-id]')
+    );
+    if (containers.length === 0 && editorRef.current) {
+      containers.push(editorRef.current);
+    }
+
+    // Re-highlight in yellow when a new search string is entered or no marks exist
+    const existingMarks = document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]');
+    if (query !== lastSearchRef.current || existingMarks.length === 0) {
+      clearFindHighlights();
+      lastSearchRef.current = query;
+      matchIndexRef.current = 0;
+
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escaped, "gi");
+
+      containers.forEach((container) => {
+        const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+        const textNodes: Text[] = [];
+        let n: Node | null;
+        while ((n = walker.nextNode())) {
+          if (n.parentElement && !n.parentElement.closest('[data-find-highlight="true"]')) {
+            textNodes.push(n as Text);
+          }
+        }
+
+        textNodes.forEach((node) => {
+          const val = node.nodeValue;
+          if (!val) return;
+
+          regex.lastIndex = 0;
+          if (!regex.test(val)) return;
+          regex.lastIndex = 0;
+
+          const frag = document.createDocumentFragment();
+          let lastIndex = 0;
+          let match: RegExpExecArray | null;
+
+          while ((match = regex.exec(val)) !== null) {
+            const start = match.index;
+            const end = regex.lastIndex;
+
+            if (start > lastIndex) {
+              frag.appendChild(document.createTextNode(val.substring(lastIndex, start)));
+            }
+
+            // Create standard yellow highlight mark
+            const mark = document.createElement("mark");
+            mark.setAttribute("data-find-highlight", "true");
+            mark.style.backgroundColor = "yellow";
+            mark.style.color = "black";
+            mark.style.padding = "0 1px";
+            mark.style.borderRadius = "2px";
+            mark.textContent = val.substring(start, end);
+            frag.appendChild(mark);
+
+            lastIndex = end;
+          }
+
+          if (lastIndex < val.length) {
+            frag.appendChild(document.createTextNode(val.substring(lastIndex)));
+          }
+
+          node.parentNode?.replaceChild(frag, node);
+        });
+      });
+    }
+
+    // Query all yellow highlighted occurrences
+    const marks = Array.from(
+      document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]')
+    );
+
+    if (marks.length === 0) return;
+
+    // Reset all highlights to default yellow, emphasize active match
+    marks.forEach((m) => {
+      m.style.backgroundColor = "yellow";
+      m.style.outline = "none";
+    });
+
+    const activeIndex = matchIndexRef.current % marks.length;
+    const activeMark = marks[activeIndex];
+    activeMark.style.backgroundColor = "#facc15";
+    activeMark.style.outline = "2px solid #ca8a04";
+    activeMark.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    matchIndexRef.current = (activeIndex + 1) % marks.length;
   };
 
   const handleReplace = () => {
-    if (!findText || !editorRef.current) return;
-    const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT);
-    let n: Node | null;
-    while ((n = walker.nextNode())) {
-      if (n.nodeValue && n.nodeValue.includes(findText)) {
-        n.nodeValue = n.nodeValue.replace(findText, replaceText);
-        break;
+    if (!findText.trim()) return;
+
+    const marks = Array.from(
+      document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]')
+    );
+
+    if (marks.length > 0) {
+      const activeIdx = Math.max(0, (matchIndexRef.current - 1 + marks.length) % marks.length);
+      const targetMark = marks[activeIdx] || marks[0];
+      const pageContainer = targetMark.closest<HTMLElement>('[contenteditable="true"]');
+      const textNode = document.createTextNode(replaceText);
+      targetMark.parentNode?.replaceChild(textNode, targetMark);
+
+      if (pageContainer) {
+        pageContainer.normalize();
+        pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
       }
+
+      // Re-highlight remaining occurrences in yellow
+      lastSearchRef.current = "";
+      handleFind();
     }
   };
 
@@ -434,7 +555,19 @@ export default function DocumentPage() {
                   <input
                     type="text"
                     value={findText}
-                    onChange={(e) => setFindText(e.target.value)}
+                    onChange={(e) => {
+                      setFindText(e.target.value);
+                      if (!e.target.value.trim()) {
+                        clearFindHighlights();
+                        lastSearchRef.current = "";
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleFind();
+                      }
+                    }}
                     placeholder="Find text..."
                     className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
                   />

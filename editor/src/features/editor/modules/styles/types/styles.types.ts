@@ -119,16 +119,20 @@ export interface StyleToken {
   name: string;
 
   family: string;
+  font?: string;
 
   size: number;
 
   weight: number;
+
+  color?: "primary" | string;
 
   italic?: boolean;
 
   underline?: boolean;
 
   alignment?: "left" | "center" | "right" | "justify";
+  align?: "left" | "center" | "right" | "justify";
 
   lineHeight?: number;
 
@@ -150,6 +154,8 @@ export interface StyleToken {
 }
 
 export type StyleOverride = Partial<StyleToken>;
+
+export type StyleOverrides = Record<string, StyleOverride>;
 
 export interface StyleState {
   styles: StyleToken[];

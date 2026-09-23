@@ -166,6 +166,41 @@ export interface EditorContextType {
    */
   applyStyleToken: (token: StyleToken) => void;
 
+  /**
+   * Applies font size (in pt) to active selection or current cursor without losing selection.
+   */
+  applyFontSize: (size: string | number) => void;
+
+  /**
+   * Applies font family to active selection or current cursor.
+   */
+  applyFontFamily: (font: string) => void;
+
+  /**
+   * Executes a native formatting command (bold, italic, underline, align, etc.) preserving selection.
+   */
+  applyFormatCommand: (command: string, value?: string) => void;
+  exec: (command: string, value?: string) => void;
+  applyBulletStyle: (style?: any) => void;
+  applyNumberingStyle: (style?: any) => void;
+  applyMultilevelStyle: (style?: any) => void;
+  toggleMultilevelList: (type?: any) => void;
+
+  /**
+   * Formats paragraph block (p, h1, h2, h3, h4, blockquote) preserving selection.
+   */
+  applyBlockStyle: (tag: string) => void;
+
+  /**
+   * Restores editor focus and selection from the last known valid range within active page.
+   */
+  restoreEditorSelection: () => boolean;
+
+  /**
+   * Retrieves the current editor range or last saved range.
+   */
+  getEditorSelection: () => Range | null;
+
   zoom: number;
   setZoom: React.Dispatch<React.SetStateAction<number>>;
 
@@ -265,111 +300,399 @@ export function EditorProvider({
   const [selection, setSelection] =
     useState<Selection | null>(null);
 
-  const applyStyleToken = (
-    token: StyleToken,
-  ) => {
-    const editor = editorRef.current;
+  // Saved selection tracking for active editor contenteditable pages
+  const savedSelectionRef = useRef<{
+    range: Range;
+    pageId: string;
+    startContainer: Node;
+    startOffset: number;
+    endContainer: Node;
+    endOffset: number;
+  } | null>(null);
 
-    if (!editor) {
-      return;
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+
+      // Verify if selection originates inside an editor contenteditable page
+      const ancestor = range.commonAncestorContainer;
+      const el = ancestor.nodeType === Node.ELEMENT_NODE ? (ancestor as HTMLElement) : ancestor.parentElement;
+      const pageEl = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]');
+      if (!pageEl) {
+        // Selection is outside editor pages (e.g. in ribbon/toolbar/dialog) - retain previous saved selection
+        return;
+      }
+
+      const pageId = pageEl.getAttribute("data-page-id") || "";
+      savedSelectionRef.current = {
+        range: range.cloneRange(),
+        pageId,
+        startContainer: range.startContainer,
+        startOffset: range.startOffset,
+        endContainer: range.endContainer,
+        endOffset: range.endOffset,
+      };
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+    return () => document.removeEventListener("selectionchange", handleSelectionChange);
+  }, []);
+
+  const restoreEditorSelection = useCallback((): boolean => {
+    const sel = window.getSelection();
+    if (!sel) return false;
+
+    // 1. If active selection is already inside an editor page, keep it!
+    if (sel.rangeCount > 0) {
+      const r = sel.getRangeAt(0);
+      const anc = r.commonAncestorContainer;
+      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+      const pageEl = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]');
+      if (pageEl) {
+        if (document.activeElement !== pageEl && !pageEl.contains(document.activeElement)) {
+          pageEl.focus({ preventScroll: true });
+        }
+        return true;
+      }
     }
 
-    editor.focus();
-
-    const selection =
-      window.getSelection();
-
-    if (!selection || selection.rangeCount === 0) {
-      return;
+    // 2. Otherwise restore from savedSelectionRef
+    const saved = savedSelectionRef.current;
+    if (!saved) {
+      if (editorRef.current) {
+        editorRef.current.focus({ preventScroll: true });
+        return true;
+      }
+      return false;
     }
 
-    const range =
-      selection.getRangeAt(0);
+    const targetPage =
+      document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${saved.pageId}"]`) ||
+      editorRef.current;
 
-    if (!editor.contains(range.commonAncestorContainer)) {
-      return;
-    }
+    if (!targetPage) return false;
 
-    const span =
-      document.createElement("span");
-
-    span.dataset.style = token.name;
-
-    span.style.fontFamily =
-      `${token.font}, Calibri, sans-serif`;
-
-    span.style.fontSize =
-      `${token.size}pt`;
-
-    span.style.fontWeight =
-      String(token.weight);
-
-    if (token.italic) {
-      span.style.fontStyle = "italic";
-    }
-
-    if (token.underline) {
-      span.style.textDecoration =
-        "underline";
-    }
-
-    if (token.color === "primary") {
-      span.style.color =
-        "hsl(var(--primary))";
-    } else if (token.color) {
-      span.style.color = token.color;
-    }
-
-    if (token.align) {
-      span.style.textAlign =
-        token.align;
-    }
-
-    if (token.lineHeight) {
-      span.style.lineHeight =
-        String(token.lineHeight);
-    }
-
-    if (token.leftIndent) {
-      span.style.paddingLeft =
-        `${token.leftIndent}pt`;
-    }
-
-    if (token.rightIndent) {
-      span.style.paddingRight =
-        `${token.rightIndent}pt`;
-    }
-
-    if (token.spaceBefore) {
-      span.style.marginTop =
-        `${token.spaceBefore}pt`;
-    }
-
-    if (token.spaceAfter) {
-      span.style.marginBottom =
-        `${token.spaceAfter}pt`;
-    }
+    targetPage.focus({ preventScroll: true });
 
     try {
-      range.surroundContents(span);
+      if (targetPage.contains(saved.startContainer) && targetPage.contains(saved.endContainer)) {
+        const newRange = document.createRange();
+        newRange.setStart(saved.startContainer, saved.startOffset);
+        newRange.setEnd(saved.endContainer, saved.endOffset);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        return true;
+      } else {
+        sel.removeAllRanges();
+        sel.addRange(saved.range);
+        return true;
+      }
     } catch {
-      const fragment =
-        range.extractContents();
+      return false;
+    }
+  }, [editorRef]);
 
-      span.appendChild(fragment);
+  const getEditorSelection = useCallback((): Range | null => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const r = sel.getRangeAt(0);
+      const anc = r.commonAncestorContainer;
+      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+      if (el?.closest('[contenteditable="true"][data-page-id]')) {
+        return r;
+      }
+    }
+    return savedSelectionRef.current?.range || null;
+  }, []);
 
+  const applyFontSize = useCallback((size: string | number) => {
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    const anc = range.commonAncestorContainer;
+    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
+    if (!pageEl) return;
+
+    const sizePt = `${size}pt`;
+
+    // 1. Collapsed selection (caret only, no text selected)
+    if (range.collapsed) {
+      const span = document.createElement("span");
+      span.style.fontSize = sizePt;
+      span.innerHTML = "&#8203;"; // Zero-width space placeholder
       range.insertNode(span);
+
+      const newRange = document.createRange();
+      newRange.setStart(span.firstChild || span, 1);
+      newRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+
+      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+      return;
     }
 
-    selection.removeAllRanges();
+    // 2. Text is selected:
+    // Sentinel fontSize "7" accurately wraps all selected text nodes across inline tags and blocks
+    document.execCommand("styleWithCSS", false, "false");
+    document.execCommand("fontSize", false, "7");
 
-    const newRange =
-      document.createRange();
+    const fontElements = Array.from(
+      pageEl.querySelectorAll<HTMLElement>('font[size="7"], span[style*="xxx-large"]')
+    );
+    const createdSpans: HTMLElement[] = [];
 
-    newRange.selectNodeContents(span);
+    if (fontElements.length > 0) {
+      fontElements.forEach((el) => {
+        if (el.tagName === "FONT") {
+          const span = document.createElement("span");
+          span.style.fontSize = sizePt;
+          while (el.firstChild) {
+            span.appendChild(el.firstChild);
+          }
+          span.querySelectorAll<HTMLElement>("span[style*='font-size']").forEach((inner) => {
+            inner.style.fontSize = "";
+          });
+          el.parentNode?.replaceChild(span, el);
+          createdSpans.push(span);
+        } else {
+          el.style.fontSize = sizePt;
+          createdSpans.push(el);
+        }
+      });
+    } else {
+      const existingSpan = parentEl?.closest<HTMLElement>("span[style*='font-size']");
+      if (existingSpan && existingSpan.textContent?.trim() === sel.toString().trim()) {
+        existingSpan.style.fontSize = sizePt;
+        createdSpans.push(existingSpan);
+      } else {
+        try {
+          const span = document.createElement("span");
+          span.style.fontSize = sizePt;
+          range.surroundContents(span);
+          createdSpans.push(span);
+        } catch {
+          // Cross-block selection fallback
+        }
+      }
+    }
 
-    selection.addRange(newRange);
-  };
+    // Reselect formatted contents to keep selection highlighted and active
+    if (createdSpans.length > 0) {
+      const newRange = document.createRange();
+      const first = createdSpans[0];
+      const last = createdSpans[createdSpans.length - 1];
+      newRange.setStartBefore(first.firstChild || first);
+      newRange.setEndAfter(last.lastChild || last);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+
+      const pageId = pageEl.getAttribute("data-page-id") || "";
+      savedSelectionRef.current = {
+        range: newRange.cloneRange(),
+        pageId,
+        startContainer: newRange.startContainer,
+        startOffset: newRange.startOffset,
+        endContainer: newRange.endContainer,
+        endOffset: newRange.endOffset,
+      };
+    }
+
+    pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+  }, [restoreEditorSelection, editorRef]);
+
+  const applyFontFamily = useCallback((font: string) => {
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    const anc = range.commonAncestorContainer;
+    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
+    if (!pageEl) return;
+
+    const fontCss = `${font}, Calibri, sans-serif`;
+
+    if (range.collapsed) {
+      const span = document.createElement("span");
+      span.style.fontFamily = fontCss;
+      span.innerHTML = "&#8203;";
+      range.insertNode(span);
+
+      const newRange = document.createRange();
+      newRange.setStart(span.firstChild || span, 1);
+      newRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+
+      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+      return;
+    }
+
+    document.execCommand("fontName", false, font);
+
+    const fontElements = Array.from(
+      pageEl.querySelectorAll<HTMLElement>(`font[face="${font}"], font[face*="${font}"]`)
+    );
+    const createdSpans: HTMLElement[] = [];
+
+    if (fontElements.length > 0) {
+      fontElements.forEach((el) => {
+        const span = document.createElement("span");
+        span.style.fontFamily = fontCss;
+        while (el.firstChild) {
+          span.appendChild(el.firstChild);
+        }
+        el.parentNode?.replaceChild(span, el);
+        createdSpans.push(span);
+      });
+    }
+
+    if (createdSpans.length > 0) {
+      const newRange = document.createRange();
+      const first = createdSpans[0];
+      const last = createdSpans[createdSpans.length - 1];
+      newRange.setStartBefore(first.firstChild || first);
+      newRange.setEndAfter(last.lastChild || last);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+
+      const pageId = pageEl.getAttribute("data-page-id") || "";
+      savedSelectionRef.current = {
+        range: newRange.cloneRange(),
+        pageId,
+        startContainer: newRange.startContainer,
+        startOffset: newRange.startOffset,
+        endContainer: newRange.endContainer,
+        endOffset: newRange.endOffset,
+      };
+    }
+
+    pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+  }, [restoreEditorSelection, editorRef]);
+
+  const applyFormatCommand = useCallback((command: string, value?: string) => {
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    const anc = range.commonAncestorContainer;
+    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
+
+    document.execCommand(command, false, value);
+
+    if (pageEl) {
+      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+      const currentSel = window.getSelection();
+      if (currentSel && currentSel.rangeCount > 0) {
+        const r = currentSel.getRangeAt(0);
+        const pageId = pageEl.getAttribute("data-page-id") || "";
+        savedSelectionRef.current = {
+          range: r.cloneRange(),
+          pageId,
+          startContainer: r.startContainer,
+          startOffset: r.startOffset,
+          endContainer: r.endContainer,
+          endOffset: r.endOffset,
+        };
+      }
+    }
+  }, [restoreEditorSelection, editorRef]);
+
+  const applyBlockStyle = useCallback((tag: string) => {
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    const anc = range.commonAncestorContainer;
+    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
+
+    const blockTag = tag.toLowerCase() === "p" ? "<p>" : `<${tag.toUpperCase()}>`;
+    document.execCommand("formatBlock", false, blockTag);
+
+    if (pageEl) {
+      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+      const currentSel = window.getSelection();
+      if (currentSel && currentSel.rangeCount > 0) {
+        const r = currentSel.getRangeAt(0);
+        const pageId = pageEl.getAttribute("data-page-id") || "";
+        savedSelectionRef.current = {
+          range: r.cloneRange(),
+          pageId,
+          startContainer: r.startContainer,
+          startOffset: r.startOffset,
+          endContainer: r.endContainer,
+          endOffset: r.endOffset,
+        };
+      }
+    }
+  }, [restoreEditorSelection, editorRef]);
+
+  const applyStyleToken = useCallback((token: StyleToken) => {
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    const anc = range.commonAncestorContainer;
+    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
+    if (!pageEl) return;
+
+    const lowerName = token.name.toLowerCase();
+    if (lowerName.includes("heading 1")) {
+      document.execCommand("formatBlock", false, "<h1>");
+    } else if (lowerName.includes("heading 2")) {
+      document.execCommand("formatBlock", false, "<h2>");
+    } else if (lowerName.includes("heading 3")) {
+      document.execCommand("formatBlock", false, "<h3>");
+    } else if (lowerName.includes("heading 4")) {
+      document.execCommand("formatBlock", false, "<h4>");
+    } else if (lowerName.includes("quote")) {
+      document.execCommand("formatBlock", false, "<blockquote>");
+    }
+
+    if (token.size) {
+      applyFontSize(token.size);
+    }
+    const familyOrFont = token.family || token.font;
+    if (familyOrFont) {
+      applyFontFamily(familyOrFont);
+    }
+    if (token.weight && token.weight >= 600) {
+      document.execCommand("bold", false);
+    }
+    if (token.italic) {
+      document.execCommand("italic", false);
+    }
+    if (token.underline) {
+      document.execCommand("underline", false);
+    }
+    if (token.color && token.color !== "primary") {
+      document.execCommand("foreColor", false, token.color);
+    } else if (token.color === "primary") {
+      document.execCommand("foreColor", false, "#0078d4");
+    }
+    const align = token.alignment || token.align;
+    if (align) {
+      if (align === "center") document.execCommand("justifyCenter", false);
+      else if (align === "right") document.execCommand("justifyRight", false);
+      else if (align === "justify") document.execCommand("justifyFull", false);
+      else document.execCommand("justifyLeft", false);
+    }
+
+    pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+  }, [restoreEditorSelection, applyFontSize, applyFontFamily, editorRef]);
 
   const focusEditor = () => {
     editorRef.current?.focus();
@@ -618,6 +941,12 @@ export function EditorProvider({
     editorRef,
 
     applyStyleToken,
+    applyFontSize,
+    applyFontFamily,
+    applyFormatCommand,
+    applyBlockStyle,
+    restoreEditorSelection,
+    getEditorSelection,
 
     zoom,
     setZoom,
@@ -636,6 +965,12 @@ export function EditorProvider({
 
     pendingPermissionFile,
     setPendingPermissionFile,
+
+    exec: applyFormatCommand,
+    applyBulletStyle: (style?: any) => applyFormatCommand("insertUnorderedList", style),
+    applyNumberingStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
+    applyMultilevelStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
+    toggleMultilevelList: (type?: any) => applyFormatCommand("insertOrderedList", type),
 
     undo,
     redo,

@@ -23,8 +23,8 @@ export function buildHistorySignatureTableHTML(): string {
   const captionHtml = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">Document Revision History &amp; Signatures</p>`;
   const tableStyle = `border-collapse: collapse; margin: 8px 0; width: 100%; table-layout: fixed; margin-left: 0; margin-right: auto;`;
   const baseCellBorder = `border: 1px solid #8a8886;`;
-  const headerCSS = `${baseCellBorder} font-size: 10pt; font-weight: 700; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; background-color: #f3f2f1;`;
-  const bodyCSS = `border: 1px solid #a19f9d; font-size: 10pt; font-weight: 400; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif;`;
+  const headerCSS = `${baseCellBorder} font-size: 10pt; font-weight: 700; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; background-color: #f3f2f1; box-sizing: border-box; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere;`;
+  const bodyCSS = `border: 1px solid #a19f9d; font-size: 10pt; font-weight: 400; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; box-sizing: border-box; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere;`;
 
   const headers = [
     { text: "Version", width: "12%" },
