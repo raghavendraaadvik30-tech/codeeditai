@@ -668,7 +668,7 @@ function DocumentPage({
   viewMode,
 }: DocumentPageProps) {
   const localEditorRef = useRef<HTMLDivElement | null>(null);
-  const lastHtmlRef = useRef<string>(html);
+  const lastHtmlRef = useRef<string | null>(null);
   const consecutiveEnterRef = useRef<boolean>(false);
   const lastEnterTimeRef = useRef<number>(0);
 
@@ -855,6 +855,13 @@ function DocumentPage({
     if (!element) return;
 
     const normalize = (s: string) => s.replace(/<br\s*\/?>/gi, "<br>").replace(/\s+/g, " ").trim();
+
+    // If element in DOM is empty or not yet initialized, populate with incoming html
+    if (!element.hasChildNodes() || element.innerHTML.trim() === "" || lastHtmlRef.current === null) {
+      element.innerHTML = html || "<p><br></p>";
+      lastHtmlRef.current = html;
+      return;
+    }
 
     // If html hasn't changed from our own last saved html, do not replace innerHTML
     if (normalize(lastHtmlRef.current) === normalize(html)) {

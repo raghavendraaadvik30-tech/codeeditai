@@ -38,6 +38,7 @@ import {
   CheckCircle2,
   Upload,
   ShieldAlert,
+  AlertTriangle,
 } from "lucide-react";
 
 import { parseUploadedFile } from "../../utils/fileImportUtil";
@@ -68,7 +69,8 @@ export default function HeaderActions() {
     save,
     saveAs,
     setActivePage,
-    importDocumentPages,
+    insertUploadedDocument,
+    savedDocuments,
   } = useDocumentModel();
 
   const {
@@ -87,6 +89,14 @@ export default function HeaderActions() {
   const [saveAsName, setSaveAsName] =
     useState(model.title);
 
+  // Document Limit Alert for Upload (Max 10 Documents)
+  const [showLimitAlert, setShowLimitAlert] = useState(false);
+  const [pendingUpload, setPendingUpload] = useState<{
+    title: string;
+    pagesToImport: string[];
+    fileName: string;
+  } | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleUploadClick = () => {
@@ -94,6 +104,13 @@ export default function HeaderActions() {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
     }
+  };
+
+  const executeUpload = (title: string, pagesToImport: string[]) => {
+    insertUploadedDocument(title, pagesToImport);
+    setIsEditable(true);
+    setPendingPermissionFile(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,18 +123,41 @@ export default function HeaderActions() {
       const pagesToImport =
         pages && pages.length > 0 ? pages : [html || "<p><br/></p>"];
 
-      // Check document pages and insert all of them directly into the document
-      importDocumentPages(title, pagesToImport);
+      const docTitle = title || file.name.replace(/\.[^/.]+$/, "");
 
-      // Immediately place in Protected View and ask permission to edit
-      setIsEditable(false);
-      setPendingPermissionFile({ fileName: file.name });
+      // Check current document count across savedDocuments and active model
+      const seen = new Set<string>();
+      savedDocuments.forEach((d) => seen.add(d.id));
+      if (!seen.has(model.id)) seen.add(model.id);
+      const totalCount = seen.size;
 
-      // Scroll smoothly to the top of page 1
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (totalCount >= 10) {
+        setPendingUpload({
+          title: docTitle,
+          pagesToImport,
+          fileName: file.name,
+        });
+        setShowLimitAlert(true);
+        return;
+      }
+
+      executeUpload(docTitle, pagesToImport);
     } catch (err) {
       console.error("Error processing file upload:", err);
     }
+  };
+
+  const handleConfirmUpload = () => {
+    setShowLimitAlert(false);
+    if (!pendingUpload) return;
+    const { title, pagesToImport } = pendingUpload;
+    setPendingUpload(null);
+    executeUpload(title, pagesToImport);
+  };
+
+  const handleCancelUpload = () => {
+    setShowLimitAlert(false);
+    setPendingUpload(null);
   };
 
   const handleEnableEditing = () => {
@@ -530,6 +570,60 @@ export default function HeaderActions() {
       ================================= */}
 
       <ThemeToggle />
+
+      {/* ============================================================
+          DOCUMENT LIMIT REACHED MODAL (MAX 10 DOCUMENTS ON UPLOAD)
+      ============================================================ */}
+      {showLimitAlert && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="upload-limit-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-amber-200 bg-white p-5 shadow-2xl dark:border-amber-900/60 dark:bg-[#0c1929]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 id="upload-limit-dialog-title" className="text-sm font-bold text-slate-900 dark:text-white">
+                  Document Limit Reached
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Maximum 10 documents allowed
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-4 rounded-xl bg-amber-50/80 p-3.5 text-xs leading-relaxed text-amber-950 dark:bg-amber-950/30 dark:text-amber-200 border border-amber-200/80 dark:border-amber-900/40">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <span>
+                  You have reached the maximum limit of 10 documents. To insert a new document, the oldest document will be removed. If you want to keep any existing document, please save it in the File Manager before continuing.
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleCancelUpload}
+                className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors shadow-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmUpload}
+                className="flex items-center gap-1.5 rounded-xl bg-[#0078d4] px-4 py-2 text-xs font-semibold text-white hover:bg-[#005a9e] transition-colors shadow-sm"
+              >
+                <span>Continue</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
