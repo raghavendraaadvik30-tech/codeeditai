@@ -28,7 +28,7 @@ import {
   Bookmark,
   Sigma,
   Files,
-  ShieldCheck,
+  GitCompare,
   LayoutTemplate,
   Settings,
 } from "lucide-react";
@@ -84,7 +84,7 @@ const SIDEBAR_ITEMS = [
   {
     id: "trackChanges",
     label: "Track Changes",
-    icon: ShieldCheck,
+    icon: GitCompare,
   },
   {
     id: "templates",

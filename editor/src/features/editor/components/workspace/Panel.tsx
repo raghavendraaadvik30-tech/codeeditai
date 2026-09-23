@@ -343,6 +343,7 @@ import { DocumentPage } from "../../modules/document";
 import { TablesPage } from "../../modules/tables";
 import { SettingsPage } from "../../modules/settings";
 import { LinksPage } from "../../modules/links";
+import { TrackChangesPage } from "../../modules/trackChanges";
 
 export interface PanelProps {
   moduleId: ModuleId;
@@ -355,6 +356,7 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
   settings: SettingsPage,
   writing: WritingPanel,
   links: LinksPage,
+  trackChanges: TrackChangesPage,
 };
 
 export default function Panel({ moduleId }: PanelProps) {
@@ -367,7 +369,8 @@ export default function Panel({ moduleId }: PanelProps) {
     moduleId === "styles" ||
     moduleId === "tables" ||
     moduleId === "settings" ||
-    moduleId === "links"
+    moduleId === "links" ||
+    moduleId === "trackChanges"
   ) {
     return ActiveComponent ? (
       <ActiveComponent />

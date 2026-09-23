@@ -294,4 +294,92 @@ body,
   border: 1px solid #ffffff;
   box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.25);
   cursor: pointer;
-}
+}
+
+/* ==========================================================
+   TRACK CHANGES & REVISION MARKUP STYLES
+========================================================== */
+ins[data-tc],
+[contenteditable][data-show-markup="true"] ins[data-tc] {
+  color: #2e7d32 !important;
+  text-decoration: underline !important;
+  background-color: rgba(46, 125, 50, 0.08) !important;
+  padding: 0 1px;
+}
+
+.dark ins[data-tc],
+.dark [contenteditable][data-show-markup="true"] ins[data-tc] {
+  color: #4ade80 !important;
+  background-color: rgba(74, 222, 128, 0.12) !important;
+}
+
+del[data-tc],
+[contenteditable][data-show-markup="true"] del[data-tc] {
+  color: #c62828 !important;
+  text-decoration: line-through !important;
+  background-color: rgba(198, 40, 40, 0.08) !important;
+  padding: 0 1px;
+  display: inline !important;
+}
+
+.dark del[data-tc],
+.dark [contenteditable][data-show-markup="true"] del[data-tc] {
+  color: #f87171 !important;
+  background-color: rgba(248, 113, 113, 0.12) !important;
+}
+
+ins[data-tc*="edit"],
+del[data-tc*="edit"],
+[contenteditable][data-show-markup="true"] ins[data-tc*="edit"],
+[contenteditable][data-show-markup="true"] del[data-tc*="edit"] {
+  background-color: rgba(255, 235, 59, 0.25) !important;
+}
+
+.dark ins[data-tc*="edit"],
+.dark del[data-tc*="edit"],
+.dark [contenteditable][data-show-markup="true"] ins[data-tc*="edit"],
+.dark [contenteditable][data-show-markup="true"] del[data-tc*="edit"] {
+  background-color: rgba(250, 204, 21, 0.18) !important;
+}
+
+/* Hide markup mode */
+[contenteditable][data-show-markup="false"] del[data-tc] {
+  display: none !important;
+}
+
+[contenteditable][data-show-markup="false"] ins[data-tc] {
+  color: inherit !important;
+  text-decoration: none !important;
+  background-color: transparent !important;
+  padding: 0;
+}
+
+/* Diff formatting */
+.diff-added {
+  color: #2e7d32;
+  text-decoration: underline;
+  background-color: rgba(46, 125, 50, 0.08);
+}
+
+.diff-removed {
+  color: #c62828;
+  text-decoration: line-through;
+  background-color: rgba(198, 40, 40, 0.08);
+}
+
+/* Thin custom scrollbar */
+.thin-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 4px;
+}
+.thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
