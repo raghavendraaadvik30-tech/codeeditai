@@ -7,9 +7,11 @@ import {
   FileCode,
   Minus,
   Plus,
+  GitCompare,
 } from "lucide-react";
 import { useEditor } from "../../context/EditorContext";
 import { useDocumentModel } from "../../store/documentModel";
+import { useTrackChanges } from "../../modules/trackChanges";
 
 export default function EditorStatusBar() {
   const {
@@ -21,6 +23,7 @@ export default function EditorStatusBar() {
     setLeftPanelOpen,
   } = useEditor();
 
+  const { trackChanges, pendingChanges } = useTrackChanges();
   const { model, activePage } = useDocumentModel();
 
   // Calculate current page number and total pages
@@ -81,7 +84,7 @@ export default function EditorStatusBar() {
         print:hidden
       "
     >
-      {/* LEFT: Document stats (Page X of Y, Word count) */}
+      {/* LEFT: Document stats (Page X of Y, Word count, Track Changes) */}
       <div className="flex items-center gap-3">
         <span
           className="hover:text-slate-900 dark:hover:text-slate-200 cursor-default"
@@ -96,6 +99,31 @@ export default function EditorStatusBar() {
         >
           {wordCount} {wordCount === 1 ? "word" : "words"}
         </span>
+        <span className="h-3 w-px bg-slate-300 dark:bg-slate-700" />
+        <button
+          type="button"
+          onClick={() => {
+            setActivePanel("trackChanges");
+            setLeftPanelOpen(true);
+          }}
+          className={`
+            flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors
+            ${
+              trackChanges
+                ? "bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/60 dark:text-blue-300"
+                : "text-slate-500 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:bg-slate-800"
+            }
+          `}
+          title="Click to open Track Changes panel"
+        >
+          <GitCompare className="h-3 w-3" />
+          <span>Track Changes: {trackChanges ? "ON" : "OFF"}</span>
+          {pendingChanges > 0 && (
+            <span className="ml-0.5 rounded-full bg-amber-500 text-white px-1 text-[9px] font-bold">
+              {pendingChanges}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* RIGHT: Word-style View Modes & Zoom Controls */}

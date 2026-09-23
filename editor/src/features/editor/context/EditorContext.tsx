@@ -243,9 +243,9 @@ export function EditorProvider({
 
   const [activePanel, setActivePanelState] = useState<string>(() => {
     try {
-      return localStorage.getItem("editor_active_panel") || "document";
+      return localStorage.getItem("editor_active_panel") || "trackChanges";
     } catch {
-      return "document";
+      return "trackChanges";
     }
   });
 

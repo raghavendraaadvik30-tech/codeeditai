@@ -84,6 +84,8 @@ export default function EditorLayout() {
               border-r
               border-slate-200
               bg-white
+              dark:border-slate-800
+              dark:bg-[#0d1117]
             "
           >
             <LeftOverlay />
@@ -100,6 +102,7 @@ export default function EditorLayout() {
             min-h-0
             overflow-hidden
             bg-[#EEF4FA]
+            dark:bg-[#090d13]
           "
         >
           <Workspace />
@@ -117,6 +120,8 @@ export default function EditorLayout() {
               border-l
               border-slate-200
               bg-white
+              dark:border-slate-800
+              dark:bg-[#0d1117]
             "
           >
             <AIPanel />

@@ -28,6 +28,7 @@ import {
   TableContextMenu,
   type TableContextMenuState,
 } from "../../modules/tables/components";
+import { useTrackChanges } from "../../modules/trackChanges";
 import DocumentRuler from "./DocumentRuler";
 
 export default function Workspace() {
@@ -673,6 +674,13 @@ function DocumentPage({
   const lastEnterTimeRef = useRef<number>(0);
 
   const { undo, redo, recordSnapshot, initHistory } = useEditor();
+  const {
+    showMarkup,
+    handleBeforeInput,
+    handleKeyDown: handleTcKeyDown,
+    handleInput: handleTcInput,
+    handleClick: handleTcClick,
+  } = useTrackChanges();
 
   useEffect(() => {
     initHistory(pageId, html || "<p><br></p>");
@@ -882,6 +890,41 @@ function DocumentPage({
       restoreSelection(element, savedSel);
     }
   }, [html]);
+
+  // Native DOM event listeners for Track Changes engine:
+  // Native beforeinput interception ensures synchronous cancellation before browser DOM mutation
+  useEffect(() => {
+    const el = localEditorRef.current;
+    if (!el) return;
+
+    const onNativeBeforeInput = (e: Event) => {
+      handleBeforeInput(e as InputEvent, pageId);
+    };
+
+    const onNativeKeyDown = (e: KeyboardEvent) => {
+      handleTcKeyDown(e, pageId);
+    };
+
+    const onNativeInput = (e: Event) => {
+      handleTcInput(e, pageId);
+    };
+
+    const onNativeClick = (e: MouseEvent) => {
+      handleTcClick(e, pageId);
+    };
+
+    el.addEventListener("beforeinput", onNativeBeforeInput);
+    el.addEventListener("keydown", onNativeKeyDown);
+    el.addEventListener("input", onNativeInput);
+    el.addEventListener("click", onNativeClick);
+
+    return () => {
+      el.removeEventListener("beforeinput", onNativeBeforeInput);
+      el.removeEventListener("keydown", onNativeKeyDown);
+      el.removeEventListener("input", onNativeInput);
+      el.removeEventListener("click", onNativeClick);
+    };
+  }, [pageId, handleBeforeInput, handleTcKeyDown, handleTcInput, handleTcClick]);
 
   // Sync editorRef with active page
   useEffect(() => {
@@ -1878,6 +1921,7 @@ function DocumentPage({
         }}
         data-page-id={pageId}
         data-editor-page={pageId}
+        data-show-markup={showMarkup ? "true" : "false"}
         contentEditable={editable && !isHeaderFooterActive}
         suppressContentEditableWarning
         onFocus={handleFocus}

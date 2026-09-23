@@ -21,17 +21,20 @@ import { EditorProvider } from "../context/EditorContext";
 import { DocumentModelProvider } from "../store/documentModel";
 import { TableProvider } from "../modules/tables/context";
 import { HeaderFooterProvider } from "../modules/document/context/HeaderFooterContext";
+import { TrackChangesProvider } from "../modules/trackChanges/context";
 import EditorLayout from "../layouts/EditorLayout";
 
 export default function EditorPage() {
   return (
     <DocumentModelProvider>
       <EditorProvider>
-        <HeaderFooterProvider>
-          <TableProvider>
-            <EditorLayout />
-          </TableProvider>
-        </HeaderFooterProvider>
+        <TrackChangesProvider>
+          <HeaderFooterProvider>
+            <TableProvider>
+              <EditorLayout />
+            </TableProvider>
+          </HeaderFooterProvider>
+        </TrackChangesProvider>
       </EditorProvider>
     </DocumentModelProvider>
   );
