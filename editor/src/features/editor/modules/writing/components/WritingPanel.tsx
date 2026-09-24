@@ -33,28 +33,28 @@ export default function WritingPanel() {
   } = useWriting();
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      {/* Header */}
-      <div className="border-b border-gray-200 px-4 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Writing
-        </h2>
+    <div className="flex h-full min-h-0 flex-col bg-white">
 
-        <p className="mt-1 text-sm text-gray-500">
-          Casing, emphasis & paragraph control
-        </p>
-      </div>
-
-      {/* Search */}
-      <div className="px-4 py-3">
+      {/* SEARCH */}
+      <div className="shrink-0 px-4 pb-3 pt-4">
         <WritingSearch
           value={searchQuery}
           onChange={setSearchQuery}
         />
       </div>
 
-      {/* Tools */}
-      <div className="flex-1 overflow-y-auto px-4 pb-6">
+      {/* TOOLS */}
+      <div
+        className="
+          min-h-0
+          flex-1
+          overflow-y-auto
+          px-4
+          pb-20
+          scrollbar-thin
+          scrollbar-thumb-slate-300
+        "
+      >
         <CaseSection
           actions={caseActions}
           onApply={applyCase}
@@ -88,12 +88,22 @@ export default function WritingPanel() {
         />
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-gray-200 px-4 py-3">
-        <p className="text-xs text-gray-500">
+      {/* FOOTER */}
+      <div
+        className="
+          shrink-0
+          border-t
+          border-slate-200
+          bg-white
+          px-4
+          py-2.5
+        "
+      >
+        <p className="text-xs text-slate-500">
           Tip: Select text first, then choose a writing tool.
         </p>
       </div>
+
     </div>
   );
 }

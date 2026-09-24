@@ -46,7 +46,7 @@ import { documentService } from "../../services/documentService";
 import { printService } from "../../services/printService";
 
 import { Button } from "@/shared/components/ui/button";
-import ThemeToggle from "@/shared/components/theme/themeToggle";
+
 
 import {
   Dialog,
@@ -285,10 +285,10 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+          h-9
+          gap-2
+          px-3
+          text-sm
 
           text-slate-600
           hover:bg-slate-100
@@ -448,10 +448,10 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+          h-9
+          gap-2
+          px-3
+          text-sm
 
           text-slate-600
           hover:bg-slate-100
@@ -477,11 +477,11 @@ export default function HeaderActions() {
       <Button
         variant="ghost"
         size="sm"
-        className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+         className="
+          h-9
+          gap-2
+          px-3
+          text-sm
 
           text-slate-600
           hover:bg-slate-100
@@ -516,14 +516,16 @@ export default function HeaderActions() {
       <Button
         variant="ghost"
         size="sm"
-        className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+         className="
+          h-9
+          gap-2
+          px-3
+          text-sm
+
           text-slate-600
           hover:bg-slate-100
           hover:text-slate-900
+
           dark:text-slate-300
           dark:hover:bg-slate-800
           dark:hover:text-white
@@ -576,7 +578,7 @@ export default function HeaderActions() {
           THEME TOGGLE
       ================================= */}
 
-      <ThemeToggle />
+    {/* <ThemeToggle /> */}
 
       {/* ============================================================
           DOCUMENT LIMIT REACHED MODAL (MAX 10 DOCUMENTS ON UPLOAD)
