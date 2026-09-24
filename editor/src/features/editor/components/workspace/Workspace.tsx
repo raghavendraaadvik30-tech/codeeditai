@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useEditor, getCaretCharacterOffsetWithin, type ViewMode } from "../../context/EditorContext";
 import { useDocumentModel, type PageModel, type SectionModel, type PageBorderConfig } from "../../store/documentModel";
-import { useHeaderFooter } from "../../document/context/HeaderFooterContext";
+import { useHeaderFooter } from "../../modules/document/context/HeaderFooterContext";
 import {
   TableControlsOverlay,
   TableFloatingFormatToolbar,

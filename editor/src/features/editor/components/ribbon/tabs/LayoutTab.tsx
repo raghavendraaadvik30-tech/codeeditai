@@ -22,7 +22,7 @@ import { useDocumentModel, type SectionModel, type PageBorderConfig } from "../.
 import {
   HeaderGallery,
   FooterGallery,
-} from "@/features/editor/document/components/HeaderFooterGallery";
+} from "@/features/editor/modules/document/components/HeaderFooterGallery";
 
 
 import {

@@ -338,7 +338,7 @@ import { Search } from "lucide-react";
 
 import type { ModuleId } from "../../data/workspaceModules";
 import { StylesPage } from "../../styles";
-import { DocumentPage } from "../../document";
+import { DocumentPage } from "../../modules/document";
 import { TablesPage } from "../../tables";
 import { SettingsPage } from "../../settings";
 import { FiguresPage } from "../../modules/figures";
