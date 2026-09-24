@@ -36,7 +36,7 @@ interface DocListItem {
 }
 
 export default function DocumentPage() {
-  const { insertHTML, editorRef } = useEditor();
+  const { editorRef, insertPageBreak, insertLineBreak, insertColumnBreak } = useEditor();
   const {
     model,
     savedDocuments,
@@ -167,23 +167,6 @@ export default function DocumentPage() {
   const handleDeleteDoc = (e: React.MouseEvent, doc: DocListItem) => {
     e.stopPropagation();
     setDocToDelete(doc);
-  };
-
-  // Breaks Actions
-  const insertColumnBreak = () => {
-    insertHTML?.(
-      `<div class="column-break" contenteditable="false" data-cb="1" style="break-before:column;page-break-before:column;border-top:1px dotted #888;margin:24px 0;text-align:center;color:#888;font-size:10pt">- Column Break -</div><p><br/></p>`
-    );
-  };
-
-  const insertLineBreak = () => {
-    insertHTML?.(`<br/>`);
-  };
-
-  const insertPageBreak = () => {
-    insertHTML?.(
-      `<div class="page-break" contenteditable="false" style="break-before:page;page-break-before:always;border-top:1px dashed #94a3b8;margin:24px 0;text-align:center;color:#94a3b8;font-size:10pt;user-select:none;">— Page Break —</div><p><br/></p>`
-    );
   };
 
   // Find & Replace State with Yellow Highlighting
@@ -574,6 +557,7 @@ export default function DocumentPage() {
             </button>
             {openSections.breaks && (
               <div className="mt-2 space-y-1.5 pl-5">
+                {/* Column Break: advances cursor to next column on same page, or next page if last column */}
                 <button
                   type="button"
                   onClick={insertColumnBreak}
@@ -582,6 +566,7 @@ export default function DocumentPage() {
                   <List className="h-4 w-4 text-slate-500" />
                   Column Break
                 </button>
+                {/* Line Break: soft break (<br>) within current paragraph block */}
                 <button
                   type="button"
                   onClick={insertLineBreak}
@@ -590,6 +575,7 @@ export default function DocumentPage() {
                   <CornerDownLeft className="h-4 w-4 text-slate-500" />
                   Line Break
                 </button>
+                {/* Page Break: splits content at cursor and creates next page */}
                 <button
                   type="button"
                   onClick={insertPageBreak}
