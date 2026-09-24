@@ -488,7 +488,8 @@ interface DocumentContextType {
     title: string
   ) => void;
   addPage: (
-    afterPageId?: string
+    afterPageId?: string,
+    initialHtml?: string
   ) => string;
   removePage: (
     pageId: string
@@ -658,7 +659,7 @@ export function DocumentModelProvider({
   ============================================================ */
 
   const addPage = useCallback(
-    (afterPageId?: string) => {
+    (afterPageId?: string, initialHtml?: string) => {
       const newPageId = "page_" + uid();
 
       setModel((prev) => {
@@ -688,7 +689,7 @@ export function DocumentModelProvider({
           ],
           pageHtml: {
             ...prev.pageHtml,
-            [newPageId]: DEFAULT_HTML,
+            [newPageId]: initialHtml !== undefined ? initialHtml : DEFAULT_HTML,
           },
         };
       });

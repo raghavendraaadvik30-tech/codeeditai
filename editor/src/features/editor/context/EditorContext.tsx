@@ -95,6 +95,40 @@ export function setCaretCharacterOffsetWithin(element: HTMLElement, offset: numb
   }
 }
 
+export function focusPageInDom(pageId: string, position: "start" | "end" = "start") {
+  const section = document.querySelector(`section[data-page-id="${pageId}"]`);
+  const editable =
+    section?.querySelector<HTMLDivElement>('[contenteditable="true"]') ||
+    document.querySelector<HTMLDivElement>(`[contenteditable="true"][data-page-id="${pageId}"]`);
+  if (!editable) return;
+
+  editable.focus();
+
+  try {
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    const range = document.createRange();
+
+    if (position === "start") {
+      const target = editable.firstElementChild || editable.firstChild || editable;
+      range.selectNodeContents(target);
+      range.collapse(true);
+    } else {
+      const target = editable.lastElementChild || editable.lastChild || editable;
+      range.selectNodeContents(target);
+      range.collapse(false);
+    }
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch {
+    // ignore
+  }
+
+  section?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 export interface HistorySnapshot {
   pageId: string;
   html: string;
@@ -215,6 +249,25 @@ export interface EditorContextType {
 
   focusEditor: () => void;
   insertHTML: (html: string) => void;
+
+  /**
+   * Inserts a Microsoft Word-style Page Break at current caret position,
+   * splitting content across pages and placing caret at top of next page.
+   */
+  insertPageBreak: () => void;
+
+  /**
+   * Inserts a Microsoft Word-style soft Line Break (<br>) inside the current
+   * paragraph without splitting the paragraph or creating a new block.
+   */
+  insertLineBreak: () => void;
+
+  /**
+   * Inserts a Microsoft Word-style Column Break. If in a multi-column section:
+   * - Non-terminal column: moves following content to next column on SAME page.
+   * - Last column / single-column: transitions subsequent content to NEXT page.
+   */
+  insertColumnBreak: () => void;
 
   pendingPermissionFile: { fileName: string } | null;
   setPendingPermissionFile: React.Dispatch<React.SetStateAction<{ fileName: string } | null>>;
@@ -772,6 +825,633 @@ export function EditorProvider({
     []
   );
 
+  const insertPageBreak = useCallback(() => {
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    let pageEl: HTMLElement | null = null;
+    let range: Range | null = null;
+
+    // 1. Locate current contenteditable page and range
+    if (sel && sel.rangeCount > 0) {
+      const r = sel.getRangeAt(0);
+      const anc = r.commonAncestorContainer;
+      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+      const found = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]');
+      if (found) {
+        pageEl = found;
+        range = r.cloneRange();
+      }
+    }
+
+    if (!pageEl && savedSelectionRef.current) {
+      const saved = savedSelectionRef.current;
+      const found = document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${saved.pageId}"]`);
+      if (found) {
+        pageEl = found;
+        range = saved.range.cloneRange();
+      }
+    }
+
+    if (!pageEl) {
+      const activeId = docModel?.activePage || docModel?.model.pages[0]?.id;
+      if (activeId) {
+        pageEl = document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${activeId}"]`);
+      }
+    }
+
+    if (!pageEl) {
+      pageEl = editorRef.current || document.querySelector<HTMLElement>('[contenteditable="true"][data-page-id]');
+    }
+
+    if (!pageEl) return;
+
+    const currentPageId =
+      pageEl.getAttribute("data-page-id") ||
+      docModel?.activePage ||
+      docModel?.model.pages[0]?.id ||
+      "";
+
+    // Ensure range is valid and inside pageEl
+    if (!range || !pageEl.contains(range.startContainer)) {
+      range = document.createRange();
+      range.selectNodeContents(pageEl);
+      range.collapse(false);
+    }
+
+    // Delete any selected text
+    if (!range.collapsed) {
+      range.deleteContents();
+    }
+
+    // Build the visual page-break element for current page
+    const pageBreakEl = document.createElement("div");
+    pageBreakEl.className = "page-break";
+    pageBreakEl.contentEditable = "false";
+    pageBreakEl.setAttribute("data-page-break", "true");
+    pageBreakEl.setAttribute(
+      "style",
+      "page-break-after: always; break-after: page; border-top: 1px dashed #94a3b8; margin: 16px 0; text-align: center; color: #94a3b8; font-size: 10pt; user-select: none;"
+    );
+    pageBreakEl.textContent = "— Page Break —";
+
+    let trailingHtml = "";
+
+    // Check if cursor is inside a table cell (td, th)
+    const anchorEl =
+      range.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (range.startContainer as HTMLElement)
+        : range.startContainer.parentElement;
+    const tableCell = anchorEl?.closest("td, th");
+
+    if (tableCell) {
+      const tableRow = tableCell.closest("tr");
+      const table = tableRow?.closest("table");
+      if (table && tableRow) {
+        const rows = Array.from(table.rows);
+        const splitRowIndex = rows.indexOf(tableRow);
+        const rowsToMove = rows.slice(splitRowIndex);
+
+        const newTable = table.cloneNode(false) as HTMLTableElement;
+        const newTbody = document.createElement("tbody");
+        newTable.appendChild(newTbody);
+        rowsToMove.forEach((r) => newTbody.appendChild(r));
+
+        const afterTableNodes: Node[] = [];
+        let nextSibling = table.nextSibling;
+        while (nextSibling) {
+          const toRemove = nextSibling;
+          nextSibling = nextSibling.nextSibling;
+          afterTableNodes.push(toRemove);
+        }
+
+        const nextDiv = document.createElement("div");
+        nextDiv.appendChild(newTable);
+        afterTableNodes.forEach((n) => nextDiv.appendChild(n));
+
+        trailingHtml = nextDiv.innerHTML.trim();
+
+        if (table.nextSibling) {
+          pageEl.insertBefore(pageBreakEl, table.nextSibling);
+        } else {
+          pageEl.appendChild(pageBreakEl);
+        }
+      }
+    } else {
+      // Normal paragraph / block splitting
+      const splitRange = document.createRange();
+      splitRange.setStart(range.endContainer, range.endOffset);
+      if (pageEl.lastChild) {
+        splitRange.setEndAfter(pageEl.lastChild);
+      } else {
+        splitRange.selectNodeContents(pageEl);
+      }
+
+      const fragment = splitRange.extractContents();
+      const tempDiv = document.createElement("div");
+      tempDiv.appendChild(fragment);
+
+      trailingHtml = tempDiv.innerHTML.trim();
+
+      // Find top block containing cursor
+      let cursorBlock: Node | null = range.endContainer;
+      while (cursorBlock && cursorBlock.parentNode !== pageEl) {
+        cursorBlock = cursorBlock.parentNode;
+      }
+
+      if (cursorBlock && cursorBlock.parentNode === pageEl) {
+        const isBlockEmpty =
+          cursorBlock.nodeType === Node.ELEMENT_NODE &&
+          (cursorBlock as HTMLElement).textContent?.trim() === "" &&
+          !(cursorBlock as HTMLElement).querySelector("table, img, video, iframe");
+
+        if (isBlockEmpty && pageEl.children.length > 1) {
+          pageEl.replaceChild(pageBreakEl, cursorBlock);
+        } else {
+          if (cursorBlock.nextSibling) {
+            pageEl.insertBefore(pageBreakEl, cursorBlock.nextSibling);
+          } else {
+            pageEl.appendChild(pageBreakEl);
+          }
+        }
+      } else {
+        pageEl.appendChild(pageBreakEl);
+      }
+    }
+
+    // Ensure content exists before the page break
+    if (pageEl.firstChild === pageBreakEl) {
+      const emptyP = document.createElement("p");
+      emptyP.innerHTML = "<br/>";
+      pageEl.insertBefore(emptyP, pageBreakEl);
+    }
+
+    if (
+      !trailingHtml ||
+      trailingHtml === "<br>" ||
+      trailingHtml === "<br/>" ||
+      trailingHtml === "<p></p>" ||
+      trailingHtml === "<p><br></p>" ||
+      trailingHtml === "<p><br/></p>"
+    ) {
+      trailingHtml = "<p><br/></p>";
+    }
+
+    const remainingHtml = pageEl.innerHTML.trim() || "<p><br/></p>";
+
+    // Update document model and distribute trailingHtml to next page
+    if (docModel && currentPageId) {
+      docModel.setPageHtml(currentPageId, remainingHtml);
+
+      const pages = docModel.model.pages;
+      const currentIdx = pages.findIndex((p) => p.id === currentPageId);
+      const nextPage = currentIdx >= 0 && currentIdx + 1 < pages.length ? pages[currentIdx + 1] : null;
+
+      let targetPageId = "";
+
+      if (nextPage) {
+        const nextHtml = (docModel.model.pageHtml[nextPage.id] || "").trim();
+        const isNextBlank =
+          !nextHtml ||
+          nextHtml === "<p></p>" ||
+          nextHtml === "<p><br></p>" ||
+          nextHtml === "<p><br/></p>" ||
+          nextHtml === "<p><br data-mce-bogus=\"1\"></p>";
+
+        if (isNextBlank) {
+          docModel.setPageHtml(nextPage.id, trailingHtml);
+          targetPageId = nextPage.id;
+        } else {
+          targetPageId = docModel.addPage(currentPageId, trailingHtml);
+        }
+      } else {
+        targetPageId = docModel.addPage(currentPageId, trailingHtml);
+      }
+
+      docModel.setActivePage(targetPageId);
+
+      recordSnapshot(currentPageId, remainingHtml, undefined, "Insert Page Break");
+      if (targetPageId) {
+        recordSnapshot(targetPageId, trailingHtml, 0, "Insert Page Break");
+      }
+
+      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+
+      setTimeout(() => {
+        focusPageInDom(targetPageId, "start");
+      }, 50);
+    }
+  }, [restoreEditorSelection, docModel, editorRef, recordSnapshot]);
+
+  /**
+   * ============================================================================
+   * Line Break (Soft Break / Shift + Enter)
+   * ----------------------------------------------------------------------------
+   * Inserts an inline `<br>` element at the current cursor position within the
+   * current paragraph block without splitting the block or generating extra paragraphs.
+   * Also appends a trailing bogus `<br>` if located at the end of the block so that
+   * contenteditable browsers correctly display the caret on the newly created line.
+   * ============================================================================
+   */
+  const insertLineBreak = useCallback(() => {
+    // Step 1: Restore active editor selection if focus was temporarily transferred
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    let pageEl: HTMLElement | null = null;
+    let range: Range | null = null;
+
+    // Step 2: Resolve active contenteditable page element from DOM selection
+    if (sel && sel.rangeCount > 0) {
+      const r = sel.getRangeAt(0);
+      const anc = r.commonAncestorContainer;
+      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+      const found = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]');
+      if (found) {
+        pageEl = found;
+        range = r.cloneRange();
+      }
+    }
+
+    // Step 3: Fall back to saved selection ref if selection is outside DOM
+    if (!pageEl && savedSelectionRef.current) {
+      const saved = savedSelectionRef.current;
+      const found = document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${saved.pageId}"]`);
+      if (found) {
+        pageEl = found;
+        range = saved.range.cloneRange();
+      }
+    }
+
+    // Step 4: Fall back to active page ID from the document model
+    if (!pageEl) {
+      const activeId = docModel?.activePage || docModel?.model.pages[0]?.id;
+      if (activeId) {
+        pageEl = document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${activeId}"]`);
+      }
+    }
+
+    if (!pageEl) {
+      pageEl = editorRef.current || document.querySelector<HTMLElement>('[contenteditable="true"][data-page-id]');
+    }
+
+    if (!pageEl) return;
+
+    // Step 5: Ensure range exists and is anchored within the current page container
+    if (!range || !pageEl.contains(range.startContainer)) {
+      range = document.createRange();
+      range.selectNodeContents(pageEl);
+      range.collapse(false);
+    }
+
+    // Step 6: Delete any currently highlighted/selected text before inserting break
+    if (!range.collapsed) {
+      range.deleteContents();
+    }
+
+    // Step 7: Insert soft line break <br>
+    const br = document.createElement("br");
+    range.insertNode(br);
+
+    // Step 8: Detect if cursor is at the end of the enclosing block (p, h1-h6, li, etc.)
+    // Browsers require a trailing bogus <br> for caret navigation and typing on the new line
+    let parentBlock: Node | null = br.parentNode;
+    while (parentBlock && parentBlock !== pageEl && !/^(P|H[1-6]|LI|BLOCKQUOTE|DIV|TD|TH)$/i.test(parentBlock.nodeName)) {
+      parentBlock = parentBlock.parentNode;
+    }
+
+    let isAtEndOfBlock = false;
+    if (parentBlock) {
+      let next: Node | null = br.nextSibling;
+      while (next && next.nodeType === Node.TEXT_NODE && (next.textContent || "").trim() === "") {
+        next = next.nextSibling;
+      }
+      if (!next) {
+        isAtEndOfBlock = true;
+      }
+    }
+
+    // Step 9: Append bogus <br> if inserting at the trailing edge of the block
+    if (isAtEndOfBlock && parentBlock) {
+      const bogusBr = document.createElement("br");
+      bogusBr.setAttribute("data-bogus", "1");
+      if (br.nextSibling) {
+        parentBlock.insertBefore(bogusBr, br.nextSibling);
+      } else {
+        parentBlock.appendChild(bogusBr);
+      }
+    }
+
+    // Step 10: Place the caret immediately after the inserted <br>
+    const newRange = document.createRange();
+    newRange.setStartAfter(br);
+    newRange.collapse(true);
+
+    if (sel) {
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+    }
+
+    // Step 11: Persist updated selection coordinates in saved selection ref
+    const currentPageId = pageEl.getAttribute("data-page-id") || "";
+    savedSelectionRef.current = {
+      range: newRange.cloneRange(),
+      pageId: currentPageId,
+      startContainer: newRange.startContainer,
+      startOffset: newRange.startOffset,
+      endContainer: newRange.endContainer,
+      endOffset: newRange.endOffset,
+    };
+
+    // Step 12: Dispatch input event to synchronize with state & document model
+    pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+  }, [restoreEditorSelection, docModel, editorRef]);
+
+  /**
+   * ============================================================================
+   * Column Break (Ctrl + Shift + Enter)
+   * ----------------------------------------------------------------------------
+   * Implements true Microsoft Word-style column break behavior:
+   * 1. Single Column: In Word, a column break in single-column layout behaves as a page break.
+   * 2. Non-Terminal Column (Col 1 of 2, Col 1/2 of 3): Splits subsequent content into
+   *    the next column on the SAME page using a `.column-break` indicator element.
+   * 3. Last Column (Col 2 of 2, Col 3 of 3): Transitions subsequent content to Column 1
+   *    of the NEXT page (reusing an existing blank page or appending a new page).
+   * ============================================================================
+   */
+  const insertColumnBreak = useCallback(() => {
+    // Step 1: Restore active editor selection
+    restoreEditorSelection();
+    const sel = window.getSelection();
+    let pageEl: HTMLElement | null = null;
+    let range: Range | null = null;
+
+    // Step 2: Locate active contenteditable page element from DOM
+    if (sel && sel.rangeCount > 0) {
+      const r = sel.getRangeAt(0);
+      const anc = r.commonAncestorContainer;
+      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
+      const found = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]');
+      if (found) {
+        pageEl = found;
+        range = r.cloneRange();
+      }
+    }
+
+    // Step 3: Fall back to saved selection ref if focus was elsewhere
+    if (!pageEl && savedSelectionRef.current) {
+      const saved = savedSelectionRef.current;
+      const found = document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${saved.pageId}"]`);
+      if (found) {
+        pageEl = found;
+        range = saved.range.cloneRange();
+      }
+    }
+
+    // Step 4: Fall back to active page ID from the document model
+    if (!pageEl) {
+      const activeId = docModel?.activePage || docModel?.model.pages[0]?.id;
+      if (activeId) {
+        pageEl = document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${activeId}"]`);
+      }
+    }
+
+    if (!pageEl) {
+      pageEl = editorRef.current || document.querySelector<HTMLElement>('[contenteditable="true"][data-page-id]');
+    }
+
+    if (!pageEl) return;
+
+    const currentPageId =
+      pageEl.getAttribute("data-page-id") ||
+      docModel?.activePage ||
+      docModel?.model.pages[0]?.id ||
+      "";
+
+    // Step 5: Check active section column configuration (count & gap)
+    const pageModel = docModel?.model.pages.find((p) => p.id === currentPageId);
+    const section = docModel?.model.sections.find((s) => s.id === (pageModel?.sectionId || docModel.model.sections[0]?.id));
+    const columnCount = section?.columns?.count ?? 1;
+
+    // Word Rule: In single column mode, a column break behaves identically to a page break
+    if (columnCount <= 1) {
+      insertPageBreak();
+      return;
+    }
+
+    if (!range || !pageEl.contains(range.startContainer)) {
+      range = document.createRange();
+      range.selectNodeContents(pageEl);
+      range.collapse(false);
+    }
+
+    if (!range.collapsed) {
+      range.deleteContents();
+    }
+
+    // Step 6: Calculate current column index (0-indexed) based on caret X coordinate
+    const containerRect = pageEl.getBoundingClientRect();
+    const rangeRect = range.getBoundingClientRect();
+    const colGap = section?.columns?.gap ?? 32;
+    const colWidth = (containerRect.width - (columnCount - 1) * colGap) / columnCount;
+
+    let targetLeft = rangeRect.left;
+    if (targetLeft === 0) {
+      const pNode = range.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (range.startContainer as HTMLElement)
+        : range.startContainer.parentElement;
+      if (pNode) {
+        targetLeft = pNode.getBoundingClientRect().left;
+      }
+    }
+
+    const relX = Math.max(0, targetLeft - containerRect.left);
+    const currentColIdx = Math.min(columnCount - 1, Math.floor(relX / (colWidth + colGap)));
+
+    // Step 7: Create the standard visual Column Break indicator element
+    const colBreakEl = document.createElement("div");
+    colBreakEl.className = "column-break";
+    colBreakEl.contentEditable = "false";
+    colBreakEl.setAttribute("data-column-break", "true");
+    colBreakEl.setAttribute("data-cb", "1");
+    colBreakEl.setAttribute(
+      "style",
+      "break-after: column; -webkit-column-break-after: always; page-break-after: column; border-top: 1px dotted #94a3b8; margin: 12px 0; text-align: center; color: #94a3b8; font-size: 9pt; user-select: none;"
+    );
+    colBreakEl.textContent = "— Column Break —";
+
+    // --------------------------------------------------------------------------
+    // CASE 1: Caret is in the LAST column -> transition subsequent content to NEXT page
+    // --------------------------------------------------------------------------
+    if (currentColIdx >= columnCount - 1) {
+      const splitRange = document.createRange();
+      splitRange.setStart(range.endContainer, range.endOffset);
+      if (pageEl.lastChild) {
+        splitRange.setEndAfter(pageEl.lastChild);
+      } else {
+        splitRange.selectNodeContents(pageEl);
+      }
+
+      const fragment = splitRange.extractContents();
+      const tempDiv = document.createElement("div");
+      tempDiv.appendChild(fragment);
+
+      let trailingHtml = tempDiv.innerHTML.trim();
+
+      // Insert column-break marker on the current page
+      let cursorBlock: Node | null = range.endContainer;
+      while (cursorBlock && cursorBlock.parentNode !== pageEl) {
+        cursorBlock = cursorBlock.parentNode;
+      }
+
+      if (cursorBlock && cursorBlock.parentNode === pageEl) {
+        const isBlockEmpty =
+          cursorBlock.nodeType === Node.ELEMENT_NODE &&
+          (cursorBlock as HTMLElement).textContent?.trim() === "" &&
+          !(cursorBlock as HTMLElement).querySelector("table, img, video, iframe");
+
+        if (isBlockEmpty && pageEl.children.length > 1) {
+          pageEl.replaceChild(colBreakEl, cursorBlock);
+        } else {
+          if (cursorBlock.nextSibling) {
+            pageEl.insertBefore(colBreakEl, cursorBlock.nextSibling);
+          } else {
+            pageEl.appendChild(colBreakEl);
+          }
+        }
+      } else {
+        pageEl.appendChild(colBreakEl);
+      }
+
+      if (pageEl.firstChild === colBreakEl) {
+        const emptyP = document.createElement("p");
+        emptyP.innerHTML = "<br/>";
+        pageEl.insertBefore(emptyP, colBreakEl);
+      }
+
+      if (!trailingHtml || trailingHtml === "<br>" || trailingHtml === "<p></p>" || trailingHtml === "<p><br></p>") {
+        trailingHtml = "<p><br/></p>";
+      }
+
+      const remainingHtml = pageEl.innerHTML.trim() || "<p><br/></p>";
+
+      // Transfer trailing content to the next page
+      if (docModel && currentPageId) {
+        docModel.setPageHtml(currentPageId, remainingHtml);
+
+        const pages = docModel.model.pages;
+        const currentIdx = pages.findIndex((p) => p.id === currentPageId);
+        const nextPage = currentIdx >= 0 && currentIdx + 1 < pages.length ? pages[currentIdx + 1] : null;
+
+        let targetPageId = "";
+
+        if (nextPage) {
+          const nextHtml = (docModel.model.pageHtml[nextPage.id] || "").trim();
+          const isNextBlank =
+            !nextHtml ||
+            nextHtml === "<p></p>" ||
+            nextHtml === "<p><br></p>" ||
+            nextHtml === "<p><br/></p>";
+
+          if (isNextBlank) {
+            docModel.setPageHtml(nextPage.id, trailingHtml);
+            targetPageId = nextPage.id;
+          } else {
+            targetPageId = docModel.addPage(currentPageId, trailingHtml);
+          }
+        } else {
+          targetPageId = docModel.addPage(currentPageId, trailingHtml);
+        }
+
+        docModel.setActivePage(targetPageId);
+        recordSnapshot(currentPageId, remainingHtml, undefined, "Insert Column Break");
+        if (targetPageId) {
+          recordSnapshot(targetPageId, trailingHtml, 0, "Insert Column Break");
+        }
+
+        pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+
+        setTimeout(() => {
+          focusPageInDom(targetPageId, "start");
+        }, 50);
+      }
+      return;
+    }
+
+    // --------------------------------------------------------------------------
+    // CASE 2: Caret is NOT in the last column -> move subsequent content to NEXT column on SAME page
+    // --------------------------------------------------------------------------
+    let topBlock: Node | null = range.endContainer;
+    while (topBlock && topBlock.parentNode !== pageEl) {
+      topBlock = topBlock.parentNode;
+    }
+
+    let nextBlockToFocus: HTMLElement | null = null;
+
+    if (topBlock && topBlock.parentNode === pageEl) {
+      // Split the current paragraph block at cursor position
+      const splitBlockRange = document.createRange();
+      splitBlockRange.setStart(range.endContainer, range.endOffset);
+      splitBlockRange.setEndAfter(topBlock.lastChild || topBlock);
+
+      const trailingFragment = splitBlockRange.extractContents();
+      const trailingDiv = document.createElement("div");
+      trailingDiv.appendChild(trailingFragment);
+
+      let trailingText = trailingDiv.innerHTML.trim();
+      if (!trailingText || trailingText === "<br>") {
+        trailingText = "<br/>";
+      }
+
+      // Create new paragraph block placed after the column-break marker
+      const nextP = document.createElement("p");
+      nextP.innerHTML = trailingText;
+
+      if (topBlock.nextSibling) {
+        pageEl.insertBefore(colBreakEl, topBlock.nextSibling);
+        pageEl.insertBefore(nextP, colBreakEl.nextSibling);
+      } else {
+        pageEl.appendChild(colBreakEl);
+        pageEl.appendChild(nextP);
+      }
+
+      nextBlockToFocus = nextP;
+    } else {
+      const nextP = document.createElement("p");
+      nextP.innerHTML = "<br/>";
+      pageEl.appendChild(colBreakEl);
+      pageEl.appendChild(nextP);
+      nextBlockToFocus = nextP;
+    }
+
+    // Place caret at start of the newly moved content in the next column
+    if (nextBlockToFocus) {
+      const caretRange = document.createRange();
+      caretRange.selectNodeContents(nextBlockToFocus);
+      caretRange.collapse(true);
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(caretRange);
+      }
+
+      savedSelectionRef.current = {
+        range: caretRange.cloneRange(),
+        pageId: currentPageId,
+        startContainer: caretRange.startContainer,
+        startOffset: caretRange.startOffset,
+        endContainer: caretRange.endContainer,
+        endOffset: caretRange.endOffset,
+      };
+    }
+
+    // Persist updated page HTML into document model
+    const newHtml = pageEl.innerHTML;
+    if (docModel && currentPageId) {
+      docModel.setPageHtml(currentPageId, newHtml);
+      recordSnapshot(currentPageId, newHtml, undefined, "Insert Column Break");
+    }
+
+    pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+  }, [restoreEditorSelection, docModel, editorRef, insertPageBreak, recordSnapshot]);
+
   const undoMultiple = useCallback((count: number) => {
     if (count <= 0) return;
     const stack = historyStackRef.current;
@@ -962,6 +1642,9 @@ export function EditorProvider({
 
     focusEditor,
     insertHTML,
+    insertPageBreak,
+    insertLineBreak,
+    insertColumnBreak,
 
     pendingPermissionFile,
     setPendingPermissionFile,

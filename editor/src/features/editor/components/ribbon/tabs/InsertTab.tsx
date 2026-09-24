@@ -14,6 +14,8 @@ import {
   Hash,
   ChevronDown,
   Check,
+  Columns2,
+  WrapText,
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -56,6 +58,9 @@ export default function InsertTab() {
   const {
     editorRef,
     insertHTML,
+    insertPageBreak,
+    insertLineBreak,
+    insertColumnBreak,
   } = useEditor();
 
   const savedRangeRef = useRef<Range | null>(null);
@@ -191,8 +196,7 @@ export default function InsertTab() {
   // Other Insert Handlers
   // ------------------------------------------------------------------------
   const handlePageBreak = () => {
-    const pageBreakMarker = `<div class="page-break" style="page-break-after: always; break-after: page; border-top: 2px dashed #94a3b8; margin: 16px 0; position: relative;" data-page-break="true"><span style="position: absolute; top: -10px; right: 8px; background: #f1f5f9; padding: 0 6px; font-size: 10px; color: #64748b; font-family: monospace; border-radius: 3px;">Page Break</span></div><p><br></p>`;
-    handleInsertHTML(pageBreakMarker);
+    insertPageBreak();
   };
 
   const handleDeletePage = () => {
@@ -221,11 +225,28 @@ export default function InsertTab() {
         Add Page
       </RibbonButton>
 
+      {/* Page Break button: splits content to next page (Ctrl+Enter) */}
       <RibbonButton
         icon={<CornerDownLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
         onClick={handlePageBreak}
       >
         Page Break
+      </RibbonButton>
+
+      {/* Column Break button: advances content to next column or page (Ctrl+Shift+Enter) */}
+      <RibbonButton
+        icon={<Columns2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />}
+        onClick={() => insertColumnBreak()}
+      >
+        Column Break
+      </RibbonButton>
+
+      {/* Line Break button: inserts soft break (<br>) within current paragraph (Shift+Enter) */}
+      <RibbonButton
+        icon={<WrapText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />}
+        onClick={() => insertLineBreak()}
+      >
+        Line Break
       </RibbonButton>
 
       <RibbonButton

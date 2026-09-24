@@ -294,4 +294,74 @@ body,
   border: 1px solid #ffffff;
   box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.25);
   cursor: pointer;
+}
+
+/* ==========================================================
+   MICROSOFT WORD-STYLE PAGE BREAK INDICATOR
+========================================================== */
+.page-break {
+  display: block;
+  position: relative;
+  page-break-after: always;
+  break-after: page;
+  border-top: 1px dashed #94a3b8;
+  margin: 16px 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 10pt;
+  user-select: none;
+  cursor: default;
+}
+
+.dark .page-break {
+  border-top-color: #64748b;
+  color: #94a3b8;
+}
+
+@media print {
+  .page-break {
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+}
+
+/* ==========================================================
+   MICROSOFT WORD-STYLE COLUMN BREAK INDICATOR
+========================================================== */
+.column-break {
+  display: block;
+  position: relative;
+  break-after: column;
+  -webkit-column-break-after: always;
+  page-break-after: column;
+  border-top: 1px dotted #94a3b8;
+  margin: 14px 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 9.5pt;
+  user-select: none;
+  cursor: default;
+}
+
+.dark .column-break {
+  border-top-color: #64748b;
+  color: #94a3b8;
+}
+
+@media print {
+  .column-break {
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    break-after: column !important;
+    -webkit-column-break-after: always !important;
+    page-break-after: column !important;
+  }
 }

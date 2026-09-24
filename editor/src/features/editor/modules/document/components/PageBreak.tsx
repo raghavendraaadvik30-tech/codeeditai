@@ -11,12 +11,10 @@ import { CornerDownLeft } from "lucide-react";
 import { useEditor } from "@/features/editor/context/EditorContext";
 
 export function PageBreak() {
-  const { insertHTML } = useEditor();
+  const { insertPageBreak } = useEditor();
 
   const handleInsert = () => {
-    insertHTML?.(
-      `<div class="page-break" contenteditable="false" style="break-before:page;page-break-before:always;border-top:1px dashed #94a3b8;margin:24px 0;text-align:center;color:#94a3b8;font-size:10pt;user-select:none;">— Page Break —</div><p><br/></p>`
-    );
+    insertPageBreak();
   };
 
   return (

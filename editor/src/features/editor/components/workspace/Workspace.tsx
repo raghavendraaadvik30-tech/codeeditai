@@ -740,7 +740,7 @@ function DocumentPage({
   const consecutiveEnterRef = useRef<boolean>(false);
   const lastEnterTimeRef = useRef<number>(0);
 
-  const { undo, redo, recordSnapshot, initHistory } = useEditor();
+  const { undo, redo, recordSnapshot, initHistory, insertPageBreak, insertLineBreak, insertColumnBreak } = useEditor();
 
   useEffect(() => {
     initHistory(pageId, html || "<p><br></p>");
@@ -1006,50 +1006,65 @@ function DocumentPage({
     const children = Array.from(container.children) as HTMLElement[];
     if (children.length <= 1) return;
 
-    // Only paginate if container content genuinely exceeds its usable height
-    if (container.scrollHeight <= container.clientHeight + 2) {
-      return;
-    }
+    // Check if an explicit page break marker is present with content after it
+    const breakIdx = children.findIndex(
+      (child) =>
+        child.classList.contains("page-break") ||
+        child.getAttribute("data-page-break") === "true" ||
+        child.querySelector?.(".page-break, [data-page-break='true']") !== null
+    );
 
-    const containerRect = container.getBoundingClientRect();
-    if (containerRect.height === 0) return;
-
-    const scale = zoom / 100;
-    // Available writing boundary: container bottom minus bottom margin tolerance (scaled with zoom)
-    const maxBottom = containerRect.bottom - Math.max(16, bodyPaddingBottom) * scale;
-
-    const columnCount = section?.columns?.count ?? 1;
-    const isMultiColumn = columnCount > 1;
-
-    // Find the first child whose boundary exceeds the writing area
     let splitIdx = -1;
-    for (let i = 0; i < children.length; i++) {
-      const childRect = children[i].getBoundingClientRect();
 
-      if (isMultiColumn) {
-        // Multi-column layout overflow check:
-        // 1. Child spilled past the right edge of container into an overflow column
-        const isPastRightBoundary =
-          childRect.right > containerRect.right - marginR * scale + 10 ||
-          childRect.left >= containerRect.right - marginR * scale;
+    if (breakIdx !== -1 && breakIdx < children.length - 1) {
+      // Forced Page Break: split immediately at the element right after the page break
+      splitIdx = breakIdx + 1;
+    } else {
+      // Normal Height-based Overflow Check:
+      // Only paginate if container content genuinely exceeds its usable height
+      if (container.scrollHeight <= container.clientHeight + 2) {
+        return;
+      }
 
-        // 2. Child is in the last column and exceeds bottom boundary
-        const approxColWidth =
-          (containerRect.width - (marginL + marginR) * scale - (columnCount - 1) * (section?.columns?.gap ?? 32) * scale) /
-          columnCount;
-        const lastColLeftThreshold = containerRect.right - marginR * scale - approxColWidth - 15;
-        const isInLastColumn = childRect.left >= lastColLeftThreshold;
-        const isPastBottomInLastCol = isInLastColumn && childRect.bottom > maxBottom;
+      const containerRect = container.getBoundingClientRect();
+      if (containerRect.height === 0) return;
 
-        if (isPastRightBoundary || isPastBottomInLastCol) {
-          splitIdx = i;
-          break;
-        }
-      } else {
-        // Single column layout
-        if (childRect.bottom > maxBottom) {
-          splitIdx = i;
-          break;
+      const scale = zoom / 100;
+      // Available writing boundary: container bottom minus bottom margin tolerance (scaled with zoom)
+      const maxBottom = containerRect.bottom - Math.max(16, bodyPaddingBottom) * scale;
+
+      const columnCount = section?.columns?.count ?? 1;
+      const isMultiColumn = columnCount > 1;
+
+      // Find the first child whose boundary exceeds the writing area
+      for (let i = 0; i < children.length; i++) {
+        const childRect = children[i].getBoundingClientRect();
+
+        if (isMultiColumn) {
+          // Multi-column layout overflow check:
+          // 1. Child spilled past the right edge of container into an overflow column
+          const isPastRightBoundary =
+            childRect.right > containerRect.right - marginR * scale + 10 ||
+            childRect.left >= containerRect.right - marginR * scale;
+
+          // 2. Child is in the last column and exceeds bottom boundary
+          const approxColWidth =
+            (containerRect.width - (marginL + marginR) * scale - (columnCount - 1) * (section?.columns?.gap ?? 32) * scale) /
+            columnCount;
+          const lastColLeftThreshold = containerRect.right - marginR * scale - approxColWidth - 15;
+          const isInLastColumn = childRect.left >= lastColLeftThreshold;
+          const isPastBottomInLastCol = isInLastColumn && childRect.bottom > maxBottom;
+
+          if (isPastRightBoundary || isPastBottomInLastCol) {
+            splitIdx = i;
+            break;
+          }
+        } else {
+          // Single column layout
+          if (childRect.bottom > maxBottom) {
+            splitIdx = i;
+            break;
+          }
         }
       }
     }
@@ -1101,22 +1116,61 @@ function DocumentPage({
         }, 50);
       }
     } else {
-      // Next page already exists: prepend overflowing content to next page
       const existingNextHtml = pageHtmlMap[nextPage.id] || "";
-      const cleanExisting =
-        existingNextHtml.trim() === "<p><br/></p>" || existingNextHtml.trim() === "<p><br></p>"
-          ? ""
-          : existingNextHtml;
-      const mergedHtml = overflowHtml + (cleanExisting ? cleanExisting : "");
-      onSetPageHtml(nextPage.id, mergedHtml);
-      if (isCaretInOverflow) {
-        setTimeout(() => {
-          onSetActivePage(nextPage.id);
-          focusPage(nextPage.id, "start");
-        }, 50);
+      const isNextBlank =
+        !existingNextHtml ||
+        existingNextHtml.trim() === "<p><br/></p>" ||
+        existingNextHtml.trim() === "<p><br></p>" ||
+        existingNextHtml.trim() === "<p></p>";
+
+      if (isNextBlank) {
+        onSetPageHtml(nextPage.id, overflowHtml);
+        if (isCaretInOverflow) {
+          setTimeout(() => {
+            onSetActivePage(nextPage.id);
+            focusPage(nextPage.id, "start");
+          }, 50);
+        }
+      } else if (breakIdx !== -1) {
+        // Explicit forced page break: insert new page to avoid overwriting or merging into existing next page
+        const newPageId = onAddPage(pageId, overflowHtml);
+        if (isCaretInOverflow) {
+          setTimeout(() => {
+            onSetActivePage(newPageId);
+            focusPage(newPageId, "start");
+          }, 50);
+        }
+      } else {
+        // Natural height overflow: prepend overflowing content to next page
+        const mergedHtml = overflowHtml + existingNextHtml;
+        onSetPageHtml(nextPage.id, mergedHtml);
+        if (isCaretInOverflow) {
+          setTimeout(() => {
+            onSetActivePage(nextPage.id);
+            focusPage(nextPage.id, "start");
+          }, 50);
+        }
       }
     }
-  }, [allPages, bodyPaddingBottom, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section, zoom]);
+  }, [allPages, bodyPaddingBottom, marginL, marginR, onAddPage, onChange, onSetPageHtml, onSetActivePage, pageHtmlMap, pageId, section, zoom]);
+
+  // If a forced page break has trailing nodes on this page, trigger overflow pagination
+  useEffect(() => {
+    const element = localEditorRef.current;
+    if (!element) return;
+    if (element.querySelector(".page-break, [data-page-break='true']")) {
+      const children = Array.from(element.children);
+      const bIdx = children.findIndex(
+        (c) =>
+          c.classList.contains("page-break") ||
+          c.getAttribute("data-page-break") === "true" ||
+          c.querySelector?.(".page-break, [data-page-break='true']") !== null
+      );
+      if (bIdx !== -1 && bIdx < children.length - 1) {
+        checkAndPaginateOverflow();
+      }
+    }
+  }, [html, checkAndPaginateOverflow]);
 
   // ------------------------------------------------------------------------
   // KeyDown: Enter, Ctrl+Enter, and Backspace Handlers
@@ -1205,10 +1259,21 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
-    // 1. Manual Page Break: Ctrl + Enter / Cmd + Enter
+    // 1. Column Break: Ctrl + Shift + Enter / Cmd + Shift + Enter
+    // Inserts a column break that breaks content into the next column (or next page)
+    // ------------------------------------------------------------------
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+      e.preventDefault();
+      consecutiveEnterRef.current = false;
+      insertColumnBreak();
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // 2. Manual Page Break: Ctrl + Enter / Cmd + Enter
     // Intentionally splits content at cursor and creates a new page immediately
     // ------------------------------------------------------------------
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
       e.preventDefault();
       consecutiveEnterRef.current = false;
       handleManualPageBreak();
@@ -1216,7 +1281,18 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
-    // 2. Normal Enter:
+    // 3. Line Break (Soft Break): Shift + Enter
+    // Inserts a soft break (<br>) within current paragraph block
+    // ------------------------------------------------------------------
+    if (e.key === "Enter" && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      consecutiveEnterRef.current = false;
+      insertLineBreak();
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // 4. Normal Enter:
     // Single Enter creates normal paragraph break on current page.
     // Double Enter (consecutive Enter on empty paragraph) creates page break.
     // ------------------------------------------------------------------
@@ -1349,51 +1425,7 @@ function DocumentPage({
   // Manual Page Break (Ctrl + Enter)
   // ------------------------------------------------------------------------
   const handleManualPageBreak = () => {
-    const container = localEditorRef.current;
-    if (!container) return;
-
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-
-    const range = sel.getRangeAt(0);
-    const splitRange = document.createRange();
-    splitRange.setStart(range.endContainer, range.endOffset);
-    splitRange.setEndAfter(container.lastChild || container);
-
-    const fragment = splitRange.extractContents();
-    const tempDiv = document.createElement("div");
-    tempDiv.appendChild(fragment);
-
-    let trailingHtml = tempDiv.innerHTML.trim();
-    if (!trailingHtml || trailingHtml === "<br>" || trailingHtml === "<p></p>") {
-      trailingHtml = "<p><br/></p>";
-    }
-
-    const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
-    lastHtmlRef.current = remainingHtml;
-    onChange(remainingHtml);
-
-    const nextPage = allPages[pageIndex + 1];
-
-    if (!nextPage) {
-      const newPageId = onAddPage(pageId, trailingHtml);
-      setTimeout(() => {
-        onSetActivePage(newPageId);
-        focusPage(newPageId, "start");
-      }, 50);
-    } else {
-      const existingNextHtml = pageHtmlMap[nextPage.id] || "";
-      const cleanExisting =
-        existingNextHtml.trim() === "<p><br/></p>" || existingNextHtml.trim() === "<p><br></p>"
-          ? ""
-          : existingNextHtml;
-      const mergedHtml = trailingHtml + cleanExisting;
-      onSetPageHtml(nextPage.id, mergedHtml);
-      setTimeout(() => {
-        onSetActivePage(nextPage.id);
-        focusPage(nextPage.id, "start");
-      }, 50);
-    }
+    insertPageBreak();
   };
 
   // ------------------------------------------------------------------------
@@ -1438,6 +1470,12 @@ function DocumentPage({
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
     recordSnapshot(pageId, currentHtml, getCaretCharacterOffsetWithin(element));
+
+    if (element.querySelector(".page-break, [data-page-break='true']")) {
+      setTimeout(() => {
+        checkAndPaginateOverflow();
+      }, 50);
+    }
   };
 
   const handleFocus = () => {
@@ -1476,6 +1514,10 @@ function DocumentPage({
     const children = Array.from(container.children) as HTMLElement[];
     const firstChild = children[0];
     const lastChild = children[children.length - 1];
+    const lastEditableChild =
+      lastChild?.classList.contains("page-break") && children.length > 1
+        ? children[children.length - 2]
+        : lastChild;
 
     // If the click is inside the editable container or on any of its content:
     if (container.contains(target) || target === container) {
@@ -1508,7 +1550,7 @@ function DocumentPage({
         const sel = window.getSelection();
         if (sel) {
           const range = document.createRange();
-          range.selectNodeContents(lastChild);
+          range.selectNodeContents(lastEditableChild || lastChild);
           range.collapse(false);
           sel.removeAllRanges();
           sel.addRange(range);
@@ -1543,7 +1585,7 @@ function DocumentPage({
       const sel = window.getSelection();
       if (sel) {
         const range = document.createRange();
-        range.selectNodeContents(lastChild);
+        range.selectNodeContents(lastEditableChild || lastChild);
         range.collapse(false);
         sel.removeAllRanges();
         sel.addRange(range);
@@ -2016,8 +2058,9 @@ function DocumentPage({
             ? {
                 columnCount: section.columns.count,
                 columnGap: `${section.columns.gap ?? 32}px`,
-                columnFill: "balance",
-                WebkitColumnFill: "balance",
+                // columnFill: "auto" ensures sequential top-to-bottom column filling and enables CSS break-after: column
+                columnFill: "auto",
+                WebkitColumnFill: "auto",
               }
             : {}),
         }}
