@@ -9,7 +9,7 @@ import React, {
 
 import type { ReactNode, RefObject } from "react";
 
-import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
+import type { StyleToken } from "@/features/editor/styles/types/styles.types";
 import { useDocumentModel } from "../store/documentModel";
 
 export function getCaretCharacterOffsetWithin(element: HTMLElement): number {

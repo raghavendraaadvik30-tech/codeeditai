@@ -14,8 +14,8 @@
  */
 
 import { Table2, Plus } from "lucide-react";
-import { useTable } from "../hooks";
-import { buildCustomTableHTML } from "./TableInsertDialog";
+import { useTable } from "@/features/editor/tables/hooks";
+import { buildCustomTableHTML } from "@/features/editor/tables/components/TableInsertDialog";
 
 interface StandardTableItem {
   id: number;

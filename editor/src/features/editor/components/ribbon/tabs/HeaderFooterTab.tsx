@@ -12,11 +12,11 @@ import {
   X,
 } from "lucide-react";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
-import { useHeaderFooter, type HFUnit } from "@/features/editor/modules/document/context/HeaderFooterContext";
+import { useHeaderFooter, type HFUnit } from "@/features/editor/document/context/HeaderFooterContext";
 import {
   HeaderGallery,
   FooterGallery,
-} from "@/features/editor/modules/document/components/HeaderFooterGallery";
+} from "@/features/editor/document/components/HeaderFooterGallery";
 import {
   DropdownMenu,
   DropdownMenuContent,

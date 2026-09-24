@@ -16,8 +16,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Table2, ChevronDown } from "lucide-react";
-import { useTable } from "../hooks";
-import { buildCustomTableHTML } from "./TableInsertDialog";
+import { useTable } from "@/features/editor/tables/hooks";
+import { buildCustomTableHTML } from "@/features/editor/tables/components/TableInsertDialog";
 
 export function buildHistorySignatureTableHTML(): string {
   const captionHtml = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">Document Revision History &amp; Signatures</p>`;

@@ -337,12 +337,12 @@ import type { ComponentType } from "react";
 import { Search } from "lucide-react";
 
 import type { ModuleId } from "../../data/workspaceModules";
+import { StylesPage } from "../../styles";
+import { DocumentPage } from "../../document";
+import { TablesPage } from "../../tables";
+import { SettingsPage } from "../../settings";
+import { FiguresPage } from "../../modules/figures";
 import { WritingPage } from "../../modules/writing";
-
-import { StylesPage } from "../../modules/styles";
-import { DocumentPage } from "../../modules/document";
-import { TablesPage } from "../../modules/tables";
-import { SettingsPage } from "../../modules/settings";
 import { LinksPage } from "../../modules/links";
 import { TrackChangesPage } from "../../modules/trackChanges";
 
@@ -355,6 +355,7 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
   document: DocumentPage,
   tables: TablesPage,
   settings: SettingsPage,
+  figures: FiguresPage,
   writing: WritingPage,
   links: LinksPage,
   trackChanges: TrackChangesPage,
@@ -370,6 +371,7 @@ export default function Panel({ moduleId }: PanelProps) {
     moduleId === "styles" ||
     moduleId === "tables" ||
     moduleId === "settings" ||
+    moduleId === "figures" ||
     moduleId === "links" ||
     moduleId === "trackChanges" ||
     moduleId === "writing"
