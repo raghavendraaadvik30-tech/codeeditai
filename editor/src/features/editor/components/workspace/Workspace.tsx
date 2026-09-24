@@ -27,7 +27,7 @@ import {
   TableFloatingFormatToolbar,
   TableContextMenu,
   type TableContextMenuState,
-} from "../../tables/components";
+} from "../../modules/tables/components";
 import { PictureHydration } from "@/features/editor/modules/figures/modules/pictures";
 import { IconHydration } from "@/features/editor/modules/figures/modules/icons";
 import { ShapeHydration } from "@/features/editor/modules/figures/modules/shapes";
@@ -148,7 +148,7 @@ export default function Workspace() {
 
   // Close table context menu when navigating pages
   useEffect(() => {
-    setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+    setTableContextMenu((prev: TableContextMenuState) => (prev.open ? { ...prev, open: false } : prev));
   }, [activePage]);
 
   // Native contextmenu detection specifically for table cells (td, th)
@@ -198,7 +198,7 @@ export default function Workspace() {
       }
 
       // If clicked outside a table cell, close any open table context menu and leave default behavior
-      setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+      setTableContextMenu((prev: TableContextMenuState) => (prev.open ? { ...prev, open: false } : prev));
     };
 
     document.addEventListener("contextmenu", handleContextMenu);
@@ -385,7 +385,7 @@ export default function Workspace() {
       {isEditable && viewMode !== "read" && (
         <TableContextMenu
           state={tableContextMenu}
-          onClose={() => setTableContextMenu((prev) => ({ ...prev, open: false }))}
+          onClose={() => setTableContextMenu((prev: TableContextMenuState) => ({ ...prev, open: false }))}
           onUpdateTable={() => {
             if (tableContextMenu.table) {
               const editable = tableContextMenu.table.closest('[contenteditable="true"]') as HTMLElement | null;
@@ -716,8 +716,6 @@ function restoreSelection(container: HTMLElement, saved: SavedSelection | null):
     // ignore
   }
 }
-  }
-}
 
 interface DocumentPageProps {
   pageId: string;
@@ -970,9 +968,7 @@ function DocumentPage({
       onChange(element.innerHTML);
     }
   }, [pageNumber, totalPages, pageNumberFormat, onChange]);
->>>>>>> origin/main
-
-  /*
+/*
    * Keep the page HTML synchronized with the document model
    * only when genuine external updates occur (undo/redo, file load).
    */
@@ -986,7 +982,13 @@ function DocumentPage({
         .replace(/\s+/g, " ")
         .trim();
 
-<<<<<<< HEAD
+    // If element in DOM is empty or not yet initialized, populate with incoming html
+    if (!element.hasChildNodes() || element.innerHTML.trim() === "" || lastHtmlRef.current === null) {
+      element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
+      lastHtmlRef.current = html;
+      return;
+    }
+
     // If active element is inside this editor, avoid destroying the user's cursor
     const hasFocus = element === document.activeElement || element.contains(document.activeElement);
     if (hasFocus) {
@@ -997,11 +999,6 @@ function DocumentPage({
 
     if (normalize(element.innerHTML) !== normalize(html)) {
       element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
-=======
-    // If element in DOM is empty or not yet initialized, populate with incoming html
-    if (!element.hasChildNodes() || element.innerHTML.trim() === "" || lastHtmlRef.current === null) {
-      element.innerHTML = html || "<p><br></p>";
->>>>>>> origin/main
       lastHtmlRef.current = html;
       return;
     }
@@ -1634,7 +1631,22 @@ function DocumentPage({
       return;
     }
 
-<<<<<<< HEAD
+    // Click is outside the editable container (e.g. on page margins in <section>):
+    if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
+      e.preventDefault();
+      container.focus();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(firstChild);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
     const lastChildRect = lastChild.getBoundingClientRect();
     const effectiveLineHeight = 28 * (zoom / 100);
 
@@ -1675,16 +1687,10 @@ function DocumentPage({
       onChange(updatedHtml);
 
       // Place caret '|' inside target paragraph
-=======
-    // Click is outside the editable container (e.g. on page margins in <section>):
-    if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
-      e.preventDefault();
-      container.focus();
->>>>>>> origin/main
       const sel = window.getSelection();
       if (sel) {
         const range = document.createRange();
-        range.selectNodeContents(firstChild);
+        range.selectNodeContents(targetP);
         range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
@@ -2438,12 +2444,11 @@ function DocumentPage({
           [&_th]:break-words
           [&_th]:[overflow-wrap:anywhere]
           [&_th]:[word-break:break-word]
-          [&_th]:whitespace-normal
           [&_th_p]:my-0
           [&_th_p]:min-w-0
           [&_th_p]:[overflow-wrap:anywhere]
           [&_th_p]:[word-break:break-word]
-        "
+        `}
       />
 
       {/* WORD-STYLE TABLE MOVE & RESIZE OVERLAY (Editor UI only, not in saved document) */}

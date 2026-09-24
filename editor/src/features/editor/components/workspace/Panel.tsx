@@ -382,7 +382,6 @@ export default function Panel({ moduleId }: PanelProps) {
       <GenericPanel title={moduleId} />
     );
   }
-  }
 
   return (
     <div className="flex h-full flex-col">

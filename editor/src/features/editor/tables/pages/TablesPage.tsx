@@ -20,8 +20,8 @@ import {
   TableGridPicker,
   TableInsertDialog,
   TableActionsToolbar,
-  StandardTablesPanel,
 } from "../components";
+import { StandardTablesPanel } from "../../modules/tables/components/StandardTablesPanel";
 import { cn } from "@/lib/utils";
 
 type TableSection = "quickGrid" | "actions" | "standardTables";
