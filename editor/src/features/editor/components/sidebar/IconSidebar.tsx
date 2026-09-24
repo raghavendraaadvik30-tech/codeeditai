@@ -1,23 +1,3 @@
-/*### `IconSidebar.tsx` — Description
-
-**Purpose:**
-Creates the editor's **left-side icon navigation bar** and controls which editor panel is opened.
-
-**What each part does:**
-
-* **`SIDEBAR_ITEMS`** – Defines all available sidebar sections such as Document, Writing, Styles, Tables, References, Templates, and Settings.
-* **`useEditor()`** – Gets the current active panel and functions to change/open panels.
-* **`handlePanelClick()`** – Sets the selected panel and opens the left overlay panel.
-* **`SIDEBAR_ITEMS.map()`** – Dynamically renders each sidebar icon from the configuration.
-* **`isActive`** – Highlights the currently selected panel.
-* **Active indicator** – Displays a blue indicator beside the active icon.
-* **Hover tooltip** – Shows the panel name when the user hovers over an icon.
-* **Dark mode** – Provides separate styling for light and dark themes.
-
-**In short:**
-`IconSidebar.tsx` is the **main navigation component for editor tools**. It does not contain the actual panel content; it only **selects and opens the required panel through `useEditor()`**.
-*/
-
 import {
   FileText,
   Link2,
@@ -39,61 +19,73 @@ const SIDEBAR_ITEMS = [
   {
     id: "document",
     label: "Document",
+    description: "Document tools",
     icon: FileText,
   },
   {
     id: "links",
     label: "Links",
+    description: "Internal, external & cross references",
     icon: Link2,
   },
   {
     id: "writing",
     label: "Writing",
+    description: "Writing and formatting tools",
     icon: PenLine,
   },
   {
     id: "styles",
     label: "Styles",
+    description: "Document styles",
     icon: Palette,
   },
   {
     id: "tables",
     label: "Tables",
+    description: "Smart table wizard",
     icon: Table2,
   },
   {
     id: "figures",
     label: "Figures",
+    description: "Images and figures",
     icon: Image,
   },
   {
     id: "references",
     label: "References",
+    description: "References and citations",
     icon: Bookmark,
   },
   {
     id: "symbols",
     label: "Symbols",
+    description: "Special symbols",
     icon: Sigma,
   },
   {
     id: "appendices",
     label: "Appendices",
+    description: "Document appendices",
     icon: Files,
   },
   {
     id: "trackChanges",
     label: "Track Changes",
+    description: "Review document changes",
     icon: ShieldCheck,
   },
   {
     id: "templates",
     label: "Templates",
+    description: "Document templates",
     icon: LayoutTemplate,
   },
   {
     id: "settings",
     label: "Settings",
+    description: "Editor settings",
     icon: Settings,
   },
 ] as const;
@@ -127,29 +119,19 @@ export default function IconSidebar() {
         dark:bg-[#07131E]
       "
     >
-      {/* =========================
-          ALL WORKSPACE ICONS
-      ========================= */}
-
       <div className="flex w-full flex-col items-center gap-1">
         {SIDEBAR_ITEMS.map((item) => {
           const Icon = item.icon;
-
-          const isActive =
-            activePanel === item.id;
+          const isActive = activePanel === item.id;
 
           return (
             <div
               key={item.id}
               className="group relative"
             >
-              {/* ICON BUTTON */}
-
               <button
                 type="button"
-                onClick={() =>
-                  handlePanelClick(item.id)
-                }
+                onClick={() => handlePanelClick(item.id)}
                 aria-label={item.label}
                 className={`
                   relative
@@ -161,7 +143,6 @@ export default function IconSidebar() {
                   rounded-lg
                   transition-all
                   duration-150
-
                   ${
                     isActive
                       ? "bg-blue-600 text-white shadow-sm"
@@ -170,8 +151,6 @@ export default function IconSidebar() {
                 `}
               >
                 <Icon className="h-5 w-5" />
-
-                {/* ACTIVE INDICATOR */}
 
                 {isActive && (
                   <span
@@ -188,37 +167,58 @@ export default function IconSidebar() {
                 )}
               </button>
 
-              {/* =========================
-                  HOVER TOOLTIP
-              ========================= */}
+              {/* HOVER TOOLTIP */}
 
               <div
                 className="
                   pointer-events-none
                   absolute
-                  left-[52px]
+                  left-[54px]
                   top-1/2
-                  z-[100]
+                  z-[9999]
+                  w-max
+                  max-w-[240px]
                   -translate-y-1/2
                   translate-x-1
-                  whitespace-nowrap
-                  rounded-md
-                  bg-slate-900
-                  px-3
-                  py-1.5
-                  text-xs
-                  font-medium
-                  text-white
+                  rounded-xl
+                  border
+                  border-slate-200
+                  bg-white
+                  px-4
+                  py-2.5
                   opacity-0
                   shadow-lg
                   transition-all
                   duration-150
-
                   group-hover:translate-x-0
                   group-hover:opacity-100
+                  dark:border-slate-700
+                  dark:bg-[#111D29]
                 "
               >
-                {item.label}
+                <div
+                  className="
+                    text-sm
+                    font-semibold
+                    leading-5
+                    text-slate-900
+                    dark:text-white
+                  "
+                >
+                  {item.label}
+                </div>
+
+                <div
+                  className="
+                    mt-0.5
+                    text-xs
+                    leading-4
+                    text-slate-500
+                    dark:text-slate-400
+                  "
+                >
+                  {item.description}
+                </div>
               </div>
             </div>
           );

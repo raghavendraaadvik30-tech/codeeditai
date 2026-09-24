@@ -28,6 +28,12 @@ import {
   TableContextMenu,
   type TableContextMenuState,
 } from "../../modules/tables/components";
+import { PictureHydration } from "@/features/editor/modules/figures/modules/pictures";
+import { IconHydration } from "@/features/editor/modules/figures/modules/icons";
+import { ShapeHydration } from "@/features/editor/modules/figures/modules/shapes";
+import { ChartHydration, useChartContext } from "@/features/editor/modules/figures/modules/chart";
+import { SmartArtHydration } from "@/features/editor/modules/figures/modules/smartart";
+import { useTrackChanges } from "../../modules/trackChanges";
 import DocumentRuler from "./DocumentRuler";
 
 export default function Workspace() {
@@ -142,7 +148,7 @@ export default function Workspace() {
 
   // Close table context menu when navigating pages
   useEffect(() => {
-    setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+    setTableContextMenu((prev: TableContextMenuState) => (prev.open ? { ...prev, open: false } : prev));
   }, [activePage]);
 
   // Native contextmenu detection specifically for table cells (td, th)
@@ -192,7 +198,7 @@ export default function Workspace() {
       }
 
       // If clicked outside a table cell, close any open table context menu and leave default behavior
-      setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+      setTableContextMenu((prev: TableContextMenuState) => (prev.open ? { ...prev, open: false } : prev));
     };
 
     document.addEventListener("contextmenu", handleContextMenu);
@@ -361,6 +367,13 @@ export default function Workspace() {
         })()}
       </div>
 
+      {/* DOCUMENT CHART, SMARTART, ICON & SHAPE HYDRATION */}
+      <ChartHydration />
+      <SmartArtHydration />
+      <IconHydration />
+      <ShapeHydration />
+      <PictureHydration />
+
       {/* WORD-STYLE CONTEXTUAL TABLE TEXT FORMATTING TOOLBAR
           Appears automatically near selection when text inside a table cell is selected
       */}
@@ -372,7 +385,7 @@ export default function Workspace() {
       {isEditable && viewMode !== "read" && (
         <TableContextMenu
           state={tableContextMenu}
-          onClose={() => setTableContextMenu((prev) => ({ ...prev, open: false }))}
+          onClose={() => setTableContextMenu((prev: TableContextMenuState) => ({ ...prev, open: false }))}
           onUpdateTable={() => {
             if (tableContextMenu.table) {
               const editable = tableContextMenu.table.closest('[contenteditable="true"]') as HTMLElement | null;
@@ -513,6 +526,36 @@ function isCursorAtStart(container: HTMLElement): boolean {
     node = node.parentNode;
   }
   return true;
+}
+
+/**
+ * Strips rendered React portal contents from .editor-chart-mount and .editor-smartart-mount
+ * so that live interactive DOM is never baked into static page HTML.
+ */
+export function cleanChartMountsForHtml(html: string): string {
+  if (
+    !html ||
+    (!html.includes("editor-chart-mount") &&
+      !html.includes("editor-smartart-mount") &&
+      !html.includes("editor-picture-mount") &&
+      !html.includes("editor-icon-mount") &&
+      !html.includes("editor-shape-mount"))
+  )
+    return html;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<body>${html}</body>`, "text/html");
+    const mounts = doc.querySelectorAll(
+      ".editor-chart-mount, .editor-smartart-mount, .editor-picture-mount, .editor-icon-mount, .editor-shape-mount"
+    );
+    if (mounts.length === 0) return html;
+    mounts.forEach((m) => {
+      m.innerHTML = "";
+    });
+    return doc.body.innerHTML;
+  } catch {
+    return html;
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -740,7 +783,19 @@ function DocumentPage({
   const consecutiveEnterRef = useRef<boolean>(false);
   const lastEnterTimeRef = useRef<number>(0);
 
+  const { activeChartId, isSpreadsheetOpen } = useChartContext();
+  const isEditingChartOnThisPage = Boolean(
+    isSpreadsheetOpen && activeChartId && html.includes(activeChartId)
+  );
+
   const { undo, redo, recordSnapshot, initHistory, insertPageBreak, insertLineBreak, insertColumnBreak } = useEditor();
+  const {
+    showMarkup,
+    handleBeforeInput,
+    handleKeyDown: handleTcKeyDown,
+    handleInput: handleTcInput,
+    handleClick: handleTcClick,
+  } = useTrackChanges();
 
   useEffect(() => {
     initHistory(pageId, html || "<p><br></p>");
@@ -913,8 +968,7 @@ function DocumentPage({
       onChange(element.innerHTML);
     }
   }, [pageNumber, totalPages, pageNumberFormat, onChange]);
-
-  /*
+/*
    * Keep the page HTML synchronized with the document model
    * only when genuine external updates occur (undo/redo, file load).
    */
@@ -922,11 +976,29 @@ function DocumentPage({
     const element = localEditorRef.current;
     if (!element) return;
 
-    const normalize = (s: string) => s.replace(/<br\s*\/?>/gi, "<br>").replace(/\s+/g, " ").trim();
+    const normalize = (s: string) =>
+      cleanChartMountsForHtml(s)
+        .replace(/<br\s*\/?>/gi, "<br>")
+        .replace(/\s+/g, " ")
+        .trim();
 
     // If element in DOM is empty or not yet initialized, populate with incoming html
     if (!element.hasChildNodes() || element.innerHTML.trim() === "" || lastHtmlRef.current === null) {
-      element.innerHTML = html || "<p><br></p>";
+      element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
+      lastHtmlRef.current = html;
+      return;
+    }
+
+    // If active element is inside this editor, avoid destroying the user's cursor
+    const hasFocus = element === document.activeElement || element.contains(document.activeElement);
+    if (hasFocus) {
+      if (normalize(lastHtmlRef.current) === normalize(html)) {
+        return;
+      }
+    }
+
+    if (normalize(element.innerHTML) !== normalize(html)) {
+      element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
       lastHtmlRef.current = html;
       return;
     }
@@ -950,6 +1022,41 @@ function DocumentPage({
       restoreSelection(element, savedSel);
     }
   }, [html]);
+
+  // Native DOM event listeners for Track Changes engine:
+  // Native beforeinput interception ensures synchronous cancellation before browser DOM mutation
+  useEffect(() => {
+    const el = localEditorRef.current;
+    if (!el) return;
+
+    const onNativeBeforeInput = (e: Event) => {
+      handleBeforeInput(e as InputEvent, pageId);
+    };
+
+    const onNativeKeyDown = (e: KeyboardEvent) => {
+      handleTcKeyDown(e, pageId);
+    };
+
+    const onNativeInput = (e: Event) => {
+      handleTcInput(e, pageId);
+    };
+
+    const onNativeClick = (e: MouseEvent) => {
+      handleTcClick(e, pageId);
+    };
+
+    el.addEventListener("beforeinput", onNativeBeforeInput);
+    el.addEventListener("keydown", onNativeKeyDown);
+    el.addEventListener("input", onNativeInput);
+    el.addEventListener("click", onNativeClick);
+
+    return () => {
+      el.removeEventListener("beforeinput", onNativeBeforeInput);
+      el.removeEventListener("keydown", onNativeKeyDown);
+      el.removeEventListener("input", onNativeInput);
+      el.removeEventListener("click", onNativeClick);
+    };
+  }, [pageId, handleBeforeInput, handleTcKeyDown, handleTcInput, handleTcClick]);
 
   // Sync editorRef with active page
   useEffect(() => {
@@ -1000,6 +1107,8 @@ function DocumentPage({
   // If content overflows -> moves ONLY the overflowing children to next page.
   // ------------------------------------------------------------------------
   const checkAndPaginateOverflow = useCallback(() => {
+    if (isEditingChartOnThisPage) return;
+
     const container = localEditorRef.current;
     if (!container) return;
 
@@ -1093,11 +1202,11 @@ function DocumentPage({
     // Build HTML for overflowing content
     const tempDiv = document.createElement("div");
     overflowNodes.forEach((node) => tempDiv.appendChild(node.cloneNode(true)));
-    const overflowHtml = tempDiv.innerHTML.trim();
+    const overflowHtml = cleanChartMountsForHtml(tempDiv.innerHTML.trim());
 
     // Remove overflowing content from current page
     overflowNodes.forEach((node) => node.remove());
-    const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
+    const remainingHtml = cleanChartMountsForHtml(container.innerHTML.trim()) || "<p><br/></p>";
     lastHtmlRef.current = remainingHtml;
     onChange(remainingHtml);
 
@@ -1466,7 +1575,7 @@ function DocumentPage({
     consecutiveEnterRef.current = false;
     const element = localEditorRef.current;
     if (!element) return;
-    const currentHtml = element.innerHTML;
+    const currentHtml = cleanChartMountsForHtml(element.innerHTML);
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
     recordSnapshot(pageId, currentHtml, getCaretCharacterOffsetWithin(element));
@@ -1579,6 +1688,58 @@ function DocumentPage({
       return;
     }
 
+    const containerRect = container.getBoundingClientRect();
+    const lastChildRect = lastChild.getBoundingClientRect();
+    const effectiveLineHeight = 28 * (zoom / 100);
+
+    // Case 1: Click is below the last paragraph on the page
+    if (e.clientY > lastChildRect.bottom + 6) {
+      const maxAllowedBottom = containerRect.bottom - 28;
+      const diffY = e.clientY - lastChildRect.bottom;
+      let linesToAdd = Math.max(1, Math.round(diffY / effectiveLineHeight));
+
+      // Ensure we don't exceed the page boundary
+      const maxPossibleLines = Math.max(
+        1,
+        Math.floor((maxAllowedBottom - lastChildRect.bottom) / effectiveLineHeight)
+      );
+      linesToAdd = Math.min(linesToAdd, maxPossibleLines);
+
+      let targetP: HTMLElement = lastChild;
+      const isLastEmpty =
+        lastChild.tagName === "P" &&
+        (lastChild.innerHTML === "<br>" ||
+          lastChild.innerHTML === "<br/>" ||
+          lastChild.textContent?.trim() === "");
+
+      const startCount = isLastEmpty ? 1 : 0;
+      for (let i = startCount; i < linesToAdd; i++) {
+        const p = document.createElement("p");
+        p.innerHTML = "<br>";
+        container.appendChild(p);
+        targetP = p;
+      }
+
+      if (isLastEmpty && linesToAdd === 1) {
+        targetP = lastChild;
+      }
+
+      const updatedHtml = cleanChartMountsForHtml(container.innerHTML);
+      lastHtmlRef.current = updatedHtml;
+      onChange(updatedHtml);
+
+      // Place caret '|' inside target paragraph
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(targetP);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
     if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom) {
       e.preventDefault();
       container.focus();
@@ -1668,18 +1829,199 @@ function DocumentPage({
   const footerHeight = isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
 
+  const getBorderStyle = (): React.CSSProperties => {
+    if (!section?.pageBorders || section.pageBorders.style === "none") {
+      return {};
+    }
+
+    const {
+      style,
+      color = "#000000",
+      width = 2,
+      top = true,
+      bottom = true,
+      left = true,
+      right = true,
+    } = section.pageBorders;
+
+    const borderVal =
+      style === "double"
+        ? `${Math.max(3, width)}px double ${color}`
+        : style === "dashed"
+        ? `${width}px dashed ${color}`
+        : style === "dotted"
+        ? `${width}px dotted ${color}`
+        : style === "3d"
+        ? `${width}px inset ${color}`
+        : `${width}px solid ${color}`;
+
+    const styles: React.CSSProperties = {
+      boxSizing: "border-box",
+    };
+
+    if (top) styles.borderTop = borderVal;
+    if (bottom) styles.borderBottom = borderVal;
+    if (left) styles.borderLeft = borderVal;
+    if (right) styles.borderRight = borderVal;
+
+    if (style === "shadow") {
+      styles.boxShadow = "0 10px 30px rgba(0,0,0,0.25)";
+      styles.border = `${width}px solid ${color}`;
+    }
+
+    return styles;
+  };
+
+  const extractCleanTitle = (src?: string, fileName?: string): string => {
+    if (fileName && fileName.trim() && fileName !== "Online Picture") {
+      return fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+    }
+    if (src && !src.startsWith("data:")) {
+      try {
+        const match = src.match(/\/([^\/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
+        if (match && match[1]) {
+          const decoded = decodeURIComponent(match[1]).replace(/[-_]/g, " ");
+          if (decoded.length > 1 && !/^[0-9a-f]{20,}$/i.test(decoded)) {
+            return decoded;
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return fileName || "Picture";
+  };
+
+  const handlePageDrop = (e: React.DragEvent<HTMLElement>) => {
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith("image/")) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const src = reader.result as string;
+          if (src) {
+            window.dispatchEvent(
+              new CustomEvent("pf-insert-picture", {
+                detail: {
+                  src,
+                  name: extractCleanTitle(src, file.name),
+                  mode: "withTitle",
+                },
+              })
+            );
+          }
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+
+    let uri = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain");
+    const htmlData = e.dataTransfer.getData("text/html");
+
+    if (!uri && htmlData) {
+      const match = htmlData.match(/src=["'](https?:\/\/[^"']+|data:image\/[^"']+)["']/i);
+      if (match) {
+        uri = match[1];
+      }
+    }
+
+    if (uri && (uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("data:image/"))) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.dispatchEvent(
+        new CustomEvent("pf-insert-picture", {
+          detail: {
+            src: uri,
+            name: extractCleanTitle(uri),
+            mode: "withTitle",
+          },
+        })
+      );
+    }
+  };
+
+  const handlePagePaste = (e: React.ClipboardEvent<HTMLElement>) => {
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) return;
+
+    const items = Array.from(clipboardData.items);
+    const imageItem = items.find((item) => item.type.startsWith("image/"));
+    if (imageItem) {
+      const file = imageItem.getAsFile();
+      if (file) {
+        e.preventDefault();
+        e.stopPropagation();
+        const reader = new FileReader();
+        reader.onload = () => {
+          const src = reader.result as string;
+          if (src) {
+            window.dispatchEvent(
+              new CustomEvent("pf-insert-picture", {
+                detail: {
+                  src,
+                  name: extractCleanTitle(src, file.name || "Pasted Image"),
+                  mode: "withTitle",
+                },
+              })
+            );
+          }
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+
+    const pastedText = clipboardData.getData("text/plain")?.trim();
+    if (
+      pastedText &&
+      (pastedText.startsWith("http://") ||
+        pastedText.startsWith("https://") ||
+        pastedText.startsWith("data:image/")) &&
+      /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(pastedText)
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.dispatchEvent(
+        new CustomEvent("pf-insert-picture", {
+          detail: {
+            src: pastedText,
+            name: extractCleanTitle(pastedText),
+            mode: "withTitle",
+          },
+        })
+      );
+    }
+  };
+
   return (
     <div
       data-page-wrapper={pageId}
       className="relative flex justify-center shrink-0 print:contents"
       style={{
         width: `${scaledPageWidth}px`,
-        height: isWeb ? "auto" : `${scaledPageHeight}px`,
+        height: isEditingChartOnThisPage ? "auto" : (isWeb ? "auto" : `${scaledPageHeight}px`),
       }}
     >
       <section
         data-page-id={pageId}
         onMouseDown={handlePageMouseDown}
+        onPaste={handlePagePaste}
+        onDragOver={(e) => {
+          if (
+            e.dataTransfer.types.includes("Files") ||
+            e.dataTransfer.types.includes("text/uri-list") ||
+            e.dataTransfer.types.includes("text/plain") ||
+            e.dataTransfer.types.includes("text/html")
+          ) {
+            e.preventDefault();
+          }
+        }}
+        onDrop={handlePageDrop}
         onDoubleClick={(e) => {
           if (!isRead && !isDraft && isHeaderFooterActive && !(e.target as HTMLElement).closest('[data-hf-container]')) {
             e.stopPropagation();
@@ -1688,7 +2030,7 @@ function DocumentPage({
         }}
         className={`
           relative
-          overflow-hidden
+          ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
           shrink-0
           cursor-text
           box-border
@@ -1707,11 +2049,12 @@ function DocumentPage({
         style={{
           width: `${pageWidth}px`,
           minWidth: `${pageWidth}px`,
-          height: isWeb ? "auto" : `${pageHeight}px`,
-          maxHeight: isWeb ? "none" : `${pageHeight}px`,
+          height: isEditingChartOnThisPage ? "auto" : (isWeb ? "auto" : `${pageHeight}px`),
+          maxHeight: isEditingChartOnThisPage ? undefined : (isWeb ? "none" : `${pageHeight}px`),
           transform: `scale(${zoom / 100})`,
           transformOrigin: "top center",
           backgroundColor: section?.pageColor || "#ffffff",
+          ...getBorderStyle(),
         }}
       >
         {/* WORD-STYLE PAGE BORDER OVERLAY */}
@@ -2029,6 +2372,7 @@ function DocumentPage({
         }}
         data-page-id={pageId}
         data-editor-page={pageId}
+        data-show-markup={showMarkup ? "true" : "false"}
         contentEditable={editable && !isHeaderFooterActive}
         suppressContentEditableWarning
         onFocus={handleFocus}
@@ -2044,8 +2388,9 @@ function DocumentPage({
           }
         }}
         style={{
-          height: `${contentHeight}px`,
-          maxHeight: `${contentHeight}px`,
+          minHeight: `${contentHeight}px`,
+          height: isEditingChartOnThisPage ? "auto" : `${contentHeight}px`,
+          maxHeight: isEditingChartOnThisPage ? undefined : `${contentHeight}px`,
           paddingTop: `${bodyPaddingTop}px`,
           paddingBottom: `${bodyPaddingBottom}px`,
           paddingLeft: `${marginL}px`,
@@ -2064,8 +2409,8 @@ function DocumentPage({
               }
             : {}),
         }}
-        className="
-          overflow-hidden
+        className={`
+          ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
           box-border
           outline-none
           cursor-text
@@ -2142,12 +2487,11 @@ function DocumentPage({
           [&_th]:break-words
           [&_th]:[overflow-wrap:anywhere]
           [&_th]:[word-break:break-word]
-          [&_th]:whitespace-normal
           [&_th_p]:my-0
           [&_th_p]:min-w-0
           [&_th_p]:[overflow-wrap:anywhere]
           [&_th_p]:[word-break:break-word]
-        "
+        `}
       />
 
       {/* WORD-STYLE TABLE MOVE & RESIZE OVERLAY (Editor UI only, not in saved document) */}
@@ -2158,7 +2502,7 @@ function DocumentPage({
           zoom={zoom}
           onUpdate={() => {
             if (localEditorRef.current) {
-              const updatedHtml = localEditorRef.current.innerHTML;
+              const updatedHtml = cleanChartMountsForHtml(localEditorRef.current.innerHTML);
               lastHtmlRef.current = updatedHtml;
               onChange(updatedHtml);
             }
