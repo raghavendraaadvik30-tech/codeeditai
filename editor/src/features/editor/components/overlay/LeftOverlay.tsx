@@ -15,7 +15,7 @@ User clicks an icon -> LeftOverlay.tsx -> panelMap -> Panel.tsx -> modules/<modu
 */
 
 import type { ComponentType } from "react";
-import { X, FileText, Palette, Edit3, Link2, Settings, Image as ImageIcon } from "lucide-react";
+import { X, FileText, Palette, Edit3, Link2, Settings, Image as ImageIcon, GitCompare } from "lucide-react";
 
 import { useEditor } from "../../hooks/useEditor";
 import type { ModuleId } from "../../data/workspaceModules";
@@ -35,6 +35,7 @@ const PANEL_TITLES: Partial<Record<PanelType, string>> = {
   templates: "Templates",
   document: "Documents",
   settings: "Settings",
+  trackChanges: "Track Changes",
 };
 
 const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
@@ -48,6 +49,7 @@ const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
   templates: "Document templates",
   document: "Manage clinical documents & records",
   settings: "Editor settings",
+  trackChanges: "Review and tracking",
 };
 
 const PANEL_ICONS: Partial<Record<PanelType, typeof FileText>> = {
@@ -57,6 +59,7 @@ const PANEL_ICONS: Partial<Record<PanelType, typeof FileText>> = {
   links: Link2,
   settings: Settings,
   figures: ImageIcon,
+  trackChanges: GitCompare,
 };
 
 /* --------------------------------
@@ -70,6 +73,7 @@ const panelMap: Partial<Record<PanelType, ComponentType<{ moduleId: ModuleId }>>
   tables: Panel,
   settings: Panel,
   figures: Panel,
+  trackChanges: Panel,
 };
 
 export default function LeftOverlay() {

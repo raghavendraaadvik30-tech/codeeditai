@@ -41,6 +41,7 @@ import IconSidebar from "../components/sidebar/IconSidebar";
 import LeftOverlay from "../components/overlay/LeftOverlay";
 import Workspace from "../components/workspace/Workspace";
 import AIPanel from "../components/ai/AIPanel";
+import EditorStatusBar from "../components/statusbar/EditorStatusBar";
 
 
 import { useEditor } from "../hooks/useEditor";
@@ -83,6 +84,8 @@ export default function EditorLayout() {
               border-r
               border-slate-200
               bg-white
+              dark:border-slate-800
+              dark:bg-[#0d1117]
             "
           >
             <LeftOverlay />
@@ -99,6 +102,7 @@ export default function EditorLayout() {
             min-h-0
             overflow-hidden
             bg-[#EEF4FA]
+            dark:bg-[#090d13]
           "
         >
           <Workspace />
@@ -116,6 +120,8 @@ export default function EditorLayout() {
               border-l
               border-slate-200
               bg-white
+              dark:border-slate-800
+              dark:bg-[#0d1117]
             "
           >
             <AIPanel />
@@ -124,7 +130,8 @@ export default function EditorLayout() {
 
       </main>
 
-      
+      {/* WORD-STYLE STATUS & VIEW CONTROL BAR */}
+      <EditorStatusBar />
 
     </div>
   );

@@ -3,22 +3,26 @@
  * 
  * Comprehensive document file parser for the Document Editor.
  * Supports:
- * - Word documents (.docx) via native zip header traversal and deflate decompression
+ * - Word documents (.docx) via JSZip and OpenXML parsing
+ * - PDF documents (.pdf) via native text stream extraction
  * - HTML documents (.html, .htm) via DOMParser
  * - Markdown files (.md, .markdown)
  * - Structured JSON documents (.json)
  * - Plain text (.txt, .text, .rtf)
  * 
- * Completely zero npm dependencies; uses standard Web APIs.
+ * Accurately parses and paginates continuous multi-page documents.
  */
+
+import JSZip from "jszip";
 
 export interface ParsedDocument {
   title: string;
   html: string;
+  pages: string[];
 }
 
 /**
- * Main entry point: parses any uploaded document file into title and clean HTML.
+ * Main entry point: parses any uploaded document file into title, full HTML, and individual page HTMLs.
  */
 export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
   const fileName = file.name;
@@ -28,127 +32,309 @@ export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
   try {
     if (lowerName.endsWith(".docx")) {
       const buffer = await file.arrayBuffer();
-      const html = await parseDocxBuffer(buffer);
-      return { title: cleanTitle, html: html || "<p><br/></p>" };
+      const rawHtml = await parseDocxBuffer(buffer);
+      const html = rawHtml || "<p><br/></p>";
+      const pages = splitHtmlIntoPages(html);
+      return { title: cleanTitle, html, pages };
+    }
+
+    if (lowerName.endsWith(".pdf")) {
+      const buffer = await file.arrayBuffer();
+      const { html, pages } = parsePdfBuffer(buffer);
+      return { title: cleanTitle, html, pages };
     }
 
     if (lowerName.endsWith(".html") || lowerName.endsWith(".htm")) {
       const text = await file.text();
-      const html = parseHtmlText(text);
-      return { title: cleanTitle, html };
+      const { html, pages } = parseHtmlText(text);
+      return { title: cleanTitle, html, pages };
     }
 
     if (lowerName.endsWith(".json")) {
       const text = await file.text();
-      const html = parseJsonText(text);
-      return { title: cleanTitle, html };
+      const { html, pages } = parseJsonText(text);
+      return { title: cleanTitle, html, pages };
     }
 
     if (lowerName.endsWith(".md") || lowerName.endsWith(".markdown")) {
       const text = await file.text();
-      const html = parseMarkdownText(text);
-      return { title: cleanTitle, html };
+      const { html, pages } = parseMarkdownText(text);
+      return { title: cleanTitle, html, pages };
     }
 
     // Plain text or fallback
     const text = await file.text();
-    const html = parsePlainText(text);
-    return { title: cleanTitle, html };
+    const { html, pages } = parsePlainText(text);
+    return { title: cleanTitle, html, pages };
   } catch (err) {
     console.error("Error parsing uploaded file:", err);
     // Fallback: try plain text
     try {
       const text = await file.text();
-      return { title: cleanTitle, html: parsePlainText(text) };
+      const { html, pages } = parsePlainText(text);
+      return { title: cleanTitle, html, pages };
     } catch {
-      return { title: cleanTitle, html: "<p>Unable to display uploaded document content.</p>" };
+      const errHtml = "<p>Unable to display uploaded document content.</p>";
+      return { title: cleanTitle, html: errHtml, pages: [errHtml] };
     }
   }
 }
 
 /**
- * Parses DOCX ArrayBuffer by reading the ZIP archive and extracting word/document.xml.
+ * Splits HTML content into individual pages based on explicit page-break markers,
+ * and auto-paginates continuous content to fit document page dimensions without cutoffs.
  */
-async function parseDocxBuffer(buffer: ArrayBuffer): Promise<string> {
-  const bytes = new Uint8Array(buffer);
-  let pos = 0;
+export function splitHtmlIntoPages(html: string): string[] {
+  if (!html || !html.trim()) return ["<p><br/></p>"];
 
-  while (pos < bytes.length - 30) {
-    // Check for ZIP local file header signature: PK\x03\x04
-    if (bytes[pos] === 0x50 && bytes[pos + 1] === 0x4b && bytes[pos + 2] === 0x03 && bytes[pos + 3] === 0x04) {
-      const compressionMethod = bytes[pos + 8] | (bytes[pos + 9] << 8);
-      const compressedSize =
-        bytes[pos + 18] |
-        (bytes[pos + 19] << 8) |
-        (bytes[pos + 20] << 16) |
-        (bytes[pos + 21] << 24);
-      const fileNameLen = bytes[pos + 26] | (bytes[pos + 27] << 8);
-      const extraLen = bytes[pos + 28] | (bytes[pos + 29] << 8);
+  const breakPattern = /(?:<div[^>]*data-page-break="true"[^>]*><\/div>|<hr[^>]*class="[^"]*page-break[^"]*"[^>]*\/?>|<!--\s*page[-_]?break\s*-->|<div[^>]*style="[^"]*page-break-before:\s*always[^"]*"[^>]*><\/div>|<div[^>]*style="[^"]*break-before:\s*page[^"]*"[^>]*><\/div>)/i;
 
-      const fileNameBytes = bytes.subarray(pos + 30, pos + 30 + fileNameLen);
-      const entryName = new TextDecoder().decode(fileNameBytes);
+  // If there are explicit breaks, divide into segments
+  const rawSegments = breakPattern.test(html) ? html.split(breakPattern) : [html];
+  const finalPages: string[] = [];
 
-      const dataStart = pos + 30 + fileNameLen + extraLen;
-      const dataEnd = dataStart + compressedSize;
+  for (const seg of rawSegments) {
+    const trimmed = seg.trim();
+    if (!trimmed || trimmed === "<p><br/></p>" || trimmed === "<p><br></p>") {
+      continue;
+    }
+    // Paginate this segment if needed
+    const subPages = paginateContinuousHtml(trimmed);
+    finalPages.push(...subPages);
+  }
 
-      if (entryName === "word/document.xml" && dataEnd <= bytes.length) {
-        const fileData = bytes.subarray(dataStart, dataEnd);
-        let xmlText = "";
+  return finalPages.length > 0 ? finalPages : ["<p><br/></p>"];
+}
 
-        if (compressionMethod === 0) {
-          // Stored without compression
-          xmlText = new TextDecoder().decode(fileData);
-        } else if (compressionMethod === 8 && typeof DecompressionStream !== "undefined") {
-          // Deflate compressed
-          try {
-            const stream = new Response(fileData as unknown as BodyInit).body!.pipeThrough(
-              new DecompressionStream("deflate-raw")
-            );
-            xmlText = await new Response(stream).text();
-          } catch (decompErr) {
-            console.warn("DecompressionStream error:", decompErr);
-          }
+/**
+ * Continuous HTML paginator that measures block heights and splits across page boundaries.
+ */
+function paginateContinuousHtml(html: string): string[] {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    // Extract all flat block elements (unpacking any wrappers like div.WordSection1, main, article, section)
+    const blocks = extractTopBlockElements(doc.body);
+
+    if (blocks.length === 0) {
+      return [html];
+    }
+
+    const pages: string[] = [];
+    let currentPageHtml: string[] = [];
+    let currentHeight = 0;
+    const MAX_PAGE_HEIGHT = 760; // Standard Word printable writing height in px (1056 - 96 - 96 - 48 - 48)
+
+    for (let i = 0; i < blocks.length; i++) {
+      const child = blocks[i];
+
+      // Check explicit break indicator
+      const style = child.getAttribute("style") || "";
+      const isExplicitBreak =
+        child.getAttribute("data-page-break") === "true" ||
+        child.classList.contains("page-break") ||
+        /page-break-before:\s*always/i.test(style) ||
+        /break-before:\s*page/i.test(style);
+
+      if (isExplicitBreak) {
+        if (currentPageHtml.length > 0) {
+          pages.push(currentPageHtml.join(""));
+          currentPageHtml = [];
+          currentHeight = 0;
         }
-
-        if (xmlText) {
-          const html = convertDocxXmlToHtml(xmlText);
-          if (html.trim()) return html;
-        }
+        continue;
       }
 
-      pos = dataEnd > pos ? dataEnd : pos + 1;
-    } else {
-      pos++;
+      // Estimate rendered height
+      const tag = child.tagName.toLowerCase();
+      const textLen = child.textContent?.length || 0;
+      let elementHeight = 35;
+
+      if (tag === "h1") {
+        elementHeight = 65;
+      } else if (tag === "h2") {
+        elementHeight = 50;
+      } else if (tag === "h3") {
+        elementHeight = 40;
+      } else if (tag === "table") {
+        const rowCount = child.querySelectorAll("tr").length || 2;
+        elementHeight = Math.max(70, rowCount * 36);
+      } else if (tag === "ul" || tag === "ol") {
+        const itemCount = child.querySelectorAll("li").length || 2;
+        elementHeight = Math.max(30, itemCount * 28);
+      } else if (tag === "p") {
+        const lines = Math.max(1, Math.ceil(textLen / 70));
+        elementHeight = 16 + lines * 26;
+      } else {
+        const lines = Math.max(1, Math.ceil(textLen / 70));
+        elementHeight = Math.max(35, lines * 26);
+      }
+
+      // Handle extra-large paragraphs that exceed a page by themselves
+      if (tag === "p" && elementHeight > MAX_PAGE_HEIGHT && textLen > 700) {
+        if (currentPageHtml.length > 0) {
+          pages.push(currentPageHtml.join(""));
+          currentPageHtml = [];
+          currentHeight = 0;
+        }
+        // Split long paragraph into chunks
+        const pChunks = splitLongParagraph(child.innerHTML, 600);
+        for (const pChunk of pChunks) {
+          pages.push(pChunk);
+        }
+        continue;
+      }
+
+      // If adding element exceeds MAX_PAGE_HEIGHT
+      if (currentHeight + elementHeight > MAX_PAGE_HEIGHT && currentPageHtml.length > 0) {
+        pages.push(currentPageHtml.join(""));
+        currentPageHtml = [child.outerHTML];
+        currentHeight = elementHeight;
+      } else {
+        currentPageHtml.push(child.outerHTML);
+        currentHeight += elementHeight;
+      }
     }
+
+    if (currentPageHtml.length > 0) {
+      pages.push(currentPageHtml.join(""));
+    }
+
+    return pages.length > 0 ? pages : [html];
+  } catch {
+    return [html];
+  }
+}
+
+/**
+ * Extracts top-level content elements, unpacking any container divs, sections, articles, or WordSection1 wrappers.
+ */
+function extractTopBlockElements(root: Element): Element[] {
+  const blocks: Element[] = [];
+  const containerTags = new Set(["div", "section", "article", "main"]);
+
+  function walk(node: Element) {
+    const tag = node.tagName.toLowerCase();
+
+    // If it's a page break element, treat as block
+    if (
+      node.getAttribute("data-page-break") === "true" ||
+      node.classList.contains("page-break") ||
+      node.getAttribute("style")?.includes("page-break") ||
+      node.getAttribute("style")?.includes("break-before")
+    ) {
+      blocks.push(node);
+      return;
+    }
+
+    // If it's a container wrapper (e.g. WordSection1 or div)
+    if (containerTags.has(tag) && node.children.length > 0) {
+      let hasBlockChild = false;
+      for (let i = 0; i < node.children.length; i++) {
+        const childTag = node.children[i].tagName.toLowerCase();
+        if (/^(p|h[1-6]|table|ul|ol|blockquote|pre|div|section|article|figure|hr)$/.test(childTag)) {
+          hasBlockChild = true;
+          break;
+        }
+      }
+      if (hasBlockChild) {
+        for (let i = 0; i < node.children.length; i++) {
+          walk(node.children[i]);
+        }
+        return;
+      }
+    }
+
+    blocks.push(node);
+  }
+
+  for (let i = 0; i < root.children.length; i++) {
+    walk(root.children[i]);
+  }
+
+  return blocks;
+}
+
+/**
+ * Splits extra-large paragraph HTML into smaller paragraphs by sentence boundaries.
+ */
+function splitLongParagraph(innerHtml: string, maxCharsPerChunk = 600): string[] {
+  const sentences = innerHtml.split(/(?<=[.!?])\s+(?=[A-Z0-9<])/);
+  const chunks: string[] = [];
+  let currentChunk: string[] = [];
+  let currentLen = 0;
+
+  for (const s of sentences) {
+    if (currentLen + s.length > maxCharsPerChunk && currentChunk.length > 0) {
+      chunks.push(`<p>${currentChunk.join(" ")}</p>`);
+      currentChunk = [s];
+      currentLen = s.length;
+    } else {
+      currentChunk.push(s);
+      currentLen += s.length;
+    }
+  }
+
+  if (currentChunk.length > 0) {
+    chunks.push(`<p>${currentChunk.join(" ")}</p>`);
+  }
+
+  return chunks.length > 0 ? chunks : [`<p>${innerHtml}</p>`];
+}
+
+/**
+ * Parses DOCX ArrayBuffer by reading the ZIP archive via JSZip and extracting word/document.xml.
+ */
+async function parseDocxBuffer(buffer: ArrayBuffer): Promise<string> {
+  try {
+    const zip = await JSZip.loadAsync(buffer);
+    const docXmlFile = zip.file("word/document.xml");
+    if (docXmlFile) {
+      const xmlText = await docXmlFile.async("text");
+      if (xmlText) {
+        const html = convertDocxXmlToHtml(xmlText);
+        if (html && html.trim()) return html;
+      }
+    }
+  } catch (err) {
+    console.warn("JSZip DOCX reading failed, attempting fallback extraction:", err);
   }
 
   // Fallback: extract readable strings from the buffer
-  return extractPrintableStrings(bytes);
+  return extractPrintableStrings(new Uint8Array(buffer));
 }
 
 /**
- * Converts Word document.xml into HTML elements (headings, paragraphs, bold/italic, tables).
+ * Converts Word document.xml into HTML elements (headings, paragraphs, bold/italic, tables, page breaks).
  */
 function convertDocxXmlToHtml(xml: string): string {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, "application/xml");
-    const body = doc.querySelector("body");
+    const body =
+      doc.querySelector("body") ||
+      doc.getElementsByTagName("w:body")[0] ||
+      doc.getElementsByTagName("body")[0];
+
     if (!body) return fallbackRegexXmlExtract(xml);
 
     const htmlParts: string[] = [];
+    const nodes = Array.from(body.childNodes);
 
-    // Process direct children of body
-    body.childNodes.forEach((node) => {
-      if (node.nodeType !== Node.ELEMENT_NODE) return;
+    for (const node of nodes) {
+      if (node.nodeType !== Node.ELEMENT_NODE) continue;
       const el = node as Element;
+      const localName = el.localName || el.nodeName.replace(/^w:/, "");
 
-      if (el.localName === "p") {
+      if (localName === "p") {
         htmlParts.push(processParagraphElement(el));
-      } else if (el.localName === "tbl") {
+      } else if (localName === "tbl") {
         htmlParts.push(processTableElement(el));
+      } else if (localName === "sectPr") {
+        htmlParts.push('<div data-page-break="true"></div>');
       }
-    });
+    }
 
     const result = htmlParts.join("");
     return result.trim() ? result : fallbackRegexXmlExtract(xml);
@@ -159,58 +345,124 @@ function convertDocxXmlToHtml(xml: string): string {
 
 function processParagraphElement(p: Element): string {
   let styleTag = "p";
-  const pStyle = p.querySelector("pStyle");
-  const val = pStyle?.getAttribute("w:val") || "";
+  const pStyle = p.querySelector("pStyle") || p.getElementsByTagName("w:pStyle")[0];
+  const val =
+    pStyle?.getAttribute("w:val") ||
+    pStyle?.getAttribute("val") ||
+    "";
   if (/heading\s*1/i.test(val)) styleTag = "h1";
   else if (/heading\s*2/i.test(val)) styleTag = "h2";
   else if (/heading\s*3/i.test(val)) styleTag = "h3";
+  else if (/heading\s*4/i.test(val)) styleTag = "h4";
+
+  // Check for pageBreakBefore in paragraph properties
+  const hasPageBreakBefore =
+    p.querySelector("pageBreakBefore") !== null ||
+    p.getElementsByTagName("w:pageBreakBefore").length > 0 ||
+    p.getElementsByTagName("pageBreakBefore").length > 0;
 
   const runParts: string[] = [];
-  p.childNodes.forEach((node) => {
-    if (node.nodeType !== Node.ELEMENT_NODE) return;
+  const nodes = Array.from(p.childNodes);
+
+  for (const node of nodes) {
+    if (node.nodeType !== Node.ELEMENT_NODE) continue;
     const child = node as Element;
+    const childName = child.localName || child.nodeName.replace(/^w:/, "");
 
-    if (child.localName === "r") {
+    if (childName === "r") {
+      // Check for page breaks in run
+      const brs = Array.from(child.getElementsByTagName("w:br")).concat(
+        Array.from(child.getElementsByTagName("br"))
+      );
+      for (const br of brs) {
+        const t = br.getAttribute("w:type") || br.getAttribute("type");
+        if (t === "page") {
+          runParts.push('<div data-page-break="true"></div>');
+        } else {
+          runParts.push("<br/>");
+        }
+      }
+
+      const hasLastRendered =
+        child.getElementsByTagName("w:lastRenderedPageBreak").length > 0 ||
+        child.getElementsByTagName("lastRenderedPageBreak").length > 0;
+      if (hasLastRendered) {
+        runParts.push('<div data-page-break="true"></div>');
+      }
+
       let text = "";
-      child.querySelectorAll("t").forEach((t) => {
+      const textNodes = Array.from(child.getElementsByTagName("w:t")).concat(
+        Array.from(child.getElementsByTagName("t"))
+      );
+      for (const t of textNodes) {
         text += t.textContent || "";
-      });
+      }
 
-      if (!text) return;
+      if (!text) continue;
 
-      const isBold = child.querySelector("b") !== null;
-      const isItalic = child.querySelector("i") !== null;
-      const isUnderline = child.querySelector("u") !== null;
+      const isBold =
+        child.getElementsByTagName("w:b").length > 0 ||
+        child.getElementsByTagName("b").length > 0;
+      const isItalic =
+        child.getElementsByTagName("w:i").length > 0 ||
+        child.getElementsByTagName("i").length > 0;
+      const isUnderline =
+        child.getElementsByTagName("w:u").length > 0 ||
+        child.getElementsByTagName("u").length > 0;
+      const isStrike =
+        child.getElementsByTagName("w:strike").length > 0 ||
+        child.getElementsByTagName("strike").length > 0;
 
       let formatted = escapeHtml(text);
       if (isBold) formatted = `<strong>${formatted}</strong>`;
       if (isItalic) formatted = `<em>${formatted}</em>`;
       if (isUnderline) formatted = `<u>${formatted}</u>`;
+      if (isStrike) formatted = `<s>${formatted}</s>`;
 
       runParts.push(formatted);
     }
-  });
+  }
 
   const content = runParts.join("");
-  if (!content.trim()) return "<p><br/></p>";
+  const pPrefix = hasPageBreakBefore ? '<div data-page-break="true"></div>' : "";
+  if (!content.trim()) {
+    return hasPageBreakBefore ? `${pPrefix}<p><br/></p>` : "<p><br/></p>";
+  }
 
-  return `<${styleTag}>${content}</${styleTag}>`;
+  // Check for section break at paragraph end
+  const hasSectPr =
+    p.getElementsByTagName("w:sectPr").length > 0 ||
+    p.getElementsByTagName("sectPr").length > 0;
+  const pSuffix = hasSectPr ? '<div data-page-break="true"></div>' : "";
+
+  return `${pPrefix}<${styleTag}>${content}</${styleTag}>${pSuffix}`;
 }
 
 function processTableElement(tbl: Element): string {
   const rows: string[] = [];
-  tbl.querySelectorAll("tr").forEach((tr) => {
+  const trList = Array.from(tbl.getElementsByTagName("w:tr")).concat(
+    Array.from(tbl.getElementsByTagName("tr"))
+  );
+
+  for (const tr of trList) {
     const cells: string[] = [];
-    tr.querySelectorAll("tc").forEach((tc) => {
+    const tcList = Array.from(tr.getElementsByTagName("w:tc")).concat(
+      Array.from(tr.getElementsByTagName("tc"))
+    );
+
+    for (const tc of tcList) {
       const cellTextParts: string[] = [];
-      tc.querySelectorAll("p").forEach((p) => {
+      const pList = Array.from(tc.getElementsByTagName("w:p")).concat(
+        Array.from(tc.getElementsByTagName("p"))
+      );
+      for (const p of pList) {
         cellTextParts.push(processParagraphElement(p));
-      });
+      }
       const cellContent = cellTextParts.join("") || "<p><br/></p>";
       cells.push(`<td class="border border-slate-300 dark:border-slate-700 p-2">${cellContent}</td>`);
-    });
+    }
     rows.push(`<tr>${cells.join("")}</tr>`);
-  });
+  }
 
   return `<table class="document-table border-collapse border border-slate-300 dark:border-slate-700 w-full my-3">${rows.join("")}</table>`;
 }
@@ -229,7 +481,6 @@ function extractPrintableStrings(bytes: Uint8Array): string {
 
   for (let i = 0; i < bytes.length; i++) {
     const b = bytes[i];
-    // Printable ASCII
     if ((b >= 32 && b <= 126) || b === 10 || b === 13) {
       current.push(b);
     } else {
@@ -245,86 +496,248 @@ function extractPrintableStrings(bytes: Uint8Array): string {
 
   const valid = chunks
     .filter((c) => !c.includes("[Content_Types]") && !c.includes("word/") && !c.includes("schemas."))
-    .slice(0, 50);
+    .slice(0, 500);
 
   return valid.map((t) => `<p>${escapeHtml(t)}</p>`).join("") || "<p><br/></p>";
 }
 
 /**
- * Parses HTML document text and extracts the core body content.
+ * Parses PDF documents by extracting page streams and text blocks into document pages.
  */
-function parseHtmlText(html: string): string {
+function parsePdfBuffer(buffer: ArrayBuffer): { html: string; pages: string[] } {
+  try {
+    const bytes = new Uint8Array(buffer);
+    const text = new TextDecoder("latin1").decode(bytes);
+
+    // Count /Type /Page objects
+    const pageMatches = text.match(/\/Type\s*\/Page\b/g);
+    const pageCount = pageMatches ? pageMatches.length : 1;
+
+    // Extract text streams: BT ... ET
+    const streamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
+    const textChunks: string[] = [];
+    let match: RegExpExecArray | null;
+
+    while ((match = streamRegex.exec(text)) !== null) {
+      const streamContent = match[1];
+      const btRegex = /BT([\s\S]*?)ET/g;
+      let btMatch: RegExpExecArray | null;
+      while ((btMatch = btRegex.exec(streamContent)) !== null) {
+        const block = btMatch[1];
+        const tjRegex = /\((.*?)\)\s*Tj/g;
+        let tjMatch: RegExpExecArray | null;
+        while ((tjMatch = tjRegex.exec(block)) !== null) {
+          const raw = tjMatch[1].replace(/\\([()\\])/g, "$1").trim();
+          if (raw) textChunks.push(raw);
+        }
+
+        const tjArrayRegex = /\[(.*?)\]\s*TJ/g;
+        let tjArrayMatch: RegExpExecArray | null;
+        while ((tjArrayMatch = tjArrayRegex.exec(block)) !== null) {
+          const inner = tjArrayMatch[1];
+          const partRegex = /\((.*?)\)/g;
+          let partMatch: RegExpExecArray | null;
+          let combined = "";
+          while ((partMatch = partRegex.exec(inner)) !== null) {
+            combined += partMatch[1].replace(/\\([()\\])/g, "$1");
+          }
+          if (combined.trim()) textChunks.push(combined.trim());
+        }
+      }
+    }
+
+    if (textChunks.length === 0) {
+      const extracted = extractPrintableStrings(bytes);
+      const pages = splitHtmlIntoPages(extracted);
+      return { html: extracted, pages };
+    }
+
+    const chunkSizePerPage = Math.max(1, Math.ceil(textChunks.length / pageCount));
+    const pages: string[] = [];
+
+    for (let p = 0; p < pageCount; p++) {
+      const slice = textChunks.slice(p * chunkSizePerPage, (p + 1) * chunkSizePerPage);
+      if (slice.length > 0) {
+        const pHtml = slice.map((t) => `<p>${escapeHtml(t)}</p>`).join("");
+        pages.push(pHtml);
+      }
+    }
+
+    const validPages = pages.length > 0 ? pages : [textChunks.map((t) => `<p>${escapeHtml(t)}</p>`).join("")];
+    return { html: validPages.join(""), pages: validPages };
+  } catch {
+    const errHtml = "<p>Unable to parse PDF content.</p>";
+    return { html: errHtml, pages: [errHtml] };
+  }
+}
+
+/**
+ * Parses HTML document text and extracts pages.
+ */
+function parseHtmlText(html: string): { html: string; pages: string[] } {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    const bodyHtml = doc.body.innerHTML;
-    return bodyHtml && bodyHtml.trim() ? bodyHtml : html;
+
+    // 1. Check for section[data-page-id] or div[data-page-id] (our editor export format)
+    const pageSections = Array.from(
+      doc.querySelectorAll("section[data-page-id], div[data-page-id]")
+    );
+    if (pageSections.length > 0) {
+      const pages = pageSections.map((sec) => {
+        const contentEl =
+          sec.querySelector('[contenteditable="true"], [data-content="true"], main') || sec;
+        return contentEl.innerHTML.trim() || "<p><br/></p>";
+      });
+      return { html: pages.join(""), pages };
+    }
+
+    // 2. Check for elements with class 'page', 'document-page', 'sheet', or [data-page]
+    const pageDivs = Array.from(
+      doc.querySelectorAll(".page, .document-page, .sheet, [data-page]")
+    );
+    if (pageDivs.length > 0) {
+      const pages = pageDivs.map((d) => d.innerHTML.trim() || "<p><br/></p>");
+      return { html: pages.join(""), pages };
+    }
+
+    // 3. Fallback to body innerHTML with page splitter
+    const bodyHtml = doc.body.innerHTML || html;
+    const pages = splitHtmlIntoPages(bodyHtml);
+    return { html: bodyHtml, pages };
   } catch {
-    return html;
+    return { html, pages: [html] };
   }
 }
 
 /**
- * Parses JSON document text.
+ * Parses JSON document text into document pages.
  */
-function parseJsonText(jsonStr: string): string {
+function parseJsonText(jsonStr: string): { html: string; pages: string[] } {
   try {
     const parsed = JSON.parse(jsonStr);
+
     if (parsed.pageHtml && typeof parsed.pageHtml === "object") {
-      const firstKey = Object.keys(parsed.pageHtml)[0];
-      if (firstKey && parsed.pageHtml[firstKey]) {
-        return parsed.pageHtml[firstKey];
+      if (Array.isArray(parsed.pages) && parsed.pages.length > 0) {
+        const pages = parsed.pages
+          .map((p: any) => {
+            const id = typeof p === "string" ? p : p.id;
+            return parsed.pageHtml[id] || (typeof p === "object" ? p.html || p.content : "");
+          })
+          .filter((h: string) => typeof h === "string" && h.trim().length > 0);
+        if (pages.length > 0) return { html: pages.join(""), pages };
+      } else {
+        const pages = Object.values(parsed.pageHtml).filter(
+          (h): h is string => typeof h === "string" && h.trim().length > 0
+        );
+        if (pages.length > 0) return { html: pages.join(""), pages };
       }
     }
-    if (parsed.content && typeof parsed.content === "string") {
-      return parsed.content;
+
+    if (Array.isArray(parsed.pages) && parsed.pages.length > 0) {
+      const pages = parsed.pages
+        .map((p: any) =>
+          typeof p === "string" ? p : p.html || p.content || (p.text ? `<p>${escapeHtml(p.text)}</p>` : "")
+        )
+        .filter((h: string) => typeof h === "string" && h.trim().length > 0);
+      if (pages.length > 0) return { html: pages.join(""), pages };
     }
-    return `<pre class="bg-slate-50 dark:bg-slate-900 p-3 rounded text-xs font-mono">${escapeHtml(
+
+    const content =
+      typeof parsed.content === "string"
+        ? parsed.content
+        : typeof parsed.html === "string"
+        ? parsed.html
+        : "";
+    if (content) {
+      const pages = splitHtmlIntoPages(content);
+      return { html: content, pages };
+    }
+
+    const fallbackHtml = `<pre class="bg-slate-50 dark:bg-slate-900 p-3 rounded text-xs font-mono">${escapeHtml(
       JSON.stringify(parsed, null, 2)
     )}</pre>`;
+    return { html: fallbackHtml, pages: [fallbackHtml] };
   } catch {
-    return `<p>${escapeHtml(jsonStr)}</p>`;
+    const p = `<p>${escapeHtml(jsonStr)}</p>`;
+    return { html: p, pages: [p] };
   }
 }
 
 /**
- * Parses simple Markdown into HTML.
+ * Parses Markdown into HTML with page support.
  */
-function parseMarkdownText(md: string): string {
-  const lines = md.split(/\r?\n/);
-  const elements: string[] = [];
+function parseMarkdownText(md: string): { html: string; pages: string[] } {
+  const pageDelimiter = /(?:<!--\s*page[-_]?break\s*-->|===+\s*page[-_]?break\s*===+)/i;
+  let pageSections: string[] = [];
 
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      elements.push("<p><br/></p>");
-    } else if (trimmed.startsWith("### ")) {
-      elements.push(`<h3>${escapeHtml(trimmed.slice(4))}</h3>`);
-    } else if (trimmed.startsWith("## ")) {
-      elements.push(`<h2>${escapeHtml(trimmed.slice(3))}</h2>`);
-    } else if (trimmed.startsWith("# ")) {
-      elements.push(`<h1>${escapeHtml(trimmed.slice(2))}</h1>`);
-    } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-      elements.push(`<ul><li>${escapeHtml(trimmed.slice(2))}</li></ul>`);
-    } else {
-      elements.push(`<p>${escapeHtml(trimmed)}</p>`);
-    }
+  if (pageDelimiter.test(md)) {
+    pageSections = md.split(pageDelimiter);
+  } else {
+    pageSections = [md];
+  }
+
+  const pages = pageSections.map((sectionMd) => {
+    const lines = sectionMd.split(/\r?\n/);
+    const elements: string[] = [];
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        elements.push("<p><br/></p>");
+      } else if (trimmed.startsWith("### ")) {
+        elements.push(`<h3>${escapeHtml(trimmed.slice(4))}</h3>`);
+      } else if (trimmed.startsWith("## ")) {
+        elements.push(`<h2>${escapeHtml(trimmed.slice(3))}</h2>`);
+      } else if (trimmed.startsWith("# ")) {
+        elements.push(`<h1>${escapeHtml(trimmed.slice(2))}</h1>`);
+      } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+        elements.push(`<ul><li>${escapeHtml(trimmed.slice(2))}</li></ul>`);
+      } else {
+        elements.push(`<p>${escapeHtml(trimmed)}</p>`);
+      }
+    });
+
+    return elements.join("") || "<p><br/></p>";
   });
 
-  return elements.join("") || "<p><br/></p>";
+  if (pages.length === 1) {
+    const paginated = splitHtmlIntoPages(pages[0]);
+    return { html: pages[0], pages: paginated };
+  }
+
+  return { html: pages.join(""), pages };
 }
 
 /**
- * Parses plain text into HTML paragraphs.
+ * Parses plain text into HTML paragraphs with page support.
  */
-function parsePlainText(text: string): string {
-  const paragraphs = text
-    .split(/\r?\n\r?\n/)
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((p) => `<p>${escapeHtml(p).replace(/\r?\n/g, "<br/>")}</p>`);
+function parsePlainText(text: string): { html: string; pages: string[] } {
+  const pageDelimiter = /(?:\x0C|\f|---+\s*page\s*break\s*---+|\[\s*page\s*break\s*\])/i;
+  let pageSections: string[] = [];
 
-  return paragraphs.length > 0 ? paragraphs.join("") : `<p>${escapeHtml(text) || "<br/>"}</p>`;
+  if (pageDelimiter.test(text)) {
+    pageSections = text.split(pageDelimiter);
+  } else {
+    pageSections = [text];
+  }
+
+  const pages = pageSections.map((sec) => {
+    const paragraphs = sec
+      .split(/\r?\n\r?\n/)
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .map((p) => `<p>${escapeHtml(p).replace(/\r?\n/g, "<br/>")}</p>`);
+
+    return paragraphs.length > 0 ? paragraphs.join("") : `<p>${escapeHtml(sec) || "<br/>"}</p>`;
+  });
+
+  if (pages.length === 1) {
+    const paginated = splitHtmlIntoPages(pages[0]);
+    return { html: pages[0], pages: paginated };
+  }
+
+  return { html: pages.join(""), pages };
 }
 
 function escapeHtml(str: string): string {

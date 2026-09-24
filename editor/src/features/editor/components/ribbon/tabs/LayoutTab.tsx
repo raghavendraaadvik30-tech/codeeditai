@@ -7,7 +7,7 @@
  * - Group 3: Watermark, Page Color, Page Borders
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   ChevronDown,
   Check,
@@ -18,8 +18,12 @@ import {
 } from "lucide-react";
 
 import RibbonDivider from "../controls/RibbonDivider";
-import { useDocumentModel, type SectionModel } from "../../../store/documentModel";
-import { useEditor } from "../../../context/EditorContext";
+import { useDocumentModel, type SectionModel, type PageBorderConfig } from "../../../store/documentModel";
+import {
+  HeaderGallery,
+  FooterGallery,
+} from "@/features/editor/modules/document/components/HeaderFooterGallery";
+
 
 import {
   DropdownMenu,
@@ -28,10 +32,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from "@/shared/components/ui/dropdown-menu";
+
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/shared/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 import {
   Dialog,
@@ -84,9 +92,15 @@ const PAPER_SIZES: PaperSizeDef[] = [
 ];
 
 export default function LayoutTab() {
-  const { model, activePage, updateSection, addSection } =
-    useDocumentModel();
-  const { insertHTML } = useEditor();
+  const {
+    model,
+    activePage,
+    updateSection,
+    updateAllSections,
+    applySectionPatchToPage,
+    applyPageBorders,
+  } = useDocumentModel();
+
 
   // Active section resolution: activePage -> sectionId -> section
   const activePageObj =
@@ -102,32 +116,45 @@ export default function LayoutTab() {
   };
 
   const applyToAllSections = (patch: Partial<SectionModel>) => {
-    model.sections.forEach((sec) => {
-      updateSection(sec.id, patch);
-    });
+    updateAllSections(patch);
   };
 
   const applyToThisPage = (patch: Partial<SectionModel>) => {
-    if (!activePageObj) return;
-    const pagesInSection = model.pages.filter(
-      (p) => p.sectionId === activeSection.id
-    );
-    if (pagesInSection.length <= 1) {
-      applyToSection(patch);
-    } else {
-      addSection(activePageObj.id);
-      setTimeout(() => {
-        const freshTarget = model.pages.find((p) => p.id === activePageObj.id);
-        if (freshTarget) {
-          updateSection(freshTarget.sectionId, patch);
-        }
-      }, 50);
+    const targetPageId = activePage || activePageObj?.id || model.pages[0]?.id;
+    if (targetPageId) {
+      applySectionPatchToPage(targetPageId, patch);
     }
   };
 
   // ------------------------------------------------------------------------
-  // Dialog States
+  // Dialog & Popover States
   // ------------------------------------------------------------------------
+  // Orientation Popover
+  const [orientationOpen, setOrientationOpen] = useState(false);
+  const [tempOrientation, setTempOrientation] = useState<"portrait" | "landscape">("portrait");
+  const [applyTarget, setApplyTarget] = useState<"all" | "page" | "section">("all");
+
+  const handleOpenOrientationChange = (open: boolean) => {
+    if (open) {
+      setTempOrientation(activeSection?.orientation || "portrait");
+    }
+    setOrientationOpen(open);
+  };
+
+  const handleCancelOrientation = () => {
+    setOrientationOpen(false);
+  };
+
+  const handleApplyOrientation = () => {
+    if (applyTarget === "all") {
+      applyToAllSections({ orientation: tempOrientation });
+    } else if (applyTarget === "page") {
+      applyToThisPage({ orientation: tempOrientation });
+    } else {
+      applyToSection({ orientation: tempOrientation });
+    }
+    setOrientationOpen(false);
+  };
   // 1. Header & Footer
   const [headerDialogOpen, setHeaderDialogOpen] = useState(false);
   const [headerInput, setHeaderInput] = useState("");
@@ -168,6 +195,24 @@ export default function LayoutTab() {
   const [wmOpacity, setWmOpacity] = useState(15);
   const [wmRotation, setWmRotation] = useState<"diagonal" | "horizontal">("diagonal");
   const [wmImageUrl, setWmImageUrl] = useState("");
+  const [wmImageRotation, setWmImageRotation] = useState<number>(-45);
+  const [wmImageScale, setWmImageScale] = useState<string>("100");
+  const [wmFileName, setWmFileName] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setWmFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (typeof event.target?.result === "string") {
+          setWmImageUrl(event.target.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // 7. Page Borders Dialog
   const [bordersDialogOpen, setBordersDialogOpen] = useState(false);
@@ -175,7 +220,7 @@ export default function LayoutTab() {
     "none" | "box" | "shadow" | "3d" | "custom"
   >("box");
   const [borderStyle, setBorderStyle] = useState<
-    "solid" | "dashed" | "dotted" | "double"
+    "solid" | "dashed" | "dotted" | "double" | "dash-dot" | "thick-solid"
   >("solid");
   const [borderColor, setBorderColor] = useState("#000000");
   const [borderWidth, setBorderWidth] = useState<number>(2);
@@ -183,43 +228,16 @@ export default function LayoutTab() {
   const [borderBottom, setBorderBottom] = useState(true);
   const [borderLeft, setBorderLeft] = useState(true);
   const [borderRight, setBorderRight] = useState(true);
-  const [borderApplyTo, setBorderApplyTo] = useState<"section" | "document" | "page">("section");
+  const [borderDistanceTop, setBorderDistanceTop] = useState<number>(24);
+  const [borderDistanceBottom, setBorderDistanceBottom] = useState<number>(24);
+  const [borderDistanceLeft, setBorderDistanceLeft] = useState<number>(24);
+  const [borderDistanceRight, setBorderDistanceRight] = useState<number>(24);
+  const [borderApplyTo, setBorderApplyTo] = useState<
+    "document" | "section" | "page" | "firstPage" | "exceptFirstPage"
+  >("document");
+  const [artBorder, setArtBorder] = useState<string>("none");
 
-  // ------------------------------------------------------------------------
-  // Handlers for Page Number
-  // ------------------------------------------------------------------------
-  const handleSetHeaderPageNumber = (alignment: "left" | "center" | "right") => {
-    applyToSection({
-      pageNumberPosition: "header",
-      pageNumberAlignment: alignment,
-      showPageNumbers: true,
-    });
-  };
 
-  const handleSetFooterPageNumber = (alignment: "left" | "center" | "right") => {
-    applyToSection({
-      pageNumberPosition: "footer",
-      pageNumberAlignment: alignment,
-      showPageNumbers: true,
-    });
-  };
-
-  const handleInsertCurrentPosition = (alignment: "left" | "center" | "right") => {
-    const pageIndex = activePageObj
-      ? model.pages.findIndex((p) => p.id === activePageObj.id)
-      : 0;
-    const pNum = pageIndex >= 0 ? pageIndex + 1 : 1;
-    const htmlSnippet = `<p style="text-align: ${alignment};"><span class="page-number-field" data-field="page-number" contenteditable="false" style="padding: 1px 6px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 10pt; user-select: none;">Page ${pNum}</span></p>`;
-
-    insertHTML(htmlSnippet);
-  };
-
-  const handleRemovePageNumbers = () => {
-    applyToSection({
-      showPageNumbers: false,
-      pageNumberPosition: undefined,
-    });
-  };
 
   const handleApplyPageNumberFormat = () => {
     applyToSection({
@@ -233,47 +251,56 @@ export default function LayoutTab() {
   // Handlers for Margins
   // ------------------------------------------------------------------------
   const handleApplyNormalMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "normal",
-      marginConfig: { top: 72, bottom: 72, left: 72, right: 72 },
+      marginConfig: { top: 96, bottom: 96, left: 96, right: 96 },
     });
   };
 
   const handleApplyNarrowMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "narrow",
-      marginConfig: { top: 36, bottom: 36, left: 36, right: 36 },
+      marginConfig: { top: 48, bottom: 48, left: 48, right: 48 },
     });
   };
 
   const handleApplyModerateMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "moderate",
-      marginConfig: { top: 72, bottom: 72, left: 54, right: 54 },
+      marginConfig: { top: 96, bottom: 96, left: 72, right: 72 },
     });
   };
 
   const handleApplyWideMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "wide",
-      marginConfig: { top: 72, bottom: 72, left: 144, right: 144 },
+      marginConfig: { top: 96, bottom: 96, left: 192, right: 192 },
     });
   };
 
   const handleApplyMirroredMargins = () => {
-    applyToSection({
+    applyToAllSections({
       marginPreset: "mirrored",
-      marginConfig: { top: 72, bottom: 72, left: 90, right: 72 },
+      marginConfig: { top: 96, bottom: 96, left: 120, right: 96 },
     });
   };
 
-  const handleApplyCustomMargins = () => {
-    const top = Math.round(Math.max(0.1, parseFloat(customTop || "1")) * 72);
-    const bottom = Math.round(Math.max(0.1, parseFloat(customBottom || "1")) * 72);
-    const left = Math.round(Math.max(0.1, parseFloat(customLeft || "1")) * 72);
-    const right = Math.round(Math.max(0.1, parseFloat(customRight || "1")) * 72);
+  const openCustomMarginsDialog = () => {
+    const mg = activeSection?.marginConfig ?? { top: 96, bottom: 96, left: 96, right: 96 };
+    setCustomTop((mg.top / 96).toFixed(1));
+    setCustomBottom((mg.bottom / 96).toFixed(1));
+    setCustomLeft((mg.left / 96).toFixed(1));
+    setCustomRight((mg.right / 96).toFixed(1));
+    setMarginsDialogOpen(true);
+  };
 
-    applyToSection({
+  const handleApplyCustomMargins = () => {
+    const top = Math.round(Math.max(0.1, parseFloat(customTop || "1")) * 96);
+    const bottom = Math.round(Math.max(0.1, parseFloat(customBottom || "1")) * 96);
+    const left = Math.round(Math.max(0.1, parseFloat(customLeft || "1")) * 96);
+    const right = Math.round(Math.max(0.1, parseFloat(customRight || "1")) * 96);
+
+    applyToAllSections({
       marginPreset: "custom",
       marginConfig: { top, bottom, left, right },
     });
@@ -308,11 +335,17 @@ export default function LayoutTab() {
   // ------------------------------------------------------------------------
   // Handlers for Columns
   // ------------------------------------------------------------------------
+  const openCustomColumnsDialog = () => {
+    setCustomColumnCount(String(activeSection?.columns?.count ?? 2));
+    setCustomColumnGap(String(activeSection?.columns?.gap ?? 32));
+    setColumnsDialogOpen(true);
+  };
+
   const handleApplyCustomColumns = () => {
     const count = parseInt(customColumnCount, 10);
     const gap = parseInt(customColumnGap, 10);
     if (!isNaN(count) && count >= 1 && count <= 5) {
-      applyToSection({
+      applyToAllSections({
         columns: {
           type: "custom",
           count,
@@ -343,6 +376,8 @@ export default function LayoutTab() {
         watermark: {
           image: wmImageUrl,
           opacity: wmOpacity / 100,
+          rotation: wmImageRotation,
+          scale: wmImageScale,
         },
       });
     }
@@ -353,39 +388,43 @@ export default function LayoutTab() {
   // Handlers for Page Borders
   // ------------------------------------------------------------------------
   const handleApplyBorders = () => {
-    const patch: Partial<SectionModel> = {
-      pageBorders: {
-        style:
-          borderSetting === "none"
-            ? "none"
-            : borderSetting === "shadow"
-            ? "shadow"
-            : borderSetting === "3d"
-            ? "3d"
-            : borderStyle === "dashed"
-            ? "dashed"
-            : borderStyle === "dotted"
-            ? "dotted"
-            : borderStyle === "double"
-            ? "double"
-            : "box",
-        color: borderColor,
-        width: borderWidth,
-        top: borderTop,
-        bottom: borderBottom,
-        left: borderLeft,
-        right: borderRight,
-        applyTo: borderApplyTo,
+    const isNone =
+      borderSetting === "none" ||
+      (!borderTop && !borderBottom && !borderLeft && !borderRight);
+    const effectiveSetting = isNone ? "none" : borderSetting;
+    const borderConfig: PageBorderConfig = {
+      setting: effectiveSetting,
+      lineStyle: borderStyle,
+      style:
+        effectiveSetting === "none"
+          ? "none"
+          : effectiveSetting === "shadow"
+          ? "shadow"
+          : effectiveSetting === "3d"
+          ? "3d"
+          : borderStyle,
+      color: borderColor,
+      width: borderWidth,
+      top: !isNone ? borderTop : false,
+      bottom: !isNone ? borderBottom : false,
+      left: !isNone ? borderLeft : false,
+      right: !isNone ? borderRight : false,
+      distance: {
+        top: borderDistanceTop,
+        bottom: borderDistanceBottom,
+        left: borderDistanceLeft,
+        right: borderDistanceRight,
       },
+      applyTo: borderApplyTo,
+      art: artBorder !== "none" ? artBorder : undefined,
     };
 
-    if (borderApplyTo === "document") {
-      applyToAllSections(patch);
-    } else if (borderApplyTo === "page") {
-      applyToThisPage(patch);
-    } else {
-      applyToSection(patch);
-    }
+    applyPageBorders(
+      borderConfig,
+      borderApplyTo,
+      activePageObj?.id || activePage || undefined,
+      activeSection?.id
+    );
 
     setBordersDialogOpen(false);
   };
@@ -398,256 +437,12 @@ export default function LayoutTab() {
       ======================================================= */}
 
       {/* HEADER */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Document Header">
-            <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 8V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M4 16h16" />
-            </svg>
-            <span>Header</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 text-xs">
-          <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold">
-            Header Options
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => {
-              setHeaderInput(activeSection?.header || "");
-              setHeaderDialogOpen(true);
-            }}
-            className="text-blue-600 font-medium cursor-pointer"
-          >
-            Edit Header...
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                header: "",
-                firstHeader: "",
-                evenHeader: "",
-              })
-            }
-            className="text-red-600 cursor-pointer"
-          >
-            Remove Header
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <HeaderGallery buttonClassName={triggerClass} />
 
       {/* FOOTER */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Document Footer">
-            <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 16v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4M4 8h16" />
-            </svg>
-            <span>Footer</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 text-xs">
-          <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold">
-            Footer Options
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => {
-              setFooterInput(activeSection?.footer || "");
-              setFooterDialogOpen(true);
-            }}
-            className="text-blue-600 font-medium cursor-pointer"
-          >
-            Edit Footer...
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                footer: "",
-                firstFooter: "",
-                evenFooter: "",
-              })
-            }
-            className="text-red-600 cursor-pointer"
-          >
-            Remove Footer
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setFormatChoice(activeSection?.pageNumberFormat || "1");
-              setNumberingMode(
-                activeSection?.pageNumberStartAt !== undefined ? "startAt" : "continue"
-              );
-              setStartAtValue(activeSection?.pageNumberStartAt ?? 1);
-              setPageNumberFormatOpen(true);
-            }}
-            className="cursor-pointer"
-          >
-            Page Number Settings...
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <FooterGallery buttonClassName={triggerClass} />
 
-      {/* PAGE NUMBER */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Page Numbers">
-            <span className="font-semibold text-[11px] text-slate-600 dark:text-slate-300">#</span>
-            <span>Page Number</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 text-xs">
-          {/* 1. Top of Page Submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Top of Page</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => handleSetHeaderPageNumber("left")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Left</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "header" &&
-                  activeSection?.pageNumberAlignment === "left" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetHeaderPageNumber("center")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Center</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "header" &&
-                  activeSection?.pageNumberAlignment === "center" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetHeaderPageNumber("right")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Right</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "header" &&
-                  activeSection?.pageNumberAlignment === "right" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
 
-          {/* 2. Bottom of Page Submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Bottom of Page</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => handleSetFooterPageNumber("left")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Left</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "footer" &&
-                  activeSection?.pageNumberAlignment === "left" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetFooterPageNumber("center")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Center</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "footer" &&
-                  activeSection?.pageNumberAlignment === "center" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSetFooterPageNumber("right")}
-                className="cursor-pointer flex justify-between items-center"
-              >
-                <span>Right</span>
-                {activeSection?.showPageNumbers !== false &&
-                  activeSection?.pageNumberPosition === "footer" &&
-                  activeSection?.pageNumberAlignment === "right" && (
-                    <Check className="h-3.5 w-3.5 text-blue-600" />
-                  )}
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          {/* 3. Current Position Submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Current Position</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("left")}
-                className="cursor-pointer"
-              >
-                <span>Left</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("center")}
-                className="cursor-pointer"
-              >
-                <span>Center</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("right")}
-                className="cursor-pointer"
-              >
-                <span>Right</span>
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          <DropdownMenuSeparator />
-
-          {/* 4. Format Page Numbers */}
-          <DropdownMenuItem
-            onClick={() => {
-              setFormatChoice(activeSection?.pageNumberFormat || "1");
-              setNumberingMode(
-                activeSection?.pageNumberStartAt !== undefined ? "startAt" : "continue"
-              );
-              setStartAtValue(activeSection?.pageNumberStartAt ?? 1);
-              setPageNumberFormatOpen(true);
-            }}
-            className="cursor-pointer text-blue-600 font-medium"
-          >
-            Format Page Numbers...
-          </DropdownMenuItem>
-
-          {/* 5. Remove Page Numbers */}
-          <DropdownMenuItem
-            onClick={handleRemovePageNumbers}
-            className="cursor-pointer text-red-600"
-          >
-            Remove Page Numbers
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
 
       <RibbonDivider />
 
@@ -746,7 +541,7 @@ export default function LayoutTab() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => setMarginsDialogOpen(true)}
+            onClick={openCustomMarginsDialog}
             className="text-blue-600 font-medium cursor-pointer"
           >
             Custom Margins...
@@ -755,8 +550,8 @@ export default function LayoutTab() {
       </DropdownMenu>
 
       {/* ORIENTATION */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Popover open={orientationOpen} onOpenChange={handleOpenOrientationChange}>
+        <PopoverTrigger asChild>
           <button type="button" className={triggerClass} title="Orientation">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
@@ -771,71 +566,183 @@ export default function LayoutTab() {
             <span>Orientation</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
           </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-52 text-xs">
-          <DropdownMenuItem
-            onClick={() => applyToSection({ orientation: "portrait" })}
-            className="flex justify-between items-center py-1.5 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-3.5 h-4.5 border border-slate-500 rounded-sm" />
-              <span className="font-medium">Portrait</span>
-            </div>
-            {(!activeSection?.orientation || activeSection?.orientation === "portrait") && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => applyToSection({ orientation: "landscape" })}
-            className="flex justify-between items-center py-1.5 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-4.5 h-3.5 border border-slate-500 rounded-sm" />
-              <span className="font-medium">Landscape</span>
-            </div>
-            {activeSection?.orientation === "landscape" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="w-[260px] p-3 rounded-xl border border-slate-200/90 bg-white shadow-xl dark:border-slate-800 dark:bg-[#0c1827] text-slate-900 dark:text-slate-100"
+        >
+          {/* Orientation Cards */}
+          <div className="space-y-1.5">
+            {/* Portrait Card */}
+            <button
+              type="button"
+              onClick={() => setTempOrientation("portrait")}
+              className={cn(
+                "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors border",
+                tempOrientation === "portrait"
+                  ? "border-blue-300 bg-[#edf5fc] dark:border-blue-600 dark:bg-blue-950/50"
+                  : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-slate-800/80"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    "h-6 w-4.5 rounded-[2px] border-2 transition-colors",
+                    tempOrientation === "portrait"
+                      ? "border-[#0078d4]"
+                      : "border-slate-800 dark:border-slate-300"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-xs font-semibold",
+                    tempOrientation === "portrait"
+                      ? "text-[#0078d4]"
+                      : "text-slate-800 dark:text-slate-200"
+                  )}
+                >
+                  Portrait
+                </span>
+              </div>
+              {tempOrientation === "portrait" && (
+                <Check className="h-4 w-4 text-[#0078d4] stroke-[2.5]" />
+              )}
+            </button>
 
-          <DropdownMenuSeparator />
+            {/* Landscape Card */}
+            <button
+              type="button"
+              onClick={() => setTempOrientation("landscape")}
+              className={cn(
+                "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors border",
+                tempOrientation === "landscape"
+                  ? "border-blue-300 bg-[#edf5fc] dark:border-blue-600 dark:bg-blue-950/50"
+                  : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-slate-800/80"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    "h-4.5 w-6 rounded-[2px] border-2 transition-colors",
+                    tempOrientation === "landscape"
+                      ? "border-[#0078d4]"
+                      : "border-slate-800 dark:border-slate-300"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-xs font-semibold",
+                    tempOrientation === "landscape"
+                      ? "text-[#0078d4]"
+                      : "text-slate-800 dark:text-slate-200"
+                  )}
+                >
+                  Landscape
+                </span>
+              </div>
+              {tempOrientation === "landscape" && (
+                <Check className="h-4 w-4 text-[#0078d4] stroke-[2.5]" />
+              )}
+            </button>
+          </div>
 
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Apply To</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-44 text-xs">
-              <DropdownMenuItem
-                onClick={() => {
-                  const currentOr = activeSection?.orientation || "portrait";
-                  applyToSection({ orientation: currentOr });
-                }}
-                className="cursor-pointer"
+          <div className="border-t border-slate-200/80 dark:border-slate-800 my-2.5" />
+
+          {/* APPLY TO */}
+          <div className="space-y-2">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              APPLY TO
+            </div>
+            <div className="space-y-2">
+              {/* Whole Document */}
+              <div
+                onClick={() => setApplyTarget("all")}
+                className="flex items-center gap-2.5 cursor-pointer py-0.5 select-none group"
               >
-                Current Section
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  const currentOr = activeSection?.orientation || "portrait";
-                  applyToAllSections({ orientation: currentOr });
-                }}
-                className="cursor-pointer"
+                <div
+                  className={cn(
+                    "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
+                    applyTarget === "all"
+                      ? "border-[#0078d4] bg-white dark:bg-slate-900 border-2"
+                      : "border-slate-400 group-hover:border-slate-600 dark:border-slate-500"
+                  )}
+                >
+                  {applyTarget === "all" && (
+                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                  )}
+                </div>
+                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                  Whole Document
+                </span>
+              </div>
+
+              {/* This Page */}
+              <div
+                onClick={() => setApplyTarget("page")}
+                className="flex items-center gap-2.5 cursor-pointer py-0.5 select-none group"
               >
-                Whole Document
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  const currentOr = activeSection?.orientation || "portrait";
-                  applyToThisPage({ orientation: currentOr });
-                }}
-                className="cursor-pointer"
+                <div
+                  className={cn(
+                    "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
+                    applyTarget === "page"
+                      ? "border-[#0078d4] bg-white dark:bg-slate-900 border-2"
+                      : "border-slate-400 group-hover:border-slate-600 dark:border-slate-500"
+                  )}
+                >
+                  {applyTarget === "page" && (
+                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                  )}
+                </div>
+                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                  This Page
+                </span>
+              </div>
+
+              {/* Current Section */}
+              <div
+                onClick={() => setApplyTarget("section")}
+                className="flex items-center gap-2.5 cursor-pointer py-0.5 select-none group"
               >
-                This Page
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-        </DropdownMenuContent>
-      </DropdownMenu>
+                <div
+                  className={cn(
+                    "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
+                    applyTarget === "section"
+                      ? "border-[#0078d4] bg-white dark:bg-slate-900 border-2"
+                      : "border-slate-400 group-hover:border-slate-600 dark:border-slate-500"
+                  )}
+                >
+                  {applyTarget === "section" && (
+                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                  )}
+                </div>
+                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                  Current Section
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200/80 dark:border-slate-800 my-2.5" />
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-2 pt-0.5">
+            <button
+              type="button"
+              onClick={handleCancelOrientation}
+              className="h-7 px-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleApplyOrientation}
+              className="h-7 px-4 rounded-md bg-[#0078d4] text-xs font-semibold text-white hover:bg-[#006abc] shadow-xs transition-colors"
+            >
+              Apply
+            </button>
+          </div>
+        </PopoverContent>
+      </Popover>
 
       {/* SIZE */}
       <DropdownMenu>
@@ -911,34 +818,34 @@ export default function LayoutTab() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48 text-xs">
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "one", count: 1 } })}
+            onClick={() => applyToAllSections({ columns: { type: "one", count: 1 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>One</span>
-            {(!activeSection?.columns || activeSection?.columns?.type === "one") && (
+            {(!activeSection?.columns || activeSection?.columns?.type === "one" || activeSection?.columns?.count === 1) && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "two", count: 2 } })}
+            onClick={() => applyToAllSections({ columns: { type: "two", count: 2, gap: 32 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Two</span>
-            {activeSection?.columns?.type === "two" && (
+            {(activeSection?.columns?.type === "two" || (activeSection?.columns?.count === 2 && activeSection?.columns?.type !== "left" && activeSection?.columns?.type !== "right")) && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "three", count: 3 } })}
+            onClick={() => applyToAllSections({ columns: { type: "three", count: 3, gap: 24 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Three</span>
-            {activeSection?.columns?.type === "three" && (
+            {(activeSection?.columns?.type === "three" || activeSection?.columns?.count === 3) && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "left", count: 2 } })}
+            onClick={() => applyToAllSections({ columns: { type: "left", count: 2, gap: 32 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Left (Narrow Left)</span>
@@ -947,7 +854,7 @@ export default function LayoutTab() {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => applyToSection({ columns: { type: "right", count: 2 } })}
+            onClick={() => applyToAllSections({ columns: { type: "right", count: 2, gap: 32 } })}
             className="flex justify-between items-center cursor-pointer"
           >
             <span>Right (Narrow Right)</span>
@@ -959,7 +866,7 @@ export default function LayoutTab() {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => setColumnsDialogOpen(true)}
+            onClick={openCustomColumnsDialog}
             className="text-blue-600 font-medium cursor-pointer"
           >
             More Columns...
@@ -1049,7 +956,23 @@ export default function LayoutTab() {
 
           <DropdownMenuItem
             onClick={() => {
-              setWmText(activeSection?.watermark?.text || "CONFIDENTIAL");
+              if (activeSection?.watermark?.image) {
+                setWatermarkType("image");
+                setWmImageUrl(activeSection.watermark.image);
+                setWmOpacity(Math.round((activeSection.watermark.opacity ?? 0.5) * 100));
+                setWmImageRotation(
+                  typeof activeSection.watermark.rotation === "number"
+                    ? activeSection.watermark.rotation
+                    : activeSection.watermark.rotation === "diagonal"
+                    ? -45
+                    : 0
+                );
+                setWmImageScale(String(activeSection.watermark.scale ?? "100"));
+              } else {
+                setWatermarkType("text");
+                setWmText(activeSection?.watermark?.text || "CONFIDENTIAL");
+                setWmOpacity(Math.round((activeSection?.watermark?.opacity ?? 0.15) * 100));
+              }
               setWatermarkDialogOpen(true);
             }}
             className="text-blue-600 font-medium cursor-pointer"
@@ -1129,31 +1052,88 @@ export default function LayoutTab() {
       <button
         type="button"
         onClick={() => {
-          setBorderSetting(
-            activeSection?.pageBorders?.style === "none"
-              ? "none"
-              : activeSection?.pageBorders?.style === "shadow"
-              ? "shadow"
-              : activeSection?.pageBorders?.style === "3d"
-              ? "3d"
-              : "box"
-          );
-          setBorderStyle(
-            activeSection?.pageBorders?.style === "dashed"
-              ? "dashed"
-              : activeSection?.pageBorders?.style === "dotted"
-              ? "dotted"
-              : activeSection?.pageBorders?.style === "double"
-              ? "double"
-              : "solid"
-          );
-          setBorderColor(activeSection?.pageBorders?.color || "#000000");
-          setBorderWidth(activeSection?.pageBorders?.width || 2);
-          setBorderTop(activeSection?.pageBorders?.top ?? true);
-          setBorderBottom(activeSection?.pageBorders?.bottom ?? true);
-          setBorderLeft(activeSection?.pageBorders?.left ?? true);
-          setBorderRight(activeSection?.pageBorders?.right ?? true);
-          setBorderApplyTo(activeSection?.pageBorders?.applyTo || "section");
+          const effectiveBorder =
+            activePageObj?.pageBorders ?? activeSection?.pageBorders;
+
+          if (
+            effectiveBorder &&
+            effectiveBorder.setting !== "none" &&
+            effectiveBorder.style !== "none"
+          ) {
+            const hasCustomSides =
+              effectiveBorder.top === false ||
+              effectiveBorder.bottom === false ||
+              effectiveBorder.left === false ||
+              effectiveBorder.right === false;
+
+            const inferredSetting =
+              effectiveBorder.setting ||
+              (effectiveBorder.style === "shadow"
+                ? "shadow"
+                : effectiveBorder.style === "3d"
+                ? "3d"
+                : hasCustomSides
+                ? "custom"
+                : "box");
+
+            setBorderSetting(inferredSetting);
+
+            const inferredLineStyle =
+              effectiveBorder.lineStyle ||
+              (effectiveBorder.style === "dashed"
+                ? "dashed"
+                : effectiveBorder.style === "dotted"
+                ? "dotted"
+                : effectiveBorder.style === "double"
+                ? "double"
+                : effectiveBorder.style === "dash-dot"
+                ? "dash-dot"
+                : effectiveBorder.style === "thick-solid"
+                ? "thick-solid"
+                : "solid");
+
+            setBorderStyle(inferredLineStyle);
+            setBorderColor(effectiveBorder.color || "#000000");
+            setBorderWidth(effectiveBorder.width ?? 2);
+            setBorderTop(effectiveBorder.top ?? true);
+            setBorderBottom(effectiveBorder.bottom ?? true);
+            setBorderLeft(effectiveBorder.left ?? true);
+            setBorderRight(effectiveBorder.right ?? true);
+            const dist = effectiveBorder.distance ?? { top: 24, bottom: 24, left: 24, right: 24 };
+            setBorderDistanceTop(dist.top ?? 24);
+            setBorderDistanceBottom(dist.bottom ?? 24);
+            setBorderDistanceLeft(dist.left ?? 24);
+            setBorderDistanceRight(dist.right ?? 24);
+
+            const rawApplyTo = effectiveBorder.applyTo;
+            const validApplyTo: "document" | "section" | "page" | "firstPage" | "exceptFirstPage" =
+              rawApplyTo === "page" ||
+              rawApplyTo === "section" ||
+              rawApplyTo === "firstPage" ||
+              rawApplyTo === "exceptFirstPage" ||
+              rawApplyTo === "document"
+                ? rawApplyTo
+                : activePageObj?.pageBorders
+                ? "page"
+                : "document";
+            setBorderApplyTo(validApplyTo);
+            setArtBorder(effectiveBorder.art || "none");
+          } else {
+            setBorderSetting("none");
+            setBorderStyle("solid");
+            setBorderColor("#000000");
+            setBorderWidth(2);
+            setBorderTop(false);
+            setBorderBottom(false);
+            setBorderLeft(false);
+            setBorderRight(false);
+            setBorderDistanceTop(24);
+            setBorderDistanceBottom(24);
+            setBorderDistanceLeft(24);
+            setBorderDistanceRight(24);
+            setBorderApplyTo(activePageObj?.pageBorders ? "page" : "document");
+            setArtBorder("none");
+          }
           setBordersDialogOpen(true);
         }}
         className={triggerClass}
@@ -1499,196 +1479,335 @@ export default function LayoutTab() {
 
       {/* 7. Custom Watermark Dialog */}
       <Dialog open={watermarkDialogOpen} onOpenChange={setWatermarkDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent
+          className="!max-w-[760px] !w-[760px] max-h-[90vh] overflow-y-auto"
+          style={{ maxWidth: "760px", width: "95vw" }}
+        >
           <DialogHeader>
             <DialogTitle className="text-sm font-semibold">
               Watermark Configuration
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2 text-xs">
-            {/* Tabs for Text vs Image */}
-            <div className="flex rounded-md bg-slate-100 dark:bg-slate-800 p-1">
-              <button
-                type="button"
-                onClick={() => setWatermarkType("text")}
-                className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
-                  watermarkType === "text"
-                    ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                Text Watermark
-              </button>
-              <button
-                type="button"
-                onClick={() => setWatermarkType("image")}
-                className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
-                  watermarkType === "image"
-                    ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                Picture Watermark
-              </button>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-6 py-2 text-xs items-stretch">
+            {/* Left: Configuration Controls */}
+            <div className="w-full sm:w-[380px] flex-shrink-0 space-y-4">
+              {/* Tabs for Text vs Image */}
+              <div className="flex rounded-md bg-slate-100 dark:bg-slate-800 p-1">
+                <button
+                  type="button"
+                  onClick={() => setWatermarkType("text")}
+                  className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
+                    watermarkType === "text"
+                      ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
+                      : "text-slate-600 dark:text-slate-400"
+                  }`}
+                >
+                  Text Watermark
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWatermarkType("image")}
+                  className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
+                    watermarkType === "image"
+                      ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
+                      : "text-slate-600 dark:text-slate-400"
+                  }`}
+                >
+                  Picture Watermark
+                </button>
+              </div>
 
-            {watermarkType === "text" ? (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs mb-1 block">Text</Label>
-                  <Input
-                    value={wmText}
-                    onChange={(e) => setWmText(e.target.value)}
-                    placeholder="e.g. CONFIDENTIAL"
-                    className="text-xs"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+              {watermarkType === "text" ? (
+                <div className="space-y-3">
                   <div>
-                    <Label className="text-xs mb-1 block">Font</Label>
-                    <select
-                      value={wmFont}
-                      onChange={(e) => setWmFont(e.target.value)}
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    >
-                      <option value="Calibri">Calibri</option>
-                      <option value="Arial">Arial</option>
-                      <option value="Times New Roman">Times New Roman</option>
-                      <option value="Georgia">Georgia</option>
-                      <option value="Courier New">Courier New</option>
-                    </select>
+                    <Label className="text-xs mb-1 block">Text</Label>
+                    <Input
+                      value={wmText}
+                      onChange={(e) => setWmText(e.target.value)}
+                      placeholder="e.g. CONFIDENTIAL"
+                      className="text-xs"
+                    />
                   </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">Size</Label>
-                    <select
-                      value={wmFontSize}
-                      onChange={(e) => setWmFontSize(e.target.value)}
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    >
-                      <option value="auto">Auto</option>
-                      <option value="36">36 pt</option>
-                      <option value="48">48 pt</option>
-                      <option value="60">60 pt</option>
-                      <option value="72">72 pt</option>
-                      <option value="96">96 pt</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs mb-1 block">Font</Label>
+                      <select
+                        value={wmFont}
+                        onChange={(e) => setWmFont(e.target.value)}
+                        className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                      >
+                        <option value="Calibri">Calibri</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Courier New">Courier New</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">Size</Label>
+                      <select
+                        value={wmFontSize}
+                        onChange={(e) => setWmFontSize(e.target.value)}
+                        className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                      >
+                        <option value="auto">Auto</option>
+                        <option value="36">36 pt</option>
+                        <option value="48">48 pt</option>
+                        <option value="60">60 pt</option>
+                        <option value="72">72 pt</option>
+                        <option value="96">96 pt</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-3 items-center">
-                  <div>
-                    <Label className="text-xs mb-1 block">Color</Label>
-                    <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                      <Label className="text-xs mb-1 block">Color</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={wmColor}
+                          onChange={(e) => setWmColor(e.target.value)}
+                          className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                        />
+                        <span className="font-mono text-[11px] text-slate-500">
+                          {wmColor}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">
+                        Opacity: {wmOpacity}%
+                      </Label>
                       <input
-                        type="color"
-                        value={wmColor}
-                        onChange={(e) => setWmColor(e.target.value)}
-                        className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                        type="range"
+                        min={5}
+                        max={100}
+                        value={wmOpacity}
+                        onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
+                        className="w-full cursor-pointer accent-sky-500"
                       />
-                      <span className="font-mono text-[11px] text-slate-500">
-                        {wmColor}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs mb-1 block">Layout / Rotation</Label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="wmRot"
+                          checked={wmRotation === "diagonal"}
+                          onChange={() => setWmRotation("diagonal")}
+                          className="text-blue-600"
+                        />
+                        <span>Diagonal (-35°)</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="wmRot"
+                          checked={wmRotation === "horizontal"}
+                          onChange={() => setWmRotation("horizontal")}
+                          className="text-blue-600"
+                        />
+                        <span>Horizontal (0°)</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* 1. Select Image File */}
+                  <div>
+                    <Label className="text-xs font-semibold mb-2 block">
+                      Select Image File
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-8 px-3.5 text-xs font-medium bg-[#1d8cd7] hover:bg-[#157bbd] text-white cursor-pointer rounded shadow-xs"
+                      >
+                        Choose File
+                      </Button>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+                        {wmFileName || "No file chosen"}
                       </span>
                     </div>
                   </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">
-                      Opacity: {wmOpacity}%
+
+                  {/* 2. Rotation & Scale (Size) */}
+                  <div className="grid grid-cols-2 gap-4 items-center">
+                    <div>
+                      <Label className="text-xs font-semibold mb-1.5 block">
+                        Rotation
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min={-90}
+                          max={90}
+                          step={5}
+                          value={wmImageRotation}
+                          onChange={(e) => setWmImageRotation(parseInt(e.target.value, 10))}
+                          className="w-full cursor-pointer accent-sky-500"
+                        />
+                        <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-8 text-right">
+                          {wmImageRotation}°
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold mb-1.5 block">
+                        Scale (Size)
+                      </Label>
+                      <select
+                        value={wmImageScale}
+                        onChange={(e) => setWmImageScale(e.target.value)}
+                        className="w-full h-8 px-2.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-200"
+                      >
+                        <option value="auto">Auto</option>
+                        <option value="500">500%</option>
+                        <option value="200">200%</option>
+                        <option value="150">150%</option>
+                        <option value="100">100%</option>
+                        <option value="50">50%</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 3. Opacity / Transparency Card */}
+                  <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/60 dark:bg-slate-900/40 space-y-2">
+                    <Label className="text-xs font-semibold block">
+                      Opacity / Transparency
                     </Label>
-                    <input
-                      type="range"
-                      min={5}
-                      max={100}
-                      value={wmOpacity}
-                      onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
-                      className="w-full"
-                    />
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={5}
+                        max={100}
+                        step={5}
+                        value={wmOpacity}
+                        onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
+                        className="w-full cursor-pointer accent-sky-500"
+                      />
+                      <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-8 text-right">
+                        {wmOpacity}%
+                      </span>
+                    </div>
                   </div>
                 </div>
+              )}
+            </div>
 
-                <div>
-                  <Label className="text-xs mb-1 block">Layout / Rotation</Label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="wmRot"
-                        checked={wmRotation === "diagonal"}
-                        onChange={() => setWmRotation("diagonal")}
-                        className="text-blue-600"
+            {/* Right: Live Preview Box */}
+            <div className="flex-1 min-w-[260px] flex flex-col items-center justify-center">
+              <div
+                className="w-full h-full min-h-[350px] rounded-xl border border-slate-700/60 p-5 flex flex-col items-center justify-center shadow-lg relative select-none"
+                style={{ backgroundColor: "#0c1421" }}
+              >
+                <div className="text-[11px] uppercase font-bold tracking-[0.2em] text-slate-400 mb-5 text-center">
+                  LIVE PREVIEW
+                </div>
+
+                {/* White Document Page */}
+                <div
+                  className="w-44 h-60 rounded-xs shadow-2xl relative overflow-hidden flex flex-col pt-4 px-3.5 pb-3 select-none"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    boxSizing: "border-box",
+                    borderTop:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.top ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    borderBottom:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.bottom ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    borderLeft:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.left ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    borderRight:
+                      activeSection?.pageBorders &&
+                      activeSection.pageBorders.style !== "none" &&
+                      (activeSection.pageBorders.right ?? true)
+                        ? `${activeSection.pageBorders.width || 1}px ${activeSection.pageBorders.style || "solid"} ${activeSection.pageBorders.color || "#000000"}`
+                        : "none",
+                    boxShadow:
+                      activeSection?.pageBorders?.style === "shadow"
+                        ? "0 10px 25px -5px rgba(0,0,0,0.5), 6px 6px 0px rgba(0,0,0,0.35)"
+                        : "0 10px 25px -5px rgba(0,0,0,0.4)",
+                  }}
+                >
+                  {/* Skeleton Document Lines */}
+                  <div className="space-y-2 pointer-events-none select-none z-10 w-full">
+                    <div className="h-3 w-20 bg-slate-200/90 rounded-full mb-3" />
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-[72%] bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-[94%] bg-slate-100 rounded-full" />
+                    <div className="h-1.5 w-[60%] bg-slate-100 rounded-full" />
+                  </div>
+
+                  {/* Watermark Overlay on Document Page */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-20 p-2">
+                    {watermarkType === "text" ? (
+                      <span
+                        style={{
+                          fontFamily: wmFont,
+                          fontSize:
+                            wmFontSize === "auto"
+                              ? "16px"
+                              : `${Math.min(22, Math.max(11, parseInt(wmFontSize, 10) / 3))}px`,
+                          fontWeight: 700,
+                          color: wmColor,
+                          opacity: wmOpacity / 100,
+                          transform: `rotate(${wmRotation === "diagonal" ? -35 : 0}deg)`,
+                          userSelect: "none",
+                          textTransform: "uppercase",
+                          textAlign: "center",
+                          lineHeight: 1.1,
+                          wordBreak: "break-word",
+                          maxWidth: "90%",
+                          display: "block",
+                        }}
+                      >
+                        {wmText || "PREVIEW"}
+                      </span>
+                    ) : wmImageUrl ? (
+                      <img
+                        src={wmImageUrl}
+                        alt="Preview"
+                        className="max-h-36 max-w-[85%] object-contain"
+                        style={{
+                          opacity: wmOpacity / 100,
+                          transform: `rotate(${wmImageRotation}deg) scale(${
+                            wmImageScale === "auto" ? 1 : Number(wmImageScale) / 100
+                          })`,
+                        }}
                       />
-                      <span>Diagonal (-35°)</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="wmRot"
-                        checked={wmRotation === "horizontal"}
-                        onChange={() => setWmRotation("horizontal")}
-                        className="text-blue-600"
-                      />
-                      <span>Horizontal (0°)</span>
-                    </label>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 font-medium">No image chosen</span>
+                    )}
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs mb-1 block">Image URL</Label>
-                  <Input
-                    value={wmImageUrl}
-                    onChange={(e) => setWmImageUrl(e.target.value)}
-                    placeholder="https://example.com/watermark.png"
-                    className="text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs mb-1 block">
-                    Opacity: {wmOpacity}%
-                  </Label>
-                  <input
-                    type="range"
-                    min={5}
-                    max={100}
-                    value={wmOpacity}
-                    onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Live Preview Box */}
-            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
-              <div className="text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
-                Preview
-              </div>
-              <div className="h-28 w-full bg-white dark:bg-[#0c1622] rounded border border-slate-200 dark:border-slate-800 relative flex items-center justify-center overflow-hidden">
-                {watermarkType === "text" ? (
-                  <span
-                    style={{
-                      fontFamily: wmFont,
-                      fontSize: "22px",
-                      fontWeight: 700,
-                      color: wmColor,
-                      opacity: wmOpacity / 100,
-                      transform: `rotate(${wmRotation === "diagonal" ? -35 : 0}deg)`,
-                      userSelect: "none",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {wmText || "PREVIEW"}
-                  </span>
-                ) : wmImageUrl ? (
-                  <img
-                    src={wmImageUrl}
-                    alt="Preview"
-                    className="max-h-24 max-w-full object-contain"
-                    style={{ opacity: wmOpacity / 100 }}
-                  />
-                ) : (
-                  <span className="text-xs text-slate-400">Enter image URL</span>
-                )}
               </div>
             </div>
           </div>
@@ -1709,223 +1828,479 @@ export default function LayoutTab() {
 
       {/* 8. Page Borders Dialog */}
       <Dialog open={bordersDialogOpen} onOpenChange={setBordersDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-sm font-semibold">
-              Borders and Shading
+        <DialogContent
+          className="!max-w-[820px] !w-[820px] sm:!max-w-[820px] sm:!w-[820px] max-h-[92vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800"
+          style={{ maxWidth: "820px", width: "95vw" }}
+        >
+          <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between">
+            <DialogTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <svg
+                className="h-4 w-4 text-blue-600"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+              </svg>
+              Page Borders
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2 text-xs">
-            {/* Presets Settings */}
-            <div>
-              <Label className="text-xs font-semibold mb-1.5 block">Setting:</Label>
-              <div className="grid grid-cols-5 gap-1.5">
-                {(
-                  [
-                    { id: "none", label: "None" },
-                    { id: "box", label: "Box" },
-                    { id: "shadow", label: "Shadow" },
-                    { id: "3d", label: "3D" },
-                    { id: "custom", label: "Custom" },
-                  ] as const
-                ).map(({ id, label }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => {
-                      setBorderSetting(id);
-                      if (id === "none") {
-                        setBorderTop(false);
-                        setBorderBottom(false);
-                        setBorderLeft(false);
-                        setBorderRight(false);
-                      } else {
-                        setBorderTop(true);
-                        setBorderBottom(true);
-                        setBorderLeft(true);
-                        setBorderRight(true);
-                      }
-                    }}
-                    className={`py-1.5 px-2 rounded border text-center font-medium transition-colors cursor-pointer ${
-                      borderSetting === id
-                        ? "border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-950/40"
-                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-50"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            {borderSetting !== "none" && (
-              <>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-xs mb-1 block">Style:</Label>
+          {/* Scrollable Content Body */}
+          <div className="flex-1 overflow-y-auto px-6 pt-4 pb-4 min-h-0">
+            <div className="flex flex-row gap-5 text-xs items-stretch">
+              {/* Column 1: SETTING */}
+              <div className="w-[125px] flex-shrink-0 border-r border-slate-200/90 dark:border-slate-800 pr-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+                  Setting
+                </div>
+                <div className="space-y-1.5">
+                  {(
+                    [
+                      { id: "none", label: "None" },
+                      { id: "box", label: "Box" },
+                      { id: "shadow", label: "Shadow" },
+                      { id: "3d", label: "3-D" },
+                      { id: "custom", label: "Custom" },
+                    ] as const
+                  ).map(({ id, label }) => {
+                    const isSelected = borderSetting === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => {
+                          setBorderSetting(id);
+                          if (id === "none") {
+                            setBorderTop(false);
+                            setBorderBottom(false);
+                            setBorderLeft(false);
+                            setBorderRight(false);
+                          } else if (id === "custom") {
+                            if (!borderTop && !borderBottom && !borderLeft && !borderRight) {
+                              setBorderTop(true);
+                              setBorderBottom(true);
+                              setBorderLeft(true);
+                              setBorderRight(true);
+                            }
+                          } else {
+                            setBorderTop(true);
+                            setBorderBottom(true);
+                            setBorderLeft(true);
+                            setBorderRight(true);
+                          }
+                        }}
+                        className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-[#E1F0FF] border border-[#0078D4] text-slate-900 font-semibold shadow-xs dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-500"
+                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Column 2: Controls */}
+              <div className="flex-1 min-w-[240px] px-1 space-y-3">
+                {/* Style */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    Style
+                  </label>
+                  <div className="relative">
                     <select
                       value={borderStyle}
-                      onChange={(e) =>
-                        setBorderStyle(
-                          e.target.value as "solid" | "dashed" | "dotted" | "double"
-                        )
-                      }
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                      onChange={(e) => {
+                        const nextStyle = e.target.value as "solid" | "dashed" | "dotted" | "double" | "dash-dot" | "thick-solid";
+                        setBorderStyle(nextStyle);
+                        if (borderSetting === "none") {
+                          setBorderSetting("box");
+                          setBorderTop(true);
+                          setBorderBottom(true);
+                          setBorderLeft(true);
+                          setBorderRight(true);
+                        }
+                      }}
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
                     >
-                      <option value="solid">Solid Line</option>
-                      <option value="dashed">Dashed Line</option>
-                      <option value="dotted">Dotted Line</option>
-                      <option value="double">Double Line</option>
+                      <option value="solid">───── Solid</option>
+                      <option value="dashed">- - - - - - Dashed</option>
+                      <option value="dotted">············ Dotted</option>
+                      <option value="double">══════ Double</option>
+                      <option value="dash-dot">─ · ─ · ─ Dash-Dot</option>
+                      <option value="thick-solid">━━━━━━ Thick Solid</option>
                     </select>
+                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">Width:</Label>
-                    <select
-                      value={borderWidth}
-                      onChange={(e) => setBorderWidth(parseInt(e.target.value, 10))}
-                      className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    >
-                      <option value={1}>1/2 pt (1px)</option>
-                      <option value={2}>1 pt (2px)</option>
-                      <option value={3}>2 1/4 pt (3px)</option>
-                      <option value={4}>3 pt (4px)</option>
-                      <option value={6}>4 1/2 pt (6px)</option>
-                    </select>
+                </div>
+
+                {/* Color with Word Preset Palette */}
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    Color
+                  </label>
+                  <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                    {[
+                      { name: "Black", hex: "#000000" },
+                      { name: "White", hex: "#FFFFFF" },
+                      { name: "Gray", hex: "#6B7280" },
+                      { name: "Red", hex: "#EF4444" },
+                      { name: "Blue", hex: "#2563EB" },
+                      { name: "Green", hex: "#10B981" },
+                      { name: "Yellow", hex: "#F59E0B" },
+                    ].map((c) => (
+                      <button
+                        key={c.hex}
+                        type="button"
+                        title={c.name}
+                        onClick={() => setBorderColor(c.hex)}
+                        className={`h-5 w-5 rounded-full border transition-transform hover:scale-110 cursor-pointer ${
+                          borderColor.toLowerCase() === c.hex.toLowerCase()
+                            ? "ring-2 ring-blue-500 scale-110"
+                            : "border-slate-300 dark:border-slate-600"
+                        }`}
+                        style={{ backgroundColor: c.hex }}
+                      />
+                    ))}
                   </div>
-                  <div>
-                    <Label className="text-xs mb-1 block">Color:</Label>
-                    <div className="flex items-center gap-1.5 h-8">
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden flex-shrink-0 cursor-pointer flex items-center justify-center p-0.5 shadow-xs">
                       <input
                         type="color"
                         value={borderColor}
                         onChange={(e) => setBorderColor(e.target.value)}
-                        className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                       />
-                      <span className="font-mono text-[10px] text-slate-500">
-                        {borderColor}
-                      </span>
+                      <div
+                        className="w-full h-full rounded-xs"
+                        style={{ backgroundColor: borderColor }}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={borderColor}
+                      onChange={(e) => setBorderColor(e.target.value)}
+                      className="w-full h-8 px-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-mono uppercase bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-[#0078D4]"
+                    />
+                  </div>
+                </div>
+
+                {/* Width & Art */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                      Width
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={borderWidth}
+                        onChange={(e) => setBorderWidth(parseFloat(e.target.value))}
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      >
+                        <option value={1}>0.5 pt</option>
+                        <option value={1.5}>0.75 pt</option>
+                        <option value={2}>1 pt</option>
+                        <option value={3}>1.5 pt</option>
+                        <option value={4}>2.25 pt</option>
+                        <option value={6}>3 pt</option>
+                        <option value={8}>4.5 pt</option>
+                        <option value={10}>6 pt</option>
+                      </select>
+                      <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                      Art
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={artBorder}
+                        onChange={(e) => setArtBorder(e.target.value)}
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      >
+                        <option value="none">None</option>
+                      </select>
+                      <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
-                {/* Individual Sides Toggle */}
-                <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">
-                    Border Sides:
-                  </Label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setBorderTop((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderTop
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
-                    >
-                      Top
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBorderBottom((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderBottom
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
-                    >
-                      Bottom
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBorderLeft((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderLeft
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
-                    >
-                      Left
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBorderRight((p) => !p)}
-                      className={`px-2.5 py-1 rounded text-xs border font-medium cursor-pointer ${
-                        borderRight
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-slate-300 text-slate-600"
-                      }`}
-                    >
-                      Right
-                    </button>
+                {/* Distance Options (Word Distance from Page Edge) */}
+                <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-2.5 bg-slate-50/70 dark:bg-slate-900/50">
+                  <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Distance from Edge (px)
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Top:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceTop}
+                        onChange={(e) => setBorderDistanceTop(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Bottom:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceBottom}
+                        onChange={(e) => setBorderDistanceBottom(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Left:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceLeft}
+                        onChange={(e) => setBorderDistanceLeft(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10.5px] text-slate-500">Right:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={borderDistanceRight}
+                        onChange={(e) => setBorderDistanceRight(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 {/* Apply To */}
                 <div>
-                  <Label className="text-xs font-semibold mb-1.5 block">Apply To:</Label>
-                  <select
-                    value={borderApplyTo}
-                    onChange={(e) =>
-                      setBorderApplyTo(
-                        e.target.value as "section" | "document" | "page"
-                      )
-                    }
-                    className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                  >
-                    <option value="section">Current Section</option>
-                    <option value="document">Whole Document</option>
-                    <option value="page">This Page</option>
-                  </select>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    Apply To
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={borderApplyTo}
+                      onChange={(e) =>
+                        setBorderApplyTo(
+                          e.target.value as
+                            | "document"
+                            | "section"
+                            | "page"
+                            | "firstPage"
+                            | "exceptFirstPage"
+                        )
+                      }
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                    >
+                      <option value="document">Whole Document</option>
+                      <option value="section">Current Section</option>
+                      <option value="page">Current Page</option>
+                      <option value="firstPage">This section - First page only</option>
+                      <option value="exceptFirstPage">This section - All except first page</option>
+                    </select>
+                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Column 3: PREVIEW Card */}
+              <div className="w-[250px] flex-shrink-0 bg-[#F2F7FC] dark:bg-[#0c1421] rounded-2xl p-4 border border-[#E1EDF8] dark:border-slate-800 flex flex-col items-center justify-between shadow-xs">
+                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 text-center mb-2">
+                  PREVIEW
                 </div>
 
-                {/* Live Preview Box */}
-                <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
-                  <div className="text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
-                    Live Preview
-                  </div>
-                  <div className="h-28 w-full flex items-center justify-center">
+                <div className="relative flex items-center justify-center my-2">
+                  {/* T Button */}
+                  <button
+                    type="button"
+                    title="Toggle Top Border"
+                    onClick={() => {
+                      const next = !borderTop;
+                      setBorderTop(next);
+                      if (!next && !borderBottom && !borderLeft && !borderRight) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!next || !borderBottom || !borderLeft || !borderRight) setBorderSetting("custom");
+                      }
+                    }}
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderTop && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    T
+                  </button>
+
+                  {/* B Button */}
+                  <button
+                    type="button"
+                    title="Toggle Bottom Border"
+                    onClick={() => {
+                      const next = !borderBottom;
+                      setBorderBottom(next);
+                      if (!borderTop && !next && !borderLeft && !borderRight) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!borderTop || !next || !borderLeft || !borderRight) setBorderSetting("custom");
+                      }
+                    }}
+                    className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderBottom && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    B
+                  </button>
+
+                  {/* L Button */}
+                  <button
+                    type="button"
+                    title="Toggle Left Border"
+                    onClick={() => {
+                      const next = !borderLeft;
+                      setBorderLeft(next);
+                      if (!borderTop && !borderBottom && !next && !borderRight) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!borderTop || !borderBottom || !next || !borderRight) setBorderSetting("custom");
+                      }
+                    }}
+                    className={`absolute top-1/2 -left-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderLeft && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    L
+                  </button>
+
+                  {/* R Button */}
+                  <button
+                    type="button"
+                    title="Toggle Right Border"
+                    onClick={() => {
+                      const next = !borderRight;
+                      setBorderRight(next);
+                      if (!borderTop && !borderBottom && !borderLeft && !next) {
+                        setBorderSetting("none");
+                      } else if (borderSetting === "none") {
+                        setBorderSetting("custom");
+                      } else if (borderSetting === "box" || borderSetting === "shadow" || borderSetting === "3d") {
+                        if (!borderTop || !borderBottom || !borderLeft || !next) setBorderSetting("custom");
+                      }
+                    }}
+                    className={`absolute top-1/2 -right-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
+                      borderRight && borderSetting !== "none"
+                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
+                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    R
+                  </button>
+
+                  {/* Miniature Document Sheet with Interactive Clickable Sides */}
+                  <div
+                    className="w-36 h-48 rounded-xs bg-white dark:bg-slate-900 relative overflow-hidden flex flex-col pt-3.5 px-3 pb-3 transition-all select-none cursor-pointer"
+                    style={{
+                      boxSizing: "border-box",
+                      borderTop:
+                        borderTop && borderSetting !== "none"
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
+                          : "none",
+                      borderBottom:
+                        borderBottom && borderSetting !== "none"
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
+                          : "none",
+                      borderLeft:
+                        borderLeft && borderSetting !== "none"
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
+                          : "none",
+                      borderRight:
+                        borderRight && borderSetting !== "none"
+                          ? `${borderStyle === "thick-solid" ? Math.max(3, borderWidth * 1.5) : borderStyle === "double" ? Math.max(3, borderWidth) : borderWidth}px ${borderSetting === "3d" ? "inset" : borderStyle === "dash-dot" ? "dashed" : borderStyle === "thick-solid" ? "solid" : borderStyle} ${borderColor}`
+                          : "none",
+                      boxShadow:
+                        borderSetting === "shadow"
+                          ? "5px 5px 0px rgba(0,0,0,0.85), 0 8px 20px -4px rgba(0,0,0,0.25)"
+                          : "0 8px 20px -4px rgba(0,0,0,0.12), 0 2px 6px -1px rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    {/* Clickable side hotspots */}
                     <div
-                      className="h-24 w-32 bg-white dark:bg-[#0c1622] rounded flex items-center justify-center text-[10px] text-slate-400"
-                      style={{
-                        boxSizing: "border-box",
-                        borderTop: borderTop
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
-                          : "none",
-                        borderBottom: borderBottom
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
-                          : "none",
-                        borderLeft: borderLeft
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
-                          : "none",
-                        borderRight: borderRight
-                          ? `${borderWidth}px ${borderStyle} ${borderColor}`
-                          : "none",
-                        boxShadow:
-                          borderSetting === "shadow"
-                            ? "0 8px 20px rgba(0,0,0,0.25)"
-                            : "none",
-                      }}
-                    >
-                      Page Content
+                      className="absolute top-0 left-0 right-0 h-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Top border"
+                      onClick={() => setBorderTop(!borderTop)}
+                    />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Bottom border"
+                      onClick={() => setBorderBottom(!borderBottom)}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 left-0 w-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Left border"
+                      onClick={() => setBorderLeft(!borderLeft)}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 right-0 w-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      title="Click to toggle Right border"
+                      onClick={() => setBorderRight(!borderRight)}
+                    />
+
+                    {/* Skeleton text lines */}
+                    <div className="space-y-1.5 pointer-events-none select-none w-full">
+                      <div className="h-1.5 w-[65%] bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
+                      <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full" />
+                      <div className="h-1.5 w-[85%] bg-slate-100 dark:bg-slate-800 rounded-full" />
+                      <div className="h-1.5 w-[70%] bg-slate-100 dark:bg-slate-800 rounded-full" />
                     </div>
                   </div>
                 </div>
-              </>
-            )}
+
+                <div className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-2 text-center select-none font-normal">
+                  Click sides or T/B/L/R to toggle
+                </div>
+              </div>
+            </div>
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
+
+          {/* Sticky Non-Scrolling Edge-to-Edge Footer - ALWAYS VISIBLE */}
+          <div className="border-t border-slate-200 dark:border-slate-800 px-6 py-3.5 bg-slate-50/80 dark:bg-slate-900/90 flex items-center justify-end gap-3 shrink-0 rounded-b-2xl">
+            <button
+              type="button"
               onClick={() => setBordersDialogOpen(false)}
+              className="px-5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium transition-colors cursor-pointer shadow-xs"
             >
               Cancel
-            </Button>
-            <Button size="sm" onClick={handleApplyBorders}>
-              Apply Border
-            </Button>
-          </DialogFooter>
+            </button>
+            <button
+              type="button"
+              onClick={handleApplyBorders}
+              className="px-6 py-2 rounded-lg bg-[#0078D4] hover:bg-[#006CBD] active:bg-[#005A9E] text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+            >
+              OK
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

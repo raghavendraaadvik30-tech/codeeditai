@@ -9,7 +9,7 @@
  * --------------------------------------------------------
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -47,6 +47,7 @@ export default function DocumentPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [docToDelete, setDocToDelete] = useState<DocListItem | null>(null);
+  const [showLimitAlert, setShowLimitAlert] = useState(false);
 
   // Accordion state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -105,7 +106,7 @@ export default function DocumentPage() {
       });
     }
 
-    return list;
+    return list.slice(0, 10);
   }, [model, savedDocuments]);
 
   const filteredDocs = useMemo(() => {
@@ -115,7 +116,7 @@ export default function DocumentPage() {
     );
   }, [allDocs, searchQuery]);
 
-  const handleCreateDoc = () => {
+  const executeCreateDoc = () => {
     createNewDocument();
     setTimeout(() => {
       const editable = document.querySelector('[contenteditable="true"]') as HTMLElement | null;
@@ -138,6 +139,19 @@ export default function DocumentPage() {
         }
       }
     }, 60);
+  };
+
+  const handleCreateDoc = () => {
+    if (allDocs.length >= 10) {
+      setShowLimitAlert(true);
+      return;
+    }
+    executeCreateDoc();
+  };
+
+  const handleConfirmCreateDoc = () => {
+    setShowLimitAlert(false);
+    executeCreateDoc();
   };
 
   const handleSelectDoc = (doc: { id: string }) => {
@@ -172,32 +186,153 @@ export default function DocumentPage() {
     );
   };
 
-  // Find & Replace State
+  // Find & Replace State with Yellow Highlighting
   const [findText, setFindText] = useState("");
   const [replaceText, setReplaceText] = useState("");
+  const matchIndexRef = useRef<number>(0);
+  const lastSearchRef = useRef<string>("");
+
+  const clearFindHighlights = () => {
+    const oldMarks = document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]');
+    oldMarks.forEach((mark) => {
+      const parent = mark.parentNode;
+      if (!parent) return;
+      while (mark.firstChild) {
+        parent.insertBefore(mark.firstChild, mark);
+      }
+      mark.remove();
+      parent.normalize();
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      clearFindHighlights();
+    };
+  }, []);
 
   const handleFind = () => {
-    if (!findText || !editorRef.current) return;
-    const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT);
-    let n: Node | null;
-    while ((n = walker.nextNode())) {
-      if (n.nodeValue && n.nodeValue.toLowerCase().includes(findText.toLowerCase())) {
-        const parent = n.parentElement;
-        parent?.scrollIntoView({ behavior: "smooth", block: "center" });
-        break;
-      }
+    const query = findText.trim();
+    if (!query) {
+      clearFindHighlights();
+      lastSearchRef.current = "";
+      return;
     }
+
+    // Identify all editable page containers in the workspace
+    const containers = Array.from(
+      document.querySelectorAll<HTMLElement>('[contenteditable="true"][data-page-id]')
+    );
+    if (containers.length === 0 && editorRef.current) {
+      containers.push(editorRef.current);
+    }
+
+    // Re-highlight in yellow when a new search string is entered or no marks exist
+    const existingMarks = document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]');
+    if (query !== lastSearchRef.current || existingMarks.length === 0) {
+      clearFindHighlights();
+      lastSearchRef.current = query;
+      matchIndexRef.current = 0;
+
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escaped, "gi");
+
+      containers.forEach((container) => {
+        const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+        const textNodes: Text[] = [];
+        let n: Node | null;
+        while ((n = walker.nextNode())) {
+          if (n.parentElement && !n.parentElement.closest('[data-find-highlight="true"]')) {
+            textNodes.push(n as Text);
+          }
+        }
+
+        textNodes.forEach((node) => {
+          const val = node.nodeValue;
+          if (!val) return;
+
+          regex.lastIndex = 0;
+          if (!regex.test(val)) return;
+          regex.lastIndex = 0;
+
+          const frag = document.createDocumentFragment();
+          let lastIndex = 0;
+          let match: RegExpExecArray | null;
+
+          while ((match = regex.exec(val)) !== null) {
+            const start = match.index;
+            const end = regex.lastIndex;
+
+            if (start > lastIndex) {
+              frag.appendChild(document.createTextNode(val.substring(lastIndex, start)));
+            }
+
+            // Create standard yellow highlight mark
+            const mark = document.createElement("mark");
+            mark.setAttribute("data-find-highlight", "true");
+            mark.style.backgroundColor = "yellow";
+            mark.style.color = "black";
+            mark.style.padding = "0 1px";
+            mark.style.borderRadius = "2px";
+            mark.textContent = val.substring(start, end);
+            frag.appendChild(mark);
+
+            lastIndex = end;
+          }
+
+          if (lastIndex < val.length) {
+            frag.appendChild(document.createTextNode(val.substring(lastIndex)));
+          }
+
+          node.parentNode?.replaceChild(frag, node);
+        });
+      });
+    }
+
+    // Query all yellow highlighted occurrences
+    const marks = Array.from(
+      document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]')
+    );
+
+    if (marks.length === 0) return;
+
+    // Reset all highlights to default yellow, emphasize active match
+    marks.forEach((m) => {
+      m.style.backgroundColor = "yellow";
+      m.style.outline = "none";
+    });
+
+    const activeIndex = matchIndexRef.current % marks.length;
+    const activeMark = marks[activeIndex];
+    activeMark.style.backgroundColor = "#facc15";
+    activeMark.style.outline = "2px solid #ca8a04";
+    activeMark.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    matchIndexRef.current = (activeIndex + 1) % marks.length;
   };
 
   const handleReplace = () => {
-    if (!findText || !editorRef.current) return;
-    const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT);
-    let n: Node | null;
-    while ((n = walker.nextNode())) {
-      if (n.nodeValue && n.nodeValue.includes(findText)) {
-        n.nodeValue = n.nodeValue.replace(findText, replaceText);
-        break;
+    if (!findText.trim()) return;
+
+    const marks = Array.from(
+      document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]')
+    );
+
+    if (marks.length > 0) {
+      const activeIdx = Math.max(0, (matchIndexRef.current - 1 + marks.length) % marks.length);
+      const targetMark = marks[activeIdx] || marks[0];
+      const pageContainer = targetMark.closest<HTMLElement>('[contenteditable="true"]');
+      const textNode = document.createTextNode(replaceText);
+      targetMark.parentNode?.replaceChild(textNode, targetMark);
+
+      if (pageContainer) {
+        pageContainer.normalize();
+        pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
       }
+
+      // Re-highlight remaining occurrences in yellow
+      lastSearchRef.current = "";
+      handleFind();
     }
   };
 
@@ -207,24 +342,83 @@ export default function DocumentPage() {
     let characters = 0;
     let charactersNoSpaces = 0;
     let paragraphs = 0;
+    let tables = 0;
+    let images = 0;
 
     if (typeof window === "undefined" || typeof DOMParser === "undefined") {
-      return { words: 0, characters: 0, charactersNoSpaces: 0, paragraphs: 0, pages: 1, tables: 0, images: 0, sections: 1 };
+      return {
+        words: 0,
+        characters: 0,
+        charactersNoSpaces: 0,
+        paragraphs: 0,
+        pages: model.pages?.length || 1,
+        tables: 0,
+        images: 0,
+        sections: model.sections?.length || 1,
+      };
     }
 
     const parser = new DOMParser();
-    Object.values(model.pageHtml || {}).forEach((html) => {
-      if (!html) return;
-      const doc = parser.parseFromString(html, "text/html");
-      const text = doc.body.textContent || "";
-      const trimmed = text.trim();
-      words += trimmed ? trimmed.split(/\s+/).filter(Boolean).length : 0;
-      characters += text.length;
-      charactersNoSpaces += text.replace(/\s+/g, "").length;
+    const pages = model.pages && model.pages.length > 0 ? model.pages : [{ id: "page_1" }];
 
-      const nodes = doc.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6");
-      nodes.forEach((n) => {
-        if ((n.textContent || "").trim().length > 0) paragraphs++;
+    pages.forEach((page) => {
+      const html = model.pageHtml?.[page.id];
+      if (!html || !html.trim()) return;
+
+      const doc = parser.parseFromString(html, "text/html");
+
+      // 1. Remove editor UI markers, page breaks, and overlays from stats
+      doc.querySelectorAll(
+        "[data-editor-ui], [data-table-control], .page-break, .column-break, script, style"
+      ).forEach((el) => el.remove());
+
+      tables += doc.querySelectorAll("table").length;
+      images += doc.querySelectorAll("img").length;
+
+      // 2. Query all text-bearing block elements
+      const allCandidateBlocks = Array.from(
+        doc.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th")
+      );
+
+      // Keep only leaf block elements so nested blocks (e.g. td > p) are never double counted
+      const leafBlocks = allCandidateBlocks.filter((block) => {
+        return block.querySelector("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th") === null;
+      });
+
+      const blocks = leafBlocks.length > 0 ? leafBlocks : [doc.body];
+
+      blocks.forEach((block) => {
+        // Clone block to safely remove trailing placeholder <br> elements inserted by contentEditable
+        const clone = block.cloneNode(true) as HTMLElement;
+        while (clone.lastChild && clone.lastChild.nodeName === "BR") {
+          clone.removeChild(clone.lastChild);
+        }
+
+        // Clean out zero-width characters and normalize non-breaking spaces
+        const rawText = (clone.textContent || "")
+          .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+          .replace(/\u00A0/g, " ");
+
+        // Trim leading and trailing whitespace to determine if block has genuine content
+        const trimmed = rawText.trim();
+        if (!trimmed) {
+          // Empty paragraph or whitespace-only block: does not count towards words, characters, or paragraphs
+          return;
+        }
+
+        paragraphs++;
+
+        // Words: count words delimited by whitespace
+        const blockWords = trimmed.split(/\s+/).filter(Boolean);
+        words += blockWords.length;
+
+        // Characters (no spaces): count of non-whitespace characters
+        const noSpacesCount = trimmed.replace(/\s+/g, "").length;
+        charactersNoSpaces += noSpacesCount;
+
+        // Characters (with spaces): length of content without phantom placeholder newlines
+        const cleanContent = rawText.replace(/^[\r\n]+|[\r\n]+$/g, "");
+        characters += cleanContent.length;
       });
     });
 
@@ -234,8 +428,8 @@ export default function DocumentPage() {
       charactersNoSpaces,
       paragraphs,
       pages: model.pages?.length || 1,
-      tables: 0,
-      images: 0,
+      tables,
+      images,
       sections: model.sections?.length || 1,
     };
   }, [model.pageHtml, model.pages, model.sections]);
@@ -434,7 +628,19 @@ export default function DocumentPage() {
                   <input
                     type="text"
                     value={findText}
-                    onChange={(e) => setFindText(e.target.value)}
+                    onChange={(e) => {
+                      setFindText(e.target.value);
+                      if (!e.target.value.trim()) {
+                        clearFindHighlights();
+                        lastSearchRef.current = "";
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleFind();
+                      }
+                    }}
                     placeholder="Find text..."
                     className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
                   />
@@ -503,15 +709,15 @@ export default function DocumentPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">No spaces:</span>
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        {stats.charactersNoSpaces}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-slate-400">Paragraphs:</span>
                       <span className="font-bold text-slate-900 dark:text-white">
                         {stats.paragraphs}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Sections:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {stats.sections}
                       </span>
                     </div>
                   </div>
@@ -520,12 +726,6 @@ export default function DocumentPage() {
                       <span className="text-slate-400">Total Pages:</span>
                       <span className="font-bold text-slate-900 dark:text-white">
                         {stats.pages}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Sections:</span>
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        {stats.sections}
                       </span>
                     </div>
                   </div>
@@ -583,6 +783,60 @@ export default function DocumentPage() {
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================
+          DOCUMENT LIMIT REACHED MODAL (MAX 10 DOCUMENTS)
+      ============================================================ */}
+      {showLimitAlert && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="limit-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-amber-200 bg-white p-5 shadow-2xl dark:border-amber-900/60 dark:bg-[#0c1929]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 id="limit-dialog-title" className="text-sm font-bold text-slate-900 dark:text-white">
+                  Document Limit Reached
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Maximum 10 documents allowed
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-4 rounded-xl bg-amber-50/80 p-3.5 text-xs leading-relaxed text-amber-950 dark:bg-amber-950/30 dark:text-amber-200 border border-amber-200/80 dark:border-amber-900/40">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <span>
+                  You have reached the maximum limit of 10 documents. To insert a new document, the oldest document will be removed. If you want to keep any existing document, please save it in the File Manager before continuing.
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowLimitAlert(false)}
+                className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors shadow-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCreateDoc}
+                className="flex items-center gap-1.5 rounded-xl bg-[#0078d4] px-4 py-2 text-xs font-semibold text-white hover:bg-[#005a9e] transition-colors shadow-sm"
+              >
+                <span>Continue</span>
               </button>
             </div>
           </div>

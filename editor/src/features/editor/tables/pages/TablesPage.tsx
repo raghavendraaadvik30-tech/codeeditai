@@ -20,31 +20,20 @@ import {
   TableGridPicker,
   TableInsertDialog,
   TableActionsToolbar,
+  StandardTablesPanel,
 } from "../components";
 import { cn } from "@/lib/utils";
+
+type TableSection = "quickGrid" | "actions" | "standardTables";
 
 function TablesPageContent() {
   const [insertDialogOpen, setInsertDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    quickGrid: false,
-    actions: false,
-    templates: false,
-    styles: false,
-  });
+  const [activeSection, setActiveSection] = useState<TableSection | null>(null);
 
-  const toggleSection = (section: string) => {
-    setOpenSections((prev) => {
-      const isCurrentlyOpen = !!prev[section];
-      return {
-        quickGrid: false,
-        actions: false,
-        templates: false,
-        styles: false,
-        [section]: !isCurrentlyOpen,
-      };
-    });
+  const toggleSection = (section: TableSection) => {
+    setActiveSection((prev) => (prev === section ? null : section));
   };
 
   return (
@@ -71,7 +60,13 @@ function TablesPageContent() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearchQuery(val);
+              if (val.trim()) {
+                setActiveSection("standardTables");
+              }
+            }}
             placeholder="Search templates & tools..."
             className="h-8 w-full rounded-md border border-slate-200 bg-slate-50/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-slate-400 focus:border-[#0078d4] dark:border-slate-800 dark:bg-[#07131E] dark:text-slate-200"
           />
@@ -94,12 +89,12 @@ function TablesPageContent() {
             <ChevronRight
               className={cn(
                 "h-3.5 w-3.5 transition-transform duration-200",
-                openSections.quickGrid ? "rotate-90" : ""
+                activeSection === "quickGrid" ? "rotate-90" : ""
               )}
             />
           </button>
 
-          {openSections.quickGrid && <TableGridPicker />}
+          {activeSection === "quickGrid" && <TableGridPicker />}
         </div>
 
         {/* TABLE ACTIONS */}
@@ -116,12 +111,36 @@ function TablesPageContent() {
             <ChevronRight
               className={cn(
                 "h-3.5 w-3.5 transition-transform duration-200",
-                openSections.actions ? "rotate-90" : ""
+                activeSection === "actions" ? "rotate-90" : ""
               )}
             />
           </button>
 
-          {openSections.actions && <TableActionsToolbar />}
+          {activeSection === "actions" && <TableActionsToolbar />}
+        </div>
+
+        {/* STANDARD TABLES (Directly below Table Tools & Rows) */}
+        <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800/80">
+          <button
+            type="button"
+            onClick={() => toggleSection("standardTables")}
+            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+          >
+            <div className="flex items-center gap-1.5">
+              <Table2 className="h-3.5 w-3.5 text-[#0078d4]" />
+              <span>Standard Tables</span>
+            </div>
+            <ChevronRight
+              className={cn(
+                "h-3.5 w-3.5 transition-transform duration-200",
+                activeSection === "standardTables" ? "rotate-90" : ""
+              )}
+            />
+          </button>
+
+          {activeSection === "standardTables" && (
+            <StandardTablesPanel searchQuery={searchQuery} />
+          )}
         </div>
       </div>
 

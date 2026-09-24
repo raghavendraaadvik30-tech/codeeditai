@@ -11,6 +11,7 @@ export * from "./DocumentCanvas";
 export * from "./DocumentToolbar";
 export * from "./HeaderFooter";
 export * from "./HeaderFooterDialog";
+export * from "./HeaderFooterGallery";
 export * from "./FindReplace";
 export * from "./ExportDialog";
 export * from "./SaveDialog";

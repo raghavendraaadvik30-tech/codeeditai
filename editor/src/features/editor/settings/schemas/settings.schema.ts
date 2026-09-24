@@ -42,7 +42,7 @@ export const EditorSettingsSchema = z.object({
 
   pageSize: z.enum(["A4", "Letter", "Legal"]).default("A4"),
   pageOrientation: z.enum(["portrait", "landscape"]).default("portrait"),
-  showRuler: z.boolean().default(false),
+  showRuler: z.boolean().default(true),
   showWordCount: z.boolean().default(true),
   showPageNumbers: z.boolean().default(true),
   defaultZoom: z.number().int().min(50).max(200).default(100),

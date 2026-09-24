@@ -19,15 +19,22 @@ and provides true Word-style content-overflow pagination across pages.
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { useEditor } from "../../context/EditorContext";
-import { useDocumentModel, type PageModel, type SectionModel } from "../../store/documentModel";
-import { TableControlsOverlay, TableFloatingFormatToolbar } from "@/features/editor/tables/components";
+import { useEditor, getCaretCharacterOffsetWithin, type ViewMode } from "../../context/EditorContext";
+import { useDocumentModel, type PageModel, type SectionModel, type PageBorderConfig } from "../../store/documentModel";
+import { useHeaderFooter } from "../../document/context/HeaderFooterContext";
+import {
+  TableControlsOverlay,
+  TableFloatingFormatToolbar,
+  TableContextMenu,
+  type TableContextMenuState,
+} from "../../tables/components";
 import { PictureHydration } from "@/features/editor/modules/figures/modules/pictures";
 import { IconHydration } from "@/features/editor/modules/figures/modules/icons";
 import { ShapeHydration } from "@/features/editor/modules/figures/modules/shapes";
 import { ChartHydration, useChartContext } from "@/features/editor/modules/figures/modules/chart";
 import { SmartArtHydration } from "@/features/editor/modules/figures/modules/smartart";
-
+import { useTrackChanges } from "../../modules/trackChanges";
+import DocumentRuler from "./DocumentRuler";
 
 export default function Workspace() {
   const {
@@ -37,7 +44,23 @@ export default function Workspace() {
     setPageHtml,
     addPage,
     removePage,
+    updateSection,
   } = useDocumentModel();
+
+  const {
+    isHeaderFooterActive,
+    exitHeaderFooterMode,
+  } = useHeaderFooter();
+
+  useEffect(() => {
+    const handleGlobalEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isHeaderFooterActive) {
+        exitHeaderFooterMode();
+      }
+    };
+    window.addEventListener("keydown", handleGlobalEscape);
+    return () => window.removeEventListener("keydown", handleGlobalEscape);
+  }, [isHeaderFooterActive, exitHeaderFooterMode]);
 
   const {
     zoom,
@@ -45,9 +68,18 @@ export default function Workspace() {
     editorRef,
     aiPanelOpen,
     setAiPanelOpen,
+    viewMode,
   } = useEditor();
 
   const [activeTable, setActiveTable] = useState<HTMLTableElement | null>(null);
+  const [tableContextMenu, setTableContextMenu] = useState<TableContextMenuState>({
+    open: false,
+    x: 0,
+    y: 0,
+    table: null,
+    cell: null,
+    savedRange: null,
+  });
 
   // Unified global table selection tracking across all document pages
   useEffect(() => {
@@ -114,6 +146,80 @@ export default function Workspace() {
     };
   }, [activePage, setActivePage]);
 
+  // Close table context menu when navigating pages
+  useEffect(() => {
+    setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+  }, [activePage]);
+
+  // Native contextmenu detection specifically for table cells (td, th)
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // Determine clicked element using closest("td, th")
+      const cell = target.closest("td, th") as HTMLTableCellElement | null;
+      const table = cell?.closest("table") as HTMLTableElement | null;
+
+      if (cell && table) {
+        const pageSection = table.closest("section[data-page-id]");
+        if (pageSection) {
+          // 1. Prevent browser's default context menu
+          e.preventDefault();
+
+          // 2. Update active table and active page
+          setActiveTable(table);
+          const pageId = pageSection.getAttribute("data-page-id");
+          if (pageId && activePage !== pageId) {
+            setActivePage(pageId);
+          }
+
+          // 3. Preserve text selection range if inside cell
+          let savedRange: Range | null = null;
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            const r = sel.getRangeAt(0);
+            if (cell.contains(r.commonAncestorContainer)) {
+              savedRange = r.cloneRange();
+            }
+          }
+
+          // 4. Open table context menu at pointer position
+          setTableContextMenu({
+            open: true,
+            x: e.clientX,
+            y: e.clientY,
+            table,
+            cell,
+            savedRange,
+          });
+          return;
+        }
+      }
+
+      // If clicked outside a table cell, close any open table context menu and leave default behavior
+      setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [activePage, setActivePage]);
+
+  const activePageObj =
+    model.pages.find((p) => p.id === activePage) ?? model.pages[0];
+  const activeSection =
+    model.sections.find((s) => s.id === activePageObj?.sectionId) ??
+    model.sections[0];
+
+  const isLandscape = activeSection?.orientation === "landscape";
+  const baseWidth = activeSection?.paperSize?.width ?? 816;
+  const baseHeight = activeSection?.paperSize?.height ?? 1056;
+  const activePageWidth = isLandscape ? baseHeight : baseWidth;
+  const activeMarginLeft = activeSection?.marginConfig?.left ?? 96;
+  const activeMarginRight = activeSection?.marginConfig?.right ?? 96;
+
   return (
     <main
       className="
@@ -124,18 +230,42 @@ export default function Workspace() {
         min-w-0
         min-h-0
         flex-1
-        overflow-x-hidden
+        flex-col
+        overflow-x-auto
         overflow-y-auto
         bg-[#EEF4FA]
         dark:bg-[#050B11]
       "
     >
+      {/* WORD HORIZONTAL RULER */}
+      {viewMode !== "read" && (
+        <DocumentRuler
+          pageWidth={activePageWidth}
+          zoom={zoom}
+          marginLeft={activeMarginLeft}
+          marginRight={activeMarginRight}
+          onMarginChange={(newLeft, newRight) => {
+            if (activeSection?.id) {
+              updateSection(activeSection.id, {
+                marginConfig: {
+                  top: activeSection.marginConfig?.top ?? 96,
+                  bottom: activeSection.marginConfig?.bottom ?? 96,
+                  left: newLeft,
+                  right: newRight,
+                },
+              });
+            }
+          }}
+        />
+      )}
+
       {/* DOCUMENT AREA */}
       <div
         className="
           flex
-          w-full
-          min-w-0
+          min-w-full
+          w-fit
+          mx-auto
           flex-col
           items-center
           gap-8
@@ -173,6 +303,29 @@ export default function Workspace() {
               ? activePage === page.id
               : index === 0;
 
+            const sectionPages = model.pages.filter(
+              (p) => p.sectionId === section?.id
+            );
+            const isFirstPageOfSection = sectionPages[0]?.id === page.id;
+
+            let effectivePageBorders: PageBorderConfig | undefined = undefined;
+            if (page.pageBorders !== undefined) {
+              effectivePageBorders = page.pageBorders;
+            } else if (section?.pageBorders) {
+              const applyTo = section.pageBorders.applyTo;
+              if (applyTo === "firstPage") {
+                if (isFirstPageOfSection) {
+                  effectivePageBorders = section.pageBorders;
+                }
+              } else if (applyTo === "exceptFirstPage") {
+                if (!isFirstPageOfSection) {
+                  effectivePageBorders = section.pageBorders;
+                }
+              } else {
+                effectivePageBorders = section.pageBorders;
+              }
+            }
+
             return (
               <DocumentPage
                 key={page.id}
@@ -181,14 +334,16 @@ export default function Workspace() {
                 pageNumber={pageNumbersMap[page.id] ?? (index + 1)}
                 totalPages={model.pages.length}
                 section={section}
+                pageBorders={effectivePageBorders}
                 headerText={section?.header || ""}
                 footerText={section?.footer || "Parexel Smart Authoring Suite"}
                 pageNumberPosition={section?.pageNumberPosition}
                 pageNumberAlignment={section?.pageNumberAlignment}
                 pageNumberFormat={section?.pageNumberFormat}
+                pageNumberStyle={section?.pageNumberStyle}
                 html={model.pageHtml?.[page.id] ?? ""}
                 active={isEffectiveActive}
-                editable={isEditable}
+                editable={isEditable && viewMode !== "read"}
                 editorRef={editorRef}
                 allPages={model.pages}
                 pageHtmlMap={model.pageHtml}
@@ -205,6 +360,7 @@ export default function Workspace() {
                 onSetPageHtml={setPageHtml}
                 onSetActivePage={setActivePage}
                 zoom={zoom}
+                viewMode={viewMode}
               />
             );
           });
@@ -221,12 +377,35 @@ export default function Workspace() {
       {/* WORD-STYLE CONTEXTUAL TABLE TEXT FORMATTING TOOLBAR
           Appears automatically near selection when text inside a table cell is selected
       */}
-      {isEditable && <TableFloatingFormatToolbar />}
+      {isEditable && viewMode !== "read" && <TableFloatingFormatToolbar />}
+
+      {/* MICROSOFT WORD-STYLE TABLE CELL CONTEXT MENU
+          Appears exclusively when right-clicking inside a table cell (td, th)
+      */}
+      {isEditable && viewMode !== "read" && (
+        <TableContextMenu
+          state={tableContextMenu}
+          onClose={() => setTableContextMenu((prev) => ({ ...prev, open: false }))}
+          onUpdateTable={() => {
+            if (tableContextMenu.table) {
+              const editable = tableContextMenu.table.closest('[contenteditable="true"]') as HTMLElement | null;
+              if (editable) {
+                editable.dispatchEvent(new Event("input", { bubbles: true }));
+                const pageSection = editable.closest("section[data-page-id]");
+                const pageId = pageSection?.getAttribute("data-page-id");
+                if (pageId) {
+                  setPageHtml(pageId, editable.innerHTML);
+                }
+              }
+            }
+          }}
+        />
+      )}
 
       {/* AI FLOATING BUTTON
-          Only show when AI panel is closed
+          Only show when AI panel is closed and not in read mode
       */}
-      {!aiPanelOpen && (
+      {!aiPanelOpen && viewMode !== "read" && (
         <button
           type="button"
           onClick={() => setAiPanelOpen(true)}
@@ -379,6 +558,167 @@ export function cleanChartMountsForHtml(html: string): string {
   }
 }
 
+// --------------------------------------------------------------------------
+// Helper: Check if current typing position should auto-capitalize (Sentence Case)
+// Word-style auto-capitalization:
+// 1. At start of block/paragraph (or empty block, or only whitespace before caret)
+// 2. Immediately after Enter or line break (<br>, \r, \n)
+// 3. After sentence-ending punctuation (.?! or …) followed by whitespace
+// --------------------------------------------------------------------------
+function shouldAutoCapitalize(container: HTMLElement): boolean {
+  try {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return false;
+    const range = sel.getRangeAt(0);
+    if (!container.contains(range.startContainer)) return false;
+
+    // Find the enclosing block element (p, h1-h6, li, blockquote, td, th, div)
+    const node = range.startContainer;
+    const el = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+    if (!el) return false;
+
+    const block =
+      (el.closest("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th") as HTMLElement | null) ||
+      (el === container ? container : (el.closest("div") as HTMLElement | null) || container);
+
+    // Check if directly preceded by a <br>
+    if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+      if (range.startOffset > 0) {
+        const prevChild = range.startContainer.childNodes[range.startOffset - 1];
+        if (prevChild && prevChild.nodeName === "BR") {
+          return true;
+        }
+      }
+    } else if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset === 0) {
+      let prev: Node | null = range.startContainer.previousSibling;
+      while (prev && prev.nodeType === Node.TEXT_NODE && (prev.textContent || "") === "") {
+        prev = prev.previousSibling;
+      }
+      if (prev && prev.nodeName === "BR") {
+        return true;
+      }
+    }
+
+    // Get text before caret inside the block
+    const preRange = document.createRange();
+    preRange.setStart(block, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const textBefore = preRange.toString();
+
+    // 1. At the start of the block (empty or only whitespace/quotes/brackets)
+    if (/^[\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    // 2. Directly after a newline
+    if (/[\r\n][\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    // 3. After sentence-ending punctuation (. ? !) followed by at least one space
+    if (/[.?!][\s\u00A0]+["'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+interface SavedSelection {
+  start: number;
+  end: number;
+}
+
+function saveSelection(container: HTMLElement): SavedSelection | null {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  const range = sel.getRangeAt(0);
+  if (!container.contains(range.startContainer) || !container.contains(range.endContainer)) {
+    return null;
+  }
+
+  const preStartRange = range.cloneRange();
+  preStartRange.selectNodeContents(container);
+  preStartRange.setEnd(range.startContainer, range.startOffset);
+  const start = preStartRange.toString().length;
+
+  const preEndRange = range.cloneRange();
+  preEndRange.selectNodeContents(container);
+  preEndRange.setEnd(range.endContainer, range.endOffset);
+  const end = preEndRange.toString().length;
+
+  return { start, end };
+}
+
+function restoreSelection(container: HTMLElement, saved: SavedSelection | null): void {
+  if (!saved) return;
+  const sel = window.getSelection();
+  if (!sel) return;
+
+  const savedStart = saved.start;
+  const savedEnd = saved.end;
+
+  let charIndex = 0;
+  const found = {
+    startNode: null as Node | null,
+    startOffset: 0,
+    endNode: null as Node | null,
+    endOffset: 0,
+  };
+
+  function traverse(node: Node) {
+    if (found.startNode && found.endNode) return;
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const textLen = (node as Text).length ?? node.textContent?.length ?? 0;
+      const nextCharIndex = charIndex + textLen;
+
+      if (!found.startNode && savedStart >= charIndex && savedStart <= nextCharIndex) {
+        found.startNode = node;
+        found.startOffset = savedStart - charIndex;
+      }
+      if (!found.endNode && savedEnd >= charIndex && savedEnd <= nextCharIndex) {
+        found.endNode = node;
+        found.endOffset = savedEnd - charIndex;
+      }
+
+      charIndex = nextCharIndex;
+    } else {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        traverse(node.childNodes[i]);
+        if (found.startNode && found.endNode) return;
+      }
+    }
+  }
+
+  traverse(container);
+
+  try {
+    const range = document.createRange();
+    if (found.startNode && found.endNode) {
+      const sLen = found.startNode.textContent?.length ?? 0;
+      const eLen = found.endNode.textContent?.length ?? 0;
+      range.setStart(found.startNode, Math.min(found.startOffset, sLen));
+      range.setEnd(found.endNode, Math.min(found.endOffset, eLen));
+    } else if (found.startNode) {
+      const sLen = found.startNode.textContent?.length ?? 0;
+      range.setStart(found.startNode, Math.min(found.startOffset, sLen));
+      range.collapse(true);
+    } else {
+      range.selectNodeContents(container);
+      range.collapse(false);
+    }
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch {
+    // ignore
+  }
+}
+  }
+}
+
 interface DocumentPageProps {
   pageId: string;
   pageIndex: number;
@@ -387,9 +727,11 @@ interface DocumentPageProps {
   headerText: string;
   footerText: string;
   section?: SectionModel;
+  pageBorders?: PageBorderConfig;
   pageNumberPosition?: "header" | "footer" | "margin-left" | "margin-right";
   pageNumberAlignment?: "left" | "center" | "right";
   pageNumberFormat?: "1" | "i" | "I" | "a" | "A";
+  pageNumberStyle?: string;
   html: string;
   active: boolean;
   editable: boolean;
@@ -405,19 +747,22 @@ interface DocumentPageProps {
   onSetPageHtml: (pageId: string, html: string) => void;
   onSetActivePage: (id: string | null) => void;
   zoom: number;
+  viewMode?: ViewMode;
 }
 
 function DocumentPage({
   pageId,
   pageIndex,
   pageNumber,
-  totalPages: _totalPages,
-  headerText,
-  footerText,
+  totalPages,
+  headerText: _headerText,
+  footerText: _footerText,
   section,
+  pageBorders,
   pageNumberPosition,
   pageNumberAlignment,
   pageNumberFormat,
+  pageNumberStyle,
   html,
   active,
   editable,
@@ -433,19 +778,203 @@ function DocumentPage({
   onSetPageHtml,
   onSetActivePage,
   zoom,
+  viewMode,
 }: DocumentPageProps) {
   const localEditorRef = useRef<HTMLDivElement | null>(null);
-  const lastHtmlRef = useRef<string>(html);
+  const lastHtmlRef = useRef<string | null>(null);
+  const consecutiveEnterRef = useRef<boolean>(false);
+  const lastEnterTimeRef = useRef<number>(0);
 
   const { activeChartId, isSpreadsheetOpen } = useChartContext();
   const isEditingChartOnThisPage = Boolean(
     isSpreadsheetOpen && activeChartId && html.includes(activeChartId)
   );
 
+  const { undo, redo, recordSnapshot, initHistory } = useEditor();
+  const {
+    showMarkup,
+    handleBeforeInput,
+    handleKeyDown: handleTcKeyDown,
+    handleInput: handleTcInput,
+    handleClick: handleTcClick,
+  } = useTrackChanges();
+
+  useEffect(() => {
+    initHistory(pageId, html || "<p><br></p>");
+  }, [pageId, initHistory]);
+
+  const marginL = section?.marginConfig?.left ?? 96;
+  const marginR = section?.marginConfig?.right ?? 96;
+  const bodyPaddingTop = 8;
+  const bodyPaddingBottom = Math.max(16, Math.min(32, (section?.marginConfig?.bottom ?? 96) - 64));
+
+  const { model: docModel, updateSection: docUpdateSection } = useDocumentModel();
+  const {
+    isHeaderFooterActive,
+    showDocumentText,
+    enterHeaderFooterMode,
+    exitHeaderFooterMode,
+    setActiveHFType,
+  } = useHeaderFooter();
+
+  const sectionIndex = docModel.sections.findIndex((s) => s.id === section?.id);
+  const secNumber = sectionIndex >= 0 ? sectionIndex + 1 : 1;
+
+  // Link to previous section resolution
+  const isLinked = (section?.linkToPrevious ?? false) && sectionIndex > 0;
+  const effectiveSection = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1] : section;
+
+  // Section pages for first-page check
+  const sectionPages = docModel.pages.filter((p) => p.sectionId === section?.id);
+  const isFirstPageOfSection = (sectionPages[0]?.id === pageId) || pageIndex === 0;
+  const isEvenPage = pageNumber % 2 === 0;
+
+  // Header resolution
+  let headerKind: "first" | "even" | "odd" | "normal" = "normal";
+  let headerLabel = `HEADER - SECTION ${secNumber}`;
+  let effectiveHeaderText = effectiveSection?.header || "";
+  let effectiveHeaderHtml = effectiveSection?.headerHtml || "";
+
+  if (effectiveSection?.differentFirstPage && isFirstPageOfSection) {
+    headerKind = "first";
+    headerLabel = `FIRST PAGE HEADER - SECTION ${secNumber}`;
+    effectiveHeaderText = effectiveSection.firstHeader || effectiveSection.header || "";
+    effectiveHeaderHtml = effectiveSection.firstHeaderHtml || effectiveSection.headerHtml || "";
+  } else if (effectiveSection?.differentOddEven && isEvenPage) {
+    headerKind = "even";
+    headerLabel = `EVEN PAGE HEADER - SECTION ${secNumber}`;
+    effectiveHeaderText = effectiveSection.evenHeader || effectiveSection.header || "";
+    effectiveHeaderHtml = effectiveSection.evenHeaderHtml || effectiveSection.headerHtml || "";
+  } else if (effectiveSection?.differentOddEven && !isEvenPage) {
+    headerKind = "odd";
+    headerLabel = `ODD PAGE HEADER - SECTION ${secNumber}`;
+    effectiveHeaderText = effectiveSection.header || "";
+    effectiveHeaderHtml = effectiveSection.headerHtml || "";
+  }
+
+  // Footer resolution
+  let footerKind: "first" | "even" | "odd" | "normal" = "normal";
+  let footerLabel = `FOOTER - SECTION ${secNumber}`;
+  let effectiveFooterText = effectiveSection?.footer || "Parexel Smart Authoring Suite";
+  let effectiveFooterHtml = effectiveSection?.footerHtml || "";
+
+  if (effectiveSection?.differentFirstPage && isFirstPageOfSection) {
+    footerKind = "first";
+    footerLabel = `FIRST PAGE FOOTER - SECTION ${secNumber}`;
+    effectiveFooterText = effectiveSection.firstFooter || effectiveSection.footer || "";
+    effectiveFooterHtml = effectiveSection.firstFooterHtml || effectiveSection.footerHtml || "";
+  } else if (effectiveSection?.differentOddEven && isEvenPage) {
+    footerKind = "even";
+    footerLabel = `EVEN PAGE FOOTER - SECTION ${secNumber}`;
+    effectiveFooterText = effectiveSection.evenFooter || effectiveSection.footer || "";
+    effectiveFooterHtml = effectiveSection.evenFooterHtml || effectiveSection.footerHtml || "";
+  } else if (effectiveSection?.differentOddEven && !isEvenPage) {
+    footerKind = "odd";
+    footerLabel = `ODD PAGE FOOTER - SECTION ${secNumber}`;
+    effectiveFooterText = effectiveSection.footer || "";
+    effectiveFooterHtml = effectiveSection.footerHtml || "";
+  }
+
+  const headerContentRef = useRef<HTMLDivElement | null>(null);
+  const footerContentRef = useRef<HTMLDivElement | null>(null);
+  const isEditingHeaderRef = useRef(false);
+  const isEditingFooterRef = useRef(false);
+
+  useEffect(() => {
+    if (headerContentRef.current && !isEditingHeaderRef.current) {
+      headerContentRef.current.innerHTML = effectiveHeaderHtml || effectiveHeaderText || "";
+    }
+  }, [effectiveHeaderHtml, effectiveHeaderText, isHeaderFooterActive]);
+
+  useEffect(() => {
+    if (footerContentRef.current && !isEditingFooterRef.current) {
+      footerContentRef.current.innerHTML = effectiveFooterHtml || effectiveFooterText || "";
+    }
+  }, [effectiveFooterHtml, effectiveFooterText, isHeaderFooterActive]);
+
+  const handleHeaderUpdate = useCallback(
+    (newText: string, newHtml: string) => {
+      if (!section) return;
+      const targetSecId = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1]?.id : section.id;
+      if (!targetSecId) return;
+
+      if (headerKind === "first") {
+        docUpdateSection(targetSecId, { firstHeader: newText, firstHeaderHtml: newHtml });
+      } else if (headerKind === "even") {
+        docUpdateSection(targetSecId, { evenHeader: newText, evenHeaderHtml: newHtml });
+      } else {
+        docUpdateSection(targetSecId, { header: newText, headerHtml: newHtml });
+      }
+    },
+    [section, isLinked, sectionIndex, docModel.sections, headerKind, docUpdateSection]
+  );
+
+  const handleFooterUpdate = useCallback(
+    (newText: string, newHtml: string) => {
+      if (!section) return;
+      const targetSecId = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1]?.id : section.id;
+      if (!targetSecId) return;
+
+      if (footerKind === "first") {
+        docUpdateSection(targetSecId, { firstFooter: newText, firstFooterHtml: newHtml });
+      } else if (footerKind === "even") {
+        docUpdateSection(targetSecId, { evenFooter: newText, evenFooterHtml: newHtml });
+      } else {
+        docUpdateSection(targetSecId, { footer: newText, footerHtml: newHtml });
+      }
+    },
+    [section, isLinked, sectionIndex, docModel.sections, footerKind, docUpdateSection]
+  );
+
+  /*
+   * Keep dynamic page number fields inside document content synchronized
+   * with current pageNumber, totalPages, and format across all pages.
+   */
+  useEffect(() => {
+    const element = localEditorRef.current;
+    if (!element) return;
+
+    const dynamicFields = element.querySelectorAll<HTMLElement>(".page-number-field, [data-field]");
+    if (dynamicFields.length === 0) return;
+
+    let hasChange = false;
+    const formattedNum = formatPageNumber(pageNumber, pageNumberFormat);
+    const formattedTotal = formatPageNumber(totalPages, pageNumberFormat);
+
+    dynamicFields.forEach((field) => {
+      if (field.getAttribute("data-static") === "true") return;
+
+      const fieldType = field.getAttribute("data-field");
+      let expectedText = "";
+
+      if (fieldType === "page-number") {
+        expectedText = formattedNum;
+      } else if (fieldType === "page-x") {
+        expectedText = `Page ${formattedNum}`;
+      } else if (fieldType === "page-x-of-y") {
+        expectedText = `Page ${formattedNum} of ${formattedTotal}`;
+      } else if (fieldType === "x-of-y") {
+        expectedText = `${formattedNum} of ${formattedTotal}`;
+      } else if (fieldType === "total-pages") {
+        expectedText = formattedTotal;
+      }
+
+      if (expectedText && field.textContent !== expectedText) {
+        field.textContent = expectedText;
+        hasChange = true;
+      }
+    });
+
+    if (hasChange) {
+      lastHtmlRef.current = element.innerHTML;
+      onChange(element.innerHTML);
+    }
+  }, [pageNumber, totalPages, pageNumberFormat, onChange]);
+>>>>>>> origin/main
 
   /*
    * Keep the page HTML synchronized with the document model
-   * only when external updates occur.
+   * only when genuine external updates occur (undo/redo, file load).
    */
   useEffect(() => {
     const element = localEditorRef.current;
@@ -457,6 +986,7 @@ function DocumentPage({
         .replace(/\s+/g, " ")
         .trim();
 
+<<<<<<< HEAD
     // If active element is inside this editor, avoid destroying the user's cursor
     const hasFocus = element === document.activeElement || element.contains(document.activeElement);
     if (hasFocus) {
@@ -467,29 +997,108 @@ function DocumentPage({
 
     if (normalize(element.innerHTML) !== normalize(html)) {
       element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
+=======
+    // If element in DOM is empty or not yet initialized, populate with incoming html
+    if (!element.hasChildNodes() || element.innerHTML.trim() === "" || lastHtmlRef.current === null) {
+      element.innerHTML = html || "<p><br></p>";
+>>>>>>> origin/main
       lastHtmlRef.current = html;
+      return;
+    }
+
+    // If html hasn't changed from our own last saved html, do not replace innerHTML
+    if (normalize(lastHtmlRef.current) === normalize(html)) {
+      return;
+    }
+
+    // If current element innerHTML already matches new html, do not replace innerHTML
+    if (normalize(element.innerHTML) === normalize(html)) {
+      lastHtmlRef.current = html;
+      return;
+    }
+
+    // External change occurred - always attempt to preserve selection
+    const savedSel = saveSelection(element);
+    element.innerHTML = html || "<p><br></p>";
+    lastHtmlRef.current = html;
+    if (savedSel) {
+      restoreSelection(element, savedSel);
     }
   }, [html]);
 
-  // Initial focus only when activated externally and focus is not already inside
+  // Native DOM event listeners for Track Changes engine:
+  // Native beforeinput interception ensures synchronous cancellation before browser DOM mutation
+  useEffect(() => {
+    const el = localEditorRef.current;
+    if (!el) return;
+
+    const onNativeBeforeInput = (e: Event) => {
+      handleBeforeInput(e as InputEvent, pageId);
+    };
+
+    const onNativeKeyDown = (e: KeyboardEvent) => {
+      handleTcKeyDown(e, pageId);
+    };
+
+    const onNativeInput = (e: Event) => {
+      handleTcInput(e, pageId);
+    };
+
+    const onNativeClick = (e: MouseEvent) => {
+      handleTcClick(e, pageId);
+    };
+
+    el.addEventListener("beforeinput", onNativeBeforeInput);
+    el.addEventListener("keydown", onNativeKeyDown);
+    el.addEventListener("input", onNativeInput);
+    el.addEventListener("click", onNativeClick);
+
+    return () => {
+      el.removeEventListener("beforeinput", onNativeBeforeInput);
+      el.removeEventListener("keydown", onNativeKeyDown);
+      el.removeEventListener("input", onNativeInput);
+      el.removeEventListener("click", onNativeClick);
+    };
+  }, [pageId, handleBeforeInput, handleTcKeyDown, handleTcInput, handleTcClick]);
+
+  // Sync editorRef with active page
+  useEffect(() => {
+    if (active && localEditorRef.current && editorRef) {
+      (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = localEditorRef.current;
+    }
+  }, [active, editorRef]);
+
+  // External activation focus guard:
+  // Never steal focus or collapse cursor if interacting with toolbar/ribbon or if selection already exists
   useEffect(() => {
     if (active && editable && localEditorRef.current) {
       const el = localEditorRef.current;
-      if (document.activeElement !== el && !el.contains(document.activeElement)) {
-        el.focus();
-        try {
-          const sel = window.getSelection();
-          if (sel && sel.rangeCount === 0) {
-            const range = document.createRange();
-            const target = el.querySelector("p") || el.firstChild || el;
-            range.selectNodeContents(target);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-          }
-        } catch {
-          // ignore
+      // Do nothing if focus is already inside this editor
+      if (document.activeElement === el || el.contains(document.activeElement)) {
+        return;
+      }
+      // Never steal focus or reset cursor if user is interacting with toolbar, ribbon, controls, or dialogs
+      if (document.activeElement?.closest("[data-editor-ui], [data-ribbon], nav, header, [role='dialog'], .ribbon-toolbar")) {
+        return;
+      }
+      // Never reset cursor if selection already exists within this page
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && sel.anchorNode && el.contains(sel.anchorNode)) {
+        return;
+      }
+      // Only set initial caret for a newly activated empty page with no selection
+      try {
+        if (!sel || sel.rangeCount === 0) {
+          el.focus({ preventScroll: true });
+          const range = document.createRange();
+          const target = el.querySelector("p") || el.firstChild || el;
+          range.selectNodeContents(target);
+          range.collapse(true);
+          sel?.removeAllRanges();
+          sel?.addRange(range);
         }
+      } catch {
+        // ignore
       }
     }
   }, [active, pageId, editable]);
@@ -509,19 +1118,51 @@ function DocumentPage({
     const children = Array.from(container.children) as HTMLElement[];
     if (children.length <= 1) return;
 
+    // Only paginate if container content genuinely exceeds its usable height
+    if (container.scrollHeight <= container.clientHeight + 2) {
+      return;
+    }
+
     const containerRect = container.getBoundingClientRect();
     if (containerRect.height === 0) return;
 
-    // Available writing boundary: container bottom minus 28px bottom padding tolerance
-    const maxBottom = containerRect.bottom - 28;
+    const scale = zoom / 100;
+    // Available writing boundary: container bottom minus bottom margin tolerance (scaled with zoom)
+    const maxBottom = containerRect.bottom - Math.max(16, bodyPaddingBottom) * scale;
 
-    // Find the first child whose bottom edge exceeds the writing area
+    const columnCount = section?.columns?.count ?? 1;
+    const isMultiColumn = columnCount > 1;
+
+    // Find the first child whose boundary exceeds the writing area
     let splitIdx = -1;
     for (let i = 0; i < children.length; i++) {
       const childRect = children[i].getBoundingClientRect();
-      if (childRect.bottom > maxBottom) {
-        splitIdx = i;
-        break;
+
+      if (isMultiColumn) {
+        // Multi-column layout overflow check:
+        // 1. Child spilled past the right edge of container into an overflow column
+        const isPastRightBoundary =
+          childRect.right > containerRect.right - marginR * scale + 10 ||
+          childRect.left >= containerRect.right - marginR * scale;
+
+        // 2. Child is in the last column and exceeds bottom boundary
+        const approxColWidth =
+          (containerRect.width - (marginL + marginR) * scale - (columnCount - 1) * (section?.columns?.gap ?? 32) * scale) /
+          columnCount;
+        const lastColLeftThreshold = containerRect.right - marginR * scale - approxColWidth - 15;
+        const isInLastColumn = childRect.left >= lastColLeftThreshold;
+        const isPastBottomInLastCol = isInLastColumn && childRect.bottom > maxBottom;
+
+        if (isPastRightBoundary || isPastBottomInLastCol) {
+          splitIdx = i;
+          break;
+        }
+      } else {
+        // Single column layout
+        if (childRect.bottom > maxBottom) {
+          splitIdx = i;
+          break;
+        }
       }
     }
 
@@ -538,6 +1179,13 @@ function DocumentPage({
 
     const overflowNodes = children.slice(safeSplitIdx);
     if (overflowNodes.length === 0) return;
+
+    const sel = window.getSelection();
+    const isCaretInOverflow = Boolean(
+      sel &&
+      sel.rangeCount > 0 &&
+      overflowNodes.some((node) => node.contains(sel.anchorNode))
+    );
 
     // Build HTML for overflowing content
     const tempDiv = document.createElement("div");
@@ -558,10 +1206,12 @@ function DocumentPage({
       // Current page is the LAST page and genuinely overflowed:
       // Create EXACTLY ONE new page using existing addPage function
       const newPageId = onAddPage(pageId, overflowHtml);
-      setTimeout(() => {
-        onSetActivePage(newPageId);
-        focusPage(newPageId, "start");
-      }, 50);
+      if (isCaretInOverflow) {
+        setTimeout(() => {
+          onSetActivePage(newPageId);
+          focusPage(newPageId, "start");
+        }, 50);
+      }
     } else {
       // Next page already exists: prepend overflowing content to next page
       const existingNextHtml = pageHtmlMap[nextPage.id] || "";
@@ -571,12 +1221,14 @@ function DocumentPage({
           : existingNextHtml;
       const mergedHtml = overflowHtml + (cleanExisting ? cleanExisting : "");
       onSetPageHtml(nextPage.id, mergedHtml);
-      setTimeout(() => {
-        onSetActivePage(nextPage.id);
-        focusPage(nextPage.id, "start");
-      }, 50);
+      if (isCaretInOverflow) {
+        setTimeout(() => {
+          onSetActivePage(nextPage.id);
+          focusPage(nextPage.id, "start");
+        }, 50);
+      }
     }
-  }, [allPages, onChange, onAddPage, onSetPageHtml, pageHtmlMap, pageId]);
+  }, [allPages, bodyPaddingBottom, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section, zoom]);
 
   // ------------------------------------------------------------------------
   // KeyDown: Enter, Ctrl+Enter, and Backspace Handlers
@@ -585,21 +1237,100 @@ function DocumentPage({
     const container = localEditorRef.current;
     if (!container) return;
 
+    // Reset consecutive enter tracking on any key other than Enter
+    if (e.key !== "Enter") {
+      consecutiveEnterRef.current = false;
+    }
+
+    // ------------------------------------------------------------------
+    // Word-style Sentence Auto-Capitalization:
+    // When typing a lowercase letter at the start of a block, after Enter,
+    // or after sentence-ending punctuation (. ? !), auto-capitalize it.
+    // ------------------------------------------------------------------
+    if (
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      e.key.length === 1 &&
+      e.key >= "a" &&
+      e.key <= "z"
+    ) {
+      if (shouldAutoCapitalize(container)) {
+        e.preventDefault();
+        const upper = e.key.toUpperCase();
+        let inserted = false;
+        try {
+          inserted = document.execCommand("insertText", false, upper);
+        } catch {
+          inserted = false;
+        }
+
+        if (!inserted) {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            const textNode = document.createTextNode(upper);
+            range.insertNode(textNode);
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+        handleInput();
+        return;
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Undo / Redo: Move down or up single letter
+    // ------------------------------------------------------------------
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "z" || e.key === "Z")) {
+      e.preventDefault();
+      undo();
+      return;
+    }
+
+    if (
+      ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "Y")) ||
+      ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "z" || e.key === "Z"))
+    ) {
+      e.preventDefault();
+      redo();
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Select All in Current Page: Ctrl + A / Cmd + A
+    // ------------------------------------------------------------------
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "a" || e.key === "A")) {
+      e.preventDefault();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(container);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
     // ------------------------------------------------------------------
     // 1. Manual Page Break: Ctrl + Enter / Cmd + Enter
     // Intentionally splits content at cursor and creates a new page immediately
     // ------------------------------------------------------------------
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
+      consecutiveEnterRef.current = false;
       handleManualPageBreak();
       return;
     }
 
     // ------------------------------------------------------------------
     // 2. Normal Enter:
-    // Enter does NOT mean "create a new page"!
-    // Allow normal browser paragraph creation.
-    // If inside a table cell, allow creating a new line in the cell without paginating!
+    // Single Enter creates normal paragraph break on current page.
+    // Double Enter (consecutive Enter on empty paragraph) creates page break.
     // ------------------------------------------------------------------
     if (e.key === "Enter" && !e.shiftKey) {
       const sel = window.getSelection();
@@ -608,12 +1339,66 @@ function DocumentPage({
       const cell = el?.closest("td, th") as HTMLTableCellElement | null;
       if (cell) {
         // Normal Enter in table cell: keep typing inside the cell without pagination
+        consecutiveEnterRef.current = false;
         return;
       }
 
+      // Identify the current block element where cursor is positioned
+      const currentBlock = (el?.closest("p, div, h1, h2, h3, li, blockquote") as HTMLElement | null) || el;
+      const isBlockEmpty = Boolean(
+        currentBlock &&
+        currentBlock !== container &&
+        (currentBlock.textContent?.trim() === "" ||
+          currentBlock.innerHTML === "<br>" ||
+          currentBlock.innerHTML === "<br/>" ||
+          currentBlock.innerHTML.trim() === "")
+      );
+
+      const now = Date.now();
+      const isConsecutive = consecutiveEnterRef.current && now - lastEnterTimeRef.current < 2500;
+
+      if (isConsecutive && isBlockEmpty) {
+        // DOUBLE ENTER: Consecutive Enter on empty line -> Page break to next page
+        e.preventDefault();
+        consecutiveEnterRef.current = false;
+
+        // Clean up the empty paragraph so no unwanted empty paragraph or blank space is left behind
+        if (currentBlock && currentBlock !== container && container.contains(currentBlock)) {
+          if (container.children.length > 1) {
+            currentBlock.remove();
+          } else {
+            currentBlock.innerHTML = "<br>";
+          }
+        }
+
+        const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
+        lastHtmlRef.current = remainingHtml;
+        onChange(remainingHtml);
+
+        const nextPage = allPages[pageIndex + 1];
+        if (!nextPage) {
+          const newPageId = onAddPage(pageId, "<p><br></p>");
+          setTimeout(() => {
+            onSetActivePage(newPageId);
+            focusPage(newPageId, "start");
+          }, 50);
+        } else {
+          onSetActivePage(nextPage.id);
+          setTimeout(() => {
+            focusPage(nextPage.id, "start");
+          }, 50);
+        }
+        return;
+      }
+
+      // SINGLE ENTER: Normal paragraph break on current page
+      consecutiveEnterRef.current = true;
+      lastEnterTimeRef.current = now;
+
+      // Allow browser native paragraph creation on current page
       setTimeout(() => {
         checkAndPaginateOverflow();
-      }, 20);
+      }, 100);
       return;
     }
 
@@ -758,17 +1543,20 @@ function DocumentPage({
   };
 
   const handleInput = () => {
+    consecutiveEnterRef.current = false;
     const element = localEditorRef.current;
     if (!element) return;
     const currentHtml = cleanChartMountsForHtml(element.innerHTML);
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
+    recordSnapshot(pageId, currentHtml, getCaretCharacterOffsetWithin(element));
   };
 
   const handleFocus = () => {
     onActivate();
+    consecutiveEnterRef.current = false;
 
-    if (!editorRef.current) {
+    if (editorRef) {
       (
         editorRef as React.MutableRefObject<HTMLDivElement | null>
       ).current = localEditorRef.current;
@@ -781,6 +1569,7 @@ function DocumentPage({
   // ------------------------------------------------------------------------
   const handlePageMouseDown = (e: React.MouseEvent<HTMLElement>) => {
     onActivate();
+    consecutiveEnterRef.current = false;
 
     const container = localEditorRef.current;
     if (!container || !editable) return;
@@ -796,33 +1585,56 @@ function DocumentPage({
       return;
     }
 
-    // If the click is directly on an existing text block (p, h1, h2, li, etc.)
-    if (
-      target &&
-      target !== container &&
-      target.closest("p, h1, h2, h3, ul, ol, li, blockquote")
-    ) {
-      // Allow browser native caret placement to handle direct text clicks
-      return;
-    }
-
-    // Otherwise, the user clicked on empty space on the page (container whitespace, margins, etc.)
-    e.preventDefault();
-    container.focus();
-
-    if (!container.firstElementChild) {
-      container.innerHTML = "<p><br></p>";
-    }
-
-    const containerRect = container.getBoundingClientRect();
     const children = Array.from(container.children) as HTMLElement[];
+    const firstChild = children[0];
     const lastChild = children[children.length - 1];
 
-    if (!lastChild) {
-      focusPage(pageId, "start");
+    // If the click is inside the editable container or on any of its content:
+    if (container.contains(target) || target === container) {
+      // Ensure the container has at least one paragraph if completely empty
+      if (!container.firstElementChild) {
+        container.innerHTML = "<p><br></p>";
+        lastHtmlRef.current = container.innerHTML;
+        onChange(container.innerHTML);
+      }
+
+      // If clicking in the vertical spacing directly below the header boundary (above first paragraph):
+      if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
+        e.preventDefault();
+        container.focus();
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(firstChild);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return;
+      }
+
+      // Check if clicking in empty whitespace well below the last paragraph
+      if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom + 10) {
+        e.preventDefault();
+        container.focus();
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(lastChild);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return;
+      }
+
+      // Click is within normal text area: DO NOT call e.preventDefault(), DO NOT collapse selection!
+      // Let the browser's native text selection, double-click word selection,
+      // and exact caret placement work naturally!
       return;
     }
 
+<<<<<<< HEAD
     const lastChildRect = lastChild.getBoundingClientRect();
     const effectiveLineHeight = 28 * (zoom / 100);
 
@@ -863,10 +1675,16 @@ function DocumentPage({
       onChange(updatedHtml);
 
       // Place caret '|' inside target paragraph
+=======
+    // Click is outside the editable container (e.g. on page margins in <section>):
+    if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
+      e.preventDefault();
+      container.focus();
+>>>>>>> origin/main
       const sel = window.getSelection();
       if (sel) {
         const range = document.createRange();
-        range.selectNodeContents(targetP);
+        range.selectNodeContents(firstChild);
         range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
@@ -874,47 +1692,93 @@ function DocumentPage({
       return;
     }
 
-    // Case 2: Click is alongside or between existing paragraphs
-    let closestChild: HTMLElement = children[0];
-    let minDistance = Infinity;
-
-    for (const child of children) {
-      const rect = child.getBoundingClientRect();
-      if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
-        closestChild = child;
-        minDistance = 0;
-        break;
+    if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom) {
+      e.preventDefault();
+      container.focus();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(lastChild);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
       }
-      const dist = Math.min(
-        Math.abs(e.clientY - rect.top),
-        Math.abs(e.clientY - rect.bottom)
-      );
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestChild = child;
-      }
+      return;
     }
 
-    const sel = window.getSelection();
-    if (sel && closestChild) {
-      const range = document.createRange();
-      const rect = closestChild.getBoundingClientRect();
-      const isLeft = e.clientX < rect.left + 20;
+    const targetChild = children.find((child) => {
+      const rect = child.getBoundingClientRect();
+      return e.clientY >= rect.top && e.clientY <= rect.bottom;
+    });
 
-      range.selectNodeContents(closestChild);
-      range.collapse(isLeft);
-      sel.removeAllRanges();
-      sel.addRange(range);
+    if (targetChild) {
+      e.preventDefault();
+      container.focus();
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(targetChild);
+        const rect = targetChild.getBoundingClientRect();
+        range.collapse(e.clientX < rect.left);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
+
+    if (!container.contains(document.activeElement)) {
+      container.focus();
     }
   };
 
   const isLandscape = section?.orientation === "landscape";
   const baseWidth = section?.paperSize?.width ?? 816;
   const baseHeight = section?.paperSize?.height ?? 1056;
+  const isWeb = viewMode === "web";
+  const isDraft = viewMode === "draft";
+  const isRead = viewMode === "read";
+
   const pageWidth = isLandscape ? baseHeight : baseWidth;
   const pageHeight = isLandscape ? baseWidth : baseHeight;
-  const headerHeight = 45;
-  const footerHeight = 45;
+  const scaledPageWidth = Math.round((pageWidth * zoom) / 100);
+  const scaledPageHeight = Math.round((pageHeight * zoom) / 100);
+
+  const hasPageNumberInHeader = section?.showPageNumbers !== false && pageNumberPosition === "header";
+  const hasHeaderContent = Boolean(
+    (effectiveHeaderText && effectiveHeaderText.trim().length > 0) ||
+    (effectiveHeaderHtml &&
+      effectiveHeaderHtml.trim().length > 0 &&
+      effectiveHeaderHtml.trim() !== "<p><br></p>" &&
+      effectiveHeaderHtml.trim() !== "<p><br/></p>" &&
+      effectiveHeaderHtml.trim() !== "<p></p>") ||
+    hasPageNumberInHeader
+  );
+
+  const headerHeight = isDraft
+    ? 0
+    : isHeaderFooterActive
+    ? Math.max(36, section?.headerTopDistance ?? 48)
+    : hasHeaderContent
+    ? Math.max(28, section?.headerTopDistance ?? 48)
+    : Math.max(18, Math.min(26, (section?.headerTopDistance ?? 48) - 22));
+
+  const headerPaddingTop = isDraft
+    ? 0
+    : isHeaderFooterActive
+    ? Math.max(8, (section?.headerTopDistance ?? 48) - 34)
+    : hasHeaderContent
+    ? Math.max(6, (section?.headerTopDistance ?? 48) - 34)
+    : 4;
+
+  const headerPaddingBottom = isDraft
+    ? 0
+    : isHeaderFooterActive
+    ? 8
+    : hasHeaderContent
+    ? 6
+    : 4;
+
+  const footerHeight = isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
 
   const getBorderStyle = (): React.CSSProperties => {
@@ -959,11 +1823,6 @@ function DocumentPage({
 
     return styles;
   };
-
-  const marginL = section?.marginConfig?.left ?? 72;
-  const marginR = section?.marginConfig?.right ?? 72;
-  const marginT = section?.marginConfig?.top ?? 32;
-  const marginB = section?.marginConfig?.bottom ?? 32;
 
   const extractCleanTitle = (src?: string, fileName?: string): string => {
     if (fileName && fileName.trim() && fileName !== "Online Picture") {
@@ -1092,53 +1951,154 @@ function DocumentPage({
   };
 
   return (
-    <section
-      data-page-id={pageId}
-      onMouseDown={handlePageMouseDown}
-      onPaste={handlePagePaste}
-      onDragOver={(e) => {
-        if (
-          e.dataTransfer.types.includes("Files") ||
-          e.dataTransfer.types.includes("text/uri-list") ||
-          e.dataTransfer.types.includes("text/plain") ||
-          e.dataTransfer.types.includes("text/html")
-        ) {
-          e.preventDefault();
-        }
-      }}
-      onDrop={handlePageDrop}
-      className={`
-        relative
-        ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
-        shrink-0
-        cursor-text
-        shadow-[0_4px_20px_rgba(0,0,0,0.12)]
-        box-border
-        ${
-          active
-            ? "ring-1 ring-blue-300/40"
-            : ""
-        }
-        ${!section?.pageBorders || section.pageBorders.style === "none"
-            ? (active ? "border border-blue-300" : "border border-slate-200")
-            : ""
-        }
-      `}
+    <div
+      data-page-wrapper={pageId}
+      className="relative flex justify-center shrink-0 print:contents"
       style={{
-        width: `${pageWidth}px`,
-        minWidth: `${pageWidth}px`,
-        minHeight: `${pageHeight}px`,
-        height: isEditingChartOnThisPage ? "auto" : `${pageHeight}px`,
-        maxHeight: isEditingChartOnThisPage ? undefined : `${pageHeight}px`,
-        transform: `scale(${zoom / 100})`,
-        transformOrigin: "top center",
-        marginBottom: `${(pageHeight * zoom) / 100 - pageHeight}px`,
-        backgroundColor: section?.pageColor || "#ffffff",
-        ...getBorderStyle(),
+        width: `${scaledPageWidth}px`,
+        height: isEditingChartOnThisPage ? "auto" : (isWeb ? "auto" : `${scaledPageHeight}px`),
       }}
     >
+      <section
+        data-page-id={pageId}
+        onMouseDown={handlePageMouseDown}
+        onPaste={handlePagePaste}
+        onDragOver={(e) => {
+          if (
+            e.dataTransfer.types.includes("Files") ||
+            e.dataTransfer.types.includes("text/uri-list") ||
+            e.dataTransfer.types.includes("text/plain") ||
+            e.dataTransfer.types.includes("text/html")
+          ) {
+            e.preventDefault();
+          }
+        }}
+        onDrop={handlePageDrop}
+        onDoubleClick={(e) => {
+          if (!isRead && !isDraft && isHeaderFooterActive && !(e.target as HTMLElement).closest('[data-hf-container]')) {
+            e.stopPropagation();
+            exitHeaderFooterMode();
+          }
+        }}
+        className={`
+          relative
+          ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
+          shrink-0
+          cursor-text
+          box-border
+          border
+          ${
+            isWeb || isDraft
+              ? "shadow-sm border-slate-200 dark:border-slate-800"
+              : "shadow-[0_4px_20px_rgba(0,0,0,0.12)] border-slate-200"
+          }
+          ${
+            active && !isRead
+              ? "border-blue-300 ring-1 ring-blue-300/40"
+              : ""
+          }
+        `}
+        style={{
+          width: `${pageWidth}px`,
+          minWidth: `${pageWidth}px`,
+          height: isEditingChartOnThisPage ? "auto" : (isWeb ? "auto" : `${pageHeight}px`),
+          maxHeight: isEditingChartOnThisPage ? undefined : (isWeb ? "none" : `${pageHeight}px`),
+          transform: `scale(${zoom / 100})`,
+          transformOrigin: "top center",
+          backgroundColor: section?.pageColor || "#ffffff",
+          ...getBorderStyle(),
+        }}
+      >
+        {/* WORD-STYLE PAGE BORDER OVERLAY */}
+        {!isDraft && (() => {
+        if (!pageBorders || pageBorders.setting === "none" || pageBorders.style === "none") {
+          return null;
+        }
+
+        const {
+          setting = "box",
+          lineStyle,
+          style,
+          color = "#000000",
+          width = 2,
+          top = true,
+          bottom = true,
+          left = true,
+          right = true,
+          distance,
+        } = pageBorders;
+
+        if (!top && !bottom && !left && !right) {
+          return null;
+        }
+
+        const effectiveLineStyle =
+          lineStyle ||
+          (style === "dashed"
+            ? "dashed"
+            : style === "dotted"
+            ? "dotted"
+            : style === "double"
+            ? "double"
+            : style === "dash-dot"
+            ? "dash-dot"
+            : style === "thick-solid"
+            ? "thick-solid"
+            : "solid");
+
+        const effectiveBorderWidth =
+          effectiveLineStyle === "thick-solid"
+            ? Math.max(4, width * 1.5)
+            : effectiveLineStyle === "double"
+            ? Math.max(3, width)
+            : width;
+
+        const effectiveBorderType =
+          setting === "3d"
+            ? "inset"
+            : effectiveLineStyle === "dash-dot"
+            ? "dashed"
+            : effectiveLineStyle === "thick-solid"
+            ? "solid"
+            : effectiveLineStyle;
+
+        const borderVal = `${effectiveBorderWidth}px ${effectiveBorderType} ${color}`;
+
+        const distTop = distance?.top ?? 24;
+        const distBottom = distance?.bottom ?? 24;
+        const distLeft = distance?.left ?? 24;
+        const distRight = distance?.right ?? 24;
+
+        const borderOverlayStyles: React.CSSProperties = {
+          position: "absolute",
+          top: `${distTop}px`,
+          bottom: `${distBottom}px`,
+          left: `${distLeft}px`,
+          right: `${distRight}px`,
+          pointerEvents: "none",
+          zIndex: 15,
+          boxSizing: "border-box",
+          borderTop: top ? borderVal : "none",
+          borderBottom: bottom ? borderVal : "none",
+          borderLeft: left ? borderVal : "none",
+          borderRight: right ? borderVal : "none",
+        };
+
+        if (setting === "shadow") {
+          borderOverlayStyles.filter = `drop-shadow(4px 4px 0px ${color || "#000000"})`;
+        }
+
+        return (
+          <div
+            data-page-border="true"
+            className="pointer-events-none absolute z-15 select-none"
+            style={borderOverlayStyles}
+          />
+        );
+      })()}
+
       {/* WATERMARK OVERLAY */}
-      {section?.watermark?.text && (
+      {!isDraft && section?.watermark?.text && (
         <div
           className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden"
           style={{ opacity: section.watermark.opacity ?? 0.12 }}
@@ -1167,7 +2127,7 @@ function DocumentPage({
           </span>
         </div>
       )}
-      {section?.watermark?.image && (
+      {!isDraft && section?.watermark?.image && (
         <div
           className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden p-12"
           style={{ opacity: section.watermark.opacity ?? 0.15 }}
@@ -1176,6 +2136,19 @@ function DocumentPage({
             src={section.watermark.image}
             alt="Watermark"
             className="max-h-full max-w-full object-contain"
+            style={{
+              transform: `rotate(${
+                typeof section.watermark.rotation === "number"
+                  ? section.watermark.rotation
+                  : section.watermark.rotation === "horizontal"
+                  ? 0
+                  : -45
+              }deg) scale(${
+                section.watermark.scale === "auto" || !section.watermark.scale
+                  ? 1
+                  : Number(section.watermark.scale) / 100
+              })`,
+            }}
           />
         </div>
       )}
@@ -1195,57 +2168,148 @@ function DocumentPage({
       </div>
 
       {/* DOCUMENT HEADER */}
-      <div
-        className="
+      {!isDraft && (
+        <div
+          data-hf-container="header"
+        data-page-id={pageId}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          enterHeaderFooterMode("header", section?.id, pageId);
+        }}
+        className={`
           relative
-          h-[45px]
-          min-h-[45px]
-          max-h-[45px]
-          border-b
-          border-slate-100
+          box-border
           text-[10px]
           text-slate-500
-          flex
-          items-center
-          justify-between
-          box-border
-        "
+          transition-all
+          ${
+            isHeaderFooterActive
+              ? "border-b border-dashed border-[#0078d4] bg-blue-50/20 ring-1 ring-blue-300/40 dark:border-blue-500 dark:bg-blue-950/20"
+              : "border-b border-slate-100 hover:bg-blue-50/15 cursor-pointer dark:border-slate-800"
+          }
+        `}
         style={{
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
-          paddingTop: "14px",
+          paddingTop: `${headerPaddingTop}px`,
+          paddingBottom: `${headerPaddingBottom}px`,
+          minHeight: `${headerHeight}px`,
         }}
       >
-        {section?.showPageNumbers !== false && pageNumberPosition === "header" ? (
-          <>
-            {pageNumberAlignment === "left" ? (
-              <>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
-                <span>{headerText}</span>
-              </>
-            ) : pageNumberAlignment === "center" ? (
-              <>
-                <span>{headerText}</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
-                <span />
-              </>
-            ) : (
-              <>
-                <span>{headerText}</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
-              </>
+        {/* Editor-only Header Section Label */}
+        {isHeaderFooterActive && (
+          <div
+            data-editor-ui="true"
+            className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-white text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+          >
+            <span>{headerLabel}</span>
+            {isLinked && (
+              <span className="opacity-80 font-normal text-[8px]">(Same as Previous)</span>
             )}
-          </>
-        ) : (
-          <span>{headerText}</span>
+          </div>
         )}
+
+        <div className="flex items-center justify-between w-full h-full">
+          {section?.showPageNumbers !== false && pageNumberPosition === "header" ? (
+            <>
+              {pageNumberAlignment === "left" ? (
+                <>
+                  <div className="font-semibold text-slate-700 dark:text-slate-300 mr-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={headerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("header")}
+                      onInput={(e) => {
+                        isEditingHeaderRef.current = true;
+                        handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveHeaderHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+                  ) : (
+                    <span>{effectiveHeaderText}</span>
+                  )}
+                </>
+              ) : pageNumberAlignment === "center" ? (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={headerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("header")}
+                      onInput={(e) => {
+                        isEditingHeaderRef.current = true;
+                        handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveHeaderHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+                  ) : (
+                    <span>{effectiveHeaderText}</span>
+                  )}
+                  <div className="font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  <span />
+                </>
+              ) : (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={headerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("header")}
+                      onInput={(e) => {
+                        isEditingHeaderRef.current = true;
+                        handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveHeaderHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+                  ) : (
+                    <span>{effectiveHeaderText}</span>
+                  )}
+                  <div className="font-semibold text-slate-700 dark:text-slate-300 ml-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            isHeaderFooterActive ? (
+              <div
+                ref={headerContentRef}
+                contentEditable
+                suppressContentEditableWarning
+                onFocus={() => setActiveHFType("header")}
+                onInput={(e) => {
+                  isEditingHeaderRef.current = true;
+                  handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                  setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
+                }}
+                className="w-full outline-none text-[10px] cursor-text select-text"
+              />
+            ) : effectiveHeaderHtml ? (
+              <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
+            ) : (
+              <span>{effectiveHeaderText}</span>
+            )
+          )}
+        </div>
       </div>
+      )}
 
       {/* EDITABLE DOCUMENT WRITING AREA (Dynamically calculated based on paper dimensions & margins) */}
       <div
@@ -1258,13 +2322,17 @@ function DocumentPage({
             ).current = element;
           }
         }}
-        contentEditable={editable}
+        data-page-id={pageId}
+        data-editor-page={pageId}
+        data-show-markup={showMarkup ? "true" : "false"}
+        contentEditable={editable && !isHeaderFooterActive}
         suppressContentEditableWarning
         onFocus={handleFocus}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onMouseDown={handlePageMouseDown}
         onPointerDown={(e) => {
+          if (isHeaderFooterActive) return;
           const clickedTable = (e.target as HTMLElement).closest("table");
           if (clickedTable) {
             onSetActiveTable(clickedTable);
@@ -1275,14 +2343,20 @@ function DocumentPage({
           minHeight: `${contentHeight}px`,
           height: isEditingChartOnThisPage ? "auto" : `${contentHeight}px`,
           maxHeight: isEditingChartOnThisPage ? undefined : `${contentHeight}px`,
-          paddingTop: `${marginT}px`,
-          paddingBottom: `${marginB}px`,
+          paddingTop: `${bodyPaddingTop}px`,
+          paddingBottom: `${bodyPaddingBottom}px`,
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
+          opacity: isHeaderFooterActive ? (showDocumentText ? 0.35 : 0) : 1,
+          pointerEvents: isHeaderFooterActive ? "none" : "auto",
+          userSelect: isHeaderFooterActive ? "none" : "text",
+          transition: "opacity 0.2s ease",
           ...(section?.columns && section.columns.count > 1
             ? {
                 columnCount: section.columns.count,
                 columnGap: `${section.columns.gap ?? 32}px`,
+                columnFill: "balance",
+                WebkitColumnFill: "balance",
               }
             : {}),
         }}
@@ -1296,6 +2370,13 @@ function DocumentPage({
           text-slate-800
 
           [&_p]:my-2
+          [&_>_*:first-child]:mt-0
+          [&_p:first-child]:mt-0
+          [&_p]:break-inside-avoid-column
+          [&_table]:break-inside-avoid-column
+          [&_h1]:break-after-avoid
+          [&_h2]:break-after-avoid
+          [&_h3]:break-after-avoid
 
           [&_h1]:mb-4
           [&_h1]:mt-6
@@ -1321,30 +2402,48 @@ function DocumentPage({
           [&_ol]:pl-6
 
           [&_table]:my-4
-          [&_table]:max-w-full
           [&_table]:box-border
           [&_table]:border-collapse
           [&_table]:table-fixed
+          [&_table]:max-w-full
 
           [&_td]:border
           [&_td]:border-slate-300
-          [&_td]:p-2.5
+          [&_td]:px-2.5
+          [&_td]:py-1.5
           [&_td]:text-left
           [&_td]:align-top
-          [&_td]:min-w-[48px]
+          [&_td]:min-w-0
+          [&_td]:box-border
+          [&_td]:overflow-hidden
           [&_td]:break-words
+          [&_td]:[overflow-wrap:anywhere]
+          [&_td]:[word-break:break-word]
           [&_td]:whitespace-normal
+          [&_td_p]:my-0
+          [&_td_p]:min-w-0
+          [&_td_p]:[overflow-wrap:anywhere]
+          [&_td_p]:[word-break:break-word]
 
           [&_th]:border
           [&_th]:border-slate-300
-          [&_th]:p-2.5
+          [&_th]:px-2.5
+          [&_th]:py-1.5
           [&_th]:text-left
           [&_th]:align-top
           [&_th]:font-semibold
-          [&_th]:min-w-[48px]
+          [&_th]:min-w-0
+          [&_th]:box-border
+          [&_th]:overflow-hidden
           [&_th]:break-words
+          [&_th]:[overflow-wrap:anywhere]
+          [&_th]:[word-break:break-word]
           [&_th]:whitespace-normal
-        `}
+          [&_th_p]:my-0
+          [&_th_p]:min-w-0
+          [&_th_p]:[overflow-wrap:anywhere]
+          [&_th_p]:[word-break:break-word]
+        "
       />
 
       {/* WORD-STYLE TABLE MOVE & RESIZE OVERLAY (Editor UI only, not in saved document) */}
@@ -1366,58 +2465,150 @@ function DocumentPage({
       )}
 
       {/* DOCUMENT FOOTER */}
-      <div
-        className="
+      {!isDraft && (
+        <div
+          data-hf-container="footer"
+        data-page-id={pageId}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          enterHeaderFooterMode("footer", section?.id, pageId);
+        }}
+        className={`
           relative
-          h-[45px]
-          min-h-[45px]
-          max-h-[45px]
-          border-t
-          border-slate-100
+          box-border
           text-[10px]
           text-slate-400
-          flex
-          items-center
-          justify-between
-          box-border
-        "
+          transition-all
+          ${
+            isHeaderFooterActive
+              ? "border-t border-dashed border-[#0078d4] bg-blue-50/20 ring-1 ring-blue-300/40 dark:border-blue-500 dark:bg-blue-950/20"
+              : "border-t border-slate-100 hover:bg-blue-50/15 cursor-pointer dark:border-slate-800"
+          }
+        `}
         style={{
           paddingLeft: `${marginL}px`,
           paddingRight: `${marginR}px`,
-          paddingTop: "14px",
+          paddingTop: "10px",
+          paddingBottom: `${Math.max(8, (section?.footerBottomDistance ?? 48) - 34)}px`,
+          minHeight: `${footerHeight}px`,
         }}
       >
-        {section?.showPageNumbers !== false && pageNumberPosition === "footer" ? (
-          <>
-            {pageNumberAlignment === "left" ? (
-              <>
-                <span className="font-medium text-slate-600 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
-                <span>{footerText}</span>
-              </>
-            ) : pageNumberAlignment === "center" ? (
-              <>
-                <span>{footerText}</span>
-                <span className="font-medium text-slate-600 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
-                <span />
-              </>
-            ) : (
-              <>
-                <span>{footerText}</span>
-                <span className="font-medium text-slate-600 dark:text-slate-300">
-                  Page {formatPageNumber(pageNumber, pageNumberFormat)}
-                </span>
-              </>
+        {/* Editor-only Footer Section Label */}
+        {isHeaderFooterActive && (
+          <div
+            data-editor-ui="true"
+            className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-white text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+          >
+            <span>{footerLabel}</span>
+            {isLinked && (
+              <span className="opacity-80 font-normal text-[8px]">(Same as Previous)</span>
             )}
-          </>
-        ) : (
-          <span>{footerText}</span>
+          </div>
         )}
+
+        <div className="flex items-center justify-between w-full h-full">
+          {section?.showPageNumbers !== false && pageNumberPosition === "footer" ? (
+            <>
+              {pageNumberAlignment === "left" ? (
+                <>
+                  <div className="font-medium text-slate-600 dark:text-slate-300 mr-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={footerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("footer")}
+                      onInput={(e) => {
+                        isEditingFooterRef.current = true;
+                        handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveFooterHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+                  ) : (
+                    <span>{effectiveFooterText}</span>
+                  )}
+                </>
+              ) : pageNumberAlignment === "center" ? (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={footerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("footer")}
+                      onInput={(e) => {
+                        isEditingFooterRef.current = true;
+                        handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveFooterHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+                  ) : (
+                    <span>{effectiveFooterText}</span>
+                  )}
+                  <div className="font-medium text-slate-600 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                  <span />
+                </>
+              ) : (
+                <>
+                  {isHeaderFooterActive ? (
+                    <div
+                      ref={footerContentRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onFocus={() => setActiveHFType("footer")}
+                      onInput={(e) => {
+                        isEditingFooterRef.current = true;
+                        handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                        setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                      }}
+                      className="w-full outline-none text-[10px] cursor-text select-text"
+                    />
+                  ) : effectiveFooterHtml ? (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+                  ) : (
+                    <span>{effectiveFooterText}</span>
+                  )}
+                  <div className="font-medium text-slate-600 dark:text-slate-300 ml-3 shrink-0">
+                    {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            isHeaderFooterActive ? (
+              <div
+                ref={footerContentRef}
+                contentEditable
+                suppressContentEditableWarning
+                onFocus={() => setActiveHFType("footer")}
+                onInput={(e) => {
+                  isEditingFooterRef.current = true;
+                  handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
+                  setTimeout(() => { isEditingFooterRef.current = false; }, 300);
+                }}
+                className="w-full outline-none text-[10px] cursor-text select-text"
+              />
+            ) : effectiveFooterHtml ? (
+              <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
+            ) : (
+              <span>{effectiveFooterText}</span>
+            )
+          )}
+        </div>
       </div>
+      )}
     </section>
+  </div>
   );
 }
 
@@ -1475,4 +2666,80 @@ function formatPageNumber(n: number, format?: "1" | "i" | "I" | "a" | "A"): stri
     return toAlpha(n).toUpperCase();
   }
   return String(n);
+}
+
+function renderPageNumberContent(
+  pageNumber: number,
+  totalPages: number,
+  format?: "1" | "i" | "I" | "a" | "A",
+  style?: string,
+): React.ReactNode {
+  const formattedNum = formatPageNumber(pageNumber, format);
+  const formattedTotal = formatPageNumber(totalPages, format);
+
+  switch (style) {
+    case "plain":
+    case "plain-1":
+    case "plain-2":
+    case "plain-3":
+      return <span>{formattedNum}</span>;
+
+    case "page-x":
+      return <span>Page {formattedNum}</span>;
+
+    case "page-x-of-y":
+      return (
+        <span>
+          Page {formattedNum} of {formattedTotal}
+        </span>
+      );
+
+    case "x-of-y":
+      return (
+        <span>
+          {formattedNum} of {formattedTotal}
+        </span>
+      );
+
+    case "accent-bar":
+      return (
+        <span className="inline-flex items-center border-b-2 border-sky-500 pb-0.5 font-bold tracking-wider text-[10px] text-slate-800 dark:text-slate-100">
+          PAGE {formattedNum}
+        </span>
+      );
+
+    case "circle":
+      return (
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] font-bold shadow-xs">
+          {formattedNum}
+        </span>
+      );
+
+    case "modern":
+      return (
+        <span className="inline-flex items-center gap-1.5">
+          <span className="text-[9px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">
+            CONFIDENTIAL
+          </span>
+          <span className="text-slate-300 dark:text-slate-600 font-normal">|</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-100">
+            {formattedNum}
+          </span>
+        </span>
+      );
+
+    case "bold-numbers":
+      return (
+        <span>
+          Page <strong className="font-bold text-slate-900 dark:text-white">{formattedNum}</strong> of{" "}
+          <strong className="font-bold text-slate-900 dark:text-white">{formattedTotal}</strong>
+        </span>
+      );
+
+    case "brackets":
+      return <span>[ {formattedNum} ]</span>;
+
+    default:
+      return <span>{formattedNum}</span>;
+  }
 }

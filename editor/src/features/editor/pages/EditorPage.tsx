@@ -13,13 +13,13 @@ Acts as the **entry point for the document editor page** by setting up the requi
 
 > `EditorPage.tsx` serves as the **main composition/root component for the editor**, connecting the document state, editor state, and overall editor layout together.
 
-
 */
-
 
 import { EditorProvider } from "../context/EditorContext";
 import { DocumentModelProvider } from "../store/documentModel";
 import { TableProvider } from "../tables/context";
+import { HeaderFooterProvider } from "../document/context/HeaderFooterContext";
+import { TrackChangesProvider } from "../modules/trackChanges/context";
 import { FigureProvider } from "../modules/figures/context";
 import { ChartProvider } from "../modules/figures/modules/chart/context";
 import { SmartArtProvider } from "../modules/figures/modules/smartart/context";
@@ -29,15 +29,19 @@ export default function EditorPage() {
   return (
     <DocumentModelProvider>
       <EditorProvider>
-        <TableProvider>
-          <FigureProvider>
-            <ChartProvider>
-              <SmartArtProvider>
-                <EditorLayout />
-              </SmartArtProvider>
-            </ChartProvider>
-          </FigureProvider>
-        </TableProvider>
+        <TrackChangesProvider>
+          <HeaderFooterProvider>
+            <TableProvider>
+              <FigureProvider>
+                <ChartProvider>
+                  <SmartArtProvider>
+                    <EditorLayout />
+                  </SmartArtProvider>
+                </ChartProvider>
+              </FigureProvider>
+            </TableProvider>
+          </HeaderFooterProvider>
+        </TrackChangesProvider>
       </EditorProvider>
     </DocumentModelProvider>
   );

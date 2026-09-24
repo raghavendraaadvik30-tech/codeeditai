@@ -76,6 +76,16 @@ export function SettingsPanel() {
         </div>
 
         <label className="flex items-center justify-between cursor-pointer select-none">
+          <span className="text-slate-600 dark:text-slate-300">Show Ruler</span>
+          <input
+            type="checkbox"
+            checked={settings.showRuler}
+            onChange={(e) => updateSettings({ showRuler: e.target.checked })}
+            className="rounded border-slate-300 text-[#0078d4] focus:ring-[#0078d4]"
+          />
+        </label>
+
+        <label className="flex items-center justify-between cursor-pointer select-none">
           <span className="text-slate-600 dark:text-slate-300">Show Word Count</span>
           <input
             type="checkbox"

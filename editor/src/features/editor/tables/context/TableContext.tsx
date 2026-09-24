@@ -8,13 +8,19 @@
  * --------------------------------------------------------
  */
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { TableConfig, TableTemplate } from "../types";
 import { DEFAULT_TABLE_CONFIG } from "../constants";
 import { generateTableHtml, generateTemplateTableHtml } from "../utils";
 import { useEditor } from "@/features/editor/context/EditorContext";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
+
+export interface ActiveCellFormat {
+  verticalAlign: "top" | "middle" | "bottom";
+  horizontalAlign: "left" | "center" | "right";
+  isVerticalText: boolean;
+}
 
 export interface TableContextValue {
   config: TableConfig;
@@ -23,6 +29,7 @@ export interface TableContextValue {
   insertTableWithConfig: (customConfig?: TableConfig) => void;
   insertTemplate: (template: TableTemplate) => void;
   insertQuickTable: (rows: number, cols: number) => void;
+  insertCustomTableHTML: (html: string) => void;
   insertRowAbove: () => void;
   insertRowBelow: () => void;
   insertColLeft: () => void;
@@ -40,6 +47,7 @@ export interface TableContextValue {
   setCellHorizontalAlign: (align: "left" | "center" | "right") => void;
   setCellVerticalAlign: (align: "top" | "middle" | "bottom") => void;
   toggleCellTextDirection: () => void;
+  activeCellFormat: ActiveCellFormat;
   autoFitWindow: () => void;
   autoFitContent: () => void;
   distributeColumns: () => void;
@@ -138,73 +146,40 @@ export function TableProvider({
   children: ReactNode;
   initialConfig?: TableConfig;
 }) {
-  const { insertHTML, editorRef } = useEditor();
+  const { insertHTML, editorRef, zoom } = useEditor();
   const { setPageHtml, activePage, model } = useDocumentModel();
   const [config, setConfig] = useState<TableConfig>(initialConfig);
 
   const lastActiveCellRef = useRef<HTMLTableCellElement | null>(null);
   const lastActiveTableRef = useRef<HTMLTableElement | null>(null);
 
-  // Continuously track active table and cell across the document
-  useEffect(() => {
-    const updateActiveCell = (e?: Event) => {
-      if (e && e.target) {
-        const targetEl = getNodeElement(e.target as Node);
-        const table = targetEl?.closest("table");
-        if (table) {
-          lastActiveTableRef.current = table;
-          const cell = targetEl?.closest("td, th") as HTMLTableCellElement | null;
-          if (cell) {
-            lastActiveCellRef.current = cell;
-          }
-          return;
-        }
-      }
-
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const el = getNodeElement(selection.anchorNode);
-        const cell = el?.closest("td, th") as HTMLTableCellElement | null;
-        if (cell) {
-          lastActiveCellRef.current = cell;
-          lastActiveTableRef.current = cell.closest("table");
-          return;
-        }
-        const table = el?.closest("table");
-        if (table) {
-          lastActiveTableRef.current = table;
-          return;
-        }
-      }
-
-      if (document.activeElement) {
-        const cell = document.activeElement.closest("td, th") as HTMLTableCellElement | null;
-        if (cell) {
-          lastActiveCellRef.current = cell;
-          lastActiveTableRef.current = cell.closest("table");
-          return;
-        }
-        const table = document.activeElement.closest("table");
-        if (table) {
-          lastActiveTableRef.current = table;
-        }
-      }
-    };
-
-    document.addEventListener("selectionchange", updateActiveCell);
-    document.addEventListener("pointerdown", updateActiveCell);
-    document.addEventListener("keyup", updateActiveCell);
-    document.addEventListener("focusin", updateActiveCell);
-
-    return () => {
-      document.removeEventListener("selectionchange", updateActiveCell);
-      document.removeEventListener("pointerdown", updateActiveCell);
-      document.removeEventListener("keyup", updateActiveCell);
-      document.removeEventListener("focusin", updateActiveCell);
-    };
-  }, []);
+  const [activeCellFormat, setActiveCellFormat] = useState<ActiveCellFormat>({
+    verticalAlign: "top",
+    horizontalAlign: "left",
+    isVerticalText: false,
+  });
 
   const findActiveTarget = () => {
+    // 0. Currently active table marked by overlay or selection
+    const activeOverlayTable = document.querySelector<HTMLTableElement>('table[data-active-table="true"]');
+    if (activeOverlayTable && activeOverlayTable.isConnected) {
+      lastActiveTableRef.current = activeOverlayTable;
+      const selCell = window.getSelection()?.anchorNode
+        ? (getNodeElement(window.getSelection()!.anchorNode)?.closest("td, th") as HTMLTableCellElement | null)
+        : null;
+      const cell = (selCell && activeOverlayTable.contains(selCell))
+        ? selCell
+        : (lastActiveCellRef.current && activeOverlayTable.contains(lastActiveCellRef.current))
+        ? lastActiveCellRef.current
+        : (activeOverlayTable.querySelector("td, th") as HTMLTableCellElement | null);
+      if (cell) lastActiveCellRef.current = cell;
+      return {
+        cell,
+        tr: cell ? cell.closest("tr") : activeOverlayTable.querySelector("tr"),
+        table: activeOverlayTable,
+      };
+    }
+
     // 1. Current selection
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
@@ -310,6 +285,148 @@ export function TableProvider({
     return { cell: null, tr: null, table: null };
   };
 
+  // Helper to retrieve all target cells: either multi-selection, single cell, or table cells
+  const getTargetCells = (): { cells: HTMLTableCellElement[]; table: HTMLTableElement | null } => {
+    const { cell, table } = findActiveTarget();
+    const targetTable = table || cell?.closest("table") || null;
+    if (!targetTable && !cell) return { cells: [], table: null };
+
+    // 1. Check if user selected multiple cells via mouse selection range
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && targetTable) {
+      const range = sel.getRangeAt(0);
+      const allCells = Array.from(targetTable.querySelectorAll("td, th")) as HTMLTableCellElement[];
+      const intersecting = allCells.filter((c) => {
+        try {
+          return range.intersectsNode(c);
+        } catch {
+          return false;
+        }
+      });
+      if (intersecting.length > 0) {
+        return { cells: intersecting, table: targetTable };
+      }
+    }
+
+    // 2. Focused / active single cell
+    if (cell && cell.isConnected) {
+      return { cells: [cell], table: targetTable };
+    }
+
+    // 3. Fallback: all cells in active table if table is selected
+    if (targetTable) {
+      return { cells: Array.from(targetTable.querySelectorAll("td, th")) as HTMLTableCellElement[], table: targetTable };
+    }
+
+    return { cells: [], table: null };
+  };
+
+  const updateCellFormatState = useCallback(() => {
+    const target = findActiveTarget();
+    const cell = target.cell;
+    if (!cell || !cell.isConnected) return;
+
+    // Detect vertical alignment
+    let vAlign: "top" | "middle" | "bottom" = "top";
+    const vStyle =
+      cell.style.verticalAlign || cell.getAttribute("valign") || cell.getAttribute("data-vertical-align");
+    if (vStyle === "middle" || vStyle === "center") {
+      vAlign = "middle";
+    } else if (vStyle === "bottom") {
+      vAlign = "bottom";
+    }
+
+    // Detect horizontal alignment
+    let hAlign: "left" | "center" | "right" = "left";
+    const hStyle = cell.style.textAlign || cell.getAttribute("align");
+    if (hStyle === "center") {
+      hAlign = "center";
+    } else if (hStyle === "right") {
+      hAlign = "right";
+    }
+
+    // Detect text direction
+    const isVert =
+      cell.style.writingMode === "vertical-rl" ||
+      cell.style.writingMode === "vertical-lr" ||
+      cell.getAttribute("data-text-direction") === "vertical";
+
+    setActiveCellFormat({
+      verticalAlign: vAlign,
+      horizontalAlign: hAlign,
+      isVerticalText: isVert,
+    });
+  }, []);
+
+  // Continuously track active table and cell across the document
+  useEffect(() => {
+    const updateActiveCell = (e?: Event) => {
+      if (e && e.target) {
+        const targetEl = getNodeElement(e.target as Node);
+        const table = targetEl?.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+          const cell = targetEl?.closest("td, th") as HTMLTableCellElement | null;
+          if (cell) {
+            lastActiveCellRef.current = cell;
+          }
+          return;
+        }
+      }
+
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const el = getNodeElement(selection.anchorNode);
+        const cell = el?.closest("td, th") as HTMLTableCellElement | null;
+        if (cell) {
+          lastActiveCellRef.current = cell;
+          lastActiveTableRef.current = cell.closest("table");
+          return;
+        }
+        const table = el?.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+          return;
+        }
+      }
+
+      if (document.activeElement) {
+        const cell = document.activeElement.closest("td, th") as HTMLTableCellElement | null;
+        if (cell) {
+          lastActiveCellRef.current = cell;
+          lastActiveTableRef.current = cell.closest("table");
+          return;
+        }
+        const table = document.activeElement.closest("table");
+        if (table) {
+          lastActiveTableRef.current = table;
+        }
+      }
+    };
+
+    const handleEvents = (e?: Event) => {
+      updateActiveCell(e);
+      updateCellFormatState();
+    };
+
+    // Initial inspection
+    updateCellFormatState();
+
+    document.addEventListener("selectionchange", handleEvents);
+    document.addEventListener("pointerdown", handleEvents);
+    document.addEventListener("keyup", handleEvents);
+    document.addEventListener("focusin", handleEvents);
+    window.addEventListener("table:updated", updateCellFormatState);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleEvents);
+      document.removeEventListener("pointerdown", handleEvents);
+      document.removeEventListener("keyup", handleEvents);
+      document.removeEventListener("focusin", handleEvents);
+      window.removeEventListener("table:updated", updateCellFormatState);
+    };
+  }, [updateCellFormatState]);
+
   const notifyDomChange = (node?: Node | null) => {
     const editable =
       (node ? (getNodeElement(node)?.closest('[contenteditable="true"]') as HTMLElement | null) : null) ||
@@ -340,6 +457,11 @@ export function TableProvider({
       editorRef.current ||
       (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
 
+    const marker = `data-new-tbl-${Date.now()}`;
+    const markedHtml = html.includes("<table")
+      ? html.replace("<table", `<table ${marker}="true"`)
+      : html;
+
     const sel = window.getSelection();
     let hasRangeInActive = false;
     if (sel && sel.rangeCount > 0 && activeEditor) {
@@ -350,7 +472,7 @@ export function TableProvider({
     }
 
     if (hasRangeInActive) {
-      insertHTML?.(html);
+      insertHTML?.(markedHtml);
     } else if (activeEditor) {
       activeEditor.focus();
       const lastP = activeEditor.lastElementChild;
@@ -360,9 +482,9 @@ export function TableProvider({
           lastP.innerHTML === "<br/>" ||
           lastP.textContent?.trim() === "")
       ) {
-        lastP.insertAdjacentHTML("beforebegin", html);
+        lastP.insertAdjacentHTML("beforebegin", markedHtml);
       } else {
-        activeEditor.insertAdjacentHTML("beforeend", html);
+        activeEditor.insertAdjacentHTML("beforeend", markedHtml);
       }
       activeEditor.dispatchEvent(new Event("input", { bubbles: true }));
       const targetPageId = activeEditor.closest("section[data-page-id]")?.getAttribute("data-page-id");
@@ -370,24 +492,36 @@ export function TableProvider({
         setPageHtml(targetPageId, activeEditor.innerHTML);
       }
     } else {
-      insertHTML?.(html);
+      insertHTML?.(markedHtml);
     }
 
-    // Automatically place cursor in cell (0, 0) of newly inserted table
+    // Automatically place cursor in cell (0, 0) of newly inserted table and activate it
     setTimeout(() => {
       const targetEditor =
         activeEditor || editorRef.current || (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
+      let newTable: HTMLTableElement | null = null;
       if (targetEditor) {
+        newTable = targetEditor.querySelector(`table[${marker}="true"]`) as HTMLTableElement | null;
+      }
+      if (!newTable) {
+        newTable = document.querySelector(`table[${marker}="true"]`) as HTMLTableElement | null;
+      }
+      if (!newTable && targetEditor) {
         const allTables = targetEditor.querySelectorAll("table");
-        const lastTable = allTables[allTables.length - 1];
-        if (lastTable) {
-          const firstCell = lastTable.querySelector("td, th") as HTMLTableCellElement | null;
-          if (firstCell) {
-            lastActiveCellRef.current = firstCell;
-            lastActiveTableRef.current = lastTable;
-            placeCaretInCell(firstCell);
-          }
+        newTable = allTables[allTables.length - 1] || null;
+      }
+
+      if (newTable) {
+        newTable.removeAttribute(marker);
+        lastActiveTableRef.current = newTable;
+        const firstCell = newTable.querySelector("td, th") as HTMLTableCellElement | null;
+        if (firstCell) {
+          lastActiveCellRef.current = firstCell;
+          placeCaretInCell(firstCell);
         }
+        newTable.dispatchEvent(new Event("selectionchange", { bubbles: true }));
+        newTable.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        notifyDomChange(newTable);
       }
     }, 50);
   };
@@ -989,12 +1123,28 @@ export function TableProvider({
     const spacer = document.createElement("p");
     spacer.innerHTML = "<br/>";
 
+    // Continuation Title Caption (Word-style clinical table continuation)
+    let origCaptionText = "Table 1: Table Title";
+    const prevElem = targetTable.previousElementSibling;
+    if (prevElem && (prevElem.classList.contains("doc-table-caption") || prevElem.getAttribute("data-caption") === "true")) {
+      origCaptionText = prevElem.textContent?.trim() || origCaptionText;
+    }
+    const continueCaption = document.createElement("p");
+    continueCaption.className = "doc-table-caption font-bold";
+    continueCaption.setAttribute("data-caption", "true");
+    continueCaption.style.cssText = "font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;";
+    continueCaption.textContent = origCaptionText.includes("(Continued)")
+      ? origCaptionText
+      : `${origCaptionText} (Continued)`;
+
     const parentNode = targetTable.parentNode;
     if (targetTable.nextSibling) {
       parentNode.insertBefore(spacer, targetTable.nextSibling);
-      parentNode.insertBefore(newTable, spacer.nextSibling);
+      parentNode.insertBefore(continueCaption, spacer.nextSibling);
+      parentNode.insertBefore(newTable, continueCaption.nextSibling);
     } else {
       parentNode.appendChild(spacer);
+      parentNode.appendChild(continueCaption);
       parentNode.appendChild(newTable);
     }
 
@@ -1070,29 +1220,131 @@ export function TableProvider({
   };
 
   const setCellHorizontalAlign = (align: "left" | "center" | "right") => {
-    const { cell, table } = findActiveTarget();
-    if (!cell) return;
-    cell.style.textAlign = align;
-    const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div, span, h1, h2, h3");
-    innerBlocks.forEach((b) => {
-      b.style.textAlign = align;
+    const { cells, table } = getTargetCells();
+    if (cells.length === 0) return;
+
+    cells.forEach((cell) => {
+      cell.style.textAlign = align;
+      cell.setAttribute("align", align);
+      const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div, span, h1, h2, h3");
+      innerBlocks.forEach((b) => {
+        b.style.textAlign = align;
+      });
     });
-    notifyDomChange(table || cell);
+
+    updateCellFormatState();
+    notifyDomChange(table || cells[0]);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const setCellVerticalAlign = (align: "top" | "middle" | "bottom") => {
-    const { cell, table } = findActiveTarget();
-    if (!cell) return;
-    cell.style.verticalAlign = align;
-    notifyDomChange(table || cell);
+    const { cells, table } = getTargetCells();
+    if (cells.length === 0) return;
+
+    cells.forEach((cell) => {
+      cell.style.verticalAlign = align;
+      cell.setAttribute("valign", align);
+      cell.setAttribute("data-vertical-align", align);
+
+      // Reset paragraph vertical margins inside the cell to allow accurate centering
+      const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div");
+      innerBlocks.forEach((b) => {
+        b.style.marginTop = "0px";
+        b.style.marginBottom = "0px";
+      });
+
+      // Ensure the row has enough height so middle & bottom alignments are clearly visible
+      const row = cell.closest("tr");
+      if (row && (align === "middle" || align === "bottom")) {
+        const currentHeight = parseFloat(row.style.height) || row.offsetHeight || 0;
+        if (currentHeight < 44) {
+          row.style.height = "44px";
+          Array.from(row.cells).forEach((rc) => {
+            rc.style.height = "44px";
+          });
+        }
+      }
+    });
+
+    updateCellFormatState();
+    notifyDomChange(table || cells[0]);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const toggleCellTextDirection = () => {
-    const { cell, table } = findActiveTarget();
-    if (!cell) return;
-    const current = cell.style.writingMode;
-    cell.style.writingMode = current === "vertical-rl" ? "horizontal-tb" : "vertical-rl";
-    notifyDomChange(table || cell);
+    const { cells, table } = getTargetCells();
+    if (cells.length === 0) return;
+
+    const primary = cells[0];
+    const isCurrentlyVertical =
+      primary.style.writingMode === "vertical-rl" ||
+      primary.getAttribute("data-text-direction") === "vertical" ||
+      primary.style.writingMode === "vertical-lr";
+
+    const targetMode = isCurrentlyVertical ? "horizontal-tb" : "vertical-rl";
+
+    cells.forEach((cell) => {
+      cell.style.writingMode = targetMode;
+      const innerBlocks = cell.querySelectorAll<HTMLElement>("p, div, span, h1, h2, h3");
+
+      if (targetMode === "vertical-rl") {
+        cell.setAttribute("data-text-direction", "vertical");
+        cell.style.textOrientation = "mixed";
+        cell.style.whiteSpace = "nowrap";
+
+        innerBlocks.forEach((b) => {
+          b.style.writingMode = "vertical-rl";
+          b.style.textOrientation = "mixed";
+          b.style.whiteSpace = "nowrap";
+          b.style.marginTop = "0px";
+          b.style.marginBottom = "0px";
+        });
+
+        const row = cell.closest("tr");
+        if (row) {
+          const textLen = (cell.textContent || "").trim().length;
+          const neededHeight = Math.max(70, Math.min(240, textLen * 12 + 24));
+          const currentHeight = parseFloat(row.style.height) || row.offsetHeight || 0;
+          if (currentHeight < neededHeight) {
+            row.style.height = `${neededHeight}px`;
+            Array.from(row.cells).forEach((rc) => {
+              rc.style.height = `${neededHeight}px`;
+            });
+          }
+        }
+      } else {
+        cell.removeAttribute("data-text-direction");
+        cell.style.textOrientation = "";
+        cell.style.whiteSpace = "";
+
+        innerBlocks.forEach((b) => {
+          b.style.writingMode = "horizontal-tb";
+          b.style.textOrientation = "";
+          b.style.whiteSpace = "";
+          b.style.marginTop = "";
+          b.style.marginBottom = "";
+        });
+
+        const row = cell.closest("tr");
+        if (row) {
+          const otherVerticalCells = Array.from(row.cells).filter(
+            (rc) => rc !== cell && rc.getAttribute("data-text-direction") === "vertical"
+          );
+          if (otherVerticalCells.length === 0) {
+            row.style.height = "";
+            row.removeAttribute("height");
+            Array.from(row.cells).forEach((rc) => {
+              rc.style.height = "";
+              rc.removeAttribute("height");
+            });
+          }
+        }
+      }
+    });
+
+    updateCellFormatState();
+    notifyDomChange(table || cells[0]);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const autoFitWindow = () => {
@@ -1146,14 +1398,15 @@ export function TableProvider({
       ...Array.from(table.rows).map((r) => r.cells.length),
       1
     );
+    const scale = (zoom || 100) / 100;
     const colWidthPct = (100 / numCols).toFixed(2) + "%";
-    const tableWidth = table.getBoundingClientRect().width;
+    const tableWidth = table.getBoundingClientRect().width / scale;
     const colWidthPx = Math.max(20, Math.floor(tableWidth / numCols));
 
     Array.from(table.rows).forEach((row) => {
       Array.from(row.cells).forEach((cell) => {
-        cell.style.minWidth = "";
-        cell.style.maxWidth = "";
+        cell.style.minWidth = "unset";
+        cell.style.maxWidth = "unset";
         cell.style.width = table.style.width && table.style.width.endsWith("px")
           ? `${colWidthPx}px`
           : colWidthPct;
@@ -1162,6 +1415,7 @@ export function TableProvider({
     });
 
     notifyDomChange(table);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const distributeRows = () => {
@@ -1171,18 +1425,41 @@ export function TableProvider({
     const rows = Array.from(table.rows);
     if (rows.length === 0) return;
 
-    const currentHeight = table.getBoundingClientRect().height;
-    const equalRowHeight = Math.max(28, Math.round(currentHeight / rows.length));
+    const scale = (zoom || 100) / 100;
+    const rowHeights = rows.map((r) => r.getBoundingClientRect().height / scale);
+    const totalRowsHeight = rowHeights.reduce((acc, h) => acc + h, 0);
+    const equalRowHeight = Math.max(18, Math.round(totalRowsHeight / rows.length));
 
-    rows.forEach((row) => {
-      row.style.height = `${equalRowHeight}px`;
-      Array.from(row.cells).forEach((cell) => {
-        cell.style.height = `${equalRowHeight}px`;
-        cell.style.boxSizing = "border-box";
+    let maxContentHeight = 18;
+    rows.forEach((r) => {
+      Array.from(r.cells).forEach((c) => {
+        const cellContentHeight = Math.max(c.scrollHeight || 0, c.offsetHeight || 0, 18);
+        if (cellContentHeight > maxContentHeight) {
+          maxContentHeight = cellContentHeight;
+        }
       });
     });
 
+    const targetRowHeight = Math.max(equalRowHeight, Math.round(maxContentHeight));
+
+    rows.forEach((row) => {
+      row.style.height = `${targetRowHeight}px`;
+      row.removeAttribute("height");
+      Array.from(row.cells).forEach((cell) => {
+        cell.style.height = `${targetRowHeight}px`;
+        cell.style.minHeight = "unset";
+        cell.style.maxHeight = "unset";
+        cell.style.boxSizing = "border-box";
+        cell.removeAttribute("height");
+      });
+    });
+
+    table.style.height = `${Math.round(targetRowHeight * rows.length)}px`;
+    table.style.minHeight = "unset";
+    table.removeAttribute("height");
+
     notifyDomChange(table);
+    window.dispatchEvent(new CustomEvent("table:updated"));
   };
 
   const value = useMemo<TableContextValue>(
@@ -1193,6 +1470,7 @@ export function TableProvider({
       insertTableWithConfig,
       insertTemplate,
       insertQuickTable,
+      insertCustomTableHTML: executeInsertTable,
       insertRowAbove,
       insertRowBelow,
       insertColLeft,
@@ -1209,13 +1487,14 @@ export function TableProvider({
       setCellHorizontalAlign,
       setCellVerticalAlign,
       toggleCellTextDirection,
+      activeCellFormat,
       autoFitWindow,
       autoFitContent,
       distributeColumns,
       distributeRows,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config]
+    [config, activeCellFormat]
   );
 
   return (
