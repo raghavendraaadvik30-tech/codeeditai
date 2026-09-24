@@ -9,13 +9,10 @@
 import { useState, useRef } from "react";
 import {
   FilePlus,
-  CornerDownLeft,
   Trash2,
   Hash,
   ChevronDown,
   Check,
-  Columns2,
-  WrapText,
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -58,9 +55,6 @@ export default function InsertTab() {
   const {
     editorRef,
     insertHTML,
-    insertPageBreak,
-    insertLineBreak,
-    insertColumnBreak,
   } = useEditor();
 
   const savedRangeRef = useRef<Range | null>(null);
@@ -195,10 +189,6 @@ export default function InsertTab() {
   // ------------------------------------------------------------------------
   // Other Insert Handlers
   // ------------------------------------------------------------------------
-  const handlePageBreak = () => {
-    insertPageBreak();
-  };
-
   const handleDeletePage = () => {
     if (!activePage || model.pages.length <= 1) return;
 
@@ -223,30 +213,6 @@ export default function InsertTab() {
         onClick={() => addPage()}
       >
         Add Page
-      </RibbonButton>
-
-      {/* Page Break button: splits content to next page (Ctrl+Enter) */}
-      <RibbonButton
-        icon={<CornerDownLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-        onClick={handlePageBreak}
-      >
-        Page Break
-      </RibbonButton>
-
-      {/* Column Break button: advances content to next column or page (Ctrl+Shift+Enter) */}
-      <RibbonButton
-        icon={<Columns2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />}
-        onClick={() => insertColumnBreak()}
-      >
-        Column Break
-      </RibbonButton>
-
-      {/* Line Break button: inserts soft break (<br>) within current paragraph (Shift+Enter) */}
-      <RibbonButton
-        icon={<WrapText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />}
-        onClick={() => insertLineBreak()}
-      >
-        Line Break
       </RibbonButton>
 
       <RibbonButton
