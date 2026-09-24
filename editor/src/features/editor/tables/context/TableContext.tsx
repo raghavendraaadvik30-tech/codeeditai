@@ -1123,19 +1123,67 @@ export function TableProvider({
     const spacer = document.createElement("p");
     spacer.innerHTML = "<br/>";
 
-    // Continuation Title Caption (Word-style clinical table continuation)
-    let origCaptionText = "Table 1: Table Title";
+    // Sequential Title Caption for split table (Table 1 on first split, Table 2 on next, etc.)
+    const container =
+      targetTable.closest('[contenteditable="true"]') ||
+      editorRef.current ||
+      (document.querySelector('[contenteditable="true"]') as HTMLElement | null) ||
+      document;
+
     const prevElem = targetTable.previousElementSibling;
-    if (prevElem && (prevElem.classList.contains("doc-table-caption") || prevElem.getAttribute("data-caption") === "true")) {
-      origCaptionText = prevElem.textContent?.trim() || origCaptionText;
+    const hasTargetCaption =
+      prevElem &&
+      (prevElem.classList.contains("doc-table-caption") ||
+        prevElem.getAttribute("data-caption") === "true" ||
+        /^Table\s*\d+/i.test(prevElem.textContent?.trim() || ""));
+
+    const origCaptionText = hasTargetCaption
+      ? prevElem.textContent?.trim() || ""
+      : "";
+
+    const allCaptionElems = Array.from(
+      container.querySelectorAll('.doc-table-caption, [data-caption="true"], p')
+    ).filter((el) => /^Table\s*\d+/i.test(el.textContent?.trim() || ""));
+
+    const existingNumbers: number[] = [];
+    allCaptionElems.forEach((el) => {
+      const m = el.textContent?.trim().match(/^Table\s*(\d+)/i);
+      if (m) {
+        existingNumbers.push(parseInt(m[1], 10));
+      }
+    });
+
+    let nextTableNum = 1;
+    if (hasTargetCaption && origCaptionText) {
+      const match = origCaptionText.match(/^Table\s*(\d+)/i);
+      if (match) {
+        nextTableNum = parseInt(match[1], 10) + 1;
+      } else if (existingNumbers.length > 0) {
+        nextTableNum = Math.max(...existingNumbers) + 1;
+      }
+    } else {
+      if (existingNumbers.length > 0) {
+        nextTableNum = Math.max(...existingNumbers) + 1;
+      } else {
+        nextTableNum = 1;
+      }
     }
+
+    let newCaptionText = `Table ${nextTableNum}: Table Title`;
+    if (origCaptionText) {
+      const cleaned = origCaptionText.replace(/\s*\(Continued\)/gi, "").trim();
+      if (/^Table\s*\d+/i.test(cleaned)) {
+        newCaptionText = cleaned.replace(/^Table\s*\d+/i, `Table ${nextTableNum}`);
+      } else if (cleaned) {
+        newCaptionText = `Table ${nextTableNum}: ${cleaned}`;
+      }
+    }
+
     const continueCaption = document.createElement("p");
     continueCaption.className = "doc-table-caption font-bold";
     continueCaption.setAttribute("data-caption", "true");
     continueCaption.style.cssText = "font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;";
-    continueCaption.textContent = origCaptionText.includes("(Continued)")
-      ? origCaptionText
-      : `${origCaptionText} (Continued)`;
+    continueCaption.textContent = newCaptionText;
 
     const parentNode = targetTable.parentNode;
     if (targetTable.nextSibling) {

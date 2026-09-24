@@ -12,18 +12,18 @@ import type { EditorSettings } from "../types";
 export const SETTINGS_STORAGE_KEY = "document_editor_user_settings_v1";
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
-  firstName: "Gunda",
-  lastName: "R K",
-  userName: "Gunda R K",
-  userDesignation: "Senior Clinical Document Lead",
+  firstName: "Bhumika",
+  lastName: "C",
+  userName: "Bhumika C",
+  userDesignation: "Medical Writer",
   employeeId: "PX-89401",
-  userRole: "Author",
+  userRole: "Medical Writer",
   userDepartment: "Clinical Research",
-  userEmail: "sarah.jenkins@parexel.com",
+  userEmail: "bhumika@parexel.com",
   phoneNumber: "+1 (555) 382-9012",
   location: "Boston, MA, USA",
   timeZone: "America/New_York (EST)",
-  userAvatarInitials: "GR",
+  userAvatarInitials: "BC",
   avatarUrl: "",
 
   theme: "light",
