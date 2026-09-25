@@ -36,7 +36,6 @@ This component does not directly call any API or backend service.
 
 import HeaderLogo from "./HeaderLogo";
 import HeaderActions from "./HeaderActions";
-import UserProfile from "./UserProfile";
 
 export default function EditorHeader() {
   return (
@@ -59,7 +58,6 @@ export default function EditorHeader() {
 
       <div className="flex items-center gap-1">
         <HeaderActions />
-        <UserProfile />
       </div>
     </header>
   );

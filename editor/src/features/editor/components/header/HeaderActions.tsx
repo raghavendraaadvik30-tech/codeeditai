@@ -46,7 +46,6 @@ import { documentService } from "../../services/documentService";
 import { printService } from "../../services/printService";
 
 import { Button } from "@/shared/components/ui/button";
-import ThemeToggle from "@/shared/components/theme/themeToggle";
 
 
 import {
@@ -573,13 +572,6 @@ export default function HeaderActions() {
           </div>
         </div>
       )}
-
-
-      {/* =================================
-          THEME TOGGLE
-      ================================= */}
-
-      <ThemeToggle />
 
       {/* ============================================================
           DOCUMENT LIMIT REACHED MODAL (MAX 10 DOCUMENTS ON UPLOAD)
