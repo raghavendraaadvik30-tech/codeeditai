@@ -4,11 +4,11 @@
  * Feature: Track Changes Sidebar Panel
  * Description:
  * Management panel displaying active tracking toggle, Accept/Reject All buttons,
- * and the list of tracked change cards matching the reference screenshot.
+ * and the list of tracked change cards in a clean white container.
  * --------------------------------------------------------
  */
 
-import { Check, X as XIcon } from "lucide-react";
+import { Check, X as XIcon, GitCompare } from "lucide-react";
 import { useTrackChanges } from "../hooks";
 import { TrackedChangeCard } from "./TrackedChangeCard";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ export function TrackChangesPanel() {
   );
 
   return (
-    <div className="flex flex-col select-none space-y-3 p-1">
+    <div className="flex flex-col select-none space-y-3">
       {/* 1. Tracking Toggle Button */}
       <button
         type="button"
@@ -36,11 +36,12 @@ export function TrackChangesPanel() {
         className={cn(
           "flex h-9 w-full items-center justify-center gap-2 rounded-lg text-xs font-semibold transition-all shadow-xs",
           trackChanges
-            ? "border border-slate-700 bg-[#21262d] text-slate-200 hover:bg-[#30363d] hover:text-white"
+            ? "border border-blue-200 bg-blue-50 text-[#0078d4] hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-400"
             : "bg-[#0078d4] text-white hover:bg-[#006cc1]"
         )}
       >
-        <span>{trackChanges ? "Disable Tracking" : "Enable Tracking"}</span>
+        <GitCompare className="h-4 w-4" />
+        <span>{trackChanges ? "Tracking is ON" : "Enable Tracking"}</span>
       </button>
 
       {/* 2. Mass Actions: Accept all & Reject all */}
@@ -49,7 +50,7 @@ export function TrackChangesPanel() {
           type="button"
           onClick={acceptAll}
           disabled={pendingChanges === 0}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#0078d4] py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#006cc1] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Accept all pending changes across all pages"
         >
           <Check className="h-3.5 w-3.5" />
@@ -59,7 +60,7 @@ export function TrackChangesPanel() {
           type="button"
           onClick={rejectAll}
           disabled={pendingChanges === 0}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-[#21262d] py-2 text-xs font-semibold text-slate-200 shadow-xs transition-colors hover:bg-[#30363d] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 py-2 text-xs font-semibold text-rose-700 shadow-xs transition-colors hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-400 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Reject all pending changes across all pages"
         >
           <XIcon className="h-3.5 w-3.5" />
@@ -68,8 +69,8 @@ export function TrackChangesPanel() {
       </div>
 
       {/* 3. Section Title: CHANGES LIST (N) */}
-      <div className="flex items-center justify-between pt-1 border-t border-slate-800/80">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+      <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
+        <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           CHANGES LIST ({pendingTrackedChanges.length})
         </h4>
       </div>
@@ -77,8 +78,8 @@ export function TrackChangesPanel() {
       {/* 4. Scrollable Changes List */}
       <div className="space-y-2.5 max-h-[calc(100vh-260px)] overflow-y-auto thin-scroll pr-0.5">
         {pendingTrackedChanges.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-800 bg-[#10141b]/50 p-6 text-center text-slate-400">
-            <p className="text-xs text-slate-400">No pending changes to review</p>
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-6 text-center text-slate-400 dark:border-slate-800 dark:bg-[#07131E]">
+            <p className="text-xs text-slate-500 dark:text-slate-400">No pending changes to review</p>
           </div>
         ) : (
           pendingTrackedChanges.map((change) => (

@@ -97,7 +97,7 @@ export default function LeftOverlay() {
   const HeaderIcon = PANEL_ICONS[panelKey] ?? FileText;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background">
+    <div className="flex h-full min-h-0 flex-col bg-white text-slate-900 dark:bg-[#0d1117] dark:text-slate-100">
 
       {/* HEADER */}
       <div
@@ -109,7 +109,9 @@ export default function LeftOverlay() {
           justify-between
           border-b
           border-slate-200
+          bg-white
           dark:border-slate-800
+          dark:bg-[#0d1117]
           px-5
         "
       >
@@ -143,6 +145,9 @@ export default function LeftOverlay() {
             transition-colors
             hover:bg-slate-100
             hover:text-slate-900
+            dark:text-slate-400
+            dark:hover:bg-slate-800
+            dark:hover:text-slate-100
           "
           aria-label="Close panel"
           title="Close"
