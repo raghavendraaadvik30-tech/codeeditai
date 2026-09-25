@@ -57,10 +57,14 @@ export default function DocumentPage() {
   });
 
   const toggleSection = (section: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setOpenSections((prev) => {
+      const willOpen = !prev[section];
+      return {
+        breaks: section === "breaks" ? willOpen : false,
+        navigation: section === "navigation" ? willOpen : false,
+        utilities: section === "utilities" ? willOpen : false,
+      };
+    });
   };
 
   const allDocs = useMemo<DocListItem[]>(() => {
@@ -560,7 +564,10 @@ export default function DocumentPage() {
                 {/* Column Break: advances cursor to next column on same page, or next page if last column */}
                 <button
                   type="button"
-                  onClick={insertColumnBreak}
+                  onClick={() => {
+                    insertColumnBreak();
+                    setOpenSections((prev) => ({ ...prev, breaks: false }));
+                  }}
                   className="flex w-full items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/70 p-2 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 dark:border-slate-800 dark:bg-[#111D29] dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   <List className="h-4 w-4 text-slate-500" />
@@ -569,7 +576,10 @@ export default function DocumentPage() {
                 {/* Line Break: soft break (<br>) within current paragraph block */}
                 <button
                   type="button"
-                  onClick={insertLineBreak}
+                  onClick={() => {
+                    insertLineBreak();
+                    setOpenSections((prev) => ({ ...prev, breaks: false }));
+                  }}
                   className="flex w-full items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/70 p-2 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 dark:border-slate-800 dark:bg-[#111D29] dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   <CornerDownLeft className="h-4 w-4 text-slate-500" />
@@ -578,7 +588,10 @@ export default function DocumentPage() {
                 {/* Page Break: splits content at cursor and creates next page */}
                 <button
                   type="button"
-                  onClick={insertPageBreak}
+                  onClick={() => {
+                    insertPageBreak();
+                    setOpenSections((prev) => ({ ...prev, breaks: false }));
+                  }}
                   className="flex w-full items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/70 p-2 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 dark:border-slate-800 dark:bg-[#111D29] dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   <FileText className="h-4 w-4 text-slate-500" />

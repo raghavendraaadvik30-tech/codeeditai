@@ -1603,6 +1603,7 @@ function DocumentPage({
   // Ensures clicking anywhere on the page moves the text caret '|' to that position
   // ------------------------------------------------------------------------
   const handlePageMouseDown = (e: React.MouseEvent<HTMLElement>) => {
+    if (e.defaultPrevented) return;
     onActivate();
     consecutiveEnterRef.current = false;
 
@@ -1620,7 +1621,15 @@ function DocumentPage({
       return;
     }
 
+    // Ensure the container has at least one paragraph if completely empty
+    if (!container.firstElementChild) {
+      container.innerHTML = "<p><br></p>";
+      lastHtmlRef.current = container.innerHTML;
+      onChange(container.innerHTML);
+    }
+
     const children = Array.from(container.children) as HTMLElement[];
+    if (children.length === 0) return;
     const firstChild = children[0];
     const lastChild = children[children.length - 1];
     const lastEditableChild =
@@ -1628,52 +1637,16 @@ function DocumentPage({
         ? children[children.length - 2]
         : lastChild;
 
-    // If the click is inside the editable container or on any of its content:
-    if (container.contains(target) || target === container) {
-      // Ensure the container has at least one paragraph if completely empty
-      if (!container.firstElementChild) {
-        container.innerHTML = "<p><br></p>";
-        lastHtmlRef.current = container.innerHTML;
-        onChange(container.innerHTML);
-      }
-
-      // If clicking in the vertical spacing directly below the header boundary (above first paragraph):
-      if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
-        e.preventDefault();
-        container.focus();
-        const sel = window.getSelection();
-        if (sel) {
-          const range = document.createRange();
-          range.selectNodeContents(firstChild);
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-        return;
-      }
-
-      // Check if clicking in empty whitespace well below the last paragraph
-      if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom + 10) {
-        e.preventDefault();
-        container.focus();
-        const sel = window.getSelection();
-        if (sel) {
-          const range = document.createRange();
-          range.selectNodeContents(lastEditableChild || lastChild);
-          range.collapse(false);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-        return;
-      }
-
-      // Click is within normal text area: DO NOT call e.preventDefault(), DO NOT collapse selection!
-      // Let the browser's native text selection, double-click word selection,
-      // and exact caret placement work naturally!
+    // 1. If clicking directly on an existing text element / child of container (not the container background):
+    if (target && target !== container && container.contains(target)) {
+      // User clicked directly on an existing text block or child element
+      // Let browser native text placement and selection work naturally!
       return;
     }
 
-    // Click is outside the editable container (e.g. on page margins in <section>):
+    // 2. User clicked in empty space on the page (container whitespace, margins, or section)
+
+    // Case A: Clicking above the first paragraph (in top margin / spacing below header):
     if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
       e.preventDefault();
       container.focus();
@@ -1689,12 +1662,16 @@ function DocumentPage({
     }
 
     const containerRect = container.getBoundingClientRect();
-    const lastChildRect = lastChild.getBoundingClientRect();
+    const referenceChild = lastEditableChild || lastChild;
+    const lastChildRect = referenceChild.getBoundingClientRect();
     const effectiveLineHeight = 28 * (zoom / 100);
 
-    // Case 1: Click is below the last paragraph on the page
+    // Case B: Clicking below the last paragraph on the page (Word-style Click-to-Position Cursor)
     if (e.clientY > lastChildRect.bottom + 6) {
-      const maxAllowedBottom = containerRect.bottom - 28;
+      e.preventDefault();
+      container.focus();
+
+      const maxAllowedBottom = containerRect.bottom - 28 * (zoom / 100);
       const diffY = e.clientY - lastChildRect.bottom;
       let linesToAdd = Math.max(1, Math.round(diffY / effectiveLineHeight));
 
@@ -1705,30 +1682,34 @@ function DocumentPage({
       );
       linesToAdd = Math.min(linesToAdd, maxPossibleLines);
 
-      let targetP: HTMLElement = lastChild;
+      let targetP: HTMLElement = referenceChild;
       const isLastEmpty =
-        lastChild.tagName === "P" &&
-        (lastChild.innerHTML === "<br>" ||
-          lastChild.innerHTML === "<br/>" ||
-          lastChild.textContent?.trim() === "");
+        referenceChild.tagName === "P" &&
+        (referenceChild.innerHTML === "<br>" ||
+          referenceChild.innerHTML === "<br/>" ||
+          referenceChild.textContent?.trim() === "");
 
       const startCount = isLastEmpty ? 1 : 0;
       for (let i = startCount; i < linesToAdd; i++) {
         const p = document.createElement("p");
         p.innerHTML = "<br>";
-        container.appendChild(p);
+        if (lastChild !== referenceChild && lastChild.parentNode === container) {
+          container.insertBefore(p, lastChild);
+        } else {
+          container.appendChild(p);
+        }
         targetP = p;
       }
 
       if (isLastEmpty && linesToAdd === 1) {
-        targetP = lastChild;
+        targetP = referenceChild;
       }
 
       const updatedHtml = cleanChartMountsForHtml(container.innerHTML);
       lastHtmlRef.current = updatedHtml;
       onChange(updatedHtml);
 
-      // Place caret '|' inside target paragraph
+      // Place caret '|' inside target paragraph where user clicked
       const sel = window.getSelection();
       if (sel) {
         const range = document.createRange();
@@ -1740,24 +1721,26 @@ function DocumentPage({
       return;
     }
 
-    if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom) {
-      e.preventDefault();
-      container.focus();
-      const sel = window.getSelection();
-      if (sel) {
-        const range = document.createRange();
-        range.selectNodeContents(lastEditableChild || lastChild);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-      return;
-    }
-
-    const targetChild = children.find((child) => {
+    // Case C: Clicking alongside an existing child (e.g. in the left/right page margins or paragraph gap)
+    let targetChild = children.find((child) => {
       const rect = child.getBoundingClientRect();
       return e.clientY >= rect.top && e.clientY <= rect.bottom;
     });
+
+    if (!targetChild && children.length > 0) {
+      let minDistance = Infinity;
+      for (const child of children) {
+        const rect = child.getBoundingClientRect();
+        const dist = Math.min(
+          Math.abs(e.clientY - rect.top),
+          Math.abs(e.clientY - rect.bottom)
+        );
+        if (dist < minDistance) {
+          minDistance = dist;
+          targetChild = child;
+        }
+      }
+    }
 
     if (targetChild) {
       e.preventDefault();
@@ -1767,7 +1750,7 @@ function DocumentPage({
         const range = document.createRange();
         range.selectNodeContents(targetChild);
         const rect = targetChild.getBoundingClientRect();
-        range.collapse(e.clientX < rect.left);
+        range.collapse(e.clientX < rect.left + rect.width / 2);
         sel.removeAllRanges();
         sel.addRange(range);
       }

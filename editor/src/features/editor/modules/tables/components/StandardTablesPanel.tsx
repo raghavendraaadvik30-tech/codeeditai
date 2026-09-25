@@ -3,19 +3,17 @@
  * Module: Tables
  * Feature: StandardTablesPanel Component
  * Description:
- * Sidebar presentation panel for the 6 Standard Tables options:
+ * Sidebar presentation panel for the 4 Standard Tables options:
  * 1. Insert Table (Heading 12pt, Text 12pt)
  * 2. Insert Table (Heading 10pt, Text 10pt)
  * 3. Insert Table (Title Only)
  * 4. Insert Table (No Title 12pt)
- * 5. Split Table (Continue Table Title)
- * 6. Insert Table (History Signature)
  * --------------------------------------------------------------------------
  */
 
 import { Table2, Plus } from "lucide-react";
-import { useTable } from "@/features/editor/tables/hooks";
-import { buildCustomTableHTML } from "@/features/editor/tables/components/TableInsertDialog";
+import { useTable } from "../hooks";
+import { buildCustomTableHTML } from "./TableInsertDialog";
 
 interface StandardTableItem {
   id: number;
