@@ -46,7 +46,7 @@ import { documentService } from "../../services/documentService";
 import { printService } from "../../services/printService";
 
 import { Button } from "@/shared/components/ui/button";
-import ThemeToggle from "@/shared/components/theme/themeToggle";
+
 
 import {
   Dialog,
@@ -243,15 +243,37 @@ export default function HeaderActions() {
   const handleExportDocx = async () => {
     try {
       const updatedPageHtml: Record<string, string> = { ...model.pageHtml };
-      model.pages.forEach((p) => {
-        const pageEl = document.querySelector(`[data-page-id="${p.id}"]`);
-        const editable = pageEl?.querySelector("[contenteditable]");
-        if (editable) {
-          updatedPageHtml[p.id] = (editable as HTMLElement).innerHTML;
+      const pages = model.pages && model.pages.length > 0
+        ? model.pages
+        : [{ id: "p1", sectionId: model.sections?.[0]?.id || "s1" }];
+
+      pages.forEach((p) => {
+        const pageContentEl =
+          (document.querySelector(`[data-editor-page="${p.id}"]`) as HTMLElement | null) ||
+          (document.querySelector(`section[data-page-id="${p.id}"] [data-editor-page]`) as HTMLElement | null) ||
+          (document.querySelector(`section[data-page-id="${p.id}"] [contenteditable="true"]`) as HTMLElement | null) ||
+          (document.querySelector(`[data-page-id="${p.id}"] [contenteditable]`) as HTMLElement | null);
+        if (pageContentEl) {
+          updatedPageHtml[p.id] = pageContentEl.innerHTML;
         }
       });
       const activeModel: DocumentModel = {
         ...model,
+        pages,
+        sections: model.sections && model.sections.length > 0
+          ? model.sections
+          : [{
+              id: "s1",
+              header: "",
+              footer: "",
+              differentFirstPage: false,
+              differentOddEven: false,
+              firstHeader: "",
+              firstFooter: "",
+              evenHeader: "",
+              evenFooter: "",
+              showPageNumbers: false,
+            }],
         pageHtml: updatedPageHtml,
       };
 
@@ -285,10 +307,10 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+          h-9
+          gap-2
+          px-3
+          text-sm
 
           text-slate-600
           hover:bg-slate-100
@@ -394,6 +416,12 @@ export default function HeaderActions() {
               onChange={(e) =>
                 setSaveAsName(e.target.value)
               }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  doSaveAs();
+                }
+              }}
               placeholder="Enter document title"
               className="
                 border-slate-300
@@ -405,6 +433,7 @@ export default function HeaderActions() {
                 dark:text-slate-100
                 dark:placeholder:text-slate-500
               "
+              autoFocus
             />
           </div>
 
@@ -441,10 +470,10 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+          h-9
+          gap-2
+          px-3
+          text-sm
 
           text-slate-600
           hover:bg-slate-100
@@ -470,11 +499,11 @@ export default function HeaderActions() {
       <Button
         variant="ghost"
         size="sm"
-        className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+         className="
+          h-9
+          gap-2
+          px-3
+          text-sm
 
           text-slate-600
           hover:bg-slate-100
@@ -509,14 +538,16 @@ export default function HeaderActions() {
       <Button
         variant="ghost"
         size="sm"
-        className="
-          h-8
-          gap-1.5
-          px-2
-          text-xs
+         className="
+          h-9
+          gap-2
+          px-3
+          text-sm
+
           text-slate-600
           hover:bg-slate-100
           hover:text-slate-900
+
           dark:text-slate-300
           dark:hover:bg-slate-800
           dark:hover:text-white
@@ -563,13 +594,6 @@ export default function HeaderActions() {
           </div>
         </div>
       )}
-
-
-      {/* =================================
-          THEME TOGGLE
-      ================================= */}
-
-      <ThemeToggle />
 
       {/* ============================================================
           DOCUMENT LIMIT REACHED MODAL (MAX 10 DOCUMENTS ON UPLOAD)

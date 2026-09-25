@@ -14,7 +14,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Move, Maximize2, Minimize2, Columns, Rows } from "lucide-react";
+import { Move, Maximize2, Minimize2 } from "lucide-react";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
 
 interface TableControlsOverlayProps {
@@ -1240,8 +1240,6 @@ export function TableControlsOverlay({
      5. Quick AutoFit Actions ("fit the table")
      - Fit Page: exact available content width with distributed pixel columns
      - Fit Content: natural content widths clamped to available page width
-     - Equal Cols: equal distribution of current table width
-     - Equal Rows: equal distribution of current table height
      - Never locks future manual line or handle resizing
   ============================================================ */
   const handleAutoFitToWindow = () => {
@@ -1357,91 +1355,6 @@ export function TableControlsOverlay({
     }
   };
 
-  const handleDistributeCols = () => {
-    table.style.tableLayout = "fixed";
-    const numCols = Math.max(
-      ...Array.from(table.rows).map((r) => r.cells.length),
-      1
-    );
-    const tableWidth = Math.round(table.getBoundingClientRect().width / scale);
-    const colWidthPx = Math.max(20, Math.floor(tableWidth / numCols));
-    const remainder = tableWidth - colWidthPx * numCols;
-
-    Array.from(table.rows).forEach((row) => {
-      Array.from(row.cells).forEach((cell, cIdx) => {
-        const w = cIdx === numCols - 1 ? colWidthPx + remainder : colWidthPx;
-        cell.style.width = `${w}px`;
-        cell.style.minWidth = "20px";
-        cell.style.maxWidth = "";
-        cell.style.boxSizing = "border-box";
-      });
-    });
-
-    table.style.width = `${tableWidth}px`;
-    table.style.minWidth = "unset";
-
-    onUpdate();
-    updatePosition();
-
-    const pageContainer = table.closest('[contenteditable="true"]') as HTMLElement | null;
-    if (pageContainer) {
-      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
-      const pageId = pageContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
-      if (pageId && setPageHtml) {
-        setPageHtml(pageId, pageContainer.innerHTML);
-      }
-    }
-  };
-
-  const handleDistributeRows = () => {
-    const rows = Array.from(table.rows);
-    if (rows.length === 0) return;
-
-    const rowHeights = rows.map((r) => r.getBoundingClientRect().height / scale);
-    const totalRowsHeight = rowHeights.reduce((acc, h) => acc + h, 0);
-    const equalRowHeight = Math.max(18, Math.round(totalRowsHeight / rows.length));
-
-    let maxContentHeight = 18;
-    rows.forEach((r) => {
-      Array.from(r.cells).forEach((c) => {
-        const cellContentHeight = Math.max(c.scrollHeight || 0, c.offsetHeight || 0, 18);
-        if (cellContentHeight > maxContentHeight) {
-          maxContentHeight = cellContentHeight;
-        }
-      });
-    });
-
-    const targetRowHeight = Math.max(equalRowHeight, Math.round(maxContentHeight));
-
-    rows.forEach((row) => {
-      row.style.height = `${targetRowHeight}px`;
-      row.removeAttribute("height");
-      Array.from(row.cells).forEach((cell) => {
-        cell.style.height = `${targetRowHeight}px`;
-        cell.style.minHeight = "unset";
-        cell.style.maxHeight = "unset";
-        cell.style.boxSizing = "border-box";
-        cell.removeAttribute("height");
-      });
-    });
-
-    table.style.height = `${Math.round(targetRowHeight * rows.length)}px`;
-    table.style.minHeight = "unset";
-    table.removeAttribute("height");
-
-    onUpdate();
-    updatePosition();
-    window.dispatchEvent(new CustomEvent("table:updated"));
-
-    const pageContainer = table.closest('[contenteditable="true"]') as HTMLElement | null;
-    if (pageContainer) {
-      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
-      const pageId = pageContainer.closest("section[data-page-id]")?.getAttribute("data-page-id");
-      if (pageId && setPageHtml) {
-        setPageHtml(pageId, pageContainer.innerHTML);
-      }
-    }
-  };
 
   if (!pos) return null;
 
@@ -1496,28 +1409,7 @@ export function TableControlsOverlay({
               <Minimize2 className="h-3 w-3 text-amber-500" />
               <span>Fit Content</span>
             </button>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleDistributeCols}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
-              title="Distribute Columns Evenly"
-            >
-              <Columns className="h-3 w-3 text-indigo-500" />
-              <span>Equal Cols</span>
-            </button>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleDistributeRows}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
-              title="Distribute Rows Evenly"
-            >
-              <Rows className="h-3 w-3 text-emerald-500" />
-              <span>Equal Rows</span>
-            </button>
+
           </div>
         </div>
       )}

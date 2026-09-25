@@ -38,8 +38,36 @@ type SettingsTab = "profile" | "preferences" | "security";
 
 function SettingsPageContent() {
   const { settings, updateSettings } = useSettingsContext();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const userFullName =
+    user?.name ||
+    settings.userName ||
+    `${settings.firstName} ${settings.lastName}` ||
+    "Bhumika C";
+  const nameParts = userFullName.trim().split(/\s+/);
+  const userFirstName = nameParts[0] || "Bhumika";
+  const userLastName = nameParts.slice(1).join(" ") || "C";
+  const userEmail = user?.email || settings.userEmail || "bhumika@parexel.com";
+  const userRole = user?.role || settings.userRole || "Medical Writer";
+  const userDepartment =
+    user?.workspace || settings.userDepartment || "Clinical Research";
+  const userDesignation =
+    settings.userDesignation ||
+    (user?.role ? `${user.role}` : "Medical Writer");
+  const employeeId = user?.id
+    ? user.id.startsWith("PX-")
+      ? user.id
+      : `PX-${user.id.slice(-5).toUpperCase()}`
+    : settings.employeeId || "PX-89401";
+  const displayInitials =
+    userFullName
+      .split(/\s+/)
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "BC";
 
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -173,12 +201,12 @@ function SettingsPageContent() {
                 {settings.avatarUrl ? (
                   <img
                     src={settings.avatarUrl}
-                    alt={settings.userName || "Profile Photo"}
+                    alt={userFullName}
                     className="h-full w-full object-cover rounded-full"
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center">
-                    <Camera className="h-6 w-6 text-white/80 transition-transform group-hover:scale-110" />
+                  <div className="flex flex-col items-center justify-center font-bold text-xl text-white">
+                    {displayInitials}
                   </div>
                 )}
 
@@ -227,10 +255,10 @@ function SettingsPageContent() {
               </div>
 
               <h2 className="mt-2 text-base font-bold text-slate-900 dark:text-white">
-                {settings.userName || `${settings.firstName} ${settings.lastName}`}
+                {userFullName}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {settings.userDesignation || "Senior Clinical Document Lead"}
+                {userDesignation}
               </p>
             </div>
 
@@ -241,7 +269,7 @@ function SettingsPageContent() {
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 dark:text-slate-400">Employee ID</span>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {settings.employeeId || "PX-89401"}
+                  {employeeId}
                 </span>
               </div>
 
@@ -249,23 +277,23 @@ function SettingsPageContent() {
                 <span className="text-slate-500 dark:text-slate-400">Email</span>
                 <span
                   className="font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[200px]"
-                  title={settings.userEmail}
+                  title={userEmail}
                 >
-                  {settings.userEmail || "sarah.jenkins@parexel.com"}
+                  {userEmail}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 dark:text-slate-400">Department</span>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {settings.userDepartment || "Clinical Research"}
+                  {userDepartment}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 dark:text-slate-400">Role</span>
                 <span className="inline-flex items-center rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-[11px] font-semibold text-[#0078d4] dark:bg-blue-950/80 dark:text-blue-300">
-                  {settings.userRole || "Author"}
+                  {userRole}
                 </span>
               </div>
             </div>
@@ -804,7 +832,7 @@ function SettingsPageContent() {
                   </label>
                   <input
                     name="firstName"
-                    defaultValue={settings.firstName || "Gunda"}
+                    defaultValue={userFirstName}
                     readOnly
                     tabIndex={-1}
                     className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs text-slate-500 outline-none cursor-not-allowed dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400 select-none shadow-sm"
@@ -816,7 +844,7 @@ function SettingsPageContent() {
                   </label>
                   <input
                     name="lastName"
-                    defaultValue={settings.lastName || "R K"}
+                    defaultValue={userLastName}
                     readOnly
                     tabIndex={-1}
                     className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs text-slate-500 outline-none cursor-not-allowed dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400 select-none shadow-sm"
@@ -832,7 +860,7 @@ function SettingsPageContent() {
                   </label>
                   <input
                     name="employeeId"
-                    defaultValue={settings.employeeId || "PX-89401"}
+                    defaultValue={employeeId}
                     required
                     className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 outline-none focus:border-[#0078d4] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 shadow-sm"
                   />
@@ -843,7 +871,7 @@ function SettingsPageContent() {
                   </label>
                   <input
                     name="role"
-                    defaultValue={settings.userRole || "Author"}
+                    defaultValue={userRole}
                     required
                     className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 outline-none focus:border-[#0078d4] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 shadow-sm"
                   />
@@ -858,7 +886,7 @@ function SettingsPageContent() {
                   </label>
                   <input
                     name="designation"
-                    defaultValue={settings.userDesignation || "Senior Clinical Document Lead"}
+                    defaultValue={userDesignation}
                     required
                     className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 outline-none focus:border-[#0078d4] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 shadow-sm"
                   />
@@ -869,7 +897,7 @@ function SettingsPageContent() {
                   </label>
                   <input
                     name="department"
-                    defaultValue={settings.userDepartment || "Clinical Research"}
+                    defaultValue={userDepartment}
                     required
                     className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 outline-none focus:border-[#0078d4] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 shadow-sm"
                   />
@@ -884,7 +912,7 @@ function SettingsPageContent() {
                 <input
                   name="email"
                   type="email"
-                  defaultValue={settings.userEmail || "sarah.jenkins@parexel.com"}
+                  defaultValue={userEmail}
                   readOnly
                   tabIndex={-1}
                   className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs text-slate-500 outline-none cursor-not-allowed dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400 select-none shadow-sm"

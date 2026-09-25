@@ -4,13 +4,11 @@
  * Feature: StandardTablesDropdown Component
  * Description:
  * Microsoft Word-style Standard Tables Ribbon Dropdown button and menu.
- * Provides the 6 standard clinical table configurations in exact order:
+ * Provides the 4 standard clinical table configurations in exact order:
  * 1. Insert Table (Heading 12pt, Text 12pt)
  * 2. Insert Table (Heading 10pt, Text 10pt)
  * 3. Insert Table (Title Only)
  * 4. Insert Table (No Title 12pt)
- * 5. Split Table (Continue Table Title)
- * 6. Insert Table (History Signature)
  * --------------------------------------------------------------------------
  */
 
@@ -19,47 +17,6 @@ import { Table2, ChevronDown } from "lucide-react";
 import { useTable } from "../hooks";
 import { buildCustomTableHTML } from "./TableInsertDialog";
 
-export function buildHistorySignatureTableHTML(): string {
-  const captionHtml = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">Document Revision History &amp; Signatures</p>`;
-  const tableStyle = `border-collapse: collapse; margin: 8px 0; width: 100%; table-layout: fixed; margin-left: 0; margin-right: auto;`;
-  const baseCellBorder = `border: 1px solid #8a8886;`;
-  const headerCSS = `${baseCellBorder} font-size: 10pt; font-weight: 700; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; background-color: #f3f2f1; box-sizing: border-box; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere;`;
-  const bodyCSS = `border: 1px solid #a19f9d; font-size: 10pt; font-weight: 400; padding: 6px 8px; vertical-align: middle; line-height: 1.15; font-family: Calibri, 'Segoe UI', Arial, sans-serif; box-sizing: border-box; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere;`;
-
-  const headers = [
-    { text: "Version", width: "12%" },
-    { text: "Effective Date", width: "16%" },
-    { text: "Author / Signer", width: "24%" },
-    { text: "Role / Signature", width: "20%" },
-    { text: "Summary of Changes", width: "28%" },
-  ];
-
-  const theadHtml = `<thead><tr>${headers
-    .map(
-      (h) =>
-        `<th style="${headerCSS} width: ${h.width};"><p style="margin:0;padding:0;line-height:1.15;">${h.text}</p></th>`
-    )
-    .join("")}</tr></thead>`;
-
-  const sampleRows = [
-    ["1.0", "15-Jan-2026", "Principal Investigator", "Electronically Signed", "Initial Protocol Approval"],
-    ["1.1", "02-Feb-2026", "Lead Biostatistician", "Electronically Signed", "Updated Sample Size Calculations"],
-    ["2.0", "10-Mar-2026", "Medical Director", "Pending Signature", "Interim Safety Cohort Update"],
-  ];
-
-  let tbodyHtml = "<tbody>";
-  sampleRows.forEach((row) => {
-    tbodyHtml += "<tr>";
-    row.forEach((val, idx) => {
-      tbodyHtml += `<td style="${bodyCSS} width: ${headers[idx].width};"><p style="margin:0;padding:0;line-height:1.15;">${val}</p></td>`;
-    });
-    tbodyHtml += "</tr>";
-  });
-  tbodyHtml += "</tbody>";
-
-  const tableHtml = `<table class="editor-table editor-table-clinical" data-table="true" style="${tableStyle}">${theadHtml}${tbodyHtml}</table><p><br/></p>`;
-  return `${captionHtml}${tableHtml}`;
-}
 
 export function StandardTablesDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -68,7 +25,7 @@ export function StandardTablesDropdown() {
   const [alignRight, setAlignRight] = useState(false);
   const savedRangeRef = useRef<Range | null>(null);
 
-  const { insertCustomTableHTML, splitCurrentTable } = useTable();
+  const { insertCustomTableHTML } = useTable();
 
   // Save current editor caret position
   const saveSelection = useCallback(() => {
@@ -196,45 +153,11 @@ export function StandardTablesDropdown() {
           break;
         }
 
-        case 5: {
-          // OPTION 5: Split Table (Continue Table Title)
-          const sel = window.getSelection();
-          const targetTable = sel?.anchorNode
-            ? (sel.anchorNode.nodeType === Node.ELEMENT_NODE
-                ? (sel.anchorNode as HTMLElement)
-                : sel.anchorNode.parentElement
-              )?.closest("table")
-            : null;
-
-          if (targetTable || document.querySelector('[contenteditable="true"] table')) {
-            splitCurrentTable();
-          } else {
-            const contCaption = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">Table 1: Table Title (Continued)</p>`;
-            const tablePart = buildCustomTableHTML({
-              rows: 3,
-              columns: 3,
-              headingSize: "10pt",
-              textSize: "10pt",
-              titleOption: "without",
-              autoFit: true,
-            });
-            insertCustomTableHTML(`${contCaption}${tablePart}`);
-          }
-          break;
-        }
-
-        case 6: {
-          // OPTION 6: Insert Table (History Signature)
-          const html = buildHistorySignatureTableHTML();
-          insertCustomTableHTML(html);
-          break;
-        }
-
         default:
           break;
       }
     },
-    [insertCustomTableHTML, restoreSelection, splitCurrentTable]
+    [insertCustomTableHTML, restoreSelection]
   );
 
   return (
@@ -371,47 +294,6 @@ export function StandardTablesDropdown() {
               </div>
             </button>
 
-            <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
-
-            {/* OPTION 5: Split Table (Continue Table Title) */}
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleSelectOption(5)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
-                <Table2 className="h-4 w-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
-                  Split Table
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Continue Table Title
-                </span>
-              </div>
-            </button>
-
-            {/* OPTION 6: Insert Table (History Signature) */}
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleSelectOption(6)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
-                <Table2 className="h-4 w-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
-                  Insert Table
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  History Signature
-                </span>
-              </div>
-            </button>
           </div>
         </div>
       )}

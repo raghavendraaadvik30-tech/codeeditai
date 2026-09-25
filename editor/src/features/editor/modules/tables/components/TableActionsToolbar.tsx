@@ -52,8 +52,6 @@ export function TableActionsToolbar() {
     activeCellFormat,
     autoFitWindow,
     autoFitContent,
-    distributeColumns,
-    distributeRows,
   } = useTable();
 
   return (
@@ -334,27 +332,6 @@ export function TableActionsToolbar() {
             <span>Fit Content</span>
           </button>
 
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={distributeColumns}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-colors"
-            title="Distribute columns evenly"
-          >
-            <Columns className="h-3.5 w-3.5 text-indigo-500" />
-            <span>Distribute Cols</span>
-          </button>
-
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={distributeRows}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-colors"
-            title="Distribute rows evenly"
-          >
-            <Rows className="h-3.5 w-3.5 text-emerald-500" />
-            <span>Distribute Rows</span>
-          </button>
         </div>
       </div>
 

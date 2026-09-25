@@ -28,6 +28,11 @@ import {
   TableContextMenu,
   type TableContextMenuState,
 } from "../../modules/tables/components";
+import { PictureHydration } from "@/features/editor/modules/figures/modules/pictures";
+import { IconHydration } from "@/features/editor/modules/figures/modules/icons";
+import { ShapeHydration } from "@/features/editor/modules/figures/modules/shapes";
+import { ChartHydration, useChartContext } from "@/features/editor/modules/figures/modules/chart";
+import { SmartArtHydration } from "@/features/editor/modules/figures/modules/smartart";
 import { useTrackChanges } from "../../modules/trackChanges";
 import DocumentRuler from "./DocumentRuler";
 
@@ -143,7 +148,7 @@ export default function Workspace() {
 
   // Close table context menu when navigating pages
   useEffect(() => {
-    setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+    setTableContextMenu((prev: TableContextMenuState) => (prev.open ? { ...prev, open: false } : prev));
   }, [activePage]);
 
   // Native contextmenu detection specifically for table cells (td, th)
@@ -193,7 +198,7 @@ export default function Workspace() {
       }
 
       // If clicked outside a table cell, close any open table context menu and leave default behavior
-      setTableContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev));
+      setTableContextMenu((prev: TableContextMenuState) => (prev.open ? { ...prev, open: false } : prev));
     };
 
     document.addEventListener("contextmenu", handleContextMenu);
@@ -362,6 +367,13 @@ export default function Workspace() {
         })()}
       </div>
 
+      {/* DOCUMENT CHART, SMARTART, ICON & SHAPE HYDRATION */}
+      <ChartHydration />
+      <SmartArtHydration />
+      <IconHydration />
+      <ShapeHydration />
+      <PictureHydration />
+
       {/* WORD-STYLE CONTEXTUAL TABLE TEXT FORMATTING TOOLBAR
           Appears automatically near selection when text inside a table cell is selected
       */}
@@ -373,7 +385,7 @@ export default function Workspace() {
       {isEditable && viewMode !== "read" && (
         <TableContextMenu
           state={tableContextMenu}
-          onClose={() => setTableContextMenu((prev) => ({ ...prev, open: false }))}
+          onClose={() => setTableContextMenu((prev: TableContextMenuState) => ({ ...prev, open: false }))}
           onUpdateTable={() => {
             if (tableContextMenu.table) {
               const editable = tableContextMenu.table.closest('[contenteditable="true"]') as HTMLElement | null;
@@ -514,6 +526,104 @@ function isCursorAtStart(container: HTMLElement): boolean {
     node = node.parentNode;
   }
   return true;
+}
+
+/**
+ * Strips rendered React portal contents from .editor-chart-mount and .editor-smartart-mount
+ * so that live interactive DOM is never baked into static page HTML.
+ */
+export function cleanChartMountsForHtml(html: string): string {
+  if (
+    !html ||
+    (!html.includes("editor-chart-mount") &&
+      !html.includes("editor-smartart-mount") &&
+      !html.includes("editor-picture-mount") &&
+      !html.includes("editor-icon-mount") &&
+      !html.includes("editor-shape-mount"))
+  )
+    return html;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<body>${html}</body>`, "text/html");
+    const mounts = doc.querySelectorAll(
+      ".editor-chart-mount, .editor-smartart-mount, .editor-picture-mount, .editor-icon-mount, .editor-shape-mount"
+    );
+    if (mounts.length === 0) return html;
+    mounts.forEach((m) => {
+      m.innerHTML = "";
+    });
+    return doc.body.innerHTML;
+  } catch {
+    return html;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Helper: Check if current typing position should auto-capitalize (Sentence Case)
+// Word-style auto-capitalization:
+// 1. At start of block/paragraph (or empty block, or only whitespace before caret)
+// 2. Immediately after Enter or line break (<br>, \r, \n)
+// 3. After sentence-ending punctuation (.?! or …) followed by whitespace
+// --------------------------------------------------------------------------
+function shouldAutoCapitalize(container: HTMLElement): boolean {
+  try {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return false;
+    const range = sel.getRangeAt(0);
+    if (!container.contains(range.startContainer)) return false;
+
+    // Find the enclosing block element (p, h1-h6, li, blockquote, td, th, div)
+    const node = range.startContainer;
+    const el = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+    if (!el) return false;
+
+    const block =
+      (el.closest("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th") as HTMLElement | null) ||
+      (el === container ? container : (el.closest("div") as HTMLElement | null) || container);
+
+    // Check if directly preceded by a <br>
+    if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+      if (range.startOffset > 0) {
+        const prevChild = range.startContainer.childNodes[range.startOffset - 1];
+        if (prevChild && prevChild.nodeName === "BR") {
+          return true;
+        }
+      }
+    } else if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset === 0) {
+      let prev: Node | null = range.startContainer.previousSibling;
+      while (prev && prev.nodeType === Node.TEXT_NODE && (prev.textContent || "") === "") {
+        prev = prev.previousSibling;
+      }
+      if (prev && prev.nodeName === "BR") {
+        return true;
+      }
+    }
+
+    // Get text before caret inside the block
+    const preRange = document.createRange();
+    preRange.setStart(block, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const textBefore = preRange.toString();
+
+    // 1. At the start of the block (empty or only whitespace/quotes/brackets)
+    if (/^[\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    // 2. Directly after a newline
+    if (/[\r\n][\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    // 3. After sentence-ending punctuation (. ? !) followed by at least one space
+    if (/[.?!][\s\u00A0]+["'“‘(\[]*$/.test(textBefore)) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 interface SavedSelection {
@@ -673,7 +783,12 @@ function DocumentPage({
   const consecutiveEnterRef = useRef<boolean>(false);
   const lastEnterTimeRef = useRef<number>(0);
 
-  const { undo, redo, recordSnapshot, initHistory } = useEditor();
+  const { activeChartId, isSpreadsheetOpen } = useChartContext();
+  const isEditingChartOnThisPage = Boolean(
+    isSpreadsheetOpen && activeChartId && html.includes(activeChartId)
+  );
+
+  const { undo, redo, recordSnapshot, initHistory, insertPageBreak, insertLineBreak, insertColumnBreak } = useEditor();
   const {
     showMarkup,
     handleBeforeInput,
@@ -853,8 +968,7 @@ function DocumentPage({
       onChange(element.innerHTML);
     }
   }, [pageNumber, totalPages, pageNumberFormat, onChange]);
-
-  /*
+/*
    * Keep the page HTML synchronized with the document model
    * only when genuine external updates occur (undo/redo, file load).
    */
@@ -862,11 +976,29 @@ function DocumentPage({
     const element = localEditorRef.current;
     if (!element) return;
 
-    const normalize = (s: string) => s.replace(/<br\s*\/?>/gi, "<br>").replace(/\s+/g, " ").trim();
+    const normalize = (s: string) =>
+      cleanChartMountsForHtml(s)
+        .replace(/<br\s*\/?>/gi, "<br>")
+        .replace(/\s+/g, " ")
+        .trim();
 
     // If element in DOM is empty or not yet initialized, populate with incoming html
     if (!element.hasChildNodes() || element.innerHTML.trim() === "" || lastHtmlRef.current === null) {
-      element.innerHTML = html || "<p><br></p>";
+      element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
+      lastHtmlRef.current = html;
+      return;
+    }
+
+    // If active element is inside this editor, avoid destroying the user's cursor
+    const hasFocus = element === document.activeElement || element.contains(document.activeElement);
+    if (hasFocus) {
+      if (normalize(lastHtmlRef.current) === normalize(html)) {
+        return;
+      }
+    }
+
+    if (normalize(element.innerHTML) !== normalize(html)) {
+      element.innerHTML = cleanChartMountsForHtml(html) || "<p><br></p>";
       lastHtmlRef.current = html;
       return;
     }
@@ -975,56 +1107,73 @@ function DocumentPage({
   // If content overflows -> moves ONLY the overflowing children to next page.
   // ------------------------------------------------------------------------
   const checkAndPaginateOverflow = useCallback(() => {
+    if (isEditingChartOnThisPage) return;
+
     const container = localEditorRef.current;
     if (!container) return;
 
     const children = Array.from(container.children) as HTMLElement[];
     if (children.length <= 1) return;
 
-    // Only paginate if container content genuinely exceeds its usable height
-    if (container.scrollHeight <= container.clientHeight + 2) {
-      return;
-    }
+    // Check if an explicit page break marker is present with content after it
+    const breakIdx = children.findIndex(
+      (child) =>
+        child.classList.contains("page-break") ||
+        child.getAttribute("data-page-break") === "true" ||
+        child.querySelector?.(".page-break, [data-page-break='true']") !== null
+    );
 
-    const containerRect = container.getBoundingClientRect();
-    if (containerRect.height === 0) return;
-
-    const scale = zoom / 100;
-    // Available writing boundary: container bottom minus bottom margin tolerance (scaled with zoom)
-    const maxBottom = containerRect.bottom - Math.max(16, bodyPaddingBottom) * scale;
-
-    const columnCount = section?.columns?.count ?? 1;
-    const isMultiColumn = columnCount > 1;
-
-    // Find the first child whose boundary exceeds the writing area
     let splitIdx = -1;
-    for (let i = 0; i < children.length; i++) {
-      const childRect = children[i].getBoundingClientRect();
 
-      if (isMultiColumn) {
-        // Multi-column layout overflow check:
-        // 1. Child spilled past the right edge of container into an overflow column
-        const isPastRightBoundary =
-          childRect.right > containerRect.right - marginR * scale + 10 ||
-          childRect.left >= containerRect.right - marginR * scale;
+    if (breakIdx !== -1 && breakIdx < children.length - 1) {
+      // Forced Page Break: split immediately at the element right after the page break
+      splitIdx = breakIdx + 1;
+    } else {
+      // Normal Height-based Overflow Check:
+      // Only paginate if container content genuinely exceeds its usable height
+      if (container.scrollHeight <= container.clientHeight + 2) {
+        return;
+      }
 
-        // 2. Child is in the last column and exceeds bottom boundary
-        const approxColWidth =
-          (containerRect.width - (marginL + marginR) * scale - (columnCount - 1) * (section?.columns?.gap ?? 32) * scale) /
-          columnCount;
-        const lastColLeftThreshold = containerRect.right - marginR * scale - approxColWidth - 15;
-        const isInLastColumn = childRect.left >= lastColLeftThreshold;
-        const isPastBottomInLastCol = isInLastColumn && childRect.bottom > maxBottom;
+      const containerRect = container.getBoundingClientRect();
+      if (containerRect.height === 0) return;
 
-        if (isPastRightBoundary || isPastBottomInLastCol) {
-          splitIdx = i;
-          break;
-        }
-      } else {
-        // Single column layout
-        if (childRect.bottom > maxBottom) {
-          splitIdx = i;
-          break;
+      const scale = zoom / 100;
+      // Available writing boundary: container bottom minus bottom margin tolerance (scaled with zoom)
+      const maxBottom = containerRect.bottom - Math.max(16, bodyPaddingBottom) * scale;
+
+      const columnCount = section?.columns?.count ?? 1;
+      const isMultiColumn = columnCount > 1;
+
+      // Find the first child whose boundary exceeds the writing area
+      for (let i = 0; i < children.length; i++) {
+        const childRect = children[i].getBoundingClientRect();
+
+        if (isMultiColumn) {
+          // Multi-column layout overflow check:
+          // 1. Child spilled past the right edge of container into an overflow column
+          const isPastRightBoundary =
+            childRect.right > containerRect.right - marginR * scale + 10 ||
+            childRect.left >= containerRect.right - marginR * scale;
+
+          // 2. Child is in the last column and exceeds bottom boundary
+          const approxColWidth =
+            (containerRect.width - (marginL + marginR) * scale - (columnCount - 1) * (section?.columns?.gap ?? 32) * scale) /
+            columnCount;
+          const lastColLeftThreshold = containerRect.right - marginR * scale - approxColWidth - 15;
+          const isInLastColumn = childRect.left >= lastColLeftThreshold;
+          const isPastBottomInLastCol = isInLastColumn && childRect.bottom > maxBottom;
+
+          if (isPastRightBoundary || isPastBottomInLastCol) {
+            splitIdx = i;
+            break;
+          }
+        } else {
+          // Single column layout
+          if (childRect.bottom > maxBottom) {
+            splitIdx = i;
+            break;
+          }
         }
       }
     }
@@ -1053,11 +1202,17 @@ function DocumentPage({
     // Build HTML for overflowing content
     const tempDiv = document.createElement("div");
     overflowNodes.forEach((node) => tempDiv.appendChild(node.cloneNode(true)));
-    const overflowHtml = tempDiv.innerHTML.trim();
+    const overflowHtml = cleanChartMountsForHtml(tempDiv.innerHTML.trim());
 
     // Remove overflowing content from current page
     overflowNodes.forEach((node) => node.remove());
-    const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
+    if (breakIdx !== -1 && breakIdx < children.length) {
+      const marker = children[breakIdx];
+      if (marker && marker.parentElement === container) {
+        marker.remove();
+      }
+    }
+    const remainingHtml = cleanChartMountsForHtml(container.innerHTML.trim()) || "<p><br/></p>";
     lastHtmlRef.current = remainingHtml;
     onChange(remainingHtml);
 
@@ -1076,22 +1231,61 @@ function DocumentPage({
         }, 50);
       }
     } else {
-      // Next page already exists: prepend overflowing content to next page
       const existingNextHtml = pageHtmlMap[nextPage.id] || "";
-      const cleanExisting =
-        existingNextHtml.trim() === "<p><br/></p>" || existingNextHtml.trim() === "<p><br></p>"
-          ? ""
-          : existingNextHtml;
-      const mergedHtml = overflowHtml + (cleanExisting ? cleanExisting : "");
-      onSetPageHtml(nextPage.id, mergedHtml);
-      if (isCaretInOverflow) {
-        setTimeout(() => {
-          onSetActivePage(nextPage.id);
-          focusPage(nextPage.id, "start");
-        }, 50);
+      const isNextBlank =
+        !existingNextHtml ||
+        existingNextHtml.trim() === "<p><br/></p>" ||
+        existingNextHtml.trim() === "<p><br></p>" ||
+        existingNextHtml.trim() === "<p></p>";
+
+      if (isNextBlank) {
+        onSetPageHtml(nextPage.id, overflowHtml);
+        if (isCaretInOverflow) {
+          setTimeout(() => {
+            onSetActivePage(nextPage.id);
+            focusPage(nextPage.id, "start");
+          }, 50);
+        }
+      } else if (breakIdx !== -1) {
+        // Explicit forced page break: insert new page to avoid overwriting or merging into existing next page
+        const newPageId = onAddPage(pageId, overflowHtml);
+        if (isCaretInOverflow) {
+          setTimeout(() => {
+            onSetActivePage(newPageId);
+            focusPage(newPageId, "start");
+          }, 50);
+        }
+      } else {
+        // Natural height overflow: prepend overflowing content to next page
+        const mergedHtml = overflowHtml + existingNextHtml;
+        onSetPageHtml(nextPage.id, mergedHtml);
+        if (isCaretInOverflow) {
+          setTimeout(() => {
+            onSetActivePage(nextPage.id);
+            focusPage(nextPage.id, "start");
+          }, 50);
+        }
       }
     }
-  }, [allPages, bodyPaddingBottom, marginL, marginR, onAddPage, onChange, onSetPageHtml, pageHtmlMap, pageId, section, zoom]);
+  }, [allPages, bodyPaddingBottom, marginL, marginR, onAddPage, onChange, onSetPageHtml, onSetActivePage, pageHtmlMap, pageId, section, zoom]);
+
+  // If a forced page break has trailing nodes on this page, trigger overflow pagination
+  useEffect(() => {
+    const element = localEditorRef.current;
+    if (!element) return;
+    if (element.querySelector(".page-break, [data-page-break='true']")) {
+      const children = Array.from(element.children);
+      const bIdx = children.findIndex(
+        (c) =>
+          c.classList.contains("page-break") ||
+          c.getAttribute("data-page-break") === "true" ||
+          c.querySelector?.(".page-break, [data-page-break='true']") !== null
+      );
+      if (bIdx !== -1 && bIdx < children.length - 1) {
+        checkAndPaginateOverflow();
+      }
+    }
+  }, [html, checkAndPaginateOverflow]);
 
   // ------------------------------------------------------------------------
   // KeyDown: Enter, Ctrl+Enter, and Backspace Handlers
@@ -1103,6 +1297,47 @@ function DocumentPage({
     // Reset consecutive enter tracking on any key other than Enter
     if (e.key !== "Enter") {
       consecutiveEnterRef.current = false;
+    }
+
+    // ------------------------------------------------------------------
+    // Word-style Sentence Auto-Capitalization:
+    // When typing a lowercase letter at the start of a block, after Enter,
+    // or after sentence-ending punctuation (. ? !), auto-capitalize it.
+    // ------------------------------------------------------------------
+    if (
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      e.key.length === 1 &&
+      e.key >= "a" &&
+      e.key <= "z"
+    ) {
+      if (shouldAutoCapitalize(container)) {
+        e.preventDefault();
+        const upper = e.key.toUpperCase();
+        let inserted = false;
+        try {
+          inserted = document.execCommand("insertText", false, upper);
+        } catch {
+          inserted = false;
+        }
+
+        if (!inserted) {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            const textNode = document.createTextNode(upper);
+            range.insertNode(textNode);
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+        handleInput();
+        return;
+      }
     }
 
     // ------------------------------------------------------------------
@@ -1139,10 +1374,21 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
-    // 1. Manual Page Break: Ctrl + Enter / Cmd + Enter
+    // 1. Column Break: Ctrl + Shift + Enter / Cmd + Shift + Enter
+    // Inserts a column break that breaks content into the next column (or next page)
+    // ------------------------------------------------------------------
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+      e.preventDefault();
+      consecutiveEnterRef.current = false;
+      insertColumnBreak();
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // 2. Manual Page Break: Ctrl + Enter / Cmd + Enter
     // Intentionally splits content at cursor and creates a new page immediately
     // ------------------------------------------------------------------
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
       e.preventDefault();
       consecutiveEnterRef.current = false;
       handleManualPageBreak();
@@ -1150,7 +1396,18 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
-    // 2. Normal Enter:
+    // 3. Line Break (Soft Break): Shift + Enter
+    // Inserts a soft break (<br>) within current paragraph block
+    // ------------------------------------------------------------------
+    if (e.key === "Enter" && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      consecutiveEnterRef.current = false;
+      insertLineBreak();
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // 4. Normal Enter:
     // Single Enter creates normal paragraph break on current page.
     // Double Enter (consecutive Enter on empty paragraph) creates page break.
     // ------------------------------------------------------------------
@@ -1283,51 +1540,7 @@ function DocumentPage({
   // Manual Page Break (Ctrl + Enter)
   // ------------------------------------------------------------------------
   const handleManualPageBreak = () => {
-    const container = localEditorRef.current;
-    if (!container) return;
-
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-
-    const range = sel.getRangeAt(0);
-    const splitRange = document.createRange();
-    splitRange.setStart(range.endContainer, range.endOffset);
-    splitRange.setEndAfter(container.lastChild || container);
-
-    const fragment = splitRange.extractContents();
-    const tempDiv = document.createElement("div");
-    tempDiv.appendChild(fragment);
-
-    let trailingHtml = tempDiv.innerHTML.trim();
-    if (!trailingHtml || trailingHtml === "<br>" || trailingHtml === "<p></p>") {
-      trailingHtml = "<p><br/></p>";
-    }
-
-    const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
-    lastHtmlRef.current = remainingHtml;
-    onChange(remainingHtml);
-
-    const nextPage = allPages[pageIndex + 1];
-
-    if (!nextPage) {
-      const newPageId = onAddPage(pageId, trailingHtml);
-      setTimeout(() => {
-        onSetActivePage(newPageId);
-        focusPage(newPageId, "start");
-      }, 50);
-    } else {
-      const existingNextHtml = pageHtmlMap[nextPage.id] || "";
-      const cleanExisting =
-        existingNextHtml.trim() === "<p><br/></p>" || existingNextHtml.trim() === "<p><br></p>"
-          ? ""
-          : existingNextHtml;
-      const mergedHtml = trailingHtml + cleanExisting;
-      onSetPageHtml(nextPage.id, mergedHtml);
-      setTimeout(() => {
-        onSetActivePage(nextPage.id);
-        focusPage(nextPage.id, "start");
-      }, 50);
-    }
+    insertPageBreak();
   };
 
   // ------------------------------------------------------------------------
@@ -1368,10 +1581,16 @@ function DocumentPage({
     consecutiveEnterRef.current = false;
     const element = localEditorRef.current;
     if (!element) return;
-    const currentHtml = element.innerHTML;
+    const currentHtml = cleanChartMountsForHtml(element.innerHTML);
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
     recordSnapshot(pageId, currentHtml, getCaretCharacterOffsetWithin(element));
+
+    if (element.querySelector(".page-break, [data-page-break='true']")) {
+      setTimeout(() => {
+        checkAndPaginateOverflow();
+      }, 50);
+    }
   };
 
   const handleFocus = () => {
@@ -1390,6 +1609,7 @@ function DocumentPage({
   // Ensures clicking anywhere on the page moves the text caret '|' to that position
   // ------------------------------------------------------------------------
   const handlePageMouseDown = (e: React.MouseEvent<HTMLElement>) => {
+    if (e.defaultPrevented) return;
     onActivate();
     consecutiveEnterRef.current = false;
 
@@ -1407,56 +1627,32 @@ function DocumentPage({
       return;
     }
 
+    // Ensure the container has at least one paragraph if completely empty
+    if (!container.firstElementChild) {
+      container.innerHTML = "<p><br></p>";
+      lastHtmlRef.current = container.innerHTML;
+      onChange(container.innerHTML);
+    }
+
     const children = Array.from(container.children) as HTMLElement[];
+    if (children.length === 0) return;
     const firstChild = children[0];
     const lastChild = children[children.length - 1];
+    const lastEditableChild =
+      lastChild?.classList.contains("page-break") && children.length > 1
+        ? children[children.length - 2]
+        : lastChild;
 
-    // If the click is inside the editable container or on any of its content:
-    if (container.contains(target) || target === container) {
-      // Ensure the container has at least one paragraph if completely empty
-      if (!container.firstElementChild) {
-        container.innerHTML = "<p><br></p>";
-        lastHtmlRef.current = container.innerHTML;
-        onChange(container.innerHTML);
-      }
-
-      // If clicking in the vertical spacing directly below the header boundary (above first paragraph):
-      if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
-        e.preventDefault();
-        container.focus();
-        const sel = window.getSelection();
-        if (sel) {
-          const range = document.createRange();
-          range.selectNodeContents(firstChild);
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-        return;
-      }
-
-      // Check if clicking in empty whitespace well below the last paragraph
-      if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom + 10) {
-        e.preventDefault();
-        container.focus();
-        const sel = window.getSelection();
-        if (sel) {
-          const range = document.createRange();
-          range.selectNodeContents(lastChild);
-          range.collapse(false);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-        return;
-      }
-
-      // Click is within normal text area: DO NOT call e.preventDefault(), DO NOT collapse selection!
-      // Let the browser's native text selection, double-click word selection,
-      // and exact caret placement work naturally!
+    // 1. If clicking directly on an existing text element / child of container (not the container background):
+    if (target && target !== container && container.contains(target)) {
+      // User clicked directly on an existing text block or child element
+      // Let browser native text placement and selection work naturally!
       return;
     }
 
-    // Click is outside the editable container (e.g. on page margins in <section>):
+    // 2. User clicked in empty space on the page (container whitespace, margins, or section)
+
+    // Case A: Clicking above the first paragraph (in top margin / spacing below header):
     if (firstChild && e.clientY < firstChild.getBoundingClientRect().top) {
       e.preventDefault();
       container.focus();
@@ -1471,24 +1667,86 @@ function DocumentPage({
       return;
     }
 
-    if (lastChild && e.clientY > lastChild.getBoundingClientRect().bottom) {
+    const containerRect = container.getBoundingClientRect();
+    const referenceChild = lastEditableChild || lastChild;
+    const lastChildRect = referenceChild.getBoundingClientRect();
+    const effectiveLineHeight = 28 * (zoom / 100);
+
+    // Case B: Clicking below the last paragraph on the page (Word-style Click-to-Position Cursor)
+    if (e.clientY > lastChildRect.bottom + 6) {
       e.preventDefault();
       container.focus();
+
+      const maxAllowedBottom = containerRect.bottom - 28 * (zoom / 100);
+      const diffY = e.clientY - lastChildRect.bottom;
+      let linesToAdd = Math.max(1, Math.round(diffY / effectiveLineHeight));
+
+      // Ensure we don't exceed the page boundary
+      const maxPossibleLines = Math.max(
+        1,
+        Math.floor((maxAllowedBottom - lastChildRect.bottom) / effectiveLineHeight)
+      );
+      linesToAdd = Math.min(linesToAdd, maxPossibleLines);
+
+      let targetP: HTMLElement = referenceChild;
+      const isLastEmpty =
+        referenceChild.tagName === "P" &&
+        (referenceChild.innerHTML === "<br>" ||
+          referenceChild.innerHTML === "<br/>" ||
+          referenceChild.textContent?.trim() === "");
+
+      const startCount = isLastEmpty ? 1 : 0;
+      for (let i = startCount; i < linesToAdd; i++) {
+        const p = document.createElement("p");
+        p.innerHTML = "<br>";
+        if (lastChild !== referenceChild && lastChild.parentNode === container) {
+          container.insertBefore(p, lastChild);
+        } else {
+          container.appendChild(p);
+        }
+        targetP = p;
+      }
+
+      if (isLastEmpty && linesToAdd === 1) {
+        targetP = referenceChild;
+      }
+
+      const updatedHtml = cleanChartMountsForHtml(container.innerHTML);
+      lastHtmlRef.current = updatedHtml;
+      onChange(updatedHtml);
+
+      // Place caret '|' inside target paragraph where user clicked
       const sel = window.getSelection();
       if (sel) {
         const range = document.createRange();
-        range.selectNodeContents(lastChild);
-        range.collapse(false);
+        range.selectNodeContents(targetP);
+        range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
       }
       return;
     }
 
-    const targetChild = children.find((child) => {
+    // Case C: Clicking alongside an existing child (e.g. in the left/right page margins or paragraph gap)
+    let targetChild = children.find((child) => {
       const rect = child.getBoundingClientRect();
       return e.clientY >= rect.top && e.clientY <= rect.bottom;
     });
+
+    if (!targetChild && children.length > 0) {
+      let minDistance = Infinity;
+      for (const child of children) {
+        const rect = child.getBoundingClientRect();
+        const dist = Math.min(
+          Math.abs(e.clientY - rect.top),
+          Math.abs(e.clientY - rect.bottom)
+        );
+        if (dist < minDistance) {
+          minDistance = dist;
+          targetChild = child;
+        }
+      }
+    }
 
     if (targetChild) {
       e.preventDefault();
@@ -1498,7 +1756,7 @@ function DocumentPage({
         const range = document.createRange();
         range.selectNodeContents(targetChild);
         const rect = targetChild.getBoundingClientRect();
-        range.collapse(e.clientX < rect.left);
+        range.collapse(e.clientX < rect.left + rect.width / 2);
         sel.removeAllRanges();
         sel.addRange(range);
       }
@@ -1560,18 +1818,156 @@ function DocumentPage({
   const footerHeight = isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
 
+  const extractCleanTitle = (src?: string, fileName?: string): string => {
+    if (fileName && fileName.trim() && fileName !== "Online Picture") {
+      return fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+    }
+    if (src && !src.startsWith("data:")) {
+      try {
+        const match = src.match(/\/([^\/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
+        if (match && match[1]) {
+          const decoded = decodeURIComponent(match[1]).replace(/[-_]/g, " ");
+          if (decoded.length > 1 && !/^[0-9a-f]{20,}$/i.test(decoded)) {
+            return decoded;
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return fileName || "Picture";
+  };
+
+  const handlePageDrop = (e: React.DragEvent<HTMLElement>) => {
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith("image/")) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const src = reader.result as string;
+          if (src) {
+            window.dispatchEvent(
+              new CustomEvent("pf-insert-picture", {
+                detail: {
+                  src,
+                  name: extractCleanTitle(src, file.name),
+                  mode: "withTitle",
+                },
+              })
+            );
+          }
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+
+    let uri = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain");
+    const htmlData = e.dataTransfer.getData("text/html");
+
+    if (!uri && htmlData) {
+      const match = htmlData.match(/src=["'](https?:\/\/[^"']+|data:image\/[^"']+)["']/i);
+      if (match) {
+        uri = match[1];
+      }
+    }
+
+    if (uri && (uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("data:image/"))) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.dispatchEvent(
+        new CustomEvent("pf-insert-picture", {
+          detail: {
+            src: uri,
+            name: extractCleanTitle(uri),
+            mode: "withTitle",
+          },
+        })
+      );
+    }
+  };
+
+  const handlePagePaste = (e: React.ClipboardEvent<HTMLElement>) => {
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) return;
+
+    const items = Array.from(clipboardData.items);
+    const imageItem = items.find((item) => item.type.startsWith("image/"));
+    if (imageItem) {
+      const file = imageItem.getAsFile();
+      if (file) {
+        e.preventDefault();
+        e.stopPropagation();
+        const reader = new FileReader();
+        reader.onload = () => {
+          const src = reader.result as string;
+          if (src) {
+            window.dispatchEvent(
+              new CustomEvent("pf-insert-picture", {
+                detail: {
+                  src,
+                  name: extractCleanTitle(src, file.name || "Pasted Image"),
+                  mode: "withTitle",
+                },
+              })
+            );
+          }
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+
+    const pastedText = clipboardData.getData("text/plain")?.trim();
+    if (
+      pastedText &&
+      (pastedText.startsWith("http://") ||
+        pastedText.startsWith("https://") ||
+        pastedText.startsWith("data:image/")) &&
+      /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(pastedText)
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.dispatchEvent(
+        new CustomEvent("pf-insert-picture", {
+          detail: {
+            src: pastedText,
+            name: extractCleanTitle(pastedText),
+            mode: "withTitle",
+          },
+        })
+      );
+    }
+  };
+
   return (
     <div
       data-page-wrapper={pageId}
       className="relative flex justify-center shrink-0 print:contents"
       style={{
         width: `${scaledPageWidth}px`,
-        height: isWeb ? "auto" : `${scaledPageHeight}px`,
+        height: isEditingChartOnThisPage ? "auto" : (isWeb ? "auto" : `${scaledPageHeight}px`),
       }}
     >
       <section
         data-page-id={pageId}
         onMouseDown={handlePageMouseDown}
+        onPaste={handlePagePaste}
+        onDragOver={(e) => {
+          if (
+            e.dataTransfer.types.includes("Files") ||
+            e.dataTransfer.types.includes("text/uri-list") ||
+            e.dataTransfer.types.includes("text/plain") ||
+            e.dataTransfer.types.includes("text/html")
+          ) {
+            e.preventDefault();
+          }
+        }}
+        onDrop={handlePageDrop}
         onDoubleClick={(e) => {
           if (!isRead && !isDraft && isHeaderFooterActive && !(e.target as HTMLElement).closest('[data-hf-container]')) {
             e.stopPropagation();
@@ -1580,7 +1976,7 @@ function DocumentPage({
         }}
         className={`
           relative
-          overflow-hidden
+          ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
           shrink-0
           cursor-text
           box-border
@@ -1599,8 +1995,8 @@ function DocumentPage({
         style={{
           width: `${pageWidth}px`,
           minWidth: `${pageWidth}px`,
-          height: isWeb ? "auto" : `${pageHeight}px`,
-          maxHeight: isWeb ? "none" : `${pageHeight}px`,
+          height: isEditingChartOnThisPage ? "auto" : (isWeb ? "auto" : `${pageHeight}px`),
+          maxHeight: isEditingChartOnThisPage ? undefined : (isWeb ? "none" : `${pageHeight}px`),
           transform: `scale(${zoom / 100})`,
           transformOrigin: "top center",
           backgroundColor: section?.pageColor || "#ffffff",
@@ -1937,8 +2333,9 @@ function DocumentPage({
           }
         }}
         style={{
-          height: `${contentHeight}px`,
-          maxHeight: `${contentHeight}px`,
+          minHeight: `${contentHeight}px`,
+          height: isEditingChartOnThisPage ? "auto" : `${contentHeight}px`,
+          maxHeight: isEditingChartOnThisPage ? undefined : `${contentHeight}px`,
           paddingTop: `${bodyPaddingTop}px`,
           paddingBottom: `${bodyPaddingBottom}px`,
           paddingLeft: `${marginL}px`,
@@ -1951,13 +2348,14 @@ function DocumentPage({
             ? {
                 columnCount: section.columns.count,
                 columnGap: `${section.columns.gap ?? 32}px`,
-                columnFill: "balance",
-                WebkitColumnFill: "balance",
+                // columnFill: "auto" ensures sequential top-to-bottom column filling and enables CSS break-after: column
+                columnFill: "auto",
+                WebkitColumnFill: "auto",
               }
             : {}),
         }}
-        className="
-          overflow-hidden
+        className={`
+          ${isEditingChartOnThisPage ? "overflow-visible" : "overflow-hidden"}
           box-border
           outline-none
           cursor-text
@@ -2034,12 +2432,11 @@ function DocumentPage({
           [&_th]:break-words
           [&_th]:[overflow-wrap:anywhere]
           [&_th]:[word-break:break-word]
-          [&_th]:whitespace-normal
           [&_th_p]:my-0
           [&_th_p]:min-w-0
           [&_th_p]:[overflow-wrap:anywhere]
           [&_th_p]:[word-break:break-word]
-        "
+        `}
       />
 
       {/* WORD-STYLE TABLE MOVE & RESIZE OVERLAY (Editor UI only, not in saved document) */}
@@ -2050,7 +2447,7 @@ function DocumentPage({
           zoom={zoom}
           onUpdate={() => {
             if (localEditorRef.current) {
-              const updatedHtml = localEditorRef.current.innerHTML;
+              const updatedHtml = cleanChartMountsForHtml(localEditorRef.current.innerHTML);
               lastHtmlRef.current = updatedHtml;
               onChange(updatedHtml);
             }

@@ -69,7 +69,7 @@ export default function EditorLayout() {
       <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
 
         {/* LEFT ICON SIDEBAR */}
-        <aside className="w-[60px] shrink-0 min-h-0 overflow-hidden">
+        <aside className="w-[60px] shrink-0 min-h-0 overflow-visible">
           <IconSidebar />
         </aside>
 

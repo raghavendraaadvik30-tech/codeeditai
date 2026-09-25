@@ -35,7 +35,7 @@ import React, {
   useState,
 } from "react";
 
-import type { StyleOverrides, StyleOverride } from "../modules/styles/types/styles.types";
+import type { StyleOverrides, StyleOverride } from "../styles/types/styles.types";
 
 /* ============================================================
    Types
@@ -488,7 +488,8 @@ interface DocumentContextType {
     title: string
   ) => void;
   addPage: (
-    afterPageId?: string
+    afterPageId?: string,
+    initialHtml?: string
   ) => string;
   removePage: (
     pageId: string
@@ -658,7 +659,7 @@ export function DocumentModelProvider({
   ============================================================ */
 
   const addPage = useCallback(
-    (afterPageId?: string) => {
+    (afterPageId?: string, initialHtml?: string) => {
       const newPageId = "page_" + uid();
 
       setModel((prev) => {
@@ -688,7 +689,7 @@ export function DocumentModelProvider({
           ],
           pageHtml: {
             ...prev.pageHtml,
-            [newPageId]: DEFAULT_HTML,
+            [newPageId]: initialHtml !== undefined ? initialHtml : DEFAULT_HTML,
           },
         };
       });
@@ -1016,15 +1017,24 @@ export function DocumentModelProvider({
   const save = useCallback(
     (customTitle?: string) => {
       setModel((currentModel) => {
+        const synced = syncActiveDomToDoc(currentModel);
         const titleToSave =
           customTitle !== undefined && customTitle.trim() !== ""
             ? customTitle.trim()
-            : currentModel.title || "Untitled Document";
+            : synced.title || "Untitled Document";
 
+        const now = Date.now();
         const saved: DocumentModel = {
-          ...currentModel,
+          ...synced,
           title: titleToSave,
-          savedAt: Date.now(),
+          savedAt: now,
+          metadata: {
+            ...(synced.metadata || {}),
+            title: titleToSave,
+            author: synced.metadata?.author || "User",
+            createdDate: synced.metadata?.createdDate || now,
+            modifiedDate: now,
+          },
         };
 
         try {
@@ -1053,6 +1063,7 @@ export function DocumentModelProvider({
           } else {
             nextSaved = [saved, ...existingSaved];
           }
+          nextSaved = nextSaved.slice(0, MAX_DOCUMENTS);
 
           localStorage.setItem(
             SAVED_DOCS_KEY,
@@ -1091,12 +1102,21 @@ export function DocumentModelProvider({
   const saveAs = useCallback(
     (title: string) => {
       setModel((currentModel) => {
+        const synced = syncActiveDomToDoc(currentModel);
         const titleToSave = title.trim() || "Untitled Document";
+        const now = Date.now();
 
         const saved: DocumentModel = {
-          ...currentModel,
+          ...synced,
           title: titleToSave,
-          savedAt: Date.now(),
+          savedAt: now,
+          metadata: {
+            ...(synced.metadata || {}),
+            title: titleToSave,
+            author: synced.metadata?.author || "User",
+            createdDate: synced.metadata?.createdDate || now,
+            modifiedDate: now,
+          },
         };
 
         try {

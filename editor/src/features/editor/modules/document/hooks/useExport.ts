@@ -25,14 +25,39 @@ export function useExport() {
     try {
       if (format === "docx") {
         const updatedPageHtml: Record<string, string> = { ...model.pageHtml };
-        model.pages.forEach((p: PageModel) => {
-          const pageEl = document.querySelector(`[data-page-id="${p.id}"]`);
-          const editable = pageEl?.querySelector("[contenteditable]");
-          if (editable) {
-            updatedPageHtml[p.id] = (editable as HTMLElement).innerHTML;
+        const pages = model.pages && model.pages.length > 0
+          ? model.pages
+          : [{ id: "p1", sectionId: model.sections?.[0]?.id || "s1" }];
+
+        pages.forEach((p: PageModel) => {
+          const pageContentEl =
+            (document.querySelector(`[data-editor-page="${p.id}"]`) as HTMLElement | null) ||
+            (document.querySelector(`section[data-page-id="${p.id}"] [data-editor-page]`) as HTMLElement | null) ||
+            (document.querySelector(`section[data-page-id="${p.id}"] [contenteditable="true"]`) as HTMLElement | null) ||
+            (document.querySelector(`[data-page-id="${p.id}"] [contenteditable]`) as HTMLElement | null);
+          if (pageContentEl) {
+            updatedPageHtml[p.id] = pageContentEl.innerHTML;
           }
         });
-        const activeModel = { ...model, pageHtml: updatedPageHtml };
+        const activeModel = {
+          ...model,
+          pages,
+          sections: model.sections && model.sections.length > 0
+            ? model.sections
+            : [{
+                id: "s1",
+                header: "",
+                footer: "",
+                differentFirstPage: false,
+                differentOddEven: false,
+                firstHeader: "",
+                firstFooter: "",
+                evenHeader: "",
+                evenFooter: "",
+                showPageNumbers: false,
+              }],
+          pageHtml: updatedPageHtml,
+        };
         const blob = await generateWordDocx(activeModel, {
           tableAutoFitMode: "fixed",
           exportMarkupMode: "markup",
@@ -41,7 +66,9 @@ export function useExport() {
         const a = window.document.createElement("a");
         a.href = url;
         a.download = `${resolvedName}.docx`;
+        window.document.body.appendChild(a);
         a.click();
+        window.document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       } else if (format === "html") {
         const editorElement = document.querySelector(".prose-doc") || document.body;
