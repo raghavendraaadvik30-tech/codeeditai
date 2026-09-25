@@ -1206,6 +1206,12 @@ function DocumentPage({
 
     // Remove overflowing content from current page
     overflowNodes.forEach((node) => node.remove());
+    if (breakIdx !== -1 && breakIdx < children.length) {
+      const marker = children[breakIdx];
+      if (marker && marker.parentElement === container) {
+        marker.remove();
+      }
+    }
     const remainingHtml = cleanChartMountsForHtml(container.innerHTML.trim()) || "<p><br/></p>";
     lastHtmlRef.current = remainingHtml;
     onChange(remainingHtml);

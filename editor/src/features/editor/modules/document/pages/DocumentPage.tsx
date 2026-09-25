@@ -21,6 +21,7 @@ import {
   X,
   Trash2,
   AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 import { useEditor } from "@/features/editor/context/EditorContext";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
@@ -173,9 +174,12 @@ export default function DocumentPage() {
     setDocToDelete(doc);
   };
 
-  // Find & Replace State with Yellow Highlighting
+  // Find & Replace State with Microsoft Word-Style Navigation & Replace
+  const [navTab, setNavTab] = useState<"find" | "replace">("replace");
   const [findText, setFindText] = useState("");
   const [replaceText, setReplaceText] = useState("");
+  const [searchStatus, setSearchStatus] = useState<string>("");
+  const [isFindReplaceDialogOpen, setIsFindReplaceDialogOpen] = useState(false);
   const matchIndexRef = useRef<number>(0);
   const lastSearchRef = useRef<string>("");
 
@@ -198,11 +202,12 @@ export default function DocumentPage() {
     };
   }, []);
 
-  const handleFind = () => {
+  const handleFindNext = () => {
     const query = findText.trim();
     if (!query) {
       clearFindHighlights();
       lastSearchRef.current = "";
+      setSearchStatus("");
       return;
     }
 
@@ -214,7 +219,7 @@ export default function DocumentPage() {
       containers.push(editorRef.current);
     }
 
-    // Re-highlight in yellow when a new search string is entered or no marks exist
+    // Re-highlight when a new search string is entered or no marks exist
     const existingMarks = document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]');
     if (query !== lastSearchRef.current || existingMarks.length === 0) {
       clearFindHighlights();
@@ -257,7 +262,7 @@ export default function DocumentPage() {
             // Create standard yellow highlight mark
             const mark = document.createElement("mark");
             mark.setAttribute("data-find-highlight", "true");
-            mark.style.backgroundColor = "yellow";
+            mark.style.backgroundColor = "#fef08a";
             mark.style.color = "black";
             mark.style.padding = "0 1px";
             mark.style.borderRadius = "2px";
@@ -281,11 +286,14 @@ export default function DocumentPage() {
       document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]')
     );
 
-    if (marks.length === 0) return;
+    if (marks.length === 0) {
+      setSearchStatus(`No matches found for "${query}".`);
+      return;
+    }
 
-    // Reset all highlights to default yellow, emphasize active match
+    // Reset all highlights to soft yellow, emphasize active match
     marks.forEach((m) => {
-      m.style.backgroundColor = "yellow";
+      m.style.backgroundColor = "#fef08a";
       m.style.outline = "none";
     });
 
@@ -295,32 +303,110 @@ export default function DocumentPage() {
     activeMark.style.outline = "2px solid #ca8a04";
     activeMark.scrollIntoView({ behavior: "smooth", block: "center" });
 
+    setSearchStatus(`Match ${activeIndex + 1} of ${marks.length}`);
     matchIndexRef.current = (activeIndex + 1) % marks.length;
   };
 
   const handleReplace = () => {
-    if (!findText.trim()) return;
+    const query = findText.trim();
+    if (!query) return;
 
-    const marks = Array.from(
+    let marks = Array.from(
       document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]')
     );
 
-    if (marks.length > 0) {
-      const activeIdx = Math.max(0, (matchIndexRef.current - 1 + marks.length) % marks.length);
-      const targetMark = marks[activeIdx] || marks[0];
-      const pageContainer = targetMark.closest<HTMLElement>('[contenteditable="true"]');
-      const textNode = document.createTextNode(replaceText);
-      targetMark.parentNode?.replaceChild(textNode, targetMark);
+    // If not searched yet or marks cleared, find first match
+    if (query !== lastSearchRef.current || marks.length === 0) {
+      handleFindNext();
+      marks = Array.from(
+        document.querySelectorAll<HTMLElement>('mark[data-find-highlight="true"]')
+      );
+      if (marks.length === 0) {
+        setSearchStatus(`No matches found to replace.`);
+        return;
+      }
+    }
 
-      if (pageContainer) {
-        pageContainer.normalize();
-        pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+    const activeIdx = Math.max(0, (matchIndexRef.current - 1 + marks.length) % marks.length);
+    const targetMark = marks[activeIdx] || marks[0];
+    const pageContainer = targetMark.closest<HTMLElement>('[contenteditable="true"]');
+    const textNode = document.createTextNode(replaceText);
+    targetMark.parentNode?.replaceChild(textNode, targetMark);
+
+    if (pageContainer) {
+      pageContainer.normalize();
+      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    // Reset lastSearch to re-index DOM and jump to next match
+    lastSearchRef.current = "";
+    handleFindNext();
+  };
+
+  const handleReplaceAll = () => {
+    const query = findText.trim();
+    if (!query) return;
+
+    clearFindHighlights();
+    lastSearchRef.current = "";
+    matchIndexRef.current = 0;
+
+    const containers = Array.from(
+      document.querySelectorAll<HTMLElement>('[contenteditable="true"][data-page-id]')
+    );
+    if (containers.length === 0 && editorRef.current) {
+      containers.push(editorRef.current);
+    }
+
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escaped, "gi");
+    let totalReplacements = 0;
+
+    containers.forEach((container) => {
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+      const textNodes: Text[] = [];
+      let n: Node | null;
+      while ((n = walker.nextNode())) {
+        textNodes.push(n as Text);
       }
 
-      // Re-highlight remaining occurrences in yellow
-      lastSearchRef.current = "";
-      handleFind();
+      let containerReplaced = 0;
+      textNodes.forEach((node) => {
+        const val = node.nodeValue;
+        if (!val) return;
+
+        regex.lastIndex = 0;
+        if (!regex.test(val)) return;
+
+        const count = (val.match(regex) || []).length;
+        containerReplaced += count;
+        regex.lastIndex = 0;
+        const newVal = val.replace(regex, replaceText);
+        node.nodeValue = newVal;
+      });
+
+      if (containerReplaced > 0) {
+        totalReplacements += containerReplaced;
+        container.normalize();
+        container.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+
+    if (totalReplacements === 0) {
+      setSearchStatus(`Finished searching. 0 replacements made.`);
+    } else {
+      setSearchStatus(
+        `All done. Made ${totalReplacements} replacement${totalReplacements === 1 ? "" : "s"}.`
+      );
     }
+  };
+
+  const handleCancel = () => {
+    clearFindHighlights();
+    lastSearchRef.current = "";
+    matchIndexRef.current = 0;
+    setSearchStatus("");
+    setIsFindReplaceDialogOpen(false);
   };
 
   // Document Statistics calculation
@@ -618,54 +704,184 @@ export default function DocumentPage() {
             </button>
             {openSections.navigation && (
               <div className="mt-2 space-y-2.5 pl-5">
-                {/* Find & Replace */}
-                <div className="rounded-lg border border-slate-200 bg-white p-2.5 space-y-2 dark:border-slate-800 dark:bg-[#0E1A29]">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    <Search className="h-3.5 w-3.5 text-blue-500" />
-                    Find & Replace
-                  </div>
-                  <input
-                    type="text"
-                    value={findText}
-                    onChange={(e) => {
-                      setFindText(e.target.value);
-                      if (!e.target.value.trim()) {
-                        clearFindHighlights();
-                        lastSearchRef.current = "";
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleFind();
-                      }
-                    }}
-                    placeholder="Find text..."
-                    className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
-                  />
-                  <input
-                    type="text"
-                    value={replaceText}
-                    onChange={(e) => setReplaceText(e.target.value)}
-                    placeholder="Replace with..."
-                    className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
-                  />
-                  <div className="flex gap-2 pt-0.5">
+                {/* Find & Replace Card */}
+                <div className="rounded-lg border border-slate-200 bg-white p-2.5 space-y-2.5 dark:border-slate-800 dark:bg-[#0E1A29] shadow-2xs">
+                  {/* Card Header & Mode Switcher */}
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 dark:border-slate-800">
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNavTab("find");
+                          setSearchStatus("");
+                        }}
+                        className={cn(
+                          "px-2.5 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
+                          navTab === "find"
+                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-blue-50/50 dark:bg-blue-950/40 dark:text-blue-400"
+                            : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                        )}
+                      >
+                        Find
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNavTab("replace");
+                          setSearchStatus("");
+                        }}
+                        className={cn(
+                          "px-2.5 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
+                          navTab === "replace"
+                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-blue-50/50 dark:bg-blue-950/40 dark:text-blue-400"
+                            : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                        )}
+                      >
+                        Replace
+                      </button>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={handleFind}
-                      className="flex-1 rounded bg-[#0078d4] py-1 text-[11px] font-semibold text-white hover:bg-[#005a9e]"
+                      onClick={() => setIsFindReplaceDialogOpen(true)}
+                      title="Open Microsoft Word Find and Replace Dialog"
+                      className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
                     >
-                      Find
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleReplace}
-                      className="flex-1 rounded border border-slate-200 bg-slate-100 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                    >
-                      Replace
+                      <ExternalLink className="h-3.5 w-3.5" />
                     </button>
                   </div>
+
+                  {/* Input Fields */}
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
+                        Find what:
+                      </label>
+                      <input
+                        type="text"
+                        value={findText}
+                        onChange={(e) => {
+                          setFindText(e.target.value);
+                          if (!e.target.value.trim()) {
+                            clearFindHighlights();
+                            lastSearchRef.current = "";
+                            setSearchStatus("");
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleFindNext();
+                          }
+                        }}
+                        placeholder="Find text..."
+                        className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
+                      />
+                    </div>
+
+                    {navTab === "replace" && (
+                      <div>
+                        <label className="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
+                          Replace with:
+                        </label>
+                        <input
+                          type="text"
+                          value={replaceText}
+                          onChange={(e) => setReplaceText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleReplace();
+                            }
+                          }}
+                          placeholder="Replace with..."
+                          className="h-7 w-full rounded border border-slate-200 bg-slate-50 px-2 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Search / Replace Feedback Message */}
+                  {searchStatus && (
+                    <div className="text-[11px] text-blue-600 dark:text-blue-400 italic px-0.5">
+                      {searchStatus}
+                    </div>
+                  )}
+
+                  {/* Action Buttons matching Microsoft Word */}
+                  {navTab === "replace" ? (
+                    <div className="grid grid-cols-4 gap-1.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        type="button"
+                        onClick={handleReplace}
+                        disabled={!findText.trim()}
+                        className={cn(
+                          "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none",
+                          !findText.trim()
+                            ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                            : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                        )}
+                      >
+                        Replace
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleReplaceAll}
+                        disabled={!findText.trim()}
+                        className={cn(
+                          "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
+                          !findText.trim()
+                            ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                            : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                        )}
+                      >
+                        Replace All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleFindNext}
+                        disabled={!findText.trim()}
+                        className={cn(
+                          "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
+                          !findText.trim()
+                            ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                            : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                        )}
+                      >
+                        Find Next
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="rounded-[3px] border border-blue-400/80 bg-white py-1 px-1 text-center text-[11px] font-medium text-slate-900 shadow-2xs hover:bg-slate-50 hover:border-blue-500 active:bg-slate-100 dark:border-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 cursor-pointer select-none"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        type="button"
+                        onClick={handleFindNext}
+                        disabled={!findText.trim()}
+                        className={cn(
+                          "flex-1 rounded-[3px] border py-1 text-center text-[11px] font-normal transition-colors select-none",
+                          !findText.trim()
+                            ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                            : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                        )}
+                      >
+                        Find Next
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="flex-1 rounded-[3px] border border-blue-400/80 bg-white py-1 text-center text-[11px] font-medium text-slate-900 shadow-2xs hover:bg-slate-50 hover:border-blue-500 active:bg-slate-100 dark:border-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 cursor-pointer select-none"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -837,6 +1053,193 @@ export default function DocumentPage() {
               >
                 <span>Continue</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Microsoft Word-Style Find & Replace Dialog */}
+      {isFindReplaceDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[0.5px]">
+          <div className="w-[500px] rounded-lg border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-[#111D29] overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+            {/* Window Title Bar */}
+            <div className="flex items-center justify-between border-b border-slate-200 bg-[#f3f4f6] px-3.5 py-1.5 dark:border-slate-800 dark:bg-[#07131E]">
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 select-none">
+                Find and Replace
+              </span>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="rounded p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Dialog Tabs */}
+            <div className="flex border-b border-slate-200 bg-[#f8fafc] px-3.5 pt-1.5 dark:border-slate-800 dark:bg-[#0d1824]">
+              <button
+                type="button"
+                onClick={() => {
+                  setNavTab("find");
+                  setSearchStatus("");
+                }}
+                className={cn(
+                  "px-4 py-1.5 text-xs font-medium border-t-2 transition-colors cursor-pointer select-none",
+                  navTab === "find"
+                    ? "border-t-blue-600 bg-white text-blue-700 border-x border-b-0 border-slate-200 -mb-px dark:border-slate-700 dark:bg-[#111D29] dark:text-blue-400"
+                    : "border-t-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                )}
+              >
+                Find
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setNavTab("replace");
+                  setSearchStatus("");
+                }}
+                className={cn(
+                  "px-4 py-1.5 text-xs font-medium border-t-2 transition-colors cursor-pointer select-none",
+                  navTab === "replace"
+                    ? "border-t-blue-600 bg-white text-blue-700 border-x border-b-0 border-slate-200 -mb-px dark:border-slate-700 dark:bg-[#111D29] dark:text-blue-400"
+                    : "border-t-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                )}
+              >
+                Replace
+              </button>
+            </div>
+
+            {/* Dialog Body */}
+            <div className="p-4 space-y-3 bg-white dark:bg-[#111D29]">
+              <div className="flex items-center gap-3">
+                <label className="w-24 text-xs font-normal text-slate-600 dark:text-slate-300 text-right shrink-0 select-none">
+                  Find what:
+                </label>
+                <input
+                  type="text"
+                  autoFocus
+                  value={findText}
+                  onChange={(e) => {
+                    setFindText(e.target.value);
+                    if (!e.target.value.trim()) {
+                      clearFindHighlights();
+                      lastSearchRef.current = "";
+                      setSearchStatus("");
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleFindNext();
+                    }
+                  }}
+                  className="flex-1 h-7 rounded border border-slate-300 bg-white px-2.5 text-xs outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                />
+              </div>
+
+              {navTab === "replace" && (
+                <div className="flex items-center gap-3">
+                  <label className="w-24 text-xs font-normal text-slate-600 dark:text-slate-300 text-right shrink-0 select-none">
+                    Replace with:
+                  </label>
+                  <input
+                    type="text"
+                    value={replaceText}
+                    onChange={(e) => setReplaceText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleReplace();
+                      }
+                    }}
+                    className="flex-1 h-7 rounded border border-slate-300 bg-white px-2.5 text-xs outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
+              )}
+
+              {searchStatus && (
+                <div className="text-xs text-blue-600 dark:text-blue-400 pl-27 italic">
+                  {searchStatus}
+                </div>
+              )}
+            </div>
+
+            {/* Dialog Bottom Button Bar matching user screenshot exactly */}
+            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-[#f3f4f6] px-4 py-2.5 dark:border-slate-800 dark:bg-[#07131E]">
+              {navTab === "replace" ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleReplace}
+                    disabled={!findText.trim()}
+                    className={cn(
+                      "min-w-[76px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      !findText.trim()
+                        ? "border-[#d1d5db] bg-white text-[#9ca3af] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                        : "border-[#d1d5db] bg-white text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                    )}
+                  >
+                    Replace
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReplaceAll}
+                    disabled={!findText.trim()}
+                    className={cn(
+                      "min-w-[86px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      !findText.trim()
+                        ? "border-[#d1d5db] bg-white text-[#9ca3af] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                        : "border-[#d1d5db] bg-white text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                    )}
+                  >
+                    Replace All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleFindNext}
+                    disabled={!findText.trim()}
+                    className={cn(
+                      "min-w-[76px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      !findText.trim()
+                        ? "border-[#d1d5db] bg-white text-[#9ca3af] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                        : "border-[#d1d5db] bg-white text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                    )}
+                  >
+                    Find Next
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="min-w-[76px] rounded-[2px] border border-[#0078d4] bg-white px-3 py-1 text-center text-xs font-normal text-[#1e293b] shadow-2xs hover:bg-[#f3f4f6] active:bg-[#e5e7eb] dark:border-blue-500 dark:bg-slate-800 dark:text-white cursor-pointer select-none"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleFindNext}
+                    disabled={!findText.trim()}
+                    className={cn(
+                      "min-w-[80px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      !findText.trim()
+                        ? "border-[#d1d5db] bg-white text-[#9ca3af] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                        : "border-[#d1d5db] bg-white text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                    )}
+                  >
+                    Find Next
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="min-w-[80px] rounded-[2px] border border-[#0078d4] bg-white px-3 py-1 text-center text-xs font-normal text-[#1e293b] shadow-2xs hover:bg-[#f3f4f6] active:bg-[#e5e7eb] dark:border-blue-500 dark:bg-slate-800 dark:text-white cursor-pointer select-none"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

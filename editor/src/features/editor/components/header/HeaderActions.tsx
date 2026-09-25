@@ -243,15 +243,37 @@ export default function HeaderActions() {
   const handleExportDocx = async () => {
     try {
       const updatedPageHtml: Record<string, string> = { ...model.pageHtml };
-      model.pages.forEach((p) => {
-        const pageEl = document.querySelector(`[data-page-id="${p.id}"]`);
-        const editable = pageEl?.querySelector("[contenteditable]");
-        if (editable) {
-          updatedPageHtml[p.id] = (editable as HTMLElement).innerHTML;
+      const pages = model.pages && model.pages.length > 0
+        ? model.pages
+        : [{ id: "p1", sectionId: model.sections?.[0]?.id || "s1" }];
+
+      pages.forEach((p) => {
+        const pageContentEl =
+          (document.querySelector(`[data-editor-page="${p.id}"]`) as HTMLElement | null) ||
+          (document.querySelector(`section[data-page-id="${p.id}"] [data-editor-page]`) as HTMLElement | null) ||
+          (document.querySelector(`section[data-page-id="${p.id}"] [contenteditable="true"]`) as HTMLElement | null) ||
+          (document.querySelector(`[data-page-id="${p.id}"] [contenteditable]`) as HTMLElement | null);
+        if (pageContentEl) {
+          updatedPageHtml[p.id] = pageContentEl.innerHTML;
         }
       });
       const activeModel: DocumentModel = {
         ...model,
+        pages,
+        sections: model.sections && model.sections.length > 0
+          ? model.sections
+          : [{
+              id: "s1",
+              header: "",
+              footer: "",
+              differentFirstPage: false,
+              differentOddEven: false,
+              firstHeader: "",
+              firstFooter: "",
+              evenHeader: "",
+              evenFooter: "",
+              showPageNumbers: false,
+            }],
         pageHtml: updatedPageHtml,
       };
 

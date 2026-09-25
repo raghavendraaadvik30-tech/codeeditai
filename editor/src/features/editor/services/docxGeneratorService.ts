@@ -18,6 +18,7 @@ export const pxToIn = (px: number) => Math.round((px / 96) * 1000) / 1000;
 function esc(s: string): string {
   if (!s) return "";
   return s
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -204,7 +205,7 @@ function isBlockElement(node: Node): boolean {
   return [
     "p", "div", "h1", "h2", "h3", "h4", "h5", "h6",
     "ul", "ol", "li", "table", "tr", "tbody", "thead",
-    "tfoot", "blockquote", "section", "hr"
+    "tfoot", "blockquote", "section", "article", "aside", "header", "footer", "hr"
   ].includes(tag);
 }
 
@@ -311,22 +312,21 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
       
       const escaped = esc(text);
       let rPr = "";
-      if (state.bold) rPr += "<w:b/>";
-      if (state.italic) rPr += "<w:i/>";
-      if (state.underline) rPr += '<w:u w:val="single"/>';
-      if (state.strike) rPr += "<w:strike/>";
-      
       if (state.fontFamily) {
         rPr += `<w:rFonts w:ascii="${esc(state.fontFamily)}" w:hAnsi="${esc(state.fontFamily)}"/>`;
+      }
+      if (state.bold) rPr += "<w:b/>";
+      if (state.italic) rPr += "<w:i/>";
+      if (state.strike) rPr += "<w:strike/>";
+      if (state.color) {
+        const hex = parseColorToHex(state.color);
+        if (hex) rPr += `<w:color w:val="${hex}"/>`;
       }
       if (state.fontSize) {
         const val = parseFontSize(state.fontSize);
         if (val) rPr += `<w:sz w:val="${val}"/>`;
       }
-      if (state.color) {
-        const hex = parseColorToHex(state.color);
-        if (hex) rPr += `<w:color w:val="${hex}"/>`;
-      }
+      if (state.underline) rPr += '<w:u w:val="single"/>';
       if (state.bg) {
         const hex = parseColorToHex(state.bg);
         if (hex) rPr += `<w:shd w:val="clear" w:color="auto" w:fill="${hex}"/>`;
@@ -382,35 +382,35 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         else if (tag === "h2") pPr += '<w:pStyle w:val="Heading2"/>';
         else if (tag === "h3") pPr += '<w:pStyle w:val="Heading3"/>';
         else if (tag === "h4") pPr += '<w:pStyle w:val="Heading4"/>';
-        
-        const align = styles["text-align"] || el.getAttribute("align");
-        if (align) {
-          const wAlign = align === "justify" ? "both" : align;
-          pPr += `<w:jc w:val="${esc(wAlign)}"/>`;
-        }
-        
-        const marginLeft = styles["margin-left"] || styles["padding-left"];
-        if (marginLeft) {
-          const px = parsePxVal(marginLeft);
-          if (px !== null) pPr += `<w:ind w:left="${Math.round(px * 15)}"/>`;
-        }
-        
+
         const mt = styles["margin-top"];
         const mb = styles["margin-bottom"];
         const lh = styles["line-height"];
-        let spacing = "";
-        if (mt) spacing += ` w:before="${Math.round((parsePxVal(mt) ?? 0) * 15)}"`;
-        if (mb) spacing += ` w:after="${Math.round((parsePxVal(mb) ?? 0) * 15)}"`;
+        let spAttrs = "";
+        if (mt) spAttrs += ` w:before="${Math.round((parsePxVal(mt) ?? 0) * 15)}"`;
+        if (mb) spAttrs += ` w:after="${Math.round((parsePxVal(mb) ?? 0) * 15)}"`;
         if (lh) {
           const lhVal = parseFloat(lh);
           if (!isNaN(lhVal)) {
             const lineTwips = lh.endsWith("px") || lh.endsWith("pt") 
               ? Math.round((parsePxVal(lh) ?? 16) * 15) 
               : Math.round(lhVal * 240);
-            spacing += ` w:line="${lineTwips}" w:lineRule="auto"`;
+            spAttrs += ` w:line="${lineTwips}" w:lineRule="auto"`;
           }
         }
-        if (spacing) pPr += `<w:spacing${spacing}/>`;
+        if (spAttrs) pPr += `<w:spacing${spAttrs}/>`;
+
+        const marginLeft = styles["margin-left"] || styles["padding-left"];
+        if (marginLeft) {
+          const px = parsePxVal(marginLeft);
+          if (px !== null) pPr += `<w:ind w:left="${Math.round(px * 15)}"/>`;
+        }
+
+        const align = styles["text-align"] || el.getAttribute("align");
+        if (align) {
+          const wAlign = align === "justify" ? "both" : align;
+          pPr += `<w:jc w:val="${esc(wAlign)}"/>`;
+        }
         
         xml += "<w:p>";
         if (pPr) xml += `<w:pPr>${pPr}</w:pPr>`;
@@ -421,6 +421,74 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         
         xml += "</w:p>";
         return xml;
+      }
+
+      if (tag === "div" || tag === "blockquote" || tag === "section" || tag === "article" || tag === "header" || tag === "footer") {
+        const hasBlockChildren = Array.from(el.childNodes).some((child) => isBlockElement(child));
+        if (!hasBlockChildren) {
+          let pPr = "";
+          const mt = styles["margin-top"];
+          const mb = styles["margin-bottom"];
+          const lh = styles["line-height"];
+          let spAttrs = "";
+          if (mt) spAttrs += ` w:before="${Math.round((parsePxVal(mt) ?? 0) * 15)}"`;
+          if (mb) spAttrs += ` w:after="${Math.round((parsePxVal(mb) ?? 0) * 15)}"`;
+          if (lh) {
+            const lhVal = parseFloat(lh);
+            if (!isNaN(lhVal)) {
+              const lineTwips = lh.endsWith("px") || lh.endsWith("pt") 
+                ? Math.round((parsePxVal(lh) ?? 16) * 15) 
+                : Math.round(lhVal * 240);
+              spAttrs += ` w:line="${lineTwips}" w:lineRule="auto"`;
+            }
+          }
+          if (spAttrs) pPr += `<w:spacing${spAttrs}/>`;
+
+          const marginLeft = styles["margin-left"] || styles["padding-left"] || (tag === "blockquote" ? "36pt" : null);
+          if (marginLeft) {
+            const px = parsePxVal(marginLeft);
+            if (px !== null) pPr += `<w:ind w:left="${Math.round(px * 15)}"/>`;
+          }
+
+          const align = styles["text-align"] || el.getAttribute("align");
+          if (align) {
+            const wAlign = align === "justify" ? "both" : align;
+            pPr += `<w:jc w:val="${esc(wAlign)}"/>`;
+          }
+
+          let innerXml = "";
+          Array.from(el.childNodes).forEach((child) => {
+            innerXml += walk(child, newState);
+          });
+
+          return `<w:p>${pPr ? `<w:pPr>${pPr}</w:pPr>` : ""}${innerXml}</w:p>`;
+        } else {
+          let containerXml = "";
+          let inlineBuffer: Node[] = [];
+          const flushBuffer = () => {
+            if (inlineBuffer.length === 0) return;
+            let pInner = "";
+            inlineBuffer.forEach((c) => { pInner += walk(c, newState); });
+            if (pInner.trim()) {
+              containerXml += `<w:p>${pInner}</w:p>`;
+            }
+            inlineBuffer = [];
+          };
+          Array.from(el.childNodes).forEach((child) => {
+            if (isBlockElement(child)) {
+              flushBuffer();
+              containerXml += walk(child, newState);
+            } else {
+              inlineBuffer.push(child);
+            }
+          });
+          flushBuffer();
+          return containerXml;
+        }
+      }
+
+      if (tag === "hr") {
+        return '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="CCCCCC"/></w:pBdr></w:pPr></w:p>';
       }
       
       if (tag === "ul" || tag === "ol") {
@@ -790,7 +858,10 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
       
       const cellContentWidth = cell.widthPx * cell.colSpan;
       const cellHtml = td.innerHTML;
-      const cellOOXML = parseHtmlToOOXML(cellHtml, { cw: cellContentWidth, partRels: state.partRels }, ctx);
+      let cellOOXML = parseHtmlToOOXML(cellHtml, { cw: cellContentWidth, partRels: state.partRels }, ctx);
+      if (!cellOOXML.trim() || !cellOOXML.endsWith("</w:p>")) {
+        cellOOXML += "<w:p/>";
+      }
       
       cellsXml += `<w:tc><w:tcPr>${tcPr}</w:tcPr>${cellOOXML}</w:tc>`;
     }
@@ -1027,10 +1098,14 @@ export async function generateWordDocx(
     { id: "rIdSettings", type: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings", target: "settings.xml" },
   ];
 
+  const firstSecId = model.sections[0]?.id || "s1";
+  const knownSectionIds = new Set(model.sections.map((s) => s.id));
+
   const sectionPagesMap: Record<string, typeof model.pages> = {};
   model.pages.forEach((page) => {
-    if (!sectionPagesMap[page.sectionId]) sectionPagesMap[page.sectionId] = [];
-    sectionPagesMap[page.sectionId].push(page);
+    const secId = knownSectionIds.has(page.sectionId) ? page.sectionId : firstSecId;
+    if (!sectionPagesMap[secId]) sectionPagesMap[secId] = [];
+    sectionPagesMap[secId].push(page);
   });
 
   const sectionHFRels = model.sections.map((sec) => {
@@ -1158,7 +1233,6 @@ export async function generateWordDocx(
     if (sec.differentFirstPage) {
       if (hfRel.firstHeader) hfRefs += `<w:headerReference w:type="first" r:id="${hfRel.firstHeader}"/>`;
       if (hfRel.firstFooter) hfRefs += `<w:footerReference w:type="first" r:id="${hfRel.firstFooter}"/>`;
-      hfRefs += "<w:titlePg/>";
     }
     if (sec.differentOddEven) {
       if (hfRel.evenHeader) hfRefs += `<w:headerReference w:type="even" r:id="${hfRel.evenHeader}"/>`;
@@ -1168,20 +1242,24 @@ export async function generateWordDocx(
     const paperSizeName = sec.paperSizeConfig?.name ?? sec.paperSize?.name;
     const paperCode = getPaperSizeCode(paperSizeName);
     const pgSzXml = `<w:pgSz w:w="${Math.round(paperW * 15)}" w:h="${Math.round(paperH * 15)}" w:orient="${sec.orientation === "landscape" ? "landscape" : "portrait"}"${paperCode ? ` w:code="${paperCode}"` : ""}/>`;
+    const pgMarXml = `<w:pgMar w:top="${Math.round(mg.top * 15)}" w:bottom="${Math.round(mg.bottom * 15)}" w:left="${Math.round(mg.left * 15)}" w:right="${Math.round(mg.right * 15)}" w:header="${Math.round(hDist * 15)}" w:footer="${Math.round(fDist * 15)}" w:gutter="0"/>`;
+    const pgBordersXml = buildPgBordersXml(sec);
+    const titlePgXml = sec.differentFirstPage ? "<w:titlePg/>" : "";
 
     const sectPrXml = `<w:sectPr>
       ${hfRefs}
       ${pgSzXml}
-      <w:pgMar w:top="${Math.round(mg.top * 15)}" w:bottom="${Math.round(mg.bottom * 15)}" w:left="${Math.round(mg.left * 15)}" w:right="${Math.round(mg.right * 15)}" w:header="${Math.round(hDist * 15)}" w:footer="${Math.round(fDist * 15)}" w:gutter="0"/>
+      ${pgMarXml}
+      ${pgBordersXml}
       ${pgNumTypeXml}
-      ${buildPgBordersXml(sec)}
+      ${titlePgXml}
     </w:sectPr>`;
     
     const isLastSection = idx === model.sections.length - 1;
     if (isLastSection) {
-      bodyXml += `${sectionBodyXml}\n<w:sectPr>${sectPrXml}</w:sectPr>`;
+      bodyXml += `${sectionBodyXml}\n${sectPrXml}`;
     } else {
-      bodyXml += `${sectionBodyXml}\n<w:p><w:pPr><w:sectPr>${sectPrXml}</w:sectPr></w:pPr></w:p>\n`;
+      bodyXml += `${sectionBodyXml}\n<w:p><w:pPr>${sectPrXml}</w:pPr></w:p>\n`;
     }
   });
 
@@ -1219,6 +1297,7 @@ export async function generateWordDocx(
       <w:rPr>
         <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
         <w:sz w:val="22"/>
+        <w:szCs w:val="22"/>
         <w:lang w:val="en-US"/>
       </w:rPr>
     </w:rPrDefault>
@@ -1228,6 +1307,19 @@ export async function generateWordDocx(
       </w:pPr>
     </w:pPrDefault>
   </w:docDefaults>
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:qFormat/>
+    <w:pPr>
+      <w:spacing w:after="120" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
+      <w:sz w:val="22"/>
+      <w:szCs w:val="22"/>
+      <w:lang w:val="en-US"/>
+    </w:rPr>
+  </w:style>
   <w:style w:type="paragraph" w:styleId="Heading1" w:customStyle="1">
     <w:name w:val="heading 1"/>
     <w:basedOn w:val="Normal"/>
@@ -1238,8 +1330,8 @@ export async function generateWordDocx(
     <w:rPr>
       <w:rFonts w:ascii="Calibri Light" w:hAnsi="Calibri Light"/>
       <w:b/>
-      <w:sz w:val="40"/>
       <w:color w:val="2E74B5"/>
+      <w:sz w:val="40"/>
     </w:rPr>
   </w:style>
   <w:style w:type="paragraph" w:styleId="Heading2" w:customStyle="1">
@@ -1252,8 +1344,8 @@ export async function generateWordDocx(
     <w:rPr>
       <w:rFonts w:ascii="Calibri Light" w:hAnsi="Calibri Light"/>
       <w:b/>
-      <w:sz w:val="32"/>
       <w:color w:val="2E74B5"/>
+      <w:sz w:val="32"/>
     </w:rPr>
   </w:style>
   <w:style w:type="paragraph" w:styleId="Heading3" w:customStyle="1">
@@ -1266,8 +1358,8 @@ export async function generateWordDocx(
     <w:rPr>
       <w:rFonts w:ascii="Calibri Light" w:hAnsi="Calibri Light"/>
       <w:b/>
-      <w:sz w:val="28"/>
       <w:color w:val="1F497D"/>
+      <w:sz w:val="28"/>
     </w:rPr>
   </w:style>
   <w:style w:type="paragraph" w:styleId="Heading4" w:customStyle="1">
@@ -1280,8 +1372,8 @@ export async function generateWordDocx(
     <w:rPr>
       <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
       <w:b/>
-      <w:sz w:val="24"/>
       <w:color w:val="1F497D"/>
+      <w:sz w:val="24"/>
     </w:rPr>
   </w:style>
   <w:style w:type="paragraph" w:styleId="ListParagraph" w:customStyle="1">

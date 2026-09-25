@@ -111,22 +111,75 @@ export function focusPageInDom(pageId: string, position: "start" | "end" = "star
     const range = document.createRange();
 
     if (position === "start") {
-      const target = editable.firstElementChild || editable.firstChild || editable;
-      range.selectNodeContents(target);
-      range.collapse(true);
+      let firstTarget: Node = editable.firstElementChild || editable.firstChild || editable;
+      while (firstTarget.firstChild && firstTarget.nodeType !== Node.TEXT_NODE) {
+        firstTarget = firstTarget.firstChild;
+      }
+      if (firstTarget.nodeType === Node.TEXT_NODE) {
+        range.setStart(firstTarget, 0);
+        range.collapse(true);
+      } else {
+        range.selectNodeContents(firstTarget);
+        range.collapse(true);
+      }
     } else {
-      const target = editable.lastElementChild || editable.lastChild || editable;
-      range.selectNodeContents(target);
-      range.collapse(false);
+      let lastTarget: Node = editable.lastElementChild || editable.lastChild || editable;
+      while (lastTarget.lastChild && lastTarget.nodeType !== Node.TEXT_NODE) {
+        lastTarget = lastTarget.lastChild;
+      }
+      if (lastTarget.nodeType === Node.TEXT_NODE) {
+        range.setStart(lastTarget, lastTarget.textContent?.length ?? 0);
+        range.collapse(true);
+      } else {
+        range.selectNodeContents(lastTarget);
+        range.collapse(false);
+      }
     }
 
     sel.removeAllRanges();
     sel.addRange(range);
   } catch {
-    // ignore
+    // fallback
   }
 
   section?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function cleanChartMountsForHtml(html: string): string {
+  if (
+    !html ||
+    (!html.includes("editor-chart-mount") &&
+      !html.includes("editor-smartart-mount") &&
+      !html.includes("editor-picture-mount") &&
+      !html.includes("editor-icon-mount") &&
+      !html.includes("editor-shape-mount"))
+  )
+    return html;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<body>${html}</body>`, "text/html");
+    const mounts = doc.querySelectorAll(
+      ".editor-chart-mount, .editor-smartart-mount, .editor-picture-mount, .editor-icon-mount, .editor-shape-mount"
+    );
+    if (mounts.length === 0) return html;
+    mounts.forEach((m) => {
+      m.innerHTML = "";
+    });
+    return doc.body.innerHTML;
+  } catch {
+    return html;
+  }
+}
+
+export interface PageBreakHistoryData {
+  sourcePageId: string;
+  targetPageId: string;
+  isNewPage: boolean;
+  sourceHtmlBefore: string;
+  sourceHtmlAfter: string;
+  targetHtmlBefore: string;
+  targetHtmlAfter: string;
+  caretOffsetBefore: number;
 }
 
 export interface HistorySnapshot {
@@ -134,6 +187,8 @@ export interface HistorySnapshot {
   html: string;
   caretOffset: number;
   label?: string;
+  actionType?: "edit" | "page-break";
+  pageBreakData?: PageBreakHistoryData;
 }
 
 export function extractPlainText(html: string): string {
@@ -826,12 +881,12 @@ export function EditorProvider({
   );
 
   const insertPageBreak = useCallback(() => {
+    // 1. Locate current contenteditable page and caret range
     restoreEditorSelection();
-    const sel = window.getSelection();
+    let sel = window.getSelection();
     let pageEl: HTMLElement | null = null;
     let range: Range | null = null;
 
-    // 1. Locate current contenteditable page and range
     if (sel && sel.rangeCount > 0) {
       const r = sel.getRangeAt(0);
       const anc = r.commonAncestorContainer;
@@ -848,7 +903,13 @@ export function EditorProvider({
       const found = document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${saved.pageId}"]`);
       if (found) {
         pageEl = found;
-        range = saved.range.cloneRange();
+        if (found.contains(saved.startContainer) && found.contains(saved.endContainer)) {
+          range = document.createRange();
+          range.setStart(saved.startContainer, saved.startOffset);
+          range.setEnd(saved.endContainer, saved.endOffset);
+        } else {
+          range = saved.range.cloneRange();
+        }
       }
     }
 
@@ -878,21 +939,14 @@ export function EditorProvider({
       range.collapse(false);
     }
 
-    // Delete any selected text
+    // Capture state BEFORE modifications for Undo
+    const sourceHtmlBefore = cleanChartMountsForHtml(pageEl.innerHTML);
+    const caretOffsetBefore = getCaretCharacterOffsetWithin(pageEl);
+
+    // If user has selected text, delete it first (standard Word behavior)
     if (!range.collapsed) {
       range.deleteContents();
     }
-
-    // Build the visual page-break element for current page
-    const pageBreakEl = document.createElement("div");
-    pageBreakEl.className = "page-break";
-    pageBreakEl.contentEditable = "false";
-    pageBreakEl.setAttribute("data-page-break", "true");
-    pageBreakEl.setAttribute(
-      "style",
-      "page-break-after: always; break-after: page; border-top: 1px dashed #94a3b8; margin: 16px 0; text-align: center; color: #94a3b8; font-size: 10pt; user-select: none;"
-    );
-    pageBreakEl.textContent = "— Page Break —";
 
     let trailingHtml = "";
 
@@ -927,13 +981,10 @@ export function EditorProvider({
         const nextDiv = document.createElement("div");
         nextDiv.appendChild(newTable);
         afterTableNodes.forEach((n) => nextDiv.appendChild(n));
-
         trailingHtml = nextDiv.innerHTML.trim();
 
-        if (table.nextSibling) {
-          pageEl.insertBefore(pageBreakEl, table.nextSibling);
-        } else {
-          pageEl.appendChild(pageBreakEl);
+        if (table.rows.length === 0) {
+          table.remove();
         }
       }
     } else {
@@ -949,10 +1000,9 @@ export function EditorProvider({
       const fragment = splitRange.extractContents();
       const tempDiv = document.createElement("div");
       tempDiv.appendChild(fragment);
-
       trailingHtml = tempDiv.innerHTML.trim();
 
-      // Find top block containing cursor
+      // Clean up empty remnant shell on source page if cursor was at start of block
       let cursorBlock: Node | null = range.endContainer;
       while (cursorBlock && cursorBlock.parentNode !== pageEl) {
         cursorBlock = cursorBlock.parentNode;
@@ -962,51 +1012,57 @@ export function EditorProvider({
         const isBlockEmpty =
           cursorBlock.nodeType === Node.ELEMENT_NODE &&
           (cursorBlock as HTMLElement).textContent?.trim() === "" &&
-          !(cursorBlock as HTMLElement).querySelector("table, img, video, iframe");
+          !(cursorBlock as HTMLElement).querySelector("table, img, video, iframe, [data-editor-ui]");
 
         if (isBlockEmpty && pageEl.children.length > 1) {
-          pageEl.replaceChild(pageBreakEl, cursorBlock);
-        } else {
-          if (cursorBlock.nextSibling) {
-            pageEl.insertBefore(pageBreakEl, cursorBlock.nextSibling);
-          } else {
-            pageEl.appendChild(pageBreakEl);
-          }
+          cursorBlock.parentNode.removeChild(cursorBlock);
         }
-      } else {
-        pageEl.appendChild(pageBreakEl);
       }
     }
 
-    // Ensure content exists before the page break
-    if (pageEl.firstChild === pageBreakEl) {
-      const emptyP = document.createElement("p");
-      emptyP.innerHTML = "<br/>";
-      pageEl.insertBefore(emptyP, pageBreakEl);
+    // Ensure source page has valid content
+    const cleanedSourceHtml = cleanChartMountsForHtml(pageEl.innerHTML.trim());
+    const remainingHtml = cleanedSourceHtml || "<p><br/></p>";
+    if (pageEl.children.length === 0 || !pageEl.textContent?.trim()) {
+      pageEl.innerHTML = remainingHtml;
     }
 
+    // Normalize trailingHtml for the new page
     if (
       !trailingHtml ||
       trailingHtml === "<br>" ||
       trailingHtml === "<br/>" ||
       trailingHtml === "<p></p>" ||
       trailingHtml === "<p><br></p>" ||
-      trailingHtml === "<p><br/></p>"
+      trailingHtml === "<p><br/></p>" ||
+      trailingHtml === "<p><br data-mce-bogus=\"1\"></p>"
     ) {
       trailingHtml = "<p><br/></p>";
+    } else if (
+      !/^<(?:\/?[a-z]+)[^>]*>/i.test(trailingHtml.trim()) ||
+      (!trailingHtml.trim().startsWith("<p") &&
+       !trailingHtml.trim().startsWith("<div") &&
+       !trailingHtml.trim().startsWith("<h") &&
+       !trailingHtml.trim().startsWith("<table") &&
+       !trailingHtml.trim().startsWith("<ul") &&
+       !trailingHtml.trim().startsWith("<ol") &&
+       !trailingHtml.trim().startsWith("<blockquote"))
+    ) {
+      trailingHtml = `<p>${trailingHtml}</p>`;
     }
 
-    const remainingHtml = pageEl.innerHTML.trim() || "<p><br/></p>";
-
-    // Update document model and distribute trailingHtml to next page
     if (docModel && currentPageId) {
+      // 1. Update source page HTML
       docModel.setPageHtml(currentPageId, remainingHtml);
 
+      // 2. Check if a trailing blank page can be reused, or create new page
       const pages = docModel.model.pages;
       const currentIdx = pages.findIndex((p) => p.id === currentPageId);
       const nextPage = currentIdx >= 0 && currentIdx + 1 < pages.length ? pages[currentIdx + 1] : null;
 
       let targetPageId = "";
+      let isNewPage = false;
+      let targetHtmlBefore = "";
 
       if (nextPage) {
         const nextHtml = (docModel.model.pageHtml[nextPage.id] || "").trim();
@@ -1018,29 +1074,63 @@ export function EditorProvider({
           nextHtml === "<p><br data-mce-bogus=\"1\"></p>";
 
         if (isNextBlank) {
+          targetHtmlBefore = nextHtml;
           docModel.setPageHtml(nextPage.id, trailingHtml);
           targetPageId = nextPage.id;
+          isNewPage = false;
         } else {
           targetPageId = docModel.addPage(currentPageId, trailingHtml);
+          isNewPage = true;
         }
       } else {
         targetPageId = docModel.addPage(currentPageId, trailingHtml);
+        isNewPage = true;
       }
 
+      // 3. Set active page to target page
       docModel.setActivePage(targetPageId);
 
-      recordSnapshot(currentPageId, remainingHtml, undefined, "Insert Page Break");
-      if (targetPageId) {
-        recordSnapshot(targetPageId, trailingHtml, 0, "Insert Page Break");
+      // 4. Record snapshot with structural pageBreakData for clean Undo/Redo
+      if (isUndoingRedoingRef.current === false) {
+        const stack = historyStackRef.current;
+        const idx = historyIndexRef.current;
+        const newStack = idx >= 0 ? stack.slice(0, idx + 1) : [];
+
+        newStack.push({
+          pageId: targetPageId,
+          html: trailingHtml,
+          caretOffset: 0,
+          label: "Insert Page Break",
+          actionType: "page-break",
+          pageBreakData: {
+            sourcePageId: currentPageId,
+            targetPageId,
+            isNewPage,
+            sourceHtmlBefore,
+            sourceHtmlAfter: remainingHtml,
+            targetHtmlBefore,
+            targetHtmlAfter: trailingHtml,
+            caretOffsetBefore,
+          },
+        });
+
+        if (newStack.length > 2000) newStack.shift();
+        historyStackRef.current = newStack;
+        historyIndexRef.current = newStack.length - 1;
+        setHistoryVersion((v) => v + 1);
       }
 
+      // 5. Trigger input event on source page container
       pageEl.dispatchEvent(new Event("input", { bubbles: true }));
 
-      setTimeout(() => {
+      // 6. Focus the start of the target page
+      const focusTarget = () => {
         focusPageInDom(targetPageId, "start");
-      }, 50);
+      };
+      setTimeout(focusTarget, 30);
+      setTimeout(focusTarget, 100);
     }
-  }, [restoreEditorSelection, docModel, editorRef, recordSnapshot]);
+  }, [restoreEditorSelection, docModel, editorRef]);
 
   /**
    * ============================================================================
@@ -1460,6 +1550,44 @@ export function EditorProvider({
       return;
     }
 
+    // Check if the current action being undone is a page-break
+    const currentAction = stack[idx];
+    if (currentAction?.actionType === "page-break" && currentAction.pageBreakData) {
+      const data = currentAction.pageBreakData;
+      const targetIdx = Math.max(0, idx - count);
+      historyIndexRef.current = targetIdx;
+      setHistoryVersion((v) => v + 1);
+      isUndoingRedoingRef.current = true;
+
+      if (docModel) {
+        docModel.setPageHtml(data.sourcePageId, data.sourceHtmlBefore);
+        if (data.isNewPage) {
+          docModel.removePage(data.targetPageId);
+        } else {
+          docModel.setPageHtml(data.targetPageId, data.targetHtmlBefore || "<p><br/></p>");
+        }
+        docModel.setActivePage(data.sourcePageId);
+
+        setTimeout(() => {
+          const sourceEl = document.querySelector<HTMLDivElement>(
+            `[contenteditable="true"][data-page-id="${data.sourcePageId}"]`
+          );
+          if (sourceEl) {
+            sourceEl.innerHTML = data.sourceHtmlBefore;
+            setCaretCharacterOffsetWithin(sourceEl, data.caretOffsetBefore);
+          }
+          focusPageInDom(data.sourcePageId, "start");
+          setTimeout(() => {
+            if (sourceEl) setCaretCharacterOffsetWithin(sourceEl, data.caretOffsetBefore);
+            isUndoingRedoingRef.current = false;
+          }, 40);
+        }, 40);
+      } else {
+        isUndoingRedoingRef.current = false;
+      }
+      return;
+    }
+
     const targetIdx = Math.max(0, idx - count);
     historyIndexRef.current = targetIdx;
     setHistoryVersion((v) => v + 1);
@@ -1505,6 +1633,39 @@ export function EditorProvider({
     }
 
     const targetIdx = Math.min(stack.length - 1, idx + count);
+    const targetAction = stack[targetIdx];
+    if (!targetAction) return;
+
+    if (targetAction.actionType === "page-break" && targetAction.pageBreakData) {
+      const data = targetAction.pageBreakData;
+      historyIndexRef.current = targetIdx;
+      setHistoryVersion((v) => v + 1);
+      isUndoingRedoingRef.current = true;
+
+      if (docModel) {
+        docModel.setPageHtml(data.sourcePageId, data.sourceHtmlAfter);
+
+        let finalTargetId = data.targetPageId;
+        if (data.isNewPage) {
+          finalTargetId = docModel.addPage(data.sourcePageId, data.targetHtmlAfter);
+          data.targetPageId = finalTargetId;
+          targetAction.pageId = finalTargetId;
+        } else {
+          docModel.setPageHtml(data.targetPageId, data.targetHtmlAfter);
+        }
+
+        docModel.setActivePage(finalTargetId);
+
+        setTimeout(() => {
+          focusPageInDom(finalTargetId, "start");
+          isUndoingRedoingRef.current = false;
+        }, 50);
+      } else {
+        isUndoingRedoingRef.current = false;
+      }
+      return;
+    }
+
     historyIndexRef.current = targetIdx;
     setHistoryVersion((v) => v + 1);
     const snapshot = stack[targetIdx];
