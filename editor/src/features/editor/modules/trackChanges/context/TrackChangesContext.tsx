@@ -31,10 +31,7 @@ import {
   DEFAULT_AUTHOR,
 } from "../constants";
 import {
-  escapeAttr,
-  escapeHtml,
   isInsideTcElement,
-  getClosestTcElement,
   generateChangeId,
   getHumanReadableChangeLabel,
 } from "../utils";
