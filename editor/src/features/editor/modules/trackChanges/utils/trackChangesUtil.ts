@@ -58,18 +58,38 @@ export function getHumanReadableChangeLabel(
 }
 
 /**
+ * Checks whether a DOM node or caret is strictly contained inside an element matching the selector (e.g. 'ins[data-tc]', 'del[data-tc]').
+ */
+export function isInsideTcElement(node: Node | null, selector: string = "[data-tc]"): HTMLElement | null {
+  if (!node) return null;
+  if (node.nodeType === Node.TEXT_NODE) {
+    return (node.parentElement?.closest(selector) as HTMLElement | null) ?? null;
+  }
+  if (node instanceof Element) {
+    return (node.closest(selector) as HTMLElement | null) ?? null;
+  }
+  return null;
+}
+
+/**
  * Helper to locate the closest tracked change DOM node relative to a start container and offset.
  */
-export function getClosestTcElement(node: Node, offset: number, selector: string): HTMLElement | null {
-  let target: Node | null = node;
-  if (node.nodeType === Node.ELEMENT_NODE && node.childNodes.length > 0) {
-    const idx = Math.max(0, Math.min(offset, node.childNodes.length - 1));
-    target = node.childNodes[idx];
+export function getClosestTcElement(node: Node | null, offset: number, selector: string = "[data-tc]"): HTMLElement | null {
+  if (!node) return null;
+  if (node.nodeType === Node.TEXT_NODE) {
+    return (node.parentElement?.closest(selector) as HTMLElement | null) ?? null;
   }
-  if (target && target.nodeType === Node.TEXT_NODE) {
-    target = target.parentNode;
+  if (node instanceof Element) {
+    if (node.matches(selector)) return node as HTMLElement;
+    const parentMatch = node.closest(selector);
+    if (parentMatch) return parentMatch as HTMLElement;
+    if (node.childNodes && offset >= 0 && offset < node.childNodes.length) {
+      const child = node.childNodes[offset];
+      if (child instanceof Element && child.matches(selector)) return child as HTMLElement;
+      if (child.nodeType === Node.TEXT_NODE) return (child.parentElement?.closest(selector) as HTMLElement | null) ?? null;
+    }
   }
-  return target instanceof Element ? (target.closest(selector) as HTMLElement | null) : null;
+  return null;
 }
 
 /**
@@ -78,3 +98,4 @@ export function getClosestTcElement(node: Node, offset: number, selector: string
 export function generateChangeId(prefix = "tc"): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
 }
+

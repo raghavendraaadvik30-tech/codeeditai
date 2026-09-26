@@ -135,7 +135,7 @@ export default function LeftOverlay() {
     PANEL_ICONS[panelKey] ?? FileText;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white dark:bg-[#07131E]">
+    <div className="flex h-full min-h-0 flex-col bg-white text-slate-900 dark:bg-[#07131E] dark:text-slate-100">
 
       {/* HEADER */}
 
@@ -148,8 +148,10 @@ export default function LeftOverlay() {
           justify-between
           border-b
           border-slate-200
+          bg-white
           px-5
           dark:border-slate-800
+          dark:bg-[#07131E]
         "
       >
         {/* TITLE + ICON */}
@@ -214,6 +216,7 @@ export default function LeftOverlay() {
             transition-colors
             hover:bg-slate-100
             hover:text-slate-900
+            dark:text-slate-400
             dark:hover:bg-slate-800
             dark:hover:text-white
           "
