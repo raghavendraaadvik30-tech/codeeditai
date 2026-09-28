@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
-import { DocumentPictureRenderer, type CanvasPicture } from "./DocumentPictureRenderer";
+import { DocumentPictureRenderer } from "./DocumentPictureRenderer";
+import type { CanvasPicture, PictureMountInfo, PictureInsertEventDetail } from "../types";
+import { extractPictureTitle, generatePictureHTML } from "../utils";
+import { PICTURE_INSERT_EVENT } from "../constants";
 
-interface PictureMountInfo {
-  id: string;
-  figureEl: HTMLElement;
-  mountEl: HTMLElement;
-  config: CanvasPicture;
-}
+export type { PictureMountInfo };
 
 export const PictureHydration: React.FC = () => {
   const [mounts, setMounts] = useState<PictureMountInfo[]>([]);
@@ -101,17 +99,8 @@ export const PictureHydration: React.FC = () => {
               (e.target as HTMLElement).style.borderBottomColor = "transparent";
             };
 
-            let titleText = img.alt?.trim();
-            if (!titleText || titleText === "Picture" || titleText === "Image") {
-              const src = img.src || "";
-              if (!src.startsWith("data:")) {
-                const match = src.match(/\/([^\/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
-                if (match && match[1]) {
-                  titleText = decodeURIComponent(match[1]).replace(/[-_]/g, " ");
-                }
-              }
-            }
-            figcaption.textContent = titleText || "Picture";
+            const titleText = extractPictureTitle(img.src || "", img.alt?.trim());
+            figcaption.textContent = titleText;
             fig.appendChild(figcaption);
           }
         }
@@ -240,6 +229,40 @@ export const PictureHydration: React.FC = () => {
     };
   }, [scanDocumentForPictures]);
 
+  // Ensure pf-insert-picture events are inserted into the editor document even if PicturesSection is unmounted
+  useEffect(() => {
+    const handleInsertPictureFallback = (event: Event) => {
+      if ((window as unknown as { __hasPicturesSection?: boolean }).__hasPicturesSection) {
+        return; // PicturesSection is actively handling this event; do not duplicate
+      }
+      const customEvent = event as CustomEvent<PictureInsertEventDetail>;
+      if (!customEvent.detail) return;
+      if (customEvent.detail.mode !== "titleOnly" && !customEvent.detail.src) return;
+
+      const { src, name, mode, caption } = customEvent.detail;
+      const html = generatePictureHTML({
+        src: src || "",
+        name: name || "Image",
+        mode: mode || "withTitle",
+        caption,
+      });
+
+      const activeEl = document.activeElement;
+      const editable = (activeEl?.closest('[contenteditable="true"]') ||
+        document.querySelector('[contenteditable="true"]')) as HTMLElement | null;
+
+      if (editable) {
+        editable.focus();
+        document.execCommand("insertHTML", false, html);
+      }
+    };
+
+    window.addEventListener(PICTURE_INSERT_EVENT, handleInsertPictureFallback);
+    return () => {
+      window.removeEventListener(PICTURE_INSERT_EVENT, handleInsertPictureFallback);
+    };
+  }, []);
+
   return (
     <>
       {mounts.map((m) =>
@@ -251,4 +274,3 @@ export const PictureHydration: React.FC = () => {
     </>
   );
 };
-

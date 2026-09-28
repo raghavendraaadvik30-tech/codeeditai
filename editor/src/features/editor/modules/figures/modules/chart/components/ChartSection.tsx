@@ -12,10 +12,38 @@ import { createDefaultChartModel, generateChartHTML } from '@/features/editor/mo
 import { InsertChartModal } from './InsertChartModal';
 
 export const ChartSection: React.FC = () => {
-  const { insertHTML } = useEditor();
+  const { insertHTML, restoreEditorSelection, getEditorSelection } = useEditor();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const savedRangeRef = React.useRef<Range | null>(null);
+
+  const captureSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      try {
+        savedRangeRef.current = sel.getRangeAt(0).cloneRange();
+        return;
+      } catch {
+        // ignore
+      }
+    }
+    savedRangeRef.current = getEditorSelection?.() || null;
+  };
 
   const handleInsertChart = (type: ChartType) => {
+    if (savedRangeRef.current) {
+      try {
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(savedRangeRef.current);
+        }
+      } catch {
+        restoreEditorSelection?.();
+      }
+    } else {
+      restoreEditorSelection?.();
+    }
+
     const chartModel = createDefaultChartModel(type);
     const html = generateChartHTML(chartModel);
     insertHTML(html);
@@ -45,6 +73,7 @@ export const ChartSection: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
+                onPointerDown={captureSelection}
                 className="flex items-center gap-1.5 rounded-md bg-[#0078d4] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#005a9e] focus:outline-none"
               >
                 <span>Insert</span>
@@ -54,7 +83,10 @@ export const ChartSection: React.FC = () => {
 
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => {
+                  captureSelection();
+                  setIsModalOpen(true);
+                }}
                 className="cursor-pointer font-medium"
               >
                 <BarChart2 className="mr-2 h-4 w-4 text-blue-600" />

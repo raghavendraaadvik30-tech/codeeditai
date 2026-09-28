@@ -4,7 +4,6 @@ import {
   Trash2,
   FileSpreadsheet,
   Palette,
-  LayoutGrid,
   Table,
 } from 'lucide-react';
 
@@ -16,7 +15,7 @@ export interface ChartContextMenuProps {
   onDelete: () => void;
   onSelectData: () => void;
   onChangeColors: () => void;
-  onChartStyle: () => void;
+  onChartStyle?: () => void;
   onToggleEditData: () => void;
   onChangeType?: () => void;
   onSwitchRowColumn?: () => void;
@@ -31,7 +30,6 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
   onDelete,
   onSelectData,
   onChangeColors,
-  onChartStyle,
   onToggleEditData,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -88,14 +86,6 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
       icon: <Palette className="w-4 h-4 text-emerald-600" />,
       action: () => {
         onChangeColors();
-        onClose();
-      },
-    },
-    {
-      label: 'Chart Style',
-      icon: <LayoutGrid className="w-4 h-4 text-indigo-600" />,
-      action: () => {
-        onChartStyle();
         onClose();
       },
     },

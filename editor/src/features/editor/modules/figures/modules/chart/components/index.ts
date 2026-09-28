@@ -9,3 +9,4 @@ export * from './ChartStyleModal';
 export * from './DocumentChartRenderer';
 export * from './InsertChartModal';
 export * from './SelectDataModal';
+export * from './ChartLayoutOptions';

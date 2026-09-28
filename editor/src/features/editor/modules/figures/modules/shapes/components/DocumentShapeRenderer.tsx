@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Trash2, RotateCw } from "lucide-react";
 import ShapeIcon from "./ShapeIcon";
 import type { CanvasShape } from "../types/shape";
 
@@ -21,8 +20,8 @@ export default function DocumentShapeRenderer({
   const [fillColor] = useState<string>(config.fillColor || "transparent");
   const [strokeColor] = useState<string>(config.strokeColor || "#000000");
   const [strokeWidth] = useState<number>(config.strokeWidth || 1.5);
-  const [rotate, setRotate] = useState<number>(config.rotate || 0);
-  const [text, setText] = useState<string>(config.text || "");
+  const [rotate] = useState<number>(config.rotate || 0);
+  const [text] = useState<string>(config.text || "");
   const initialSelected =
     config.selected !== undefined
       ? config.selected
@@ -31,6 +30,39 @@ export default function DocumentShapeRenderer({
   const [isSelected, setIsSelectedState] = useState<boolean>(initialSelected);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const stateRef = useRef({
+    x: config.x || 0,
+    y: config.y || 0,
+    width: config.width || 140,
+    height: config.height || 100,
+  });
+
+  // Sync state if config prop updates
+  useEffect(() => {
+    if (config.width) {
+      setWidth(config.width);
+      stateRef.current.width = config.width;
+    }
+    if (config.height) {
+      setHeight(config.height);
+      stateRef.current.height = config.height;
+    }
+    if (config.x !== undefined) {
+      setX(config.x);
+      stateRef.current.x = config.x;
+    }
+    if (config.y !== undefined) {
+      setY(config.y);
+      stateRef.current.y = config.y;
+    }
+  }, [config.width, config.height, config.x, config.y]);
+
+  // On mount, if initialSelected is true, notify other shapes to deselect
+  useEffect(() => {
+    if (initialSelected) {
+      window.dispatchEvent(new CustomEvent("editor-shape-select", { detail: config.id }));
+    }
+  }, []);
 
   const setIsSelected = (val: boolean) => {
     setIsSelectedState(val);
@@ -38,6 +70,7 @@ export default function DocumentShapeRenderer({
     updateDOMConfig({ selected: val });
 
     if (val) {
+      window.dispatchEvent(new CustomEvent("editor-shape-select", { detail: config.id }));
       // Deselect all other shapes when this shape is selected
       const allShapes = document.querySelectorAll(".editor-shape-figure");
       allShapes.forEach((otherFig) => {
@@ -47,6 +80,51 @@ export default function DocumentShapeRenderer({
       });
     }
   };
+
+  // Listen for other shapes being selected to deselect this one
+  useEffect(() => {
+    const handleOtherSelect = (e: Event) => {
+      const custom = e as CustomEvent<string>;
+      if (custom.detail !== config.id) {
+        setIsSelectedState(false);
+        figureEl.setAttribute("data-shape-selected", "false");
+        updateDOMConfig({ selected: false });
+      }
+    };
+    window.addEventListener("editor-shape-select", handleOtherSelect);
+    return () => {
+      window.removeEventListener("editor-shape-select", handleOtherSelect);
+    };
+  }, [config.id]);
+
+  // Keyboard Delete & Backspace listener when shape is selected
+  useEffect(() => {
+    if (!isSelected) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        figureEl.remove();
+        notifyDocumentChange();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [isSelected, figureEl]);
 
   // Synchronize figure element styles (position, transform, dimensions)
   useEffect(() => {
@@ -85,7 +163,7 @@ export default function DocumentShapeRenderer({
     };
   }, [figureEl]);
 
-  // Click outside listener to deselect shape
+  // Click outside listener to deselect shape (use capture to catch all outside clicks)
   useEffect(() => {
     if (!isSelected) return;
 
@@ -102,9 +180,9 @@ export default function DocumentShapeRenderer({
       }
     };
 
-    window.addEventListener("pointerdown", handlePointerDownOutside);
+    window.addEventListener("pointerdown", handlePointerDownOutside, true);
     return () => {
-      window.removeEventListener("pointerdown", handlePointerDownOutside);
+      window.removeEventListener("pointerdown", handlePointerDownOutside, true);
     };
   }, [isSelected, figureEl]);
 
@@ -138,27 +216,6 @@ export default function DocumentShapeRenderer({
     return 1;
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    figureEl.remove();
-    notifyDocumentChange();
-  };
-
-  const handleTextChange = (newText: string) => {
-    setText(newText);
-    updateDOMConfig({ text: newText });
-    notifyDocumentChange();
-  };
-
-  const handleSizeChange = (deltaW: number, deltaH: number) => {
-    const newW = Math.max(30, Math.min(800, width + deltaW));
-    const newH = Math.max(30, Math.min(600, height + deltaH));
-    setWidth(newW);
-    setHeight(newH);
-    updateDOMConfig({ width: newW, height: newH });
-    notifyDocumentChange();
-  };
-
   // Pointer drag & move handler on shape body
   const handleDragPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
@@ -184,8 +241,8 @@ export default function DocumentShapeRenderer({
 
     const startX = e.clientX;
     const startY = e.clientY;
-    const initialX = x;
-    const initialY = y;
+    const initialX = stateRef.current.x;
+    const initialY = stateRef.current.y;
     const scale = getWorkspaceScale();
 
     let isDraggingStarted = false;
@@ -219,6 +276,8 @@ export default function DocumentShapeRenderer({
       const newX = initialX + deltaX;
       const newY = initialY + deltaY;
 
+      stateRef.current.x = newX;
+      stateRef.current.y = newY;
       setX(newX);
       setY(newY);
 
@@ -264,10 +323,10 @@ export default function DocumentShapeRenderer({
 
     const startX = e.clientX;
     const startY = e.clientY;
-    const startW = width;
-    const startH = height;
-    const startXPos = x;
-    const startYPos = y;
+    const startW = stateRef.current.width;
+    const startH = stateRef.current.height;
+    const startXPos = stateRef.current.x;
+    const startYPos = stateRef.current.y;
     const scale = getWorkspaceScale();
 
     const minW = 20;
@@ -318,11 +377,20 @@ export default function DocumentShapeRenderer({
       curX = newX;
       curY = newY;
 
+      stateRef.current.width = newW;
+      stateRef.current.height = newH;
+      stateRef.current.x = newX;
+      stateRef.current.y = newY;
+
       setWidth(newW);
       setHeight(newH);
       setX(newX);
       setY(newY);
 
+      if (containerRef.current) {
+        containerRef.current.style.width = `${newW}px`;
+        containerRef.current.style.height = `${newH}px`;
+      }
       figureEl.style.width = `${newW}px`;
       figureEl.style.height = `${newH}px`;
       figureEl.style.transform = `translate(${newX}px, ${newY}px)`;
@@ -345,68 +413,12 @@ export default function DocumentShapeRenderer({
 
       document.body.style.userSelect = "";
 
+      setWidth(curW);
+      setHeight(curH);
+      setX(curX);
+      setY(curY);
+
       updateDOMConfig({ width: curW, height: curH, x: curX, y: curY });
-      notifyDocumentChange();
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
-  };
-
-  // Rotation handle pointer handler
-  const handleRotatePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsSelected(true);
-
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const targetEl = e.currentTarget;
-    const pointerId = e.pointerId;
-
-    try {
-      targetEl.setPointerCapture(pointerId);
-    } catch {
-      // ignore
-    }
-
-    document.body.style.userSelect = "none";
-    document.body.style.cursor = "grabbing";
-
-    let curRotate = rotate;
-
-    const onPointerMove = (moveEv: PointerEvent) => {
-      moveEv.preventDefault();
-      const radians = Math.atan2(moveEv.clientY - centerY, moveEv.clientX - centerX);
-      let deg = Math.round(radians * (180 / Math.PI) + 90);
-      if (deg < 0) deg += 360;
-      curRotate = deg;
-      setRotate(deg);
-      updateDOMConfig({ rotate: deg });
-    };
-
-    const onPointerUp = (upEv: PointerEvent) => {
-      upEv.preventDefault();
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-
-      try {
-        if (targetEl && targetEl.hasPointerCapture(pointerId)) {
-          targetEl.releasePointerCapture(pointerId);
-        }
-      } catch {
-        // ignore
-      }
-
-      document.body.style.userSelect = "";
-      document.body.style.cursor = "";
-
-      updateDOMConfig({ rotate: curRotate });
       notifyDocumentChange();
     };
 
@@ -420,20 +432,20 @@ export default function DocumentShapeRenderer({
       ref={containerRef}
       onPointerDown={handleDragPointerDown}
       onClick={() => setIsSelected(true)}
-      className="relative inline-flex flex-col items-center justify-center cursor-pointer select-none group"
+      className="relative inline-flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none group"
       style={{
         width: `${width}px`,
         height: `${height}px`,
         transform: rotate ? `rotate(${rotate}deg)` : undefined,
       }}
     >
-      {/* SELECTION OVERLAY BOUNDING BOX WHEN SELECTED */}
+      {/* EXACTLY ONE SELECTION CONTAINER OVERLAY WHEN SELECTED */}
       {isSelected && (
-        <div className="absolute inset-0 border border-dashed border-blue-500/80 pointer-events-none rounded-xs z-20" />
+        <div className="absolute inset-0 border border-dashed border-blue-500/90 pointer-events-none rounded-xs z-20" />
       )}
 
       {/* SHAPE ICON SVG */}
-      <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
+      <div className="w-full h-full flex items-center justify-center relative overflow-hidden pointer-events-none">
         <ShapeIcon
           type={config.type}
           className="w-full h-full"
@@ -442,127 +454,66 @@ export default function DocumentShapeRenderer({
           strokeWidth={strokeWidth || 1.5}
         />
 
-        {/* Optional Editable Text inside shape */}
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => handleTextChange(e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="absolute inset-0 w-full h-full text-center bg-transparent text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none border-none px-2 pointer-events-auto"
-          placeholder=""
-        />
+        {/* Optional Text inside shape (non-blocking so dragging works smoothly) */}
+        {text && (
+          <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-900 dark:text-slate-100 pointer-events-none px-2 select-none">
+            {text}
+          </span>
+        )}
       </div>
 
-      {/* TOP ROTATION CONNECTOR & KNOB WHEN SELECTED */}
+      {/* EXACTLY 8 INTERACTIVE RESIZE HANDLES WHEN SELECTED */}
       {isSelected && (
         <>
-          <div className="w-0.5 h-4 bg-slate-800 dark:bg-slate-200 absolute -top-4 left-1/2 -translate-x-1/2 pointer-events-none z-30" />
-          <div
-            onPointerDown={handleRotatePointerDown}
-            className="rotate-handle absolute -top-8 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center shadow-md cursor-grab active:cursor-grabbing z-40 hover:scale-110 transition-transform"
-            title="Rotate shape"
-          >
-            <RotateCw className="w-3 h-3" />
-          </div>
-        </>
-      )}
-
-      {/* 8 INTERACTIVE RESIZE HANDLES WHEN SELECTED */}
-      {isSelected && (
-        <>
-          {/* Top-Left */}
+          {/* 1. Top-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "nw")}
             className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Top-Left)"
           />
-          {/* Top-Middle */}
+          {/* 2. Top-Center */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "n")}
             className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape height (Top-Center)"
           />
-          {/* Top-Right */}
+          {/* 3. Top-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "ne")}
             className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Top-Right)"
           />
-          {/* Middle-Right */}
+          {/* 4. Middle-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "e")}
             className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape width (Middle-Right)"
           />
-          {/* Bottom-Right */}
+          {/* 5. Bottom-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "se")}
             className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Bottom-Right)"
           />
-          {/* Bottom-Middle */}
+          {/* 6. Bottom-Center */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "s")}
             className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape height (Bottom-Center)"
           />
-          {/* Bottom-Left */}
+          {/* 7. Bottom-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "sw")}
             className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Bottom-Left)"
           />
-          {/* Middle-Left */}
+          {/* 8. Middle-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "w")}
             className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape width (Middle-Left)"
           />
         </>
-      )}
-
-      {/* Floating Toolbar Controls when selected */}
-      {isSelected && (
-        <div
-          data-editor-ui="true"
-          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900/95 text-white p-1.5 rounded-xl shadow-xl text-[11px] backdrop-blur-xs z-50 whitespace-nowrap"
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          {/* Size controls */}
-          <button
-            type="button"
-            title="Decrease size"
-            onClick={() => handleSizeChange(-16, -12)}
-            className="px-1.5 py-0.5 rounded hover:bg-slate-700 font-bold"
-          >
-            -
-          </button>
-          <span className="text-[10px] text-slate-300">
-            {width}x{height}
-          </span>
-          <button
-            type="button"
-            title="Increase size"
-            onClick={() => handleSizeChange(16, 12)}
-            className="px-1.5 py-0.5 rounded hover:bg-slate-700 font-bold"
-          >
-            +
-          </button>
-
-          <div className="w-px h-3.5 bg-slate-700 mx-0.5" />
-
-          {/* Delete Button */}
-          <button
-            type="button"
-            title="Delete Shape"
-            onClick={handleDelete}
-            className="p-1 rounded text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
       )}
     </div>
   );

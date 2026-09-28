@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -20,17 +20,21 @@ import {
   Legend,
   LabelList,
 } from 'recharts';
+import { Anchor } from 'lucide-react';
 import type { ChartModel } from '@/features/editor/modules/figures/modules/chart/types';
 import { COLOR_SCHEMES } from '@/features/editor/modules/figures/modules/chart/constants';
+import { getWorkspaceScale, applyChartFigureStyles } from '@/features/editor/modules/figures/modules/chart/utils';
 import { useChartContext } from '@/features/editor/modules/figures/modules/chart/context';
 import { ChartSpreadsheetEditor } from './ChartSpreadsheetEditor';
 import { ChartContextMenu } from './ChartContextMenu';
 import { ChangeChartColorModal } from './ChangeChartColorModal';
 import { ChartStyleModal } from './ChartStyleModal';
 import { SelectDataModal } from './SelectDataModal';
+import { ChartLayoutOptions } from './ChartLayoutOptions';
 
 interface DocumentChartRendererProps {
   chart: ChartModel;
+  figureEl?: HTMLElement;
   onUpdateChart: (updated: ChartModel) => void;
   onDeleteChart: () => void;
 }
@@ -39,6 +43,7 @@ type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 
 export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
   chart,
+  figureEl: propFigureEl,
   onUpdateChart,
   onDeleteChart,
 }) => {
@@ -61,6 +66,44 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
   } = useChartContext();
 
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
+  const [isLayoutOptionsOpen, setIsLayoutOptionsOpen] = useState(false);
+
+  // Position and dimension state synchronized with chart model
+  const [x, setX] = useState<number>(chart.position?.x || 0);
+  const [y, setY] = useState<number>(chart.position?.y || 0);
+  const [width, setWidth] = useState<number>(chart.width || 560);
+  const [height, setHeight] = useState<number>(chart.height || 340);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const getFigureElement = (): HTMLElement | null => {
+    return propFigureEl || containerRef.current?.closest('.editor-chart-figure') || null;
+  };
+
+  // Sync state if chart prop updates
+  useEffect(() => {
+    if (chart.position) {
+      setX(chart.position.x || 0);
+      setY(chart.position.y || 0);
+    }
+  }, [chart.position?.x, chart.position?.y]);
+
+  useEffect(() => {
+    if (chart.width) setWidth(chart.width);
+    if (chart.height) setHeight(chart.height);
+  }, [chart.width, chart.height]);
+
+  // Synchronize figure element styles (position, transform, dimensions, layout mode)
+  useEffect(() => {
+    const el = getFigureElement();
+    if (!el) return;
+    applyChartFigureStyles(el, {
+      ...chart,
+      width,
+      height,
+      position: { x, y },
+    });
+  }, [width, height, x, y, chart.wrapMode, chart.alignment, chart.positionMode, propFigureEl]);
 
   const isSelected = activeChartId === chart.id;
   const isEditingThisChart = isSpreadsheetOpen && isSelected;
@@ -85,6 +128,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
   const handleChartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setActiveChart(chart);
+    setIsLayoutOptionsOpen(true);
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -109,7 +153,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
     });
   };
 
-  // Pointer drag handler for moving chart
+  // Pointer drag handler for moving chart smoothly via CSS transform
   const handleDragPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
 
@@ -123,152 +167,69 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
       target.closest('textarea') ||
       target.closest('.chart-spreadsheet-editor') ||
       target.closest('[role="dialog"]') ||
-      target.closest('.resize-handle')
+      target.closest('.resize-handle') ||
+      target.closest('[data-editor-ui="true"]') ||
+      target.closest('figcaption')
     ) {
       return;
     }
 
+    e.preventDefault();
     e.stopPropagation();
     setActiveChart(chart);
 
-    const containerRef = e.currentTarget;
-    const figureEl = containerRef.closest('.editor-chart-figure') as HTMLElement | null;
-    const pageContainer = containerRef.closest('[contenteditable="true"]') as HTMLElement | null;
-
     const startX = e.clientX;
     const startY = e.clientY;
+    const initialX = x;
+    const initialY = y;
+    const el = getFigureElement();
+    const scale = el ? getWorkspaceScale(el) : 1;
 
     let isDraggingStarted = false;
+    let curX = initialX;
+    let curY = initialY;
 
-    const onPointerMove = (moveEv: PointerEvent) => {
-      const deltaX = moveEv.clientX - startX;
-      const deltaY = moveEv.clientY - startY;
-
-      if (!isDraggingStarted && Math.hypot(deltaX, deltaY) > 5) {
-        isDraggingStarted = true;
-        document.body.style.cursor = 'move';
-        document.body.style.userSelect = 'none';
-        if (figureEl) {
-          figureEl.style.opacity = '0.6';
-        }
-      }
-
-      if (!isDraggingStarted) return;
-
-      if (pageContainer && figureEl) {
-        const blockChildren = Array.from(pageContainer.children).filter(
-          (child) => child !== figureEl && !child.hasAttribute('data-editor-ui')
-        );
-
-        let closestChild: Element | null = null;
-        let minDistance = Infinity;
-        let insertAfter = false;
-
-        for (const child of blockChildren) {
-          const rect = child.getBoundingClientRect();
-          const middleY = rect.top + rect.height / 2;
-          const dist = Math.abs(moveEv.clientY - middleY);
-
-          if (dist < minDistance) {
-            minDistance = dist;
-            closestChild = child;
-            insertAfter = moveEv.clientY > middleY;
-          }
-        }
-
-        if (closestChild) {
-          if (insertAfter) {
-            pageContainer.insertBefore(figureEl, closestChild.nextSibling);
-          } else {
-            pageContainer.insertBefore(figureEl, closestChild);
-          }
-        }
-      }
-    };
-
-    const onPointerUp = (upEv: PointerEvent) => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('pointercancel', onPointerUp);
-
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-
-      if (figureEl) {
-        figureEl.style.opacity = '';
-      }
-
-      if (isDraggingStarted) {
-        const newPosX = (chart.position?.x || 0) + (upEv.clientX - startX);
-        const newPosY = (chart.position?.y || 0) + (upEv.clientY - startY);
-
-        onUpdateChart({
-          ...chart,
-          position: { x: newPosX, y: newPosY },
-          updatedAt: new Date().toISOString(),
-        });
-
-        if (pageContainer) {
-          pageContainer.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      }
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-    window.addEventListener('pointercancel', onPointerUp);
-  };
-
-  // Pointer handler for 8 resize handles
-  const handleResizePointerDown = (
-    e: React.PointerEvent<HTMLDivElement>,
-    handle: ResizeHandle
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
+    const targetEl = e.currentTarget;
+    const pointerId = e.pointerId;
 
     try {
-      e.currentTarget.setPointerCapture(e.pointerId);
+      targetEl.setPointerCapture(pointerId);
     } catch {
       // ignore
     }
 
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startWidth = chart.width || 560;
-    const startHeight = chart.height || 340;
-
-    const minWidth = 240;
-    const minHeight = 160;
-
-    document.body.style.userSelect = 'none';
-
     const onPointerMove = (moveEv: PointerEvent) => {
       moveEv.preventDefault();
-      const deltaX = moveEv.clientX - startX;
-      const deltaY = moveEv.clientY - startY;
 
-      let newWidth = startWidth;
-      let newHeight = startHeight;
+      const deltaScreenX = moveEv.clientX - startX;
+      const deltaScreenY = moveEv.clientY - startY;
 
-      if (handle.includes('e')) {
-        newWidth = Math.max(minWidth, Math.round(startWidth + deltaX));
-      } else if (handle.includes('w')) {
-        newWidth = Math.max(minWidth, Math.round(startWidth - deltaX));
+      if (!isDraggingStarted && Math.hypot(deltaScreenX, deltaScreenY) > 3) {
+        isDraggingStarted = true;
+        document.body.style.cursor = 'move';
+        document.body.style.userSelect = 'none';
       }
 
-      if (handle.includes('s')) {
-        newHeight = Math.max(minHeight, Math.round(startHeight + deltaY));
-      } else if (handle.includes('n')) {
-        newHeight = Math.max(minHeight, Math.round(startHeight - deltaY));
-      }
+      if (!isDraggingStarted) return;
 
-      onUpdateChart({
-        ...chart,
-        width: newWidth,
-        height: newHeight,
-        updatedAt: new Date().toISOString(),
-      });
+      const deltaX = Math.round(deltaScreenX / scale);
+      const deltaY = Math.round(deltaScreenY / scale);
+
+      curX = initialX + deltaX;
+      curY = initialY + deltaY;
+
+      setX(curX);
+      setY(curY);
+
+      if (el) {
+        if (chart.wrapMode === 'behind' || chart.wrapMode === 'inFront') {
+          el.style.left = `${curX}px`;
+          el.style.top = `${curY}px`;
+          el.style.transform = 'none';
+        } else {
+          el.style.transform = `translate(${curX}px, ${curY}px)`;
+        }
+      }
     };
 
     const onPointerUp = (upEv: PointerEvent) => {
@@ -277,7 +238,136 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerUp);
 
+      try {
+        if (targetEl && targetEl.hasPointerCapture(pointerId)) {
+          targetEl.releasePointerCapture(pointerId);
+        }
+      } catch {
+        // ignore
+      }
+
+      document.body.style.cursor = '';
       document.body.style.userSelect = '';
+
+      if (isDraggingStarted) {
+        onUpdateChart({
+          ...chart,
+          position: { x: curX, y: curY },
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  };
+
+  // Pointer handler for 8 resize handles with anchor corner stability
+  const handleResizePointerDown = (
+    e: React.PointerEvent<HTMLDivElement>,
+    handle: ResizeHandle
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const targetEl = e.currentTarget;
+    const pointerId = e.pointerId;
+
+    try {
+      targetEl.setPointerCapture(pointerId);
+    } catch {
+      // ignore
+    }
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = width;
+    const startHeight = height;
+    const startXPos = x;
+    const startYPos = y;
+    const el = getFigureElement();
+    const scale = el ? getWorkspaceScale(el) : 1;
+
+    const minWidth = 240;
+    const minHeight = 160;
+
+    document.body.style.userSelect = 'none';
+
+    let curW = startWidth;
+    let curH = startHeight;
+    let curX = startXPos;
+    let curY = startYPos;
+
+    const onPointerMove = (moveEv: PointerEvent) => {
+      moveEv.preventDefault();
+      const deltaX = Math.round((moveEv.clientX - startX) / scale);
+      const deltaY = Math.round((moveEv.clientY - startY) / scale);
+
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+      let newX = startXPos;
+      let newY = startYPos;
+
+      if (handle.includes('e')) {
+        newWidth = Math.max(minWidth, startWidth + deltaX);
+      } else if (handle.includes('w')) {
+        newWidth = Math.max(minWidth, startWidth - deltaX);
+        newX = startXPos + (startWidth - newWidth);
+      }
+
+      if (handle.includes('s')) {
+        newHeight = Math.max(minHeight, startHeight + deltaY);
+      } else if (handle.includes('n')) {
+        newHeight = Math.max(minHeight, startHeight - deltaY);
+        newY = startYPos + (startHeight - newHeight);
+      }
+
+      curW = newWidth;
+      curH = newHeight;
+      curX = newX;
+      curY = newY;
+
+      setWidth(newWidth);
+      setHeight(newHeight);
+      setX(newX);
+      setY(newY);
+
+      if (el) {
+        el.style.width = `${newWidth}px`;
+        if (chart.wrapMode === 'behind' || chart.wrapMode === 'inFront') {
+          el.style.left = `${newX}px`;
+          el.style.top = `${newY}px`;
+          el.style.transform = 'none';
+        } else {
+          el.style.transform = `translate(${newX}px, ${newY}px)`;
+        }
+      }
+    };
+
+    const onPointerUp = (upEv: PointerEvent) => {
+      upEv.preventDefault();
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+
+      try {
+        if (targetEl && targetEl.hasPointerCapture(pointerId)) {
+          targetEl.releasePointerCapture(pointerId);
+        }
+      } catch {
+        // ignore
+      }
+
+      document.body.style.userSelect = '';
+
+      onUpdateChart({
+        ...chart,
+        width: curW,
+        height: curH,
+        position: { x: curX, y: curY },
+        updatedAt: new Date().toISOString(),
+      });
     };
 
     window.addEventListener('pointermove', onPointerMove);
@@ -395,7 +485,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
   // Render chart body
   const renderVisualization = () => {
-    const effectiveChartHeight = isSpreadsheetOpen ? Math.min(chart.height, 260) : chart.height;
+    const effectiveChartHeight = isSpreadsheetOpen ? Math.min(height, 260) : height;
 
     // Pie / Doughnut uses first series mapped over categories
     if (chart.chartType === 'pie' || chart.chartType === 'doughnut') {
@@ -408,10 +498,10 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
       return (
         <ResponsiveContainer width="100%" height={effectiveChartHeight}>
-          <PieChart margin={{ top: 10, right: 10, bottom: 20, left: 10 }}>
+          <PieChart margin={{ top: 8, right: 8, bottom: 12, left: 8 }}>
             <Tooltip />
             {chart.showLegend && (
-              <Legend verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'} height={32} />
+              <Legend verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'} height={28} />
             )}
             <Pie
               data={pieData}
@@ -447,7 +537,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
       return (
         <ResponsiveContainer width="100%" height={effectiveChartHeight}>
-          <ScatterChart margin={{ top: 15, right: 20, bottom: 25, left: 15 }}>
+          <ScatterChart margin={{ top: 10, right: 15, bottom: 20, left: 10 }}>
             {chart.showGridlines && <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />}
             <XAxis
               type="number"
@@ -478,7 +568,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
           <BarChart
             data={rechartsData}
             layout="vertical"
-            margin={{ top: 15, right: 30, bottom: 20, left: 30 }}
+            margin={{ top: 10, right: 20, bottom: 15, left: 20 }}
           >
             {chart.showGridlines && <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />}
             <XAxis
@@ -495,7 +585,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
             />
             <Tooltip />
             {chart.showLegend && (
-              <Legend verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'} height={32} />
+              <Legend verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'} height={28} />
             )}
             {renderSeriesElements()}
           </BarChart>
@@ -515,7 +605,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
     return (
       <ResponsiveContainer width="100%" height={effectiveChartHeight}>
-        <ChartContainerComponent data={rechartsData} margin={{ top: 15, right: 20, bottom: 25, left: 15 }}>
+        <ChartContainerComponent data={rechartsData} margin={{ top: 10, right: 15, bottom: 20, left: 10 }}>
           {chart.showGridlines && <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />}
           <XAxis
             dataKey="category"
@@ -533,7 +623,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
             <Legend
               verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'}
               align={chart.legendPosition === 'left' ? 'left' : chart.legendPosition === 'right' ? 'right' : 'center'}
-              height={32}
+              height={28}
             />
           )}
           {renderSeriesElements()}
@@ -544,11 +634,12 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
   return (
     <div
-      className={`chart-editing-workspace w-full transition-all duration-150 group ${
+      ref={containerRef}
+      className={`chart-editing-workspace w-full group ${
         isEditingThisChart
-          ? 'flex flex-col gap-2.5 p-2 bg-slate-50/60 rounded-xl border border-emerald-500/30 shadow-sm'
+          ? 'flex flex-col gap-2 p-2 bg-slate-50/60 rounded-xl border border-emerald-500/30 shadow-xs'
           : isSelected
-          ? 'relative ring-2 ring-blue-500 rounded-lg shadow-sm cursor-grab active:cursor-grabbing'
+          ? 'relative ring-2 ring-blue-500 rounded-lg shadow-xs cursor-grab active:cursor-grabbing'
           : 'relative hover:ring-1 hover:ring-slate-300 rounded-lg cursor-pointer'
       }`}
       onClick={handleChartClick}
@@ -567,8 +658,10 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
       {/* ORIGINAL CHART FRAME (CLEAN Visual Frame without floating toolbar overlay) */}
       <div
-        className="chart-display-frame w-full p-3 rounded-lg select-none"
+        className="chart-display-frame w-full p-2 rounded-lg select-none"
         style={{
+          position: 'relative',
+          zIndex: chart.wrapMode === 'behind' ? 1 : (chart.wrapMode === 'inFront' ? 20 : 1),
           backgroundColor: chart.backgroundColor || '#ffffff',
           borderRadius: `${chart.borderRadius || 8}px`,
           border: isEditingThisChart ? '1px solid #e2e8f0' : undefined,
@@ -601,9 +694,23 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
         <div className="w-full overflow-hidden">{renderVisualization()}</div>
       </div>
 
-      {/* 8 INTERACTIVE RESIZE HANDLES WHEN SELECTED */}
+      {/* 8 INTERACTIVE RESIZE HANDLES & ANCHOR WHEN SELECTED */}
       {isSelected && !isEditingThisChart && (
         <>
+          {/* Visual selection outline overlay when selected (renders above text at z-30) */}
+          <div
+            className="absolute inset-0 ring-2 ring-blue-500 rounded-lg pointer-events-none z-30"
+          />
+
+          {/* Anchor indicator for text-wrapping modes (MS Word-style) */}
+          {chart.wrapMode && chart.wrapMode !== 'inline' && (
+            <div
+              className="absolute -left-7 top-1 text-[#0078d4] dark:text-[#38bdf8] select-none pointer-events-none z-30"
+              title="Anchored to text"
+            >
+              <Anchor className="w-4 h-4" />
+            </div>
+          )}
           {/* Top-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'nw')}
@@ -652,6 +759,45 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
             className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-ew-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart width"
           />
+
+          {/* WORD-STYLE FLOATING SIDE ACTION (Layout Options) */}
+          <div
+            data-editor-ui="true"
+            className="absolute top-0 -right-10 flex flex-col gap-1.5 z-40 select-none"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {/* Button 1: Layout Options */}
+            <button
+              type="button"
+              title="Layout Options"
+              onClick={() => {
+                setIsLayoutOptionsOpen((prev) => !prev);
+              }}
+              className={`w-[30px] h-[30px] rounded-xs flex items-center justify-center shadow-md border transition-all cursor-pointer ${
+                isLayoutOptionsOpen
+                  ? 'bg-[#242424] border-[#38bdf8] ring-1 ring-[#38bdf8]'
+                  : 'bg-[#2b2b2b] border-[#555555] hover:border-slate-300'
+              }`}
+            >
+              <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
+                <line x1="2" y1="3" x2="18" y2="3" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+                <line x1="2" y1="7" x2="18" y2="7" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M 4 16 C 4 9, 16 9, 16 16" stroke="#ffffff" strokeWidth="2" fill="none" strokeLinecap="round" />
+                <line x1="2" y1="16" x2="3" y2="16" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+                <line x1="17" y1="16" x2="18" y2="16" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {/* Exact Layout Options Popup (Microsoft Word Style) */}
+            <ChartLayoutOptions
+              chart={chart}
+              isOpen={isLayoutOptionsOpen}
+              onClose={() => setIsLayoutOptionsOpen(false)}
+              onUpdateChart={onUpdateChart}
+              onSeeMore={() => setIsSpreadsheetOpen(true)}
+            />
+          </div>
         </>
       )}
 
