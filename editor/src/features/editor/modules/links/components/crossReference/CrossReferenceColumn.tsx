@@ -333,6 +333,22 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
               ? 'No bookmarks in document yet. Type a name above and click "Add".'
               : `No ${currentTypeLabel.toLowerCase()}s created in the document yet.`}
           </div>
+        ) : selectedType === 'bookmark' ? (
+          <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
+            {targets.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  crossReferenceService.navigateToTarget(editorRef.current, t.id);
+                  setSuccessMsg(`Navigated to ${t.title}`);
+                  setTimeout(() => setSuccessMsg(null), 2000);
+                }}
+                className="w-full text-left px-2.5 py-1.5 text-[11px] rounded bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 dark:bg-[#111D29] dark:hover:bg-[#1A2C3D] dark:border-slate-800 dark:text-slate-300 transition"
+              >
+                {t.title}
+              </button>
+            ))}
+          </div>
         ) : (
           <div className="relative">
             <select
@@ -357,60 +373,64 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
         )}
       </div>
 
-      {/* Custom Reference Label */}
-      <div>
-        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-0.5">
-          Custom Display Label (Optional)
-        </label>
-        <input
-          type="text"
-          value={customLabel}
-          onChange={(e) => setCustomLabel(e.target.value)}
-          placeholder="e.g. See Section 5"
-          className="w-full h-8 px-2.5 text-xs rounded-md border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
-        />
-      </div>
+      {/* Custom Reference Label & Insert Button (hidden for Bookmarks) */}
+      {selectedType !== 'bookmark' && (
+        <>
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-0.5">
+              Custom Display Label (Optional)
+            </label>
+            <input
+              type="text"
+              value={customLabel}
+              onChange={(e) => setCustomLabel(e.target.value)}
+              placeholder="e.g. See Section 5"
+              className="w-full h-8 px-2.5 text-xs rounded-md border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
+            />
+          </div>
 
-      {/* Include page number checkbox */}
-      <div className="flex items-center gap-2 pt-0.5">
-        <input
-          type="checkbox"
-          id="xref-page-no"
-          checked={includePageNumber}
-          onChange={(e) => setIncludePageNumber(e.target.checked)}
-          className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-        />
-        <label htmlFor="xref-page-no" className="text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer select-none">
-          Include page number suffix
-        </label>
-      </div>
+          {/* Include page number checkbox */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <input
+              type="checkbox"
+              id="xref-page-no"
+              checked={includePageNumber}
+              onChange={(e) => setIncludePageNumber(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            />
+            <label htmlFor="xref-page-no" className="text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+              Include page number suffix
+            </label>
+          </div>
 
-      {/* Error / Success Feedback */}
-      {error && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
-          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-          <span>{error}</span>
-        </div>
+          {/* Error / Success Feedback */}
+          {error && (
+            <div className="flex items-center gap-1.5 p-2 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="flex items-center gap-1.5 p-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* Insert Reference Button */}
+          <button
+            type="button"
+            disabled={targets.length === 0}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleInsertReference}
+            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-[0.99]"
+          >
+            <span>Insert Reference</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </>
       )}
-
-      {successMsg && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-          <span>{successMsg}</span>
-        </div>
-      )}
-
-      {/* Insert Reference Button */}
-      <button
-        type="button"
-        disabled={targets.length === 0}
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={handleInsertReference}
-        className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-[0.99]"
-      >
-        <span>Insert Reference</span>
-        <ArrowRight className="h-3.5 w-3.5" />
-      </button>
     </div>
   );
 }

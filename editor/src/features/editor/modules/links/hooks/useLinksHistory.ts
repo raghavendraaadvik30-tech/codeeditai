@@ -24,7 +24,7 @@ export function useLinksHistory() {
       if (typeof document !== 'undefined') {
         const docAnchors = Array.from(
           document.querySelectorAll<HTMLAnchorElement>('[contenteditable="true"] a[href]')
-        ).filter((a) => !a.closest('aside') && !a.closest('[role="dialog"]'));
+        ).filter((a) => !a.closest('aside') && !a.closest('[role="dialog"]') && !a.closest('.toc, .tot, .tof, .appendices-block, [data-appendix]'));
 
         if (docAnchors.length === 0) {
           linksRepository.clearHistory();

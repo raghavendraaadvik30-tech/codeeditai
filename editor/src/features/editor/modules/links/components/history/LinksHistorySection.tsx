@@ -87,7 +87,7 @@ export function LinksHistorySection({
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 bg-white dark:bg-[#0B1520] border border-slate-200 dark:border-slate-800 rounded-lg shadow-xs overflow-hidden">
+    <div className="flex flex-col bg-white dark:bg-[#0B1520] border border-slate-200 dark:border-slate-800 rounded-lg shadow-xs">
       {/* Section Header */}
       <div className="shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-[#111D29]/70">
         <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export function LinksHistorySection({
       </div>
 
       {/* History Items Table/List */}
-      <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+      <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
         {history.length === 0 ? (
           <div className="py-4 px-3 text-center">
             <p className="text-xs text-slate-500 dark:text-slate-400">

@@ -21,6 +21,8 @@ import {
   Image as ImageIcon,
   GitCompare,
   Sigma,
+  Bookmark,
+  Files,
 } from "lucide-react";
 
 import { useEditor } from "../../hooks/useEditor";
@@ -48,6 +50,7 @@ const PANEL_TITLES: Partial<Record<PanelType, string>> = {
   document: "Documents",
   settings: "Settings",
   trackChanges: "Track Changes",
+  appendices: "Appendices",
 };
 
 /* --------------------------------
@@ -66,6 +69,7 @@ const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
   document: "Manage clinical documents & records",
   settings: "Editor settings",
   trackChanges: "Review and tracking",
+  appendices: "Document appendices and annexes",
 };
 
 /* --------------------------------
@@ -81,6 +85,10 @@ const PANEL_ICONS: Partial<Record<PanelType, typeof FileText>> = {
   settings: Settings,
   figures: ImageIcon,
   trackChanges: GitCompare,
+  references: Bookmark,
+  appendices: Files,
+  tables: FileText,
+  templates: FileText,
 };
 
 /* --------------------------------
@@ -98,6 +106,9 @@ const panelMap: Partial<
   settings: Panel,
   figures: Panel,
   trackChanges: Panel,
+  references: Panel,
+  appendices: Panel,
+  templates: Panel,
 
   symbols: ({ moduleId }) => {
     void moduleId;

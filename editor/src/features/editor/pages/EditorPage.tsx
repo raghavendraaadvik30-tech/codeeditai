@@ -23,6 +23,7 @@ import { TrackChangesProvider } from "../modules/trackChanges/context";
 import { FigureProvider } from "../modules/figures/context";
 import { ChartProvider } from "../modules/figures/modules/chart/context";
 import { SmartArtProvider } from "../modules/figures/modules/smartart/context";
+import { ReferencesProvider } from "../modules/reference/components/ReferencesContext";
 import EditorLayout from "../layouts/EditorLayout";
 
 export default function EditorPage() {
@@ -35,7 +36,9 @@ export default function EditorPage() {
               <FigureProvider>
                 <ChartProvider>
                   <SmartArtProvider>
-                    <EditorLayout />
+                    <ReferencesProvider>
+                      <EditorLayout />
+                    </ReferencesProvider>
                   </SmartArtProvider>
                 </ChartProvider>
               </FigureProvider>

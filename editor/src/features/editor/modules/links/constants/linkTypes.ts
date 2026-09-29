@@ -67,11 +67,11 @@ export const CROSS_REFERENCE_TARGET_TYPES: Record<CrossReferenceTarget, { label:
 };
 
 export const STORAGE_KEYS = {
-  BOOKMARKS: 'paraxel_editor_bookmarks',
-  CITATIONS: 'paraxel_editor_citations',
-  VALIDATION_HISTORY: 'paraxel_editor_validation_history',
-  LINKS_HISTORY: 'paraxel_editor_links_history',
-  REGISTERED_TARGETS: 'paraxel_editor_registered_targets',
+  BOOKMARKS: 'paraxel_editor_bookmarks_v2',
+  CITATIONS: 'paraxel_editor_citations_v2',
+  VALIDATION_HISTORY: 'paraxel_editor_validation_history_v2',
+  LINKS_HISTORY: 'paraxel_editor_links_history_v2',
+  REGISTERED_TARGETS: 'paraxel_editor_registered_targets_v2',
 };
 
 export const DEFAULT_LINK_PROTOCOL = 'https://';
