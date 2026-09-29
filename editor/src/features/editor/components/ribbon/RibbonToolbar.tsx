@@ -18,7 +18,7 @@ import InsertTab from "./tabs/InsertTab";
 import LayoutTab from "./tabs/LayoutTab";
 import ReviewTab from "./tabs/ReviewTab";
 import HeaderFooterTab from "./tabs/HeaderFooterTab";
-import { useHeaderFooter } from "@/features/editor/document/context/HeaderFooterContext";
+import { useHeaderFooter } from "@/features/editor/modules/document/context/HeaderFooterContext";
 
 const baseTabs = ["Home", "Insert", "Layout", "Review"] as const;
 

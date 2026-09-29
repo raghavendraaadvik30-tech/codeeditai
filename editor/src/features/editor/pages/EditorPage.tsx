@@ -17,8 +17,8 @@ Acts as the **entry point for the document editor page** by setting up the requi
 
 import { EditorProvider } from "../context/EditorContext";
 import { DocumentModelProvider } from "../store/documentModel";
-import { TableProvider } from "../tables/context";
-import { HeaderFooterProvider } from "../document/context/HeaderFooterContext";
+import { TableProvider } from "../modules/tables/context";
+import { HeaderFooterProvider } from "../modules/document/context/HeaderFooterContext";
 import { TrackChangesProvider } from "../modules/trackChanges/context";
 import { FigureProvider } from "../modules/figures/context";
 import { ChartProvider } from "../modules/figures/modules/chart/context";

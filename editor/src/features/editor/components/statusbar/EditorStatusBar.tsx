@@ -16,7 +16,7 @@ import { useTrackChanges } from "../../modules/trackChanges";
 export default function EditorStatusBar() {
   const {
     zoom,
-    setZoom,
+    setZoom,  
     viewMode,
     setViewMode,
     setActivePanel,

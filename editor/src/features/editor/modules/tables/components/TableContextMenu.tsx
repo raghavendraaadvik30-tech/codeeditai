@@ -49,7 +49,7 @@ import {
   ArrowDown,
   MoveVertical,
 } from "lucide-react";
-import { useTable } from "@/features/editor/tables/hooks";
+import { useTable } from "../hooks";
 import { TableBordersShadingDialog } from "./TableBordersShadingDialog";
 import { TablePropertiesDialog } from "./TablePropertiesDialog";
 

@@ -1,37 +1,29 @@
-
 import { useState } from "react";
-
 import type { ListTool } from "../../types/writing.types";
-
 import BulletsDropdown from "./BulletsDropdown";
 import NumberingDropdown from "./NumberingDropdown";
-import MultilevelDropdown from "./MultilevelDropdown";
 
 interface ListSectionProps {
   tools: ListTool[];
   onApplyBullets: (style?: string) => void;
   onApplyNumbering: (style?: string) => void;
-  onApplyMultilevel: (style: string) => void;
-  onToggleMultilevel: () => void;
 }
 
 export default function ListSection({
   tools,
   onApplyBullets,
   onApplyNumbering,
-  onApplyMultilevel,
-  onToggleMultilevel,
 }: ListSectionProps) {
   const [openDropdown, setOpenDropdown] = useState<
-    "bullets" | "numbering" | "multilevel" | null
+    "bullets" | "numbering" | null
   >(null);
 
-  if (tools.length === 0) {
+  if (!tools || tools.length === 0) {
     return null;
   }
 
   const toggleDropdown = (
-    dropdown: "bullets" | "numbering" | "multilevel"
+    dropdown: "bullets" | "numbering"
   ) => {
     setOpenDropdown((current) =>
       current === dropdown ? null : dropdown
@@ -50,6 +42,9 @@ export default function ListSection({
 
       <div className="space-y-2">
         {tools.map((tool) => {
+          /* =========================
+             BULLETS
+          ========================= */
           if (tool.type === "bullets") {
             return (
               <div
@@ -58,8 +53,26 @@ export default function ListSection({
               >
                 <button
                   type="button"
-                  onClick={() => toggleDropdown("bullets")}
-                  className="flex w-full items-center justify-between rounded-md border border-gray-200 px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-100"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() =>
+                    toggleDropdown("bullets")
+                  }
+                  className="
+                    flex
+                    w-full
+                    items-center
+                    justify-between
+                    rounded-md
+                    border
+                    border-gray-200
+                    px-3
+                    py-2
+                    text-left
+                    text-sm
+                    text-gray-700
+                    transition
+                    hover:bg-gray-100
+                  "
                 >
                   <span className="flex items-center">
                     <span className="mr-3 text-base">
@@ -76,16 +89,25 @@ export default function ListSection({
 
                 {openDropdown === "bullets" && (
                   <BulletsDropdown
-                    onSelect={(style) => {
-                      onApplyBullets(style);
+                    onApplyStyle={(char, type) => {
+                      onApplyBullets(
+                        type === "custom"
+                          ? `custom:${char}`
+                          : type
+                      );
+
                       closeDropdown();
                     }}
+                    onClose={closeDropdown}
                   />
                 )}
               </div>
             );
           }
 
+          /* =========================
+             NUMBERING
+          ========================= */
           if (tool.type === "numbering") {
             return (
               <div
@@ -94,10 +116,26 @@ export default function ListSection({
               >
                 <button
                   type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() =>
                     toggleDropdown("numbering")
                   }
-                  className="flex w-full items-center justify-between rounded-md border border-gray-200 px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-100"
+                  className="
+                    flex
+                    w-full
+                    items-center
+                    justify-between
+                    rounded-md
+                    border
+                    border-gray-200
+                    px-3
+                    py-2
+                    text-left
+                    text-sm
+                    text-gray-700
+                    transition
+                    hover:bg-gray-100
+                  "
                 >
                   <span className="flex items-center">
                     <span className="mr-3 text-sm">
@@ -124,44 +162,11 @@ export default function ListSection({
             );
           }
 
-          return (
-            <div
-              key={tool.name}
-              className="relative"
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  toggleDropdown("multilevel")
-                }
-                className="flex w-full items-center justify-between rounded-md border border-gray-200 px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-100"
-              >
-                <span className="flex items-center">
-                  <span className="mr-3 text-xs leading-tight">
-                    1.
-                    <br />
-                    1.1
-                  </span>
-
-                  <span>{tool.name}</span>
-                </span>
-
-                <span className="text-xs text-gray-400">
-                  ▾
-                </span>
-              </button>
-
-              {openDropdown === "multilevel" && (
-                <MultilevelDropdown
-                  onSelect={(style) => {
-                    onApplyMultilevel(style);
-                    onToggleMultilevel();
-                    closeDropdown();
-                  }}
-                />
-              )}
-            </div>
-          );
+          /*
+           * Ignore any other list types.
+           * Multilevel is intentionally not displayed.
+           */
+          return null;
         })}
       </div>
     </section>

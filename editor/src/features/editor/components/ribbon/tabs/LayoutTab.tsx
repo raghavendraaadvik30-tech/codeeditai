@@ -18,11 +18,12 @@ import {
 } from "lucide-react";
 
 import RibbonDivider from "../controls/RibbonDivider";
+import { useEditor } from "@/features/editor/context/EditorContext";
 import { useDocumentModel, type SectionModel, type PageBorderConfig } from "../../../store/documentModel";
 import {
   HeaderGallery,
   FooterGallery,
-} from "@/features/editor/document/components/HeaderFooterGallery";
+} from "@/features/editor/modules/document/components/HeaderFooterGallery";
 
 
 import {
@@ -100,6 +101,8 @@ export default function LayoutTab() {
     applySectionPatchToPage,
     applyPageBorders,
   } = useDocumentModel();
+
+  const { insertColumnBreak } = useEditor();
 
 
   // Active section resolution: activePage -> sectionId -> section
@@ -861,6 +864,17 @@ export default function LayoutTab() {
             {activeSection?.columns?.type === "right" && (
               <Check className="h-3.5 w-3.5 text-blue-600" />
             )}
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          {/* Microsoft Word-Style Column Break Option */}
+          <DropdownMenuItem
+            onClick={() => insertColumnBreak()}
+            className="flex items-center justify-between cursor-pointer text-slate-700 dark:text-slate-200"
+          >
+            <span>Column Break</span>
+            <span className="text-[10px] text-slate-400">Ctrl+Shift+Enter</span>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
