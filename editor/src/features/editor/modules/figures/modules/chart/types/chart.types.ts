@@ -21,6 +21,15 @@ export interface ChartSeries {
 export type LegendPosition = 'top' | 'bottom' | 'left' | 'right';
 export type DataLabelPosition = 'none' | 'center' | 'top' | 'insideEnd' | 'outsideEnd';
 export type TitleAlignment = 'left' | 'center' | 'right';
+export type TextWrapMode =
+  | 'inline'
+  | 'square'
+  | 'tight'
+  | 'through'
+  | 'topBottom'
+  | 'behind'
+  | 'inFront';
+export type ChartPositionMode = 'moveWithText' | 'fixPosition';
 
 export interface ChartModel {
   id: string;
@@ -58,6 +67,8 @@ export interface ChartModel {
   alignment?: 'center' | 'left' | 'right';
   position?: { x: number; y: number };
   caption?: string;
+  wrapMode?: TextWrapMode;
+  positionMode?: ChartPositionMode;
 
   // Spreadsheet editor visibility
   isSpreadsheetOpen?: boolean;

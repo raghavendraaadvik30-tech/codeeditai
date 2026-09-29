@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import type { ChartModel } from '@/features/editor/modules/figures/modules/chart/types';
 import { useChartContext } from '@/features/editor/modules/figures/modules/chart/context';
+import { applyChartFigureStyles } from '@/features/editor/modules/figures/modules/chart/utils';
 import { DocumentChartRenderer } from './DocumentChartRenderer';
 
 interface ChartMountInfo {
@@ -55,6 +56,10 @@ export const ChartHydration: React.FC = () => {
               effectiveChart = existing.chart;
             }
           }
+
+          // Ensure figureEl styles match chart configuration
+          figEl.setAttribute('data-chart-wrap', effectiveChart.wrapMode || 'inline');
+          applyChartFigureStyles(figEl, effectiveChart);
 
           newMounts.push({
             id: chartId,
@@ -111,7 +116,8 @@ export const ChartHydration: React.FC = () => {
       const encoded = encodeURIComponent(JSON.stringify(updated));
       mount.figureEl.setAttribute('data-chart-config', encoded);
       mount.figureEl.setAttribute('data-chart-type', updated.chartType);
-      mount.figureEl.style.width = `${updated.width}px`;
+      mount.figureEl.setAttribute('data-chart-wrap', updated.wrapMode || 'inline');
+      applyChartFigureStyles(mount.figureEl, updated);
 
       // Update figcaption
       const captionEl = mount.figureEl.querySelector('figcaption');
@@ -184,11 +190,36 @@ export const ChartHydration: React.FC = () => {
 
   return (
     <>
+      <style>{`
+        [data-editor-page] > p,
+        [data-editor-page] > h1,
+        [data-editor-page] > h2,
+        [data-editor-page] > h3,
+        [data-editor-page] > h4,
+        [data-editor-page] > h5,
+        [data-editor-page] > h6,
+        [data-editor-page] > ul,
+        [data-editor-page] > ol,
+        [data-editor-page] > blockquote,
+        [data-editor-page] > table,
+        [contenteditable="true"] > p,
+        [contenteditable="true"] > h1,
+        [contenteditable="true"] > h2,
+        [contenteditable="true"] > h3,
+        [contenteditable="true"] > ul,
+        [contenteditable="true"] > ol,
+        [contenteditable="true"] > blockquote,
+        [contenteditable="true"] > table {
+          position: relative;
+          z-index: 5;
+        }
+      `}</style>
       {mounts.map((m) =>
         ReactDOM.createPortal(
           <DocumentChartRenderer
             key={m.id}
             chart={m.chart}
+            figureEl={m.figureEl}
             onUpdateChart={(updated) => handleUpdateChart(m, updated)}
             onDeleteChart={() => handleDeleteChart(m)}
           />,

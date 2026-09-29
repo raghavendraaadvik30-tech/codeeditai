@@ -1,0 +1,17 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "executionArgs": {
+    "projectName": "editor",
+    "projectPath": "g:\\frontend\\editor",
+    "testIds": [],
+    "additionalInstruction": "",
+    "serverMode": "development",
+    "envs": {},
+    "envsFile": "C:\\Users\\guru kiran\\.testsprite\\mcp\\session-d4130e4560cdaa04.json"
+  },
+  "serverPort": 65363,
+  "projectKey": "64c34ade-0b6f-4240-8861-ce3a6909bbf1"
+}

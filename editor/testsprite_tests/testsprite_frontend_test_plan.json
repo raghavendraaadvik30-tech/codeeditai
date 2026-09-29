@@ -1,0 +1,5052 @@
+[
+  {
+    "id": "DOC-001",
+    "title": "Verify initial document editor workspace loading and default page rendering",
+    "description": "Validates that launching the editor initializes the document canvas with default A4 portrait page, active ruler, and blinking cursor at start position.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /editor and wait for workspace to mount"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document canvas displays Page 1 container with class 'page-container' or section data-page-id='1'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify default page header, contenteditable editing area, and footer are mounted"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-002",
+    "title": "Verify standard text typing in document body",
+    "description": "Validates typing standard alphanumeric characters into contenteditable page area updates text model and DOM node.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click inside the document page editing area"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Test document content for automated editor validation.'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify editor contains 'Test document content for automated editor validation.'"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-003",
+    "title": "Verify multiple paragraph creation using Enter key",
+    "description": "Validates pressing Enter creates a standard paragraph element without unintentionally spawning a new page when space allows.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Paragraph 1: Primary introduction'"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter key"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Paragraph 2: Detailed description of features'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify exactly two distinct paragraph elements exist on Page 1 without creating Page 2"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-004",
+    "title": "Verify automatic content overflow pagination across pages",
+    "description": "Validates Word-style overflow engine creates Page 2 only when text height genuinely exceeds the printable page area.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Paste multi-paragraph text totaling over 3500 words into Page 1"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify overflow detection triggers addPage() creating Page 2"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify overflowing paragraphs move cleanly into Page 2 without content truncation"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-005",
+    "title": "Verify manual page break insertion via Ctrl+Enter shortcut",
+    "description": "Validates pressing Ctrl+Enter triggers an immediate page break and transfers cursor to the new page.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Heading on first page' and press Ctrl+Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify new Page 2 is created immediately"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify active caret focus moves to top of Page 2"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-006",
+    "title": "Verify backspace navigation at page start to merge into previous page",
+    "description": "Validates pressing Backspace at character index 0 of Page 2 navigates back and removes empty trailing page.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create Page 2 via page break with empty content"
+      },
+      {
+        "type": "action",
+        "description": "Press Backspace at start of Page 2"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify focus returns to the end of Page 1 and empty Page 2 is cleanly removed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-007",
+    "title": "Verify Unicode and multilingual character input support",
+    "description": "Validates editor preserves complex multilingual text without character encoding corruption.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert text: 'Hello नमस्ते ಕನ್ನಡ العربية 日本語'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text renders identically with full glyph preservation in DOM and document model"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-008",
+    "title": "Verify special characters and symbols input integrity",
+    "description": "Validates keyboard and symbol input for special punctuation characters.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type '! @ # $ % ^ & * ( ) _ + - = { } [ ] : ; ' \" < > ? /'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all special characters render without HTML entity escaping errors or script injection"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-009",
+    "title": "Verify text selection via click and drag across paragraphs",
+    "description": "Validates text range selection highlights text and updates EditorContext selection state.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type two sentences and select second sentence using mouse drag"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify window.getSelection() range encompasses the target string"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-010",
+    "title": "Verify Select All via Ctrl+A keyboard shortcut within active page",
+    "description": "Validates Ctrl+A selects all editable text within the active document body.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus page content and press Ctrl+A"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify entire page content range is selected"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-011",
+    "title": "Verify text deletion via Backspace and Delete keys",
+    "description": "Validates selected text deletion removes characters and collapses range properly.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select highlighted text and press Delete key"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected text is removed from DOM and model"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-012",
+    "title": "Verify Document Ruler rendering and drag indicator updates",
+    "description": "Validates horizontal document ruler displays correct inch/cm markers and margin guides.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Locate DocumentRuler above workspace"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ruler tick marks match document page width configuration"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-013",
+    "title": "Verify Header and Footer editable zones on document page",
+    "description": "Validates double-clicking header region activates header editing mode.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Double-click page header region"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify header editing mode is active and HeaderFooterContext reflects focused state"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Confidential Document Header' and click outside"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify header displays updated text across corresponding section pages"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-014",
+    "title": "Verify dynamic page numbers in document footers",
+    "description": "Validates footer page numbers evaluate sequentially (Page 1, Page 2, Page 3).",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add 3 pages to document"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Page 1 footer shows 1, Page 2 footer shows 2, and Page 3 footer shows 3"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-015",
+    "title": "Verify Zoom In and Zoom Out controls in workspace status bar",
+    "description": "Validates adjusting zoom scale updates document page CSS transform scale factor.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Zoom In button (+)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify zoom percentage increments from 100% to 110%"
+      },
+      {
+        "type": "action",
+        "description": "Click Zoom Out button (-)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify zoom percentage decreases and page container reflects scale"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-016",
+    "title": "Verify document view mode switching (Print Layout, Full Screen, Web)",
+    "description": "Validates switching view modes adjusts workspace margins and scroll behaviors.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click View Mode selector in status bar and choose 'Web'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify editor layout shifts to continuous flow mode"
+      },
+      {
+        "type": "action",
+        "description": "Switch back to 'Print Layout'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify discrete paginated view is restored"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "DOC-017",
+    "title": "Verify document title modification in Editor Header",
+    "description": "Validates editing title in DocumentInfo component updates document metadata and store.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click document title field in top header"
+      },
+      {
+        "type": "action",
+        "description": "Change title to 'Q3 Financial Analysis'"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter or blur input"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify documentModel.title stores 'Q3 Financial Analysis'"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-018",
+    "title": "Verify rapid text input without dropped keystrokes",
+    "description": "Validates rapid consecutive character input does not corrupt cursor state or lose characters.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate rapid typing of 200 consecutive characters"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all 200 characters are present in correct sequence"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-019",
+    "title": "Verify clipboard copy and paste within document editor",
+    "description": "Validates copying text and pasting reproduces identical text structure at caret.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Clipboard test string' and press Ctrl+C"
+      },
+      {
+        "type": "action",
+        "description": "Move caret to next line and press Ctrl+V"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'Clipboard test string' is inserted at target position"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-020",
+    "title": "Verify cut operation removes text and populates clipboard",
+    "description": "Validates Ctrl+X removes selection and allows pasting into new position.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Text to cut' and press Ctrl+X"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected text is removed from source paragraph"
+      },
+      {
+        "type": "action",
+        "description": "Move caret and press Ctrl+V"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'Text to cut' appears at new caret location"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-021",
+    "title": "Verify empty document state handling without errors",
+    "description": "Validates clearing entire document content maintains valid single empty page with placeholder.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select all content and press Backspace"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page remains active with valid default paragraph and no unhandled exceptions"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-022",
+    "title": "Verify document reload persistence from localStorage or memory store",
+    "description": "Validates refreshing the page recovers auto-saved document contents.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Persistent draft text' and trigger auto-save"
+      },
+      {
+        "type": "action",
+        "description": "Reload browser window"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'Persistent draft text' is restored in document workspace"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "DOC-023",
+    "title": "Verify document word count and character count live calculation in status bar",
+    "description": "Validates status bar statistics update in real-time as user types words.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Three simple words'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify status bar displays '3 words'"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "DOC-024",
+    "title": "Verify cursor navigation using arrow keys, Home, and End",
+    "description": "Validates keyboard navigation moves cursor position accurately within line and across lines.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type a sentence and press Home key"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify caret position moves to start of line"
+      },
+      {
+        "type": "action",
+        "description": "Press End key"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify caret position moves to end of line"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "DOC-025",
+    "title": "Verify document scroll synchronization when navigating multi-page documents",
+    "description": "Validates workspace viewport scrolls to bring active page into visible area.",
+    "category": "Document",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create 4 pages in document"
+      },
+      {
+        "type": "action",
+        "description": "Click Page 4 thumbnail in sidebar or navigate to Page 4"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Page 4 is scrolled into center viewport view"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-001",
+    "title": "Verify Undo button in HomeTab ribbon reverses last text edit",
+    "description": "Validates clicking Undo button removes recently typed text string.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'First edit text' into document"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button in Home ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'First edit text' is undone and document reverts to previous state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-002",
+    "title": "Verify Redo button restores undone text edit",
+    "description": "Validates clicking Redo button re-applies text undone by previous Undo.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Undo to remove typed text"
+      },
+      {
+        "type": "action",
+        "description": "Click Redo button in Home ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify undone text is restored in document workspace"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-003",
+    "title": "Verify Undo keyboard shortcut Ctrl+Z",
+    "description": "Validates pressing Ctrl+Z on keyboard triggers editor undo action.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Keyboard undo test'"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Z"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify typed text is undone"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-004",
+    "title": "Verify Redo keyboard shortcut Ctrl+Y",
+    "description": "Validates pressing Ctrl+Y re-applies the undone change.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform Undo via Ctrl+Z"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Y"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify undone content is restored"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-005",
+    "title": "Verify multiple consecutive Undo operations",
+    "description": "Validates executing Undo 3 times sequentially unwinds 3 discrete actions.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform Action 1 (Type text), Action 2 (Make bold), Action 3 (Insert line)"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo 3 times sequentially"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document returns to initial state step-by-step without skipping history"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-006",
+    "title": "Verify multiple consecutive Redo operations",
+    "description": "Validates consecutive Redo operations restore entire undone sequence in order.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform 3 Undos on 3 actions"
+      },
+      {
+        "type": "action",
+        "description": "Click Redo 3 times sequentially"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all 3 actions are restored in original sequential order"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-007",
+    "title": "Verify Undo button disabled state when undo stack is empty",
+    "description": "Validates canUndo returns false on a clean document and Undo button is disabled.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load fresh clean document"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Undo button has disabled attribute or aria-disabled='true'"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-008",
+    "title": "Verify Redo button disabled state when redo stack is empty",
+    "description": "Validates canRedo returns false when no undo operations have been executed.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type text without performing any Undo"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Redo button is disabled"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-009",
+    "title": "Verify Redo stack clearance upon new edit after Undo",
+    "description": "Validates typing new text after Undo clears the Redo history branch.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Version A', click Undo, then type 'Version B'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Redo button becomes disabled and cannot restore 'Version A'"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-010",
+    "title": "Verify Undo after text formatting (Bold / Italic / Underline)",
+    "description": "Validates applying Bold then pressing Undo reverts text to unformatted state.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and apply Bold formatting"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify bold styling is stripped while preserving original text string"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-011",
+    "title": "Verify Redo after text formatting Undo",
+    "description": "Validates Redo restores formatting styling on previously selected text.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Undo bold formatting"
+      },
+      {
+        "type": "action",
+        "description": "Click Redo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text returns to bold formatting"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-012",
+    "title": "Verify Undo after table insertion removes entire table",
+    "description": "Validates inserting a table and undoing removes table DOM structure completely.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert a 3x3 table into document"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify table element is completely removed from document workspace"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-013",
+    "title": "Verify Redo after table insertion re-renders table with exact structure",
+    "description": "Validates Redo restores table with all cells, rows, and columns intact.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Undo table insertion"
+      },
+      {
+        "type": "action",
+        "description": "Click Redo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 3x3 table re-renders in original position"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-014",
+    "title": "Verify Undo after figure or image insertion",
+    "description": "Validates undoing figure insertion removes figure container from document.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert a figure/picture into active page"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify figure element is removed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-015",
+    "title": "Verify Undo after page break insertion",
+    "description": "Validates undoing manual page break removes Page 2 and returns content to Page 1.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert page break via Ctrl+Enter"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Page 2 is removed and document returns to 1 page"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-016",
+    "title": "Verify Undo dropdown menu displays history action list",
+    "description": "Validates clicking chevron next to Undo button opens dropdown showing recent undoable actions.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform typing and formatting actions"
+      },
+      {
+        "type": "action",
+        "description": "Click dropdown chevron next to Undo button in Home ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify undo dropdown list appears displaying action descriptions"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-017",
+    "title": "Verify multi-action Undo via Undo dropdown list selection",
+    "description": "Validates selecting multiple actions in undo dropdown executes undoMultiple(n).",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open undo dropdown and hover to select top 3 actions"
+      },
+      {
+        "type": "action",
+        "description": "Click to confirm multi-undo"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all 3 selected actions are undone in single execution"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-018",
+    "title": "Verify Redo dropdown menu multi-action execution",
+    "description": "Validates selecting items in redo dropdown restores multiple actions simultaneously.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform multi-undo"
+      },
+      {
+        "type": "action",
+        "description": "Open redo dropdown and select top 2 actions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 2 actions are re-applied simultaneously"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-019",
+    "title": "Verify rapid repeated Undo clicks do not crash editor state",
+    "description": "Validates clicking Undo rapidly 10 times maintains stability without throwing null reference errors.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Rapidly click Undo button 10 times consecutively"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify editor state reaches earliest available state gracefully without console errors"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-020",
+    "title": "Verify editor focus preservation after Undo toolbar click",
+    "description": "Validates clicking Undo toolbar button prevents focus loss and keeps caret in editable document.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type text with active caret"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button in toolbar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document retains active cursor focus and typing can resume immediately"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "UNDO-021",
+    "title": "Verify Undo after deleting a table row",
+    "description": "Validates undoing row deletion restores row with original cell values intact.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Delete second row of table containing 'Priya | Testing'"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify deleted row is restored in table with text intact"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "UNDO-022",
+    "title": "Verify Undo after Style application reverts formatting to previous style",
+    "description": "Validates applying Heading 1 style and clicking Undo reverts text back to Normal style.",
+    "category": "Undo / Redo",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Apply Heading 1 style to current paragraph"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify paragraph styling reverts to Normal style typography"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-001",
+    "title": "Verify Save button in Editor Header saves active document",
+    "description": "Validates clicking Save button in header persists document model via documentService.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type updates into document workspace"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button in EditorHeader"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify success toast notification 'Document saved successfully' appears"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify save status indicator updates to saved/synced"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-002",
+    "title": "Verify Save shortcut Ctrl+S triggers save action",
+    "description": "Validates pressing keyboard shortcut Ctrl+S intercepts default browser behavior and executes editor save.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Press Ctrl+S while editing document"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify browser save dialog is prevented and editor save process is triggered"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-003",
+    "title": "Verify Save operation on empty document",
+    "description": "Validates saving an empty document succeeds with valid default empty model structure.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Clear document to empty page"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document saves without validation exception"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "SAVE-004",
+    "title": "Verify Save after inserting complex rich text and formatting",
+    "description": "Validates bold, italic, font sizes, and color styles persist accurately after save.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Format text with bold, red color, and 18px font size"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify saved payload contains complete inline style definitions"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-005",
+    "title": "Verify Save after inserting table structure",
+    "description": "Validates table elements and cell data are serialized and saved successfully.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert table with sample rows and cell data"
+      },
+      {
+        "type": "action",
+        "description": "Click Save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify save completes successfully and table data persists"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-006",
+    "title": "Verify Save after inserting figures and charts",
+    "description": "Validates figure models and configurations are included in document save payload.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert a chart figure with data series"
+      },
+      {
+        "type": "action",
+        "description": "Click Save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify figure entity ID and options are persisted in document model"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-007",
+    "title": "Verify Save As dialog opens with document title and format options",
+    "description": "Validates clicking Save As opens modal dialog displaying filename input and format select.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Save As option in HeaderActions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Save As modal dialog opens with document title input and format options"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-008",
+    "title": "Verify Save As with valid new filename",
+    "description": "Validates entering new document name 'Project_Report_Final' clones document under new name.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Save As dialog, enter 'Project_Report_Final'"
+      },
+      {
+        "type": "action",
+        "description": "Click Confirm / Save button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify modal closes and active document title updates to 'Project_Report_Final'"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-009",
+    "title": "Verify Save As validation on empty filename",
+    "description": "Validates clearing filename field prevents submission and displays validation error.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Save As dialog and clear filename input to empty"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation error 'Document name is required' is displayed and modal remains open"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "SAVE-010",
+    "title": "Verify Save As validation against invalid file characters",
+    "description": "Validates filename containing illegal filesystem characters (/ \\ : * ? < > |) is rejected.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enter 'Invalid/Report*Name?' in Save As dialog"
+      },
+      {
+        "type": "action",
+        "description": "Submit dialog"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify warning or sanitization occurs preventing invalid filesystem characters"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "SAVE-011",
+    "title": "Verify Cancel button in Save As dialog closes without saving",
+    "description": "Validates clicking Cancel dismisses Save As modal and retains original document state.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Save As dialog and type new name"
+      },
+      {
+        "type": "action",
+        "description": "Click Cancel button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify modal closes and document name remains unchanged"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "SAVE-012",
+    "title": "Verify Export document as PDF format",
+    "description": "Validates selecting Export PDF triggers print/PDF compilation service.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Export dropdown in HeaderActions and select 'Export as PDF'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify PDF generation service is invoked without throwing client errors"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-013",
+    "title": "Verify Export document as DOCX format",
+    "description": "Validates selecting Export DOCX compiles document model into downloadable .docx file.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Export dropdown and select 'Export as Word (.docx)'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify browser download is triggered with file extension .docx"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-014",
+    "title": "Verify Export document as JSON data backup",
+    "description": "Validates exporting raw document model as JSON file.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Export as JSON' in header export options"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify downloadable .json containing valid schema structure is initiated"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "SAVE-015",
+    "title": "Verify Save with special characters and Unicode in document body",
+    "description": "Validates saving text with emojis and non-Latin characters preserves UTF-8 encoding.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Document test: தமிழ், বাংলা, 🚀, ©, ®'"
+      },
+      {
+        "type": "action",
+        "description": "Click Save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify saved data maintains exact Unicode strings upon reload"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-016",
+    "title": "Verify Save operation when document has no changes (clean state)",
+    "description": "Validates saving unchanged document executes smoothly without unnecessary dirty state alarms.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Save immediately after a successful save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify system indicates document is already up to date"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "SAVE-017",
+    "title": "Verify Save resilience during simulated API error",
+    "description": "Validates user is alerted with error toast when save network request fails, without losing in-memory edits.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate server 500 error on document save endpoint"
+      },
+      {
+        "type": "action",
+        "description": "Click Save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify error toast 'Failed to save document' is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify in-memory document content is preserved for retry"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-018",
+    "title": "Verify Save after performing Undo and Redo",
+    "description": "Validates saving after an undo operation persists the undone state, not the discarded edit.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type text, apply bold, click Undo"
+      },
+      {
+        "type": "action",
+        "description": "Click Save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify saved document matches active undone state (text without bold)"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-019",
+    "title": "Verify Auto-Save timer trigger in background",
+    "description": "Validates document auto-saves periodically after edits without manual button click.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Make changes and wait for auto-save interval"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify auto-save status indicator confirms background synchronization"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "SAVE-020",
+    "title": "Verify New Document action in Editor Header",
+    "description": "Validates clicking New Document prompts confirmation if unsaved changes exist and resets to empty canvas.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'New Document' in header actions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify confirmation dialog warns about unsaved changes if dirty"
+      },
+      {
+        "type": "action",
+        "description": "Confirm creation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify fresh clean document workspace is initialized"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-021",
+    "title": "Verify Import file functionality in Editor Header",
+    "description": "Validates file upload button accepts valid text or document formats and loads into editor.",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Import/Upload button in header"
+      },
+      {
+        "type": "action",
+        "description": "Upload sample test file (.txt or .docx)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify parsed file content is inserted into active document workspace"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "SAVE-022",
+    "title": "Verify Print document action invokes browser print preview",
+    "description": "Validates printService prepares printable DOM view and opens window.print().",
+    "category": "Save / Save As",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Print button in header actions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify printService triggers print dialog with clean @media print styles"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-001",
+    "title": "Verify Insert Tab navigation in Ribbon Toolbar",
+    "description": "Validates clicking Insert tab displays page, table, links, and symbol controls.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Insert' tab in ribbon toolbar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify InsertTab ribbon items are rendered visibly"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-002",
+    "title": "Verify Add Page button creates new sequential page",
+    "description": "Validates clicking 'Add Page' (FilePlus) adds a page to document model and DOM.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Insert ribbon, click 'Add Page' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify new Page 2 container appears in workspace"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify activePage state updates to 2"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-003",
+    "title": "Verify Page Break button in Insert ribbon",
+    "description": "Validates clicking Page Break button splits document at cursor position.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Place cursor mid-paragraph"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Page Break' button in Insert ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify subsequent text moves to the top of newly created following page"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-004",
+    "title": "Verify Remove Page button deletes current page",
+    "description": "Validates clicking Remove Page (Trash2) button removes active page when multiple pages exist.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Page 2 of a 2-page document"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Remove Page' in Insert ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Page 2 is removed and document displays 1 page"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-005",
+    "title": "Verify Remove Page button disabled when only one page exists",
+    "description": "Validates Remove Page button is disabled when document contains only 1 page.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Ensure document has exactly 1 page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'Remove Page' button is disabled to prevent zero-page state"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-006",
+    "title": "Verify Page Number dropdown opens with position choices",
+    "description": "Validates Page Number menu reveals 'Top of Page', 'Bottom of Page', and 'Format Page Numbers'.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Page Number' dropdown trigger in Insert ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dropdown content displays Top of Page, Bottom of Page, and Format options"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-007",
+    "title": "Verify inserting page numbers at Bottom of Page (Center aligned)",
+    "description": "Validates selecting Bottom Center page number injects page number field into footer.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Page Number menu, select Bottom of Page -> Center"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify footer displays centered dynamic page number badge"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-008",
+    "title": "Verify Format Page Numbers dialog opens and updates numbering style",
+    "description": "Validates opening Format Page Numbers modal allows switching between 1,2,3 and i,ii,iii Roman numerals.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Format Page Numbers...' from dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Dialog with numbering format selector opens"
+      },
+      {
+        "type": "action",
+        "description": "Select 'i, ii, iii' format and click OK"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page numbers render as Roman numerals"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-009",
+    "title": "Verify Remove Page Numbers clears page numbers from headers and footers",
+    "description": "Validates selecting Remove Page Numbers strips numbering fields across pages.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Page Number -> 'Remove Page Numbers'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify footer page number elements are cleared"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-010",
+    "title": "Verify inserting external hyperlink via Links module",
+    "description": "Validates inserting web link embeds clickable <a> element with href attribute.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Links overlay panel"
+      },
+      {
+        "type": "action",
+        "description": "Enter display text 'Company Website' and target 'https://example.com'"
+      },
+      {
+        "type": "action",
+        "description": "Click Insert Link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify <a href='https://example.com'>Company Website</a> appears in document"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-011",
+    "title": "Verify Bare Links conversion tool in Links module",
+    "description": "Validates clicking Bare Links automatically detects raw URL text in document and converts into hyperlinks.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type raw URL 'https://testsite.org/docs' in document text"
+      },
+      {
+        "type": "action",
+        "description": "Click 'BARE LINKS (Convert Raw URLs)' in Links panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify plain text is transformed into live clickable anchor tag"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Links History records newly converted link"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-012",
+    "title": "Verify internal document bookmark creation",
+    "description": "Validates creating a bookmark attaches anchor ID to selected document location.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select section title 'Executive Summary'"
+      },
+      {
+        "type": "action",
+        "description": "Add bookmark named 'exec_summary' via Links panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify bookmark tag data-bookmark-id='exec_summary' is attached in document model"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-013",
+    "title": "Verify cross-reference link insertion pointing to bookmark",
+    "description": "Validates inserting cross-reference generates internal jump link pointing to target ID.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Links panel, switch to 'CROSS REFERENCES' tab"
+      },
+      {
+        "type": "action",
+        "description": "Select 'exec_summary' bookmark and insert reference"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify link with href='#exec_summary' is inserted"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-014",
+    "title": "Verify clicking document link navigates externally or internally",
+    "description": "Validates delegated click handler intercepts cross-references to scroll to anchor.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click cross-reference link with href='#exec_summary'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify viewport scrolls smoothly to target section heading"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-015",
+    "title": "Verify inserting special symbols from Symbols module",
+    "description": "Validates selecting a symbol from Symbols palette inserts character at caret position.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Symbols panel from sidebar"
+      },
+      {
+        "type": "action",
+        "description": "Click copyright symbol '©'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify '©' character is inserted into document at cursor"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-016",
+    "title": "Verify inserting mathematical symbols (∑, √, π, ∞)",
+    "description": "Validates inserting math symbols preserves unicode typography.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Symbols panel, insert '∑' and 'π'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify '∑' and 'π' characters render accurately"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-017",
+    "title": "Verify inserting table from Insert ribbon",
+    "description": "Validates selecting table dimensions from grid picker embeds table in document.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Table dropdown in Insert ribbon"
+      },
+      {
+        "type": "action",
+        "description": "Select 3x2 grid dimensions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 3 column by 2 row table is rendered in active page"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-018",
+    "title": "Verify inserting image/picture from Figures module",
+    "description": "Validates selecting image figure inserts Picture entity into document model.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Figures panel and select Picture upload/insert"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify picture container mounts with resize handles"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-019",
+    "title": "Verify inserting chart figure",
+    "description": "Validates inserting bar or line chart mounts interactive Chart component.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Figures -> Chart and select 'Bar Chart'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ChartHydration mounts chart with SVG elements and data series"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-020",
+    "title": "Verify inserting Shape figure",
+    "description": "Validates inserting rectangle or circle shape mounts Shape component.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Figures -> Shapes and select 'Rectangle'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify rectangle shape renders on document canvas"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-021",
+    "title": "Verify inserting SmartArt graphic",
+    "description": "Validates inserting SmartArt diagram renders structured layout nodes.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Figures -> SmartArt and insert Process diagram"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify SmartArtHydration component renders diagram nodes"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-022",
+    "title": "Verify inserting object between existing paragraphs preserves surrounding text",
+    "description": "Validates placing cursor between Paragraph 1 and 2 and inserting an object does not truncate text.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Place cursor between two paragraphs"
+      },
+      {
+        "type": "action",
+        "description": "Insert a horizontal divider line or table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Paragraph 1 remains above and Paragraph 2 remains below without content loss"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INSERT-023",
+    "title": "Verify cancel link insertion dialog",
+    "description": "Validates closing link input modal without saving commits no changes.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open link modal, type URL, and click Cancel or press Escape"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify modal closes and document content remains unmodified"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "INSERT-024",
+    "title": "Verify validation on invalid URL protocol in link insertion",
+    "description": "Validates entering malformed URL shows input validation alert.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enter 'javascript:alert(1)' in link URL field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation rejects unsafe URI scheme"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-025",
+    "title": "Verify rapid consecutive page insertions maintain sequential page integrity",
+    "description": "Validates clicking Add Page 5 times in quick succession generates exactly 5 pages with valid IDs.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Add Page' button 5 times rapidly"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify model contains exactly 6 pages (Page 1 through 6) with distinct keys"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INSERT-026",
+    "title": "Verify inserting icon from Icon library",
+    "description": "Validates selecting an SVG icon from Icon gallery inserts scalable vector symbol.",
+    "category": "Insert",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Figures -> Icons and click 'Checkmark' icon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify IconHydration renders SVG icon inside document"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-001",
+    "title": "Verify Layout Tab navigation in Ribbon Toolbar",
+    "description": "Validates clicking Layout tab in ribbon reveals Page Setup, Margins, Orientation, Size, and Page Background controls.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Layout' tab in ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify LayoutTab ribbon controls mount visibly"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-002",
+    "title": "Verify Margins dropdown presets (Normal, Narrow, Moderate, Wide)",
+    "description": "Validates Margins menu provides standard standard presets.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Margins' dropdown button in Layout ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dropdown lists Normal (1 in), Narrow (0.5 in), Moderate, and Wide options"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-003",
+    "title": "Verify applying 'Narrow' margins updates page padding",
+    "description": "Validates selecting Narrow margins updates documentSection margin configuration.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Narrow' from Margins dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document page padding reduces to 0.5in (48px)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document model records updated margins: { top: 48, right: 48, bottom: 48, left: 48 }"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-004",
+    "title": "Verify Orientation toggle from Portrait to Landscape",
+    "description": "Validates switching orientation swaps page width and height dimensions.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Orientation' dropdown and select 'Landscape'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document page width expands and height decreases (width > height)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify section model reflects orientation: 'landscape'"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-005",
+    "title": "Verify Orientation toggle from Landscape back to Portrait",
+    "description": "Validates returning orientation to Portrait restores standard vertical dimensions.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Portrait' in Orientation dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page dimensions revert to vertical portrait (height > width)"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-006",
+    "title": "Verify Page Size dropdown with paper standards (Letter, Legal, A4, Executive, A3)",
+    "description": "Validates Size dropdown lists standard paper sizes with dimensions.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Size' dropdown in Layout ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Letter (8.5x11 in), Legal (8.5x14 in), A4 (8.27x11.69 in), and A3 are listed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-007",
+    "title": "Verify search filter within Page Size dropdown",
+    "description": "Validates typing in the Size search input filters the paper size list dynamically.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Size dropdown and type 'Legal' in search box"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only 'Legal' size option remains visible in dropdown list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-008",
+    "title": "Verify applying 'Legal' page size updates page height",
+    "description": "Validates selecting Legal expands vertical page dimension to 14 inches.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Legal' from Size dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page container height updates to reflect Legal dimensions"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-009",
+    "title": "Verify Columns dropdown options (One, Two, Three, Left, Right)",
+    "description": "Validates Columns menu options for multi-column text layout.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Columns' dropdown button in Layout ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify options for One, Two, Three, Left, and Right columns are listed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-010",
+    "title": "Verify applying 'Two Columns' layout splits content into two text columns",
+    "description": "Validates selecting Two columns applies CSS column-count: 2 to editable body.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Two' from Columns dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page body receives column-count: 2 styling"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-011",
+    "title": "Verify Watermark dropdown presets (CONFIDENTIAL, DRAFT, DO NOT COPY)",
+    "description": "Validates Watermark menu displays standard visual watermark stamps.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Watermark' dropdown in Page Background section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify presets for CONFIDENTIAL, DRAFT, and DO NOT COPY are selectable"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-012",
+    "title": "Verify applying 'CONFIDENTIAL' watermark displays diagonal background text",
+    "description": "Validates selecting Confidential renders diagonal semi-transparent watermark across pages.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'CONFIDENTIAL' watermark preset"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify diagonal watermark overlay with text 'CONFIDENTIAL' renders behind content"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-013",
+    "title": "Verify Custom Watermark dialog",
+    "description": "Validates opening Custom Watermark modal allows entering custom text and font opacity.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Custom Watermark...' in Watermark menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dialog opens with watermark text input"
+      },
+      {
+        "type": "action",
+        "description": "Enter 'TOP SECRET' and click Apply"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify watermark text updates to 'TOP SECRET'"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-014",
+    "title": "Verify Remove Watermark clears watermark from document",
+    "description": "Validates selecting Remove Watermark strips watermark layer from all pages.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Remove Watermark' option"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify watermark overlay is removed completely"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-015",
+    "title": "Verify Page Color popover palette selection",
+    "description": "Validates selecting color swatch in Page Color palette changes page background hue.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Page Color' button in Layout ribbon"
+      },
+      {
+        "type": "action",
+        "description": "Select light blue swatch (#E0F2FE)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document page background changes to selected color"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-016",
+    "title": "Verify 'No Color' option resets page background to white/default",
+    "description": "Validates selecting No Color clears custom page background styling.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Page Color palette and click 'No Color'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page background returns to transparent/white default"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "LAYOUT-017",
+    "title": "Verify Page Borders dialog opens with border style, width, and color settings",
+    "description": "Validates Page Borders button opens full border customization dialog.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Page Borders' button in Layout ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Page Borders dialog opens with Style, Width, and Color dropdowns"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-018",
+    "title": "Verify applying solid page border with 2pt width",
+    "description": "Validates configuring solid 2pt border applies outline around document page perimeter.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Page Borders dialog, select Solid style and 2pt width"
+      },
+      {
+        "type": "action",
+        "description": "Click Apply / Save button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page container displays 2px solid border"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-019",
+    "title": "Verify Layout changes trigger overflow re-calculation",
+    "description": "Validates switching from Normal to Wide margins reduces available space and dynamically updates page pagination.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load document with content near bottom margin of Page 1"
+      },
+      {
+        "type": "action",
+        "description": "Apply 'Wide' margins (2 inch left/right)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text overflows to Page 2 automatically due to reduced content area"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "LAYOUT-020",
+    "title": "Verify Header & Footer gallery templates in Layout ribbon",
+    "description": "Validates Header dropdown displays gallery templates (Blank, Three Columns, Alphabet).",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Header' dropdown in Layout ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify HeaderGallery renders selectable header layout templates"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-021",
+    "title": "Verify applying Three Columns Header template",
+    "description": "Validates selecting 3-column header splits header area into Left, Center, and Right editable zones.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'Three Columns' template from Header gallery"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify header displays 3 distinct editable placeholder slots"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "LAYOUT-022",
+    "title": "Verify layout persistence after saving and reloading",
+    "description": "Validates modified margins, orientation, and page size persist after save and page reload.",
+    "category": "Layout",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set Landscape orientation and Narrow margins, then click Save"
+      },
+      {
+        "type": "action",
+        "description": "Reload application"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify reloaded document retains Landscape orientation and Narrow margins"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-001",
+    "title": "Verify Review Tab ribbon navigation and Track Changes controls",
+    "description": "Validates clicking Review tab displays Track Changes toggle, Accept/Reject buttons, and Navigation controls.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Review' tab in ribbon toolbar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Track Changes toggle button and review action controls are mounted"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-002",
+    "title": "Verify Enable Track Changes mode",
+    "description": "Validates clicking 'Track Changes' activates tracking mode and updates status indicators.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Track Changes' button in Review ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Track Changes button indicates active/pressed state"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify useTrackChanges().trackChanges evaluates to true"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-003",
+    "title": "Verify Disable Track Changes mode",
+    "description": "Validates toggling Track Changes off reverts editor to regular editing mode without tracking subsequent edits.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click active 'Track Changes' button to disable"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify tracking is deactivated and new typing commits directly without markup"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-004",
+    "title": "Verify tracking inserted text with visual underline markup",
+    "description": "Validates typing while Track Changes is enabled wraps inserted characters in green underlined markup element.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enable Track Changes"
+      },
+      {
+        "type": "action",
+        "description": "Type 'This is reviewed insertion' into document"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text is rendered inside insertion element with data-tc-id and green underline styling"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify pendingChanges count increments"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-005",
+    "title": "Verify tracking deleted text with strikethrough markup",
+    "description": "Validates deleting text with Track Changes enabled retains characters visually with red strikethrough styling.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select existing text 'Original phrase' and press Backspace with Track Changes enabled"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'Original phrase' is marked with red strikethrough instead of being destroyed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify deletion change is registered in pendingChanges queue"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-006",
+    "title": "Verify Show/Hide Markup toggle in Review ribbon",
+    "description": "Validates toggling markup visibility hides tracked insertions/deletions previewing final clean state.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Show Markup' toggle button to hide markup"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify strikethrough deleted text is hidden and inserted text appears normal"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Show Markup' again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify markup annotations reappear"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TRACK-007",
+    "title": "Verify Accept single active tracked change",
+    "description": "Validates clicking 'Accept' button accepts currently highlighted insertion, committing text cleanly.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Place cursor inside tracked insertion"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Accept' button in Review ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify insertion markup is converted to standard permanent text"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify pending change is removed from list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-008",
+    "title": "Verify Reject single active tracked change",
+    "description": "Validates clicking 'Reject' button discards active tracked insertion, removing characters.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Place cursor inside tracked insertion"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Reject' button in Review ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify inserted text is completely removed from document"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-009",
+    "title": "Verify Accept tracked deletion completely removes deleted text",
+    "description": "Validates accepting a deletion confirms removal of the strikethrough text from DOM.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus tracked deletion item"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Accept'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify marked deleted text is permanently expunged from document"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-010",
+    "title": "Verify Reject tracked deletion restores original text cleanly",
+    "description": "Validates rejecting a deletion restores text to standard active state without strikethrough.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus tracked deletion item"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Reject'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text returns to normal undeleted state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-011",
+    "title": "Verify Accept All changes commits all pending revisions",
+    "description": "Validates clicking 'Accept All' applies all pending insertions and deletions across whole document.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create 3 insertions and 2 deletions in document"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Accept All' button in Review ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all insertions become permanent and all deletions are purged"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify pendingChanges array is empty (count = 0)"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-012",
+    "title": "Verify Reject All changes reverts all pending revisions",
+    "description": "Validates clicking 'Reject All' cancels all pending insertions and deletions, restoring original text.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create multiple tracked edits"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Reject All' button in Review ribbon"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document returns completely to pre-tracking state"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify pendingChanges count is 0"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-013",
+    "title": "Verify Next Change navigation button",
+    "description": "Validates clicking 'Next' advances active focus to the next revision sequentially.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create changes on Page 1 and Page 2"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Next Change' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify focus and activeChangeId advance to the subsequent tracked change"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TRACK-014",
+    "title": "Verify Previous Change navigation button",
+    "description": "Validates clicking 'Previous' moves focus back to previous tracked change in document order.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to second change"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Previous Change' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify active focus shifts back to first change"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TRACK-015",
+    "title": "Verify Track Changes sidebar panel displays change cards list",
+    "description": "Validates opening Track Changes side panel renders summary card for each pending revision.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Track Changes panel from sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify list of revision cards displays author, type, and snippet for each change"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TRACK-016",
+    "title": "Verify clicking revision card in sidebar scrolls document to change position",
+    "description": "Validates selecting change card highlights and scrolls corresponding markup into view.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click revision card in sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify corresponding tracked element in document body is focused and highlighted"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TRACK-017",
+    "title": "Verify accepting change from sidebar revision card",
+    "description": "Validates individual Accept button on sidebar change card resolves that specific revision.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click checkmark icon on specific sidebar change card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify change is accepted in document and card is removed from sidebar list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-018",
+    "title": "Verify rejecting change from sidebar revision card",
+    "description": "Validates individual Reject (X) button on sidebar change card rejects revision.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'X' icon on specific sidebar change card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify change is rejected and card is removed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-019",
+    "title": "Verify empty Track Changes panel display when no revisions exist",
+    "description": "Validates Track Changes panel displays clean empty state 'No pending changes' when queue is empty.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Track Changes panel with 0 pending changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify empty state message 'No pending revisions found' is displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TRACK-020",
+    "title": "Verify Undo operation on tracked change creation",
+    "description": "Validates pressing Undo after creating a tracked insertion rolls back the insertion.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type tracked insertion"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Z"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify tracked insertion is undone and removed from pending queue"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-021",
+    "title": "Verify Redo operation on tracked change creation",
+    "description": "Validates pressing Redo restores the previously undone tracked revision.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Undo tracked insertion"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Y"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify tracked insertion is restored with pending status"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-022",
+    "title": "Verify Save operation persists tracked changes in document model",
+    "description": "Validates saving document preserves unaccepted revisions so reviewing can continue on next session.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create 2 tracked revisions"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button"
+      },
+      {
+        "type": "action",
+        "description": "Reload document"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the 2 revisions remain visible with markup and pending status intact"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TRACK-023",
+    "title": "Verify formatting changes tracking when style is modified",
+    "description": "Validates applying bold or underline with tracking on records formatting revision annotation.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enable Track Changes, select text, and apply Bold"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify change is logged as formatting modification in review tracker"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TRACK-024",
+    "title": "Verify disabled Accept/Reject buttons when no changes are pending",
+    "description": "Validates Accept All and Reject All ribbon controls are disabled when pendingChanges is empty.",
+    "category": "Track Changes",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Ensure document has 0 tracked changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'Accept All' and 'Reject All' buttons have disabled styling"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "FIG-001",
+    "title": "Verify Figures module navigation in sidebar",
+    "description": "Validates opening Figures panel renders categories: Pictures, Icons, Shapes, Charts, and SmartArt.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Figures icon in workspace sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Figures panel mounts displaying figure category navigation"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-002",
+    "title": "Verify Figure isolation: Selecting Chart does NOT display Shapes or mixed figures",
+    "description": "CRITICAL REGRESSION: Validates opening Chart tool presents only chart options and does not inject unrelated shapes or icon artifacts.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Figures -> Chart section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ONLY chart types (Bar, Line, Pie, Column) are presented"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no geometric shapes or miscellaneous icons contaminate the chart interface"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-003",
+    "title": "Verify Figure isolation: Selecting Shapes does NOT display Chart or SmartArt components",
+    "description": "CRITICAL REGRESSION: Validates opening Shapes presents pure shape palette without chart dialogs or extraneous nodes.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Figures -> Shapes section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only geometric shape templates (Rectangle, Circle, Arrow, Star) are rendered"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify zero chart widgets or SmartArt diagrams appear in the selection panel"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-004",
+    "title": "Verify inserting a 2D Bar Chart figure into document",
+    "description": "Validates selecting Bar Chart inserts ChartHydration container with SVG bar chart rendering.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Bar Chart' in Chart figures menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Chart figure container mounts in active page with default data series"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-005",
+    "title": "Verify Chart context menu opening on right click",
+    "description": "Validates right-clicking a chart opens ChartContextMenu with Edit Data, Change Chart Type, and Delete options.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Right click on inserted chart element"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ChartContextMenu mounts displaying chart editing actions"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-006",
+    "title": "Verify Chart Design Tab activates in ribbon when chart is selected",
+    "description": "Validates selecting chart figure dynamically switches active ribbon tab to ChartDesignTab.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click to select chart in document"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ribbon displays 'Chart Design' and 'Chart Format' contextual tabs"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-007",
+    "title": "Verify changing Chart Type from Bar to Line chart",
+    "description": "Validates selecting Line Chart in ChartDesignTab transforms chart rendering to line graph.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Chart Design ribbon, select 'Change Type' -> 'Line'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify chart SVG re-renders as line series preserving underlying data points"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-008",
+    "title": "Verify modifying chart data values in Chart Data Dialog",
+    "description": "Validates updating spreadsheet data grid in chart modal updates rendered chart series.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Edit Data' in Chart Design ribbon"
+      },
+      {
+        "type": "action",
+        "description": "Change first series value from 10 to 45 and save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify chart bar height reflects new value 45"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-009",
+    "title": "Verify inserting Rectangle shape figure",
+    "description": "Validates selecting Rectangle in Shapes gallery renders SVG rectangle with border and fill.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Shapes panel, select 'Rectangle'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ShapeHydration mounts rectangle shape container in document"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-010",
+    "title": "Verify shape selection and bounding box resize handles",
+    "description": "Validates clicking shape activates bounding box with 8 circular resize handles.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click inserted rectangle shape"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selection outline and 8 resize control points appear around perimeter"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-011",
+    "title": "Verify shape fill color modification",
+    "description": "Validates changing shape fill color updates SVG fill property.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Shape Format toolbar and select green fill (#22C55E)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify shape fill attribute updates to green color"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-012",
+    "title": "Verify shape outline stroke width and color modification",
+    "description": "Validates changing border stroke updates SVG stroke-width and stroke color.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set shape border width to 3px and color to black"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify shape renders with 3px black stroke"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-013",
+    "title": "Verify shape deletion via Delete key",
+    "description": "Validates pressing Delete while shape is selected removes shape completely.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select shape and press Delete key"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify shape is removed from document canvas and figure model"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-014",
+    "title": "Verify inserting Picture/Image figure via URL or file",
+    "description": "Validates inserting picture renders PictureHydration container with valid img element.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Figures -> Pictures, insert sample image"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify PictureHydration mounts with valid img src and aspect-ratio container"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-015",
+    "title": "Verify Picture caption insertion and editing",
+    "description": "Validates adding caption attaches editable 'Figure 1: Sample caption' below image.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select picture and click 'Add Caption'"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Figure 1: Architectural diagram'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify caption renders beneath image and persists with figure model"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-016",
+    "title": "Verify inserting SmartArt Process diagram",
+    "description": "Validates selecting Process SmartArt renders sequential step nodes with text placeholders.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Figures -> SmartArt, select 'Process Flow'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify SmartArtHydration renders 3 step cards connected with directional arrows"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-017",
+    "title": "Verify editing text within SmartArt node",
+    "description": "Validates typing into SmartArt step node updates step title.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click into Step 1 node of SmartArt diagram"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Discovery Phase'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify node displays 'Discovery Phase'"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-018",
+    "title": "Verify adding a node to SmartArt diagram",
+    "description": "Validates clicking 'Add Step' in SmartArt controls inserts fourth node in sequence.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In SmartArt controls, click 'Add Step'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify diagram expands to 4 sequential steps"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-019",
+    "title": "Verify figure positioning: In line with text vs floating wrap",
+    "description": "Validates setting text wrapping to 'Square' allows text to flow around figure perimeter.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select figure and set Text Wrap to 'Square'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text paragraphs flow around figure boundary without overlapping"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-020",
+    "title": "Verify dragging figure position across document page",
+    "description": "Validates drag-and-drop repositioning updates figure top/left coordinates.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Drag floating figure 100px to the right"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify figure coordinate properties reflect new placement"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-021",
+    "title": "Verify Undo operation after figure insertion removes figure",
+    "description": "Validates pressing Ctrl+Z immediately after adding figure removes figure from document.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert circle shape"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify circle shape is removed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-022",
+    "title": "Verify Redo operation restores undone figure",
+    "description": "Validates pressing Redo re-renders figure with previous dimensions and position.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Undo circle insertion"
+      },
+      {
+        "type": "action",
+        "description": "Click Redo button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify circle shape re-renders"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-023",
+    "title": "Verify figure persistence across Save and Reload",
+    "description": "Validates figures survive document save and reload without data corruption.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert chart and shape, then click Save"
+      },
+      {
+        "type": "action",
+        "description": "Reload application"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify both chart and shape figures rehydrate with exact options"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-024",
+    "title": "Verify inserting multiple distinct figures on the same page",
+    "description": "Validates document supports simultaneous presence of picture, shape, and chart on single page.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert 1 image, 1 rectangle shape, and 1 bar chart"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all 3 figures coexist on Page 1 without conflicting DOM IDs or visual collision"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "FIG-025",
+    "title": "Verify figure deletion via context menu",
+    "description": "Validates right-clicking figure and selecting 'Delete Figure' removes item.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Right-click chart and select 'Delete' from context menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify chart is removed from canvas"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "FIG-026",
+    "title": "Verify figure selection deselects when clicking blank canvas area",
+    "description": "Validates clicking away from selected figure clears bounding box and contextual ribbon tabs.",
+    "category": "Figures",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select figure, then click on blank page text area"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify figure bounding box outline disappears and ribbon reverts to standard Home tab"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TABLE-001",
+    "title": "Verify Tables module navigation in workspace sidebar",
+    "description": "Validates clicking Tables icon in sidebar opens Tables panel with insertion and styling options.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Tables icon in sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Tables panel mounts with table grid picker and options"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-002",
+    "title": "Verify TableGridPicker interactive grid selection (3x3 table)",
+    "description": "Validates hovering 3x3 cells in TableGridPicker highlights cells and clicking inserts 3x3 table.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Hover over 3x3 cells in TableGridPicker"
+      },
+      {
+        "type": "action",
+        "description": "Click to confirm insertion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 3 row by 3 column table element appears in document body"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-003",
+    "title": "Verify minimum table size insertion (1x1 table)",
+    "description": "Validates inserting single cell 1x1 table renders valid table structure.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 1x1 in grid picker"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify table with 1 row and 1 cell is rendered"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TABLE-004",
+    "title": "Verify maximum grid picker dimensions (10x8 table)",
+    "description": "Validates selecting full grid picker bounds creates 10 column by 8 row table.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select maximum 10x8 cells in grid picker"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify table with 8 rows and 10 columns renders without layout overflow errors"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TABLE-005",
+    "title": "Verify Custom Table Insert Dialog with row and column inputs",
+    "description": "Validates TableInsertDialog allows specifying custom column and row count numbers.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Insert Table...' in table options"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify TableInsertDialog opens with numeric inputs for Columns and Rows"
+      },
+      {
+        "type": "action",
+        "description": "Enter 5 columns and 4 rows, then click Insert"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 4x5 table is inserted into document"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-006",
+    "title": "Verify TableInsertDialog validation on negative or zero dimensions",
+    "description": "Validates entering 0 columns or negative rows displays validation error.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open TableInsertDialog and enter 0 columns"
+      },
+      {
+        "type": "action",
+        "description": "Click Insert"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation error prevents insertion"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TABLE-007",
+    "title": "Verify typing text into table cells",
+    "description": "Validates clicking inside table cell and typing populates cell content.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click inside Row 1, Column 1 cell"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Header Name'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify cell text renders 'Header Name'"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-008",
+    "title": "Verify Tab key navigation between table cells",
+    "description": "Validates pressing Tab key moves cursor focus forward to adjacent cell.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus Cell (1,1) and press Tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify caret focus moves into Cell (1,2)"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-009",
+    "title": "Verify Tab key on final cell creates a new table row",
+    "description": "Validates pressing Tab in bottom-right cell automatically appends a new row to table.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus last cell of 3x3 table and press Tab key"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify new 4th row is added to table and caret focuses first cell of new row"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-010",
+    "title": "Verify TableControlsOverlay hover handles on rows and columns",
+    "description": "Validates hovering over table displays row and column indicator handles.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Hover mouse over table container"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify TableControlsOverlay displays row add (+) and column add (+) buttons"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-011",
+    "title": "Verify Insert Row Above via table controls",
+    "description": "Validates clicking 'Insert Row Above' adds row above current selection.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Place cursor in Row 2"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Insert Row Above' in TableActionsToolbar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify row count increases by 1 and empty row is inserted above Row 2"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-012",
+    "title": "Verify Insert Row Below via table controls",
+    "description": "Validates clicking 'Insert Row Below' appends row directly beneath current row.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus Row 2 and click 'Insert Row Below'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify row is added below Row 2"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-013",
+    "title": "Verify Insert Column Left via table controls",
+    "description": "Validates adding column to the left increases column count across all rows.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus Column 2 and click 'Insert Column Left'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify column count increases and every row receives new cell at Column 2"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-014",
+    "title": "Verify Insert Column Right via table controls",
+    "description": "Validates adding column to the right inserts new column adjacent to active column.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus Column 2 and click 'Insert Column Right'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify new column appears to the right of Column 2"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-015",
+    "title": "Verify Delete Row removes target row",
+    "description": "Validates clicking 'Delete Row' removes focused row and decrements row count.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus row containing 'Priya | Testing'"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Delete Row'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify target row is removed and remaining rows shift upward"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-016",
+    "title": "Verify Delete Column removes target column",
+    "description": "Validates clicking 'Delete Column' removes focused column across all rows.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus Column 2 and click 'Delete Column'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify column count decreases by 1 and Column 2 cells are removed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-017",
+    "title": "Verify TableFloatingFormatToolbar appearance on cell selection",
+    "description": "Validates selecting multiple cells reveals floating formatting toolbar near selection.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Drag select across 3 table cells"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify TableFloatingFormatToolbar mounts displaying cell formatting options"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TABLE-018",
+    "title": "Verify Cell Background Shading in table",
+    "description": "Validates applying shading color updates background of selected cells.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select header row cells"
+      },
+      {
+        "type": "action",
+        "description": "Apply background shading color #F1F5F9"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify header row cells render with #F1F5F9 background color"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TABLE-019",
+    "title": "Verify TableTemplateList preset styles (Striped, Header Highlight, Minimal)",
+    "description": "Validates applying pre-styled table template applies alternating row stripes and header styling.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In Tables panel, select 'Striped Blue' template"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify table receives striped alternating row CSS styling"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TABLE-020",
+    "title": "Verify Table Context Menu on right click inside cell",
+    "description": "Validates right-clicking inside table cell displays context menu with cell, row, and column actions.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Right click inside table cell"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify TableContextMenu opens with Insert, Delete, and Properties actions"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-021",
+    "title": "Verify Delete Table completely removes table structure",
+    "description": "Validates clicking 'Delete Table' purges table entity completely from document.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Delete Table' in table toolbar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify table element is removed and focus returns to surrounding paragraph"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-022",
+    "title": "Verify Undo and Redo operations on table row insertion",
+    "description": "Validates undoing row insertion removes row, and redoing restores it.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert row below, then press Ctrl+Z"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify added row is removed"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Y"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify added row is restored"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-023",
+    "title": "Verify table data persistence across Save and Reload",
+    "description": "Validates populated table cells, borders, and dimensions persist accurately after save and reload.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Populate table with data, then click Save"
+      },
+      {
+        "type": "action",
+        "description": "Reload application"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify reloaded table displays identical cell data and dimensions"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TABLE-024",
+    "title": "Verify table behavior when inserting long text inside single cell",
+    "description": "Validates cell expands vertically to accommodate multi-line text without breaking table layout.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 50 words into a single table cell"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify cell height expands to wrap text without clipping or distorting adjacent columns"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TABLE-025",
+    "title": "Verify multiple independent tables in same document",
+    "description": "Validates document supports inserting and editing multiple tables without cross-table state pollution.",
+    "category": "Tables",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert Table 1 (2x2) and Table 2 (3x3)"
+      },
+      {
+        "type": "action",
+        "description": "Add row to Table 1 only"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Table 1 expands to 3 rows while Table 2 remains exactly 3 rows"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-001",
+    "title": "Verify Styles module navigation in sidebar",
+    "description": "Validates clicking Styles icon in sidebar mounts StylesPanel with style gallery and search.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Styles icon in workspace sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify StylesPanel opens displaying StyleGallery cards"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-002",
+    "title": "Verify StyleGallery renders default standard style cards",
+    "description": "Validates StyleGallery displays cards for Normal, Heading 1, Heading 2, Heading 3, Title, Subtitle, Quote, Code.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Inspect StyleGallery component"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify cards for Normal, Heading 1, Heading 2, Title, and Subtitle are present"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-003",
+    "title": "Verify applying 'Heading 1' style to selected text",
+    "description": "Validates selecting text and clicking Heading 1 applies 24px bold typography.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select document paragraph"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Heading 1' card in StyleGallery"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected paragraph updates to Heading 1 typography (font-size 24px, font-weight 700)"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-004",
+    "title": "Verify applying 'Title' style to document introduction",
+    "description": "Validates applying Title style sets 28px bold centered typography.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select intro text and click 'Title' style card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text reflects Title style font size and line height"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-005",
+    "title": "Verify applying 'Quote' style formats text with left border indentation",
+    "description": "Validates Quote style applies italic styling and left border quote callout styling.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select paragraph and click 'Quote' style card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text renders italic with left border callout bar"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "STYLE-006",
+    "title": "Verify applying 'Code' style formats text with monospace font and background",
+    "description": "Validates Code style applies monospace font family and light gray background tint.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select snippet text and apply 'Code' style"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text renders in monospace font family with background tint"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "STYLE-007",
+    "title": "Verify reverting to 'Normal' style strips heading formatting",
+    "description": "Validates clicking Normal style on a Heading paragraph restores standard body text size (14px regular).",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select Heading 1 paragraph and click 'Normal' style card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text reverts to standard 14px regular font formatting"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-008",
+    "title": "Verify StyleSearch filtering style gallery by name",
+    "description": "Validates typing 'heading' in StyleSearch input filters list to only show Heading cards.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'Heading' into StyleSearch input field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify gallery displays only Heading 1, Heading 2, and Heading 3 cards"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "STYLE-009",
+    "title": "Verify StyleSearch empty results display",
+    "description": "Validates searching for nonexistent style name displays 'No styles found' notice.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'NonexistentStyleXYZ' into StyleSearch"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify empty search notice 'No matching styles found' is displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "STYLE-010",
+    "title": "Verify StylePreview updates dynamically when hovering style card",
+    "description": "Validates hovering over style card updates StylePreview box to preview typography.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Hover over 'Heading 2' card in gallery"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify StylePreview pane renders preview text formatted with Heading 2 style"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "STYLE-011",
+    "title": "Verify StyleContextMenu right-click actions on style card",
+    "description": "Validates right-clicking style card reveals 'Apply', 'Modify...', and 'Update to Match Selection' options.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Right click on Heading 1 style card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify StyleContextMenu displays Apply, Modify, and Update actions"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-012",
+    "title": "Verify StyleModifyModal opens with style property inputs",
+    "description": "Validates selecting 'Modify...' opens modal dialog with font family, size, color, and spacing fields.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Modify...' in StyleContextMenu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify StyleModifyModal opens showing style attributes for editing"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-013",
+    "title": "Verify modifying style font size in StyleModifyModal",
+    "description": "Validates changing font size in modal updates style definition and all paragraphs using that style.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In StyleModifyModal, change font size to 32px"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all existing Heading 1 paragraphs update to 32px font size"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-014",
+    "title": "Verify modifying style font color in StyleModifyModal",
+    "description": "Validates changing style primary color updates text color across document headings.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "In StyleModifyModal, choose dark blue color (#1E3A8A)"
+      },
+      {
+        "type": "action",
+        "description": "Save style modifications"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify style color updates to #1E3A8A"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-015",
+    "title": "Verify NumericInput validation inside StyleModifyModal",
+    "description": "Validates entering non-numeric characters or values below min in NumericInput is rejected.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enter negative font size '-5' in NumericInput"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify input clamps to minimum valid size (e.g. 1)"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "STYLE-016",
+    "title": "Verify Cancel button in StyleModifyModal discards unsaved style changes",
+    "description": "Validates clicking Cancel dismisses modal without modifying style definition.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Change font family in modal"
+      },
+      {
+        "type": "action",
+        "description": "Click Cancel button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify modal closes and style definition remains unaltered"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "STYLE-017",
+    "title": "Verify 'Update to Match Selection' action in StyleContextMenu",
+    "description": "Validates updating style from selection extracts inline styles from selected text and applies them to style template.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Format a paragraph with 20px purple text"
+      },
+      {
+        "type": "action",
+        "description": "Right click 'Heading 2' card and click 'Update to Match Selection'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Heading 2 definition updates to 20px purple"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-018",
+    "title": "Verify active style card highlighting based on cursor position",
+    "description": "Validates placing cursor inside Heading 1 text highlights the Heading 1 card as active.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click into Heading 1 paragraph in document"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Heading 1 card in StyleGallery displays active border/badge"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "STYLE-019",
+    "title": "Verify Undo operation on style application",
+    "description": "Validates pressing Ctrl+Z after applying style reverts paragraph to prior style.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Apply Heading 1 to paragraph"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Z"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify style reverts to previous style"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-020",
+    "title": "Verify Redo operation on style application",
+    "description": "Validates pressing Ctrl+Y re-applies the undone style.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Undo style application"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Y"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Heading 1 style is re-applied"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-021",
+    "title": "Verify modified styles persistence across Save and Reload",
+    "description": "Validates modified style rules persist in document model and apply correctly upon document reload.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Modify Heading 1 color, apply to text, and click Save"
+      },
+      {
+        "type": "action",
+        "description": "Reload application"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify reloaded document retains modified Heading 1 styling"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "STYLE-022",
+    "title": "Verify applying style to multiple selected paragraphs simultaneously",
+    "description": "Validates selecting 3 paragraphs across line breaks and applying style updates all 3 paragraphs.",
+    "category": "Styles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 3 paragraphs"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Heading 2' in StyleGallery"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all 3 paragraphs are styled with Heading 2 typography"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-001",
+    "title": "Verify Writing module navigation in workspace sidebar",
+    "description": "Validates clicking Writing icon in sidebar opens WritingPanel with formatting and paragraph tools.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Writing icon in sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify WritingPanel mounts displaying Formatting, Case, Alignment, and List sections"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-002",
+    "title": "Verify Bold formatting button in FormattingSection",
+    "description": "Validates selecting text and clicking Bold button applies font-weight 700 / strong tag.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text in document"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Bold' button in FormattingSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected text becomes bold"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Bold button indicates active state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-003",
+    "title": "Verify Italic formatting button in FormattingSection",
+    "description": "Validates selecting text and clicking Italic button applies font-style italic / em tag.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and click 'Italic' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text displays with italic styling"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-004",
+    "title": "Verify Underline formatting button in FormattingSection",
+    "description": "Validates selecting text and clicking Underline applies text-decoration underline.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and click 'Underline' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text displays with underline decoration"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-005",
+    "title": "Verify Strikethrough formatting button in FormattingSection",
+    "description": "Validates selecting text and clicking Strikethrough applies line-through decoration.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and click 'Strikethrough' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text displays line-through decoration"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-006",
+    "title": "Verify Subscript formatting button in FormattingSection",
+    "description": "Validates applying Subscript formats characters below baseline (e.g. H₂O).",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select '2' in 'H2O' and click 'Subscript' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify '2' is rendered as subscript"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-007",
+    "title": "Verify Superscript formatting button in FormattingSection",
+    "description": "Validates applying Superscript formats characters above baseline (e.g. E=mc²).",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select '2' in 'E=mc2' and click 'Superscript' button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify '2' is rendered as superscript"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-008",
+    "title": "Verify Align Left button in AlignmentSection",
+    "description": "Validates clicking Align Left applies text-align: left to current paragraph.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Place cursor in paragraph and click 'Align Left'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify paragraph text-align evaluates to left"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-009",
+    "title": "Verify Align Center button in AlignmentSection",
+    "description": "Validates clicking Align Center centers paragraph text.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Align Center' in AlignmentSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify paragraph text-align evaluates to center"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-010",
+    "title": "Verify Align Right button in AlignmentSection",
+    "description": "Validates clicking Align Right aligns paragraph to the right margin.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Align Right' in AlignmentSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify paragraph text-align evaluates to right"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-011",
+    "title": "Verify Justify button in AlignmentSection",
+    "description": "Validates clicking Justify justifies text evenly between margins.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Justify' in AlignmentSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify paragraph text-align evaluates to justify"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-012",
+    "title": "Verify Case conversion to UPPERCASE in CaseSection",
+    "description": "Validates selecting text and clicking UPPERCASE converts all characters to uppercase.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'sample text' and click 'UPPERCASE' in CaseSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected text transforms to 'SAMPLE TEXT'"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-013",
+    "title": "Verify Case conversion to lowercase in CaseSection",
+    "description": "Validates selecting text and clicking lowercase converts all characters to lowercase.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'SAMPLE TEXT' and click 'lowercase'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected text transforms to 'sample text'"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-014",
+    "title": "Verify Case conversion to Title Case in CaseSection",
+    "description": "Validates selecting text and clicking Title Case capitalizes the first letter of each word.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'the quick brown fox' and click 'Title Case'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected text transforms to 'The Quick Brown Fox'"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-015",
+    "title": "Verify Case conversion to Sentence case in CaseSection",
+    "description": "Validates selecting text and clicking Sentence case capitalizes only initial sentence letters.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select 'FIRST SENTENCE. SECOND SENTENCE.' and click 'Sentence case'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text converts to 'First sentence. Second sentence.'"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-016",
+    "title": "Verify Bullets dropdown and bulleted list creation",
+    "description": "Validates clicking Bullets creates an unordered list (<ul><li>) with bullet markers.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select two paragraphs and click Bullets in ListSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify paragraphs convert to <ul> with two <li> items"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-017",
+    "title": "Verify Numbering dropdown and numbered list creation",
+    "description": "Validates clicking Numbering converts lines into ordered list (<ol><li>) with 1, 2, 3 sequence.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select paragraphs and click Numbering in ListSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify paragraphs convert to sequential numbered list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-018",
+    "title": "Verify Multilevel list dropdown in ListSection",
+    "description": "Validates selecting multilevel list option configures nested indentation hierarchy (1.1, 1.2).",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select Multilevel list template from dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify list adopts hierarchical multilevel styling"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-019",
+    "title": "Verify Font Color palette in FontColorSection",
+    "description": "Validates selecting a color swatch applies color to selected text.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and click blue swatch in FontColorSection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected text receives color: #2563EB styling"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-020",
+    "title": "Verify Highlight color palette and clear highlight",
+    "description": "Validates applying yellow highlight background and clearing it with 'No Color'.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and apply yellow highlight"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text receives background-color: #FEF08A"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Clear Highlight'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify background highlight is removed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-021",
+    "title": "Verify WritingSearch filtering tools in WritingPanel",
+    "description": "Validates typing 'case' in WritingSearch filters sections to show CaseSection.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'case' in WritingSearch input"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify CaseSection remains visible and unrelated tools are filtered"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "WRITE-022",
+    "title": "Verify WritingShortcutsModal dialog opens displaying keyboard shortcuts guide",
+    "description": "Validates clicking keyboard icon in Writing panel opens shortcuts reference guide modal.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click 'Keyboard Shortcuts' button in Writing panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify WritingShortcutsModal opens listing Ctrl+B, Ctrl+I, Ctrl+U, etc."
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "WRITE-023",
+    "title": "Verify keyboard shortcut Ctrl+B toggles Bold",
+    "description": "Validates pressing Ctrl+B toggles bold formatting on selection.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and press Ctrl+B"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text toggles to bold"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+B again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text toggles back to regular"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "WRITE-024",
+    "title": "Verify keyboard shortcut Ctrl+I toggles Italic",
+    "description": "Validates pressing Ctrl+I toggles italic formatting on selection.",
+    "category": "Writing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select text and press Ctrl+I"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text toggles to italic"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-001",
+    "title": "Integration: Insert Table -> Edit Cell -> Apply Bold -> Save -> Reload",
+    "description": "Validates complete lifecycle across Table, Writing, Save, and Persistence components.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert 2x2 table into document"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Revenue' in Cell (1,1) and apply Bold via Ctrl+B"
+      },
+      {
+        "type": "action",
+        "description": "Click Save in EditorHeader"
+      },
+      {
+        "type": "action",
+        "description": "Reload application"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify reloaded document contains 2x2 table with bold 'Revenue' in Cell (1,1)"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-002",
+    "title": "Integration: Apply Style -> Edit Text -> Undo -> Redo",
+    "description": "Validates interoperability between Styles engine and Undo/Redo stack.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Apply Heading 1 style to paragraph"
+      },
+      {
+        "type": "action",
+        "description": "Type ' Revised'"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Z twice"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text and style revert sequentially"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Y twice"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text and Heading 1 style are restored"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-003",
+    "title": "Integration: Enable Track Changes -> Edit Text -> Accept Change -> Save",
+    "description": "Validates Track Changes workflow successfully commits revision and persists clean state.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enable Track Changes in Review ribbon"
+      },
+      {
+        "type": "action",
+        "description": "Type 'Reviewed audit notes'"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Accept' in Review ribbon"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button in header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document saves with accepted clean text and zero pending changes"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-004",
+    "title": "Integration: Enable Track Changes -> Edit Text -> Reject Change -> Save",
+    "description": "Validates rejecting tracked revision discards text and saves unmodified document.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enable Track Changes and insert text 'Discarded text'"
+      },
+      {
+        "type": "action",
+        "description": "Click 'Reject' button"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify 'Discarded text' is omitted from saved document"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-005",
+    "title": "Integration: Insert Figure -> Add Caption -> Move Position -> Save -> Reload",
+    "description": "Validates Figures module persistence including caption and positioning coordinates.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert Chart figure with caption 'Figure 1'"
+      },
+      {
+        "type": "action",
+        "description": "Click Save button"
+      },
+      {
+        "type": "action",
+        "description": "Reload application"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Chart rehydrates in exact position with 'Figure 1' caption"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-006",
+    "title": "Integration: Layout Margins Change -> Insert Table -> Verify Table Width fits Margins",
+    "description": "Validates table insertion honors custom document margins without overflowing printable area.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set Margins to 'Wide' (2 inch left/right)"
+      },
+      {
+        "type": "action",
+        "description": "Insert 3x3 table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify table width matches the reduced content width constraint"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-007",
+    "title": "Integration: Multi-page Document -> Insert Page Break -> Insert Page Numbers -> Check Pagination",
+    "description": "Validates Document overflow engine, Page Break, and dynamic Header/Footer page numbering.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert manual page break creating Page 2"
+      },
+      {
+        "type": "action",
+        "description": "Insert Page Numbers at Bottom Center"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Page 1 displays '1' and Page 2 displays '2'"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-008",
+    "title": "Integration: Table Insertion -> Track Changes -> Delete Table Row -> Verify Tracked Deletion",
+    "description": "Validates Track Changes correctly handles table structural edits.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert table with 3 rows"
+      },
+      {
+        "type": "action",
+        "description": "Enable Track Changes"
+      },
+      {
+        "type": "action",
+        "description": "Delete Row 2"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify row deletion is registered as tracked revision"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-009",
+    "title": "Regression: Table Insertion does not disrupt Text Editing outside table",
+    "description": "REGRESSION: Validates inserting a table leaves preceding and succeeding text paragraphs completely editable.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type Paragraph 1, insert table, type Paragraph 2"
+      },
+      {
+        "type": "action",
+        "description": "Edit text in Paragraph 1"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Paragraph 1 accepts text input normally without table intercepting keystrokes"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-010",
+    "title": "Regression: Figure Insertion does not break Table functionality",
+    "description": "REGRESSION: Validates adding a figure on the same page as a table does not freeze table cell editing.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Insert table and insert shape figure on same page"
+      },
+      {
+        "type": "action",
+        "description": "Click inside table cell and type text"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify cell typing functions normally"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-011",
+    "title": "Regression: Text formatting does not corrupt Document pagination model",
+    "description": "REGRESSION: Validates applying bold or heading styles dynamically recomputes pagination heights without crashing.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Apply Heading 1 style (larger font height)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify pagination model recalculates page boundaries cleanly"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-012",
+    "title": "Regression: Undo does not remove unrelated sibling content",
+    "description": "REGRESSION: Validates undoing an edit in Paragraph 2 does not inadvertently erase Paragraph 1.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type Paragraph 1, then type Paragraph 2"
+      },
+      {
+        "type": "action",
+        "description": "Undo edit in Paragraph 2"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Paragraph 1 remains completely intact"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-013",
+    "title": "Regression: Theme Toggle (Dark / Light) does not alter document content or state",
+    "description": "REGRESSION: Validates toggling theme between light and dark updates CSS variables without modifying document model.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click ThemeToggle in editor header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dark class is toggled on html root"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document text content and active page number remain unchanged"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INTEG-014",
+    "title": "Regression: Rapid panel switching (Writing -> Tables -> Figures -> Styles)",
+    "description": "REGRESSION: Validates rapid switching between sidebar modules does not cause memory leaks or UI unmount crashes.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click Writing, then Tables, then Figures, then Styles icons in rapid succession"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify final panel (Styles) mounts cleanly with zero uncaught runtime exceptions"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INTEG-015",
+    "title": "Integration: Save As new document -> Switch to Dashboard -> Verify document list",
+    "description": "Validates saved document is registered in user document index.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Save document as 'Q3_Final_Release'"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document is indexed with updated timestamp"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-016",
+    "title": "Integration: Bare Links Convertor -> Undo conversion -> Verify original text restored",
+    "description": "Validates Bare Links automated anchor conversion can be cleanly reversed via Undo.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type 'https://sample.com' and click 'Convert Bare Links'"
+      },
+      {
+        "type": "action",
+        "description": "Press Ctrl+Z"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify live anchor converts back to plain text URL string"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INTEG-017",
+    "title": "Integration: Table Column deletion -> Undo -> Verify table geometry and content restored",
+    "description": "Validates complex table undo correctly reconstructs multidimensional cell array.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Delete Column 2 from 3x3 populated table"
+      },
+      {
+        "type": "action",
+        "description": "Click Undo"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Column 2 is restored with exact cell text across all 3 rows"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-018",
+    "title": "Integration: Custom Watermark + Landscape Orientation + Table -> Print Preview",
+    "description": "Validates Print stylesheet accurately prints document containing watermark, custom orientation, and table.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set Landscape, add 'CONFIDENTIAL' watermark, and insert table"
+      },
+      {
+        "type": "action",
+        "description": "Click Print in header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify print preview includes landscape layout, watermark layer, and table"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "INTEG-019",
+    "title": "Regression: Deleting text across multiple pages cleanly coalesces pages",
+    "description": "REGRESSION: Validates selecting text spanning from Page 1 into Page 2 and deleting removes Page 2 when empty.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select cross-page text range across Page 1 and Page 2 boundary and press Delete"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text is deleted and pagination engine collapses trailing empty page"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "INTEG-020",
+    "title": "Integration: Full End-to-End Document Workflow (Draft, Format, Insert Table, Figure, Review, Save)",
+    "description": "Comprehensive end-to-end user journey validating all 10 core components in a single session.",
+    "category": "Cross-Component",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Type document introduction and apply Title style"
+      },
+      {
+        "type": "action",
+        "description": "Apply Bold, Italic, and color to key terms via Writing panel"
+      },
+      {
+        "type": "action",
+        "description": "Insert 3x2 table and populate quarterly metrics"
+      },
+      {
+        "type": "action",
+        "description": "Insert Bar Chart figure from Figures module"
+      },
+      {
+        "type": "action",
+        "description": "Set Page Margins to Moderate and insert Page Numbers at Bottom Center"
+      },
+      {
+        "type": "action",
+        "description": "Enable Track Changes, make revision, and Accept change"
+      },
+      {
+        "type": "action",
+        "description": "Click Save in EditorHeader"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document saves with 0 errors and all components render consistently"
+      }
+    ],
+    "priority": "High"
+  }
+]
