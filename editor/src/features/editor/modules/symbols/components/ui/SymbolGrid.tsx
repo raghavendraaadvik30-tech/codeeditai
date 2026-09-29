@@ -12,7 +12,7 @@ export default function SymbolGrid({
   onSelect,
 }: SymbolGridProps) {
   return (
-    <div className="grid grid-cols-8 gap-1.5">
+    <div className="grid grid-cols-6 gap-2">
       {symbols.map((symbol, index) => (
         <SymbolButton
           key={`${symbol.value}-${index}`}

@@ -452,3 +452,26 @@ del[data-tc*="edit"],
 .thin-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.8);
 }
+
+/* ========================================
+   CUSTOM BULLETS
+======================================== */
+
+ul[data-custom-bullet] {
+  list-style: none !important;
+  padding-left: 1.5em;
+}
+
+ul[data-custom-bullet] > li {
+  list-style: none !important;
+  position: relative;
+}
+
+ul[data-custom-bullet] > li::before {
+  content: attr(data-custom-bullet);
+  position: absolute;
+  left: -1.5em;
+  width: 1.2em;
+  text-align: center;
+  color: inherit;
+}

@@ -35,7 +35,7 @@ import React, {
   useState,
 } from "react";
 
-import type { StyleOverrides, StyleOverride } from "../styles/types/styles.types";
+import type { StyleOverrides, StyleOverride } from "../modules/styles/types/styles.types";
 
 /* ============================================================
    Types

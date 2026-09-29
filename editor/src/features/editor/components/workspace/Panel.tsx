@@ -350,7 +350,7 @@ import type { ComponentType } from "react";
 import { Search } from "lucide-react";
 
 import type { ModuleId } from "../../data/workspaceModules";
-import { StylesPage } from "../../styles";
+import { StylesPage } from "../../modules/styles";
 import { DocumentPage } from "../../modules/document";
 import { TablesPage } from "../../modules/tables";
 import { SettingsPage } from "../../modules/settings";

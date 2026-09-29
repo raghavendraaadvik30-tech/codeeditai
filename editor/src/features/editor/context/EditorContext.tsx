@@ -9,7 +9,7 @@ import React, {
 
 import type { ReactNode, RefObject } from "react";
 
-import type { StyleToken } from "@/features/editor/styles/types/styles.types";
+import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
 import { useDocumentModel } from "../store/documentModel";
 
 export function getCaretCharacterOffsetWithin(element: HTMLElement): number {
@@ -270,7 +270,10 @@ export interface EditorContextType {
    */
   applyFormatCommand: (command: string, value?: string) => void;
   exec: (command: string, value?: string) => void;
-  applyBulletStyle: (style?: any) => void;
+  applyBulletStyle: (
+  bulletChar: string,
+  styleType: string
+) => void;
   applyNumberingStyle: (style?: any) => void;
   applyMultilevelStyle: (style?: any) => void;
   toggleMultilevelList: (type?: any) => void;
@@ -1768,6 +1771,216 @@ export function EditorProvider({
 
   const canUndo = historyIndexRef.current > 0;
   const canRedo = historyIndexRef.current < historyStackRef.current.length - 1;
+const applyBulletStyle = useCallback(
+  (
+    bulletChar: string,
+    styleType: string
+  ) => {
+    const restored =
+      restoreEditorSelection();
+
+    if (!restored) {
+      return;
+    }
+
+    const editor = editorRef.current;
+
+    if (!editor) {
+      return;
+    }
+
+    const selection =
+      window.getSelection();
+
+    if (
+      !selection ||
+      selection.rangeCount === 0
+    ) {
+      return;
+    }
+
+    /*
+     * Find the current list.
+     */
+    const range =
+      selection.getRangeAt(0);
+
+    let currentList:
+      | HTMLUListElement
+      | null = null;
+
+    let node: Node | null =
+      range.startContainer;
+
+    while (
+      node &&
+      node !== editor
+    ) {
+      if (
+        node instanceof
+        HTMLUListElement
+      ) {
+        currentList = node;
+        break;
+      }
+
+      node = node.parentNode;
+    }
+
+    /*
+     * NONE
+     *
+     * Remove the list completely.
+     */
+    if (styleType === "none") {
+      if (currentList) {
+        document.execCommand(
+          "insertUnorderedList"
+        );
+      }
+
+      editor.dispatchEvent(
+        new Event("input", {
+          bubbles: true,
+        })
+      );
+
+      return;
+    }
+
+    /*
+     * If we are not already inside
+     * a bullet list, create one.
+     */
+    if (!currentList) {
+      document.execCommand(
+        "insertUnorderedList"
+      );
+
+      /*
+       * Browser changes the DOM after
+       * insertUnorderedList, so get the
+       * list again.
+       */
+      const newSelection =
+        window.getSelection();
+
+      if (
+        newSelection &&
+        newSelection.rangeCount > 0
+      ) {
+        const newRange =
+          newSelection.getRangeAt(0);
+
+        let newNode: Node | null =
+          newRange.startContainer;
+
+        while (
+          newNode &&
+          newNode !== editor
+        ) {
+          if (
+            newNode instanceof
+            HTMLUListElement
+          ) {
+            currentList = newNode;
+            break;
+          }
+
+          newNode =
+            newNode.parentNode;
+        }
+      }
+    }
+
+    if (!currentList) {
+      return;
+    }
+
+    /*
+     * NORMAL BULLETS
+     */
+    if (
+      styleType === "disc" ||
+      styleType === "circle" ||
+      styleType === "square"
+    ) {
+      currentList.style.listStyleType =
+        styleType;
+
+      currentList.removeAttribute(
+        "data-custom-bullet"
+      );
+
+      currentList
+        .querySelectorAll(":scope > li")
+        .forEach((li) => {
+          li.removeAttribute(
+            "data-custom-bullet"
+          );
+
+          (
+            li as HTMLElement
+          ).style.listStyleType =
+            styleType;
+        });
+    }
+
+    /*
+     * CUSTOM BULLETS
+     *
+     * ★
+     * ✓
+     * ◆
+     * ➤
+     * ☆
+     * ✚
+     */
+    else if (
+      styleType === "custom"
+    ) {
+      currentList.style.listStyleType =
+        "none";
+
+      currentList.setAttribute(
+        "data-custom-bullet",
+        bulletChar
+      );
+
+      currentList
+        .querySelectorAll(":scope > li")
+        .forEach((li) => {
+          li.setAttribute(
+            "data-custom-bullet",
+            bulletChar
+          );
+
+          (
+            li as HTMLElement
+          ).style.listStyleType =
+            "none";
+        });
+    }
+
+    /*
+     * Update editor.
+     */
+    editor.dispatchEvent(
+      new Event("input", {
+        bubbles: true,
+      })
+    );
+
+    setTimeout(() => {
+      restoreEditorSelection();
+    }, 0);
+  },
+  [
+    restoreEditorSelection,
+    editorRef,
+  ]
+);
+
 
   const value: EditorContextType = {
     activePanel,
@@ -1810,8 +2023,9 @@ export function EditorProvider({
     pendingPermissionFile,
     setPendingPermissionFile,
 
-    exec: applyFormatCommand,
-    applyBulletStyle: (style?: any) => applyFormatCommand("insertUnorderedList", style),
+   exec: applyFormatCommand,
+
+applyBulletStyle,
     applyNumberingStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
     applyMultilevelStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
     toggleMultilevelList: (type?: any) => applyFormatCommand("insertOrderedList", type),

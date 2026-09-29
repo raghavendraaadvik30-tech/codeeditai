@@ -83,8 +83,7 @@ export default function WritingPanel() {
           tools={listTools}
           onApplyBullets={applyBullets}
           onApplyNumbering={applyNumbering}
-          onApplyMultilevel={applyMultilevel}
-          onToggleMultilevel={toggleMultilevel}
+        
         />
       </div>
 
@@ -100,7 +99,8 @@ export default function WritingPanel() {
         "
       >
         <p className="text-xs text-slate-500">
-          Tip: Select text first, then choose a writing tool.
+          Tip: Select text first, then choose a
+          writing tool.
         </p>
       </div>
 

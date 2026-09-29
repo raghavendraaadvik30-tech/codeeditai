@@ -6,27 +6,63 @@ interface FormattingSectionProps {
 }
 
 const FORMAT_ICONS: Record<string, React.ReactNode> = {
-  Bold: <span className="text-xl font-bold">B</span>,
-  Italic: <span className="text-xl font-serif italic">I</span>,
+  Bold: (
+    <span className="text-xl font-bold">
+      B
+    </span>
+  ),
+
+  Italic: (
+    <span className="text-xl font-serif italic">
+      I
+    </span>
+  ),
+
   Underline: (
     <span className="text-xl font-serif underline">
       U
     </span>
   ),
+
   Strikethrough: (
-    <span className="text-xl font-serif line-through">
+    <span className="text-xl font-serif font-semibold line-through">
       S
     </span>
   ),
+
   Subscript: (
     <span className="text-lg">
       X<sub>2</sub>
     </span>
   ),
+
   Superscript: (
     <span className="text-lg">
       X<sup>2</sup>
     </span>
+  ),
+};
+
+const FORMAT_LABELS: Record<string, React.ReactNode> = {
+  Strikethrough: (
+    <>
+      <span className="block">Strike</span>
+      <span className="block">through</span>
+    </>
+  ),
+
+  Subscript: (
+    <>
+      <span className="block">Sub</span>
+      <span className="block">script</span>
+    </>
+  ),
+
+  Superscript: (
+    <>
+      <span className="block">Super</span>
+      <span className="block">script</span>
+    </>
   ),
 };
 
@@ -44,7 +80,7 @@ export default function FormattingSection({
         Text Formatting
       </h3>
 
-      <div className="grid grid-cols-6 gap-1.5">
+      <div className="grid grid-cols-6 gap-2">
         {tools.map((tool) => (
           <button
             key={tool.name}
@@ -52,7 +88,7 @@ export default function FormattingSection({
             onClick={() => onApply(tool)}
             className="
               flex
-              h-[76px]
+              h-[84px]
               min-w-0
               flex-col
               items-center
@@ -69,16 +105,36 @@ export default function FormattingSection({
               active:scale-[0.98]
             "
           >
-            <span className="flex h-6 items-center justify-center text-slate-900">
+            {/* Icon */}
+            <span className="flex h-7 items-center justify-center text-slate-900">
               {FORMAT_ICONS[tool.name]}
             </span>
 
-            <span className="mt-1 text-[10px] font-medium text-slate-700">
-              {tool.name}
+            {/* Label */}
+            <span
+              className="
+                mt-1
+                text-center
+                text-[10px]
+                font-medium
+                leading-tight
+                text-slate-700
+              "
+            >
+              {FORMAT_LABELS[tool.name] ?? tool.name}
             </span>
 
+            {/* Shortcut */}
             {tool.shortcut && (
-              <span className="mt-0.5 text-[8px] text-slate-400">
+              <span
+                className="
+                  mt-1
+                  whitespace-nowrap
+                  text-[8px]
+                  leading-none
+                  text-slate-400
+                "
+              >
                 {tool.shortcut}
               </span>
             )}

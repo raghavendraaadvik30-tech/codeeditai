@@ -1,15 +1,10 @@
-import SymbolSearch from "./ui/SymbolSearch";
 import SymbolGroup from "./ui/SymbolGroup";
 
 import { useSymbolsContext } from "../context/SymbolsContext";
 import { useSymbols } from "../hooks/useSymbols";
 
 export default function SymbolsPanel() {
-  const {
-    searchQuery,
-    setSearchQuery,
-    visibleGroups,
-  } = useSymbolsContext();
+  const { visibleGroups } = useSymbolsContext();
 
   const { insertSymbol } = useSymbols();
 
@@ -24,15 +19,6 @@ export default function SymbolsPanel() {
         dark:bg-[#07131E]
       "
     >
-      {/* SEARCH */}
-      <div className="shrink-0 px-4 py-4">
-        <SymbolSearch
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
-      </div>
-
-      {/* SYMBOL CONTENT */}
       <div
         className="
           min-h-0

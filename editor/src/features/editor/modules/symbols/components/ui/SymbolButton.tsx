@@ -9,6 +9,10 @@ export default function SymbolButton({
   symbol,
   onSelect,
 }: SymbolButtonProps) {
+  const isLong =
+    symbol.value.length >= 4 ||
+    symbol.value.includes("/");
+
   return (
     <button
       type="button"
@@ -18,13 +22,15 @@ export default function SymbolButton({
         flex
         h-12
         w-full
+        min-w-0
         items-center
         justify-center
+        overflow-hidden
         rounded-lg
         border
         border-slate-200
         bg-white
-        text-lg
+        px-2
         text-slate-900
         transition
         hover:border-blue-300
@@ -38,7 +44,21 @@ export default function SymbolButton({
         dark:hover:bg-blue-950
       "
     >
-      {symbol.value}
+      <span
+        className={`
+          block
+          whitespace-nowrap
+          text-center
+          leading-none
+          ${
+            isLong
+              ? "text-xs font-medium"
+              : "text-lg"
+          }
+        `}
+      >
+        {symbol.value}
+      </span>
     </button>
   );
 }

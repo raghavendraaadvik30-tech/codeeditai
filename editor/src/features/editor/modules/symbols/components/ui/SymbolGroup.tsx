@@ -15,7 +15,6 @@ export default function SymbolGroup({
 }: SymbolGroupProps) {
   return (
     <section className="mb-6">
-      {/* GROUP HEADER */}
       <div className="mb-3 flex items-center justify-between">
         <h3
           className="
@@ -29,17 +28,11 @@ export default function SymbolGroup({
           {group.name}
         </h3>
 
-        <span
-          className="
-            text-xs
-            text-slate-400
-          "
-        >
+        <span className="text-xs text-slate-400">
           {group.symbols.length}
         </span>
       </div>
 
-      {/* SYMBOLS */}
       <SymbolGrid
         symbols={group.symbols}
         onSelect={onSelect}
