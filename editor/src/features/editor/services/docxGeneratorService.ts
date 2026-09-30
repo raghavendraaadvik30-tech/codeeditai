@@ -225,11 +225,13 @@ interface ParseState {
   fontSize?: string;
   color?: string;
   bg?: string;
+  isHyperlink?: boolean;
   
   listType?: "ul" | "ol" | null;
   listIndex?: number;
   
   partRels: RelationshipItem[];
+  forceInline?: boolean;
 }
 
 interface GridCell {
@@ -247,6 +249,52 @@ interface ExportContext {
   mediaFiles: { filename: string; data: string; base64: boolean }[];
   getNextRelId: () => string;
   imgCounter: { value: number };
+  bookmarkCounter: { value: number };
+  usedBookmarkNames: Set<string>;
+  targetMap: Map<string, string>;
+}
+
+// ── Bookmark sanitization for Word OpenXML (max 40 chars, [a-zA-Z_][a-zA-Z0-9_]*) ──
+function sanitizeBookmarkName(name: string | null | undefined): string {
+  if (!name) return "bm_ref";
+  let clean = name.replace(/^#+/, "").trim();
+  clean = clean.replace(/[^a-zA-Z0-9_]/g, "_");
+  if (!clean) return "bm_ref";
+  if (!/^[a-zA-Z_]/.test(clean)) {
+    clean = `bm_${clean}`;
+  }
+  return clean.substring(0, 40);
+}
+
+function getElementBookmarks(
+  el: HTMLElement,
+  ctx: ExportContext
+): { id: number; name: string }[] {
+  const bookmarks: { id: number; name: string }[] = [];
+  const candidateNames = new Set<string>();
+
+  const dataBm = el.getAttribute("data-bookmark");
+  if (dataBm && dataBm.trim()) candidateNames.add(dataBm.trim());
+
+  const dataBmId = el.getAttribute("data-bookmark-id");
+  if (dataBmId && dataBmId.trim()) candidateNames.add(dataBmId.trim());
+
+  const elId = el.getAttribute("id");
+  if (elId && elId.trim()) candidateNames.add(elId.trim());
+
+  const elName = el.getAttribute("name");
+  if (elName && elName.trim()) candidateNames.add(elName.trim());
+
+  candidateNames.forEach((raw) => {
+    let sanitized = ctx.targetMap?.get(raw) || ctx.targetMap?.get(raw.toLowerCase()) || sanitizeBookmarkName(raw);
+    if (!ctx.usedBookmarkNames.has(sanitized)) {
+      ctx.usedBookmarkNames.add(sanitized);
+      const bmId = ctx.bookmarkCounter.value++;
+      bookmarks.push({ id: bmId, name: sanitized });
+    }
+  });
+
+  return bookmarks;
 }
 
 function handleImage(src: string, partRels: RelationshipItem[], ctx: ExportContext): string {
@@ -295,7 +343,7 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
     if (currentInlineNodes.length === 0) return;
     ooxml += "<w:p>";
     currentInlineNodes.forEach((node) => {
-      ooxml += walk(node, { partRels: options.partRels });
+      ooxml += walk(node, { partRels: options.partRels, forceInline: true });
     });
     ooxml += "</w:p>";
     currentInlineNodes = [];
@@ -312,6 +360,9 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
       
       const escaped = esc(text);
       let rPr = "";
+      if (state.isHyperlink) {
+        rPr += '<w:rStyle w:val="Hyperlink"/>';
+      }
       if (state.fontFamily) {
         rPr += `<w:rFonts w:ascii="${esc(state.fontFamily)}" w:hAnsi="${esc(state.fontFamily)}"/>`;
       }
@@ -368,15 +419,31 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           innerXml += walk(child, newState);
         });
         
+        const bms = getElementBookmarks(el, ctx);
+        let bmStarts = "";
+        let bmEnds = "";
+        bms.forEach((b) => {
+          bmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+          bmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bmEnds;
+        });
+        
         if (tag === "ins") {
-          return `<w:ins w:id="${id}" w:author="${esc(user)}" w:date="${dateStr}">${innerXml}</w:ins>`;
+          return `${bmStarts}<w:ins w:id="${id}" w:author="${esc(user)}" w:date="${dateStr}">${innerXml}</w:ins>${bmEnds}`;
         } else {
           const delTextXml = innerXml.replace(/<w:t/g, "<w:delText").replace(/<\/w:t>/g, "</w:delText>");
-          return `<w:del w:id="${id}" w:author="${esc(user)}" w:date="${dateStr}">${delTextXml}</w:del>`;
+          return `${bmStarts}<w:del w:id="${id}" w:author="${esc(user)}" w:date="${dateStr}">${delTextXml}</w:del>${bmEnds}`;
         }
       }
 
       if (tag === "p" || tag === "h1" || tag === "h2" || tag === "h3" || tag === "h4" || tag === "h5" || tag === "h6") {
+        if (state.forceInline) {
+          let innerXml = "";
+          Array.from(el.childNodes).forEach((child) => {
+            innerXml += walk(child, newState);
+          });
+          return innerXml + "<w:r><w:br/></w:r>";
+        }
+
         let pPr = "";
         if (tag === "h1") pPr += '<w:pStyle w:val="Heading1"/>';
         else if (tag === "h2") pPr += '<w:pStyle w:val="Heading2"/>';
@@ -412,18 +479,36 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           pPr += `<w:jc w:val="${esc(wAlign)}"/>`;
         }
         
+        const bms = getElementBookmarks(el, ctx);
+        let bmStarts = "";
+        let bmEnds = "";
+        bms.forEach((b) => {
+          bmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+          bmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bmEnds;
+        });
+
         xml += "<w:p>";
         if (pPr) xml += `<w:pPr>${pPr}</w:pPr>`;
+        xml += bmStarts;
         
         Array.from(el.childNodes).forEach((child) => {
           xml += walk(child, newState);
         });
         
+        xml += bmEnds;
         xml += "</w:p>";
         return xml;
       }
 
       if (tag === "div" || tag === "blockquote" || tag === "section" || tag === "article" || tag === "header" || tag === "footer") {
+        if (state.forceInline) {
+          let innerXml = "";
+          Array.from(el.childNodes).forEach((child) => {
+            innerXml += walk(child, newState);
+          });
+          return innerXml + "<w:r><w:br/></w:r>";
+        }
+
         const hasBlockChildren = Array.from(el.childNodes).some((child) => isBlockElement(child));
         if (!hasBlockChildren) {
           let pPr = "";
@@ -456,19 +541,27 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
             pPr += `<w:jc w:val="${esc(wAlign)}"/>`;
           }
 
+          const bms = getElementBookmarks(el, ctx);
+          let bmStarts = "";
+          let bmEnds = "";
+          bms.forEach((b) => {
+            bmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+            bmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bmEnds;
+          });
+
           let innerXml = "";
           Array.from(el.childNodes).forEach((child) => {
             innerXml += walk(child, newState);
           });
 
-          return `<w:p>${pPr ? `<w:pPr>${pPr}</w:pPr>` : ""}${innerXml}</w:p>`;
+          return `<w:p>${pPr ? `<w:pPr>${pPr}</w:pPr>` : ""}${bmStarts}${innerXml}${bmEnds}</w:p>`;
         } else {
           let containerXml = "";
           let inlineBuffer: Node[] = [];
           const flushBuffer = () => {
             if (inlineBuffer.length === 0) return;
             let pInner = "";
-            inlineBuffer.forEach((c) => { pInner += walk(c, newState); });
+            inlineBuffer.forEach((c) => { pInner += walk(c, { ...newState, forceInline: true }); });
             if (pInner.trim()) {
               containerXml += `<w:p>${pInner}</w:p>`;
             }
@@ -492,6 +585,14 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
       }
       
       if (tag === "ul" || tag === "ol") {
+        if (state.forceInline) {
+          let innerXml = "";
+          Array.from(el.childNodes).forEach((child) => {
+            innerXml += walk(child, newState);
+          });
+          return innerXml;
+        }
+
         const listState: ParseState = {
           ...newState,
           listType: tag as "ul" | "ol",
@@ -508,15 +609,33 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           state.listIndex = (state.listIndex ?? 0) + 1;
         }
         
+        const prefix = state.listType === "ol" ? `${state.listIndex}. ` : "• ";
+        
+        if (state.forceInline) {
+          let innerXml = "";
+          innerXml += `<w:r><w:t xml:space="preserve">${prefix}</w:t></w:r>`;
+          Array.from(el.childNodes).forEach((child) => {
+            innerXml += walk(child, newState);
+          });
+          return innerXml + "<w:r><w:br/></w:r>";
+        }
+        
         const pPr = '<w:ind w:left="720" w:hanging="360"/>';
+        const bms = getElementBookmarks(el, ctx);
+        let bmStarts = "";
+        let bmEnds = "";
+        bms.forEach((b) => {
+          bmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+          bmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bmEnds;
+        });
         
         xml += "<w:p>";
         xml += `<w:pPr>${pPr}</w:pPr>`;
+        xml += bmStarts;
         
         xml += "<w:r>";
         if (newState.bold) xml += "<w:b/>";
         if (newState.italic) xml += "<w:i/>";
-        const prefix = state.listType === "ol" ? `${state.listIndex}. ` : "• ";
         xml += `<w:t xml:space="preserve">${prefix}</w:t>`;
         xml += "</w:r>";
         
@@ -524,11 +643,20 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           xml += walk(child, newState);
         });
         
+        xml += bmEnds;
         xml += "</w:p>";
         return xml;
       }
       
       if (tag === "table") {
+        if (state.forceInline) {
+          let innerXml = "";
+          Array.from(el.childNodes).forEach((child) => {
+            innerXml += walk(child, newState);
+          });
+          return innerXml;
+        }
+
         xml += parseTableToOpenXML(el as HTMLTableElement, newState, options.cw, ctx);
         return xml;
       }
@@ -540,6 +668,14 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         const wPx = parsePxVal(styleW) ?? 300;
         const hPx = parsePxVal(styleH) ?? 200;
         
+        const bms = getElementBookmarks(el, ctx);
+        let bStarts = "";
+        let bEnds = "";
+        bms.forEach((b) => {
+          bStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+          bEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bEnds;
+        });
+
         const rId = handleImage(src, options.partRels, ctx);
         if (rId) {
           const cx = Math.round(wPx * 9525);
@@ -580,7 +716,7 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
             </wp:inline>
           </w:drawing>`;
           
-          xml += `<w:r>${drawXml}</w:r>`;
+          xml += `${bStarts}<w:r>${drawXml}</w:r>${bEnds}`;
         }
         return xml;
       }
@@ -611,16 +747,127 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         }
         return xml;
       }
+
+      if (tag === "a") {
+        const href = (el.getAttribute("href") || "").trim();
+        const dataTargetId = (el.getAttribute("data-target-id") || "").trim();
+        const dataCrossRef = el.getAttribute("data-cross-ref");
+        const title = el.getAttribute("title") || el.getAttribute("data-tooltip") || "";
+
+        const isInternal =
+          Boolean(dataTargetId) ||
+          Boolean(dataCrossRef) ||
+          href.startsWith("#");
+
+        const isEmail =
+          href.startsWith("mailto:") ||
+          (!isInternal && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(href));
+
+        const isExternal =
+          !isInternal &&
+          !isEmail &&
+          href !== "" &&
+          href !== "#" &&
+          !href.startsWith("javascript:");
+
+        const isLink = isExternal || isEmail || isInternal;
+
+        const linkState: ParseState = isLink
+          ? {
+              ...newState,
+              isHyperlink: true,
+              forceInline: true,
+              color: styles["color"] || state.color || "0563C1",
+              underline: styles["text-decoration"]
+                ? styles["text-decoration"].includes("underline")
+                : (state.underline ?? true),
+            }
+          : { ...newState, forceInline: true };
+
+        let innerXml = "";
+        Array.from(el.childNodes).forEach((child) => {
+          innerXml += walk(child, linkState);
+        });
+
+        if (!innerXml.trim() && isLink) {
+          const displayText = el.innerText?.trim() || el.textContent?.trim() || href || dataTargetId;
+          if (displayText) {
+            const escaped = esc(displayText);
+            let rPr = '<w:rStyle w:val="Hyperlink"/>';
+            if (linkState.fontFamily) rPr += `<w:rFonts w:ascii="${esc(linkState.fontFamily)}" w:hAnsi="${esc(linkState.fontFamily)}"/>`;
+            if (linkState.bold) rPr += "<w:b/>";
+            if (linkState.italic) rPr += "<w:i/>";
+            rPr += '<w:color w:val="0563C1"/><w:u w:val="single"/>';
+            innerXml = `<w:r><w:rPr>${rPr}</w:rPr><w:t xml:space="preserve">${escaped}</w:t></w:r>`;
+          }
+        }
+
+        const bms = getElementBookmarks(el, ctx);
+        let bStarts = "";
+        let bEnds = "";
+        bms.forEach((b) => {
+          bStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+          bEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bEnds;
+        });
+
+        const tooltipAttr = title ? ` w:tooltip="${esc(title)}"` : "";
+
+        if (isExternal || isEmail) {
+          let targetUrl = href;
+          if (isEmail) {
+            targetUrl = targetUrl.startsWith("mailto:") ? targetUrl : `mailto:${targetUrl}`;
+          } else if (targetUrl.startsWith("//")) {
+            targetUrl = `https:${targetUrl}`;
+          } else if (/^www\./i.test(targetUrl)) {
+            targetUrl = `https://${targetUrl}`;
+          }
+
+          const rId = ctx.getNextRelId();
+          options.partRels.push({
+            id: rId,
+            type: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+            target: targetUrl,
+            targetMode: "External",
+          });
+
+          return `${bStarts}<w:hyperlink r:id="${rId}" w:history="1"${tooltipAttr}>${innerXml}</w:hyperlink>${bEnds}`;
+        }
+
+        if (isInternal) {
+          const rawTarget = dataTargetId || (href.includes("#") ? href.split("#")[1] : "");
+          const anchorName =
+            ctx.targetMap?.get(rawTarget) ||
+            ctx.targetMap?.get(rawTarget.toLowerCase()) ||
+            sanitizeBookmarkName(rawTarget);
+
+          return `${bStarts}<w:hyperlink w:anchor="${esc(anchorName)}" w:history="1"${tooltipAttr}>${innerXml}</w:hyperlink>${bEnds}`;
+        }
+
+        return `${bStarts}${innerXml}${bEnds}`;
+      }
+
+      const bms = getElementBookmarks(el, ctx);
+      let innerXml = "";
       
       Array.from(el.childNodes).forEach((child) => {
-        xml += walk(child, newState);
+        innerXml += walk(child, newState);
       });
       
       if (tag === "br") {
-        xml += "<w:r><w:br/></w:r>";
+        innerXml += "<w:r><w:br/></w:r>";
       }
       
-      return xml;
+      if (bms.length > 0) {
+        let bmStarts = "";
+        let bmEnds = "";
+        bms.forEach((b) => {
+          bmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+          bmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bmEnds;
+        });
+        return `${bmStarts}${innerXml}${bmEnds}`;
+      }
+      
+      return innerXml;
     }
     
     return xml;
@@ -646,6 +893,14 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
 function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, parentWidthPx: number, ctx: ExportContext): string {
   const rows = Array.from(tableEl.rows);
   if (rows.length === 0) return "";
+  
+  const tableBms = getElementBookmarks(tableEl, ctx);
+  let tblBmStarts = "";
+  let tblBmEnds = "";
+  tableBms.forEach((b) => {
+    tblBmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
+    tblBmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + tblBmEnds;
+  });
   
   const styleAttr = tableEl.getAttribute("style");
   const styles = parseStyleAttr(styleAttr);
@@ -861,6 +1116,9 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
       let cellOOXML = parseHtmlToOOXML(cellHtml, { cw: cellContentWidth, partRels: state.partRels }, ctx);
       if (!cellOOXML.trim() || !cellOOXML.endsWith("</w:p>")) {
         cellOOXML += "<w:p/>";
+      }
+      if (r === 0 && c === 0 && tblBmStarts) {
+        cellOOXML = cellOOXML.replace("<w:p>", `<w:p>${tblBmStarts}`).replace("</w:p>", `${tblBmEnds}</w:p>`);
       }
       
       cellsXml += `<w:tc><w:tcPr>${tcPr}</w:tcPr>${cellOOXML}</w:tc>`;
@@ -1083,14 +1341,46 @@ export async function generateWordDocx(
   
   const ctxMediaFiles: { filename: string; data: string; base64: boolean }[] = [];
   const imageCounterRef = { value: 1 };
+  const bookmarkCounterRef = { value: 0 };
+  const usedBookmarkNames = new Set<string>();
+  const targetMap = new Map<string, string>();
   
   let relIdCounter = 10;
   const getNextRelId = () => `rId${relIdCounter++}`;
+
+  const registerTarget = (raw: string | null | undefined) => {
+    if (!raw) return;
+    const trimmed = raw.trim();
+    if (!trimmed || targetMap.has(trimmed)) return;
+    const s = sanitizeBookmarkName(trimmed);
+    targetMap.set(trimmed, s);
+    targetMap.set(trimmed.toLowerCase(), s);
+  };
+
+  model.pages.forEach((page) => {
+    const rawHtml = model.pageHtml[page.id];
+    if (!rawHtml) return;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${rawHtml}</div>`, "text/html");
+      doc.querySelectorAll("[id], [data-bookmark], [data-bookmark-id], [name]").forEach((el) => {
+        registerTarget(el.getAttribute("id"));
+        registerTarget(el.getAttribute("data-bookmark"));
+        registerTarget(el.getAttribute("data-bookmark-id"));
+        registerTarget(el.getAttribute("name"));
+      });
+    } catch {
+      // Ignore pre-scan errors
+    }
+  });
   
   const ctx: ExportContext = {
     mediaFiles: ctxMediaFiles,
     getNextRelId,
     imgCounter: imageCounterRef,
+    bookmarkCounter: bookmarkCounterRef,
+    usedBookmarkNames,
+    targetMap,
   };
 
   const docRels: RelationshipItem[] = [
@@ -1151,7 +1441,7 @@ export async function generateWordDocx(
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
           partRels.forEach((r) => {
             const tm = r.targetMode ? ` TargetMode="${r.targetMode}"` : "";
-            relsXml += `\n  <Relationship Id="${r.id}" Type="${r.type}" Target="${r.target}"${tm}/>`;
+            relsXml += `\n  <Relationship Id="${r.id}" Type="${r.type}" Target="${esc(r.target)}"${tm}/>`;
           });
           relsXml += "\n</Relationships>";
           zip.file(`word/_rels/${filename}.rels`, relsXml);
@@ -1283,7 +1573,7 @@ export async function generateWordDocx(
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
   docRels.forEach((rel) => {
     const tm = rel.targetMode ? ` TargetMode="${rel.targetMode}"` : "";
-    docRelsXml += `\n  <Relationship Id="${rel.id}" Type="${rel.type}" Target="${rel.target}"${tm}/>`;
+    docRelsXml += `\n  <Relationship Id="${rel.id}" Type="${rel.type}" Target="${esc(rel.target)}"${tm}/>`;
   });
   docRelsXml += "\n</Relationships>";
   zip.file("word/_rels/document.xml.rels", docRelsXml);
@@ -1384,6 +1674,26 @@ export async function generateWordDocx(
       <w:ind w:left="720"/>
       <w:spacing w:after="60"/>
     </w:pPr>
+  </w:style>
+  <w:style w:type="character" w:styleId="Hyperlink">
+    <w:name w:val="Hyperlink"/>
+    <w:basedOn w:val="DefaultParagraphFont"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rPr>
+      <w:color w:val="0563C1" w:themeColor="hyperlink"/>
+      <w:u w:val="single"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:styleId="FollowedHyperlink">
+    <w:name w:val="FollowedHyperlink"/>
+    <w:basedOn w:val="DefaultParagraphFont"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rPr>
+      <w:color w:val="954F72" w:themeColor="followedHyperlink"/>
+      <w:u w:val="single"/>
+    </w:rPr>
   </w:style>
 </w:styles>`);
 

@@ -26,6 +26,7 @@ import { useBookmarks } from '../../context/BookmarkContext';
 import { crossReferenceService } from '../../services/CrossReferenceService';
 import type { CrossReferenceTarget, CrossReferenceTargetItem, LinkHistoryType } from '../../types';
 import { cn } from '@/lib/utils';
+import { ChevronDown } from 'lucide-react';
 
 interface CrossReferenceColumnProps {
   onLinkInserted?: (item: {
@@ -43,15 +44,12 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
   const [selectedType, setSelectedType] = useState<CrossReferenceTarget>('heading');
   const [targets, setTargets] = useState<CrossReferenceTargetItem[]>([]);
   const [selectedTargetId, setSelectedTargetId] = useState<string>('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
 
   // Inline Bookmark creation state
   const [newBookmarkName, setNewBookmarkName] = useState('');
   const [bookmarkSuccess, setBookmarkSuccess] = useState<string | null>(null);
-
-  // Custom Display Label & Page Suffix
-  const [customLabel, setCustomLabel] = useState('');
-  const [includePageNumber, setIncludePageNumber] = useState(true);
 
   // Feedback status
   const [error, setError] = useState<string | null>(null);
@@ -196,16 +194,12 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
     const inserted = crossReferenceService.insertCrossReference(
       editor,
       targetItem,
-      customLabel.trim() || undefined,
-      includePageNumber
+      undefined,
+      false // never include page number
     );
 
     if (inserted) {
-      const pageSuffix =
-        includePageNumber && targetItem.pageNumber && !targetItem.title.includes(`Page ${targetItem.pageNumber}`)
-          ? ` (Page ${targetItem.pageNumber})`
-          : '';
-      const finalLabel = customLabel.trim() ? `${customLabel.trim()}${pageSuffix}` : `${targetItem.title}${pageSuffix}`;
+      const finalLabel = targetItem.title;
 
       setSuccessMsg(`Inserted reference to "${targetItem.title}"`);
       if (onLinkInserted) {
@@ -217,7 +211,6 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
         });
       }
 
-      setCustomLabel('');
       setTimeout(() => setSuccessMsg(null), 3000);
     } else {
       setError('Failed to insert cross reference.');
@@ -316,16 +309,6 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
           <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300">
             For which target ({targets.length} found)
           </label>
-          <button
-            type="button"
-            onClick={handleManualRefresh}
-            disabled={isScanning}
-            className="text-[10px] text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 font-medium transition-colors disabled:opacity-60"
-            title="Scan document for targets"
-          >
-            <RefreshCw className={cn('h-3 w-3', isScanning && 'animate-spin')} />
-            <span>Refresh</span>
-          </button>
         </div>
         {targets.length === 0 ? (
           <div className="p-2 text-center text-xs text-slate-500 bg-slate-50 dark:bg-[#111D29] rounded-md border border-dashed border-slate-300 dark:border-slate-700">
@@ -351,24 +334,48 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
           </div>
         ) : (
           <div className="relative">
-            <select
-              value={selectedTargetId}
-              onFocus={refreshTargets}
-              onChange={(e) => setSelectedTargetId(e.target.value)}
-              className="w-full h-8 px-2 text-xs rounded-md border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100 truncate cursor-pointer"
+            <button
+              type="button"
+              onClick={() => {
+                if (!isDropdownOpen) refreshTargets();
+                setIsDropdownOpen(!isDropdownOpen);
+              }}
+              className="w-full h-8 px-2.5 text-xs rounded-md border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100 flex items-center justify-between transition-colors"
             >
-              {targets.map((t) => {
-                const pageSuffix =
-                  t.pageNumber && !t.title.includes(`Page ${t.pageNumber}`)
-                    ? ` (Page ${t.pageNumber})`
-                    : '';
-                return (
-                  <option key={t.id} value={t.id}>
-                    {t.title}{pageSuffix}
-                  </option>
-                );
-              })}
-            </select>
+              <span className="truncate pr-2">
+                {targets.find((t) => t.id === selectedTargetId)?.title || 'Select a target'}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            </button>
+            
+            {isDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                <div className="absolute left-0 top-[calc(100%+4px)] z-50 w-full max-h-[180px] overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-[#111D29] py-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
+                  {targets.length === 0 ? (
+                    <div className="px-3 py-2 text-xs text-slate-500 italic">No targets found</div>
+                  ) : (
+                    targets.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTargetId(t.id);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-1.5 text-[11px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors truncate",
+                          selectedTargetId === t.id && "bg-blue-50/50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-medium"
+                        )}
+                        title={t.title}
+                      >
+                        {t.title}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -376,33 +383,6 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
       {/* Custom Reference Label & Insert Button (hidden for Bookmarks) */}
       {selectedType !== 'bookmark' && (
         <>
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-0.5">
-              Custom Display Label (Optional)
-            </label>
-            <input
-              type="text"
-              value={customLabel}
-              onChange={(e) => setCustomLabel(e.target.value)}
-              placeholder="e.g. See Section 5"
-              className="w-full h-8 px-2.5 text-xs rounded-md border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
-            />
-          </div>
-
-          {/* Include page number checkbox */}
-          <div className="flex items-center gap-2 pt-0.5">
-            <input
-              type="checkbox"
-              id="xref-page-no"
-              checked={includePageNumber}
-              onChange={(e) => setIncludePageNumber(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            <label htmlFor="xref-page-no" className="text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer select-none">
-              Include page number suffix
-            </label>
-          </div>
-
           {/* Error / Success Feedback */}
           {error && (
             <div className="flex items-center gap-1.5 p-2 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">

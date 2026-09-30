@@ -68,11 +68,20 @@ export class CrossReferenceService {
     if (typeof document === 'undefined') return [];
 
     const rootContainers = this.getWorkspaceContainers(container);
-    const allPages = Array.from(document.querySelectorAll<HTMLElement>('section[data-page-id], [data-page-id]'));
+    const allPages = Array.from(
+      document.querySelectorAll<HTMLElement>('section[data-page-id], [data-page-id], [data-editor-page]')
+    ).filter((el) => {
+      if (el.closest('aside') || el.closest('[role="dialog"]') || el.closest('header') || el.closest('nav')) return false;
+      return el.hasAttribute('data-editor-page') || el.hasAttribute('contenteditable') || el.querySelector('[contenteditable]') !== null;
+    });
 
     const getPageNumber = (el: Element): number => {
-      const pageEl = el.closest('section[data-page-id], [data-page-id]');
+      const pageEl = el.closest('section[data-page-id], [data-page-id], [data-editor-page]');
       if (pageEl) {
+        const explicitIndex = pageEl.getAttribute('data-page-index');
+        if (explicitIndex && !isNaN(parseInt(explicitIndex, 10))) {
+          return parseInt(explicitIndex, 10) + 1;
+        }
         const idx = allPages.indexOf(pageEl as HTMLElement);
         if (idx !== -1) return idx + 1;
       }
@@ -113,8 +122,9 @@ export class CrossReferenceService {
         const matchedHeadingElements: { el: HTMLElement; title: string }[] = [];
 
         explicitHeadings.forEach((el) => {
-          const text = (el.innerText || el.textContent || '').trim();
+          let text = (el.innerText || el.textContent || '').trim().replace(/\s+/g, ' ');
           if (text) {
+            text = text.length > 55 ? text.substring(0, 52) + '...' : text;
             matchedHeadingElements.push({ el, title: text });
           }
         });
@@ -129,12 +139,14 @@ export class CrossReferenceService {
           // Examples: "1. Introduction", "2. System Architecture", "Section 3", "Section 3: Methods", "Chapter 1", "1.1 Overview"
           const headingPattern = /^((\d+(\.\d+)*|[A-Z]\.|\bSection\s+\d+|\bChapter\s+\d+)\s*[\.\:\-]?\s+[^\n]+|^Section\s+\d+|^Chapter\s+\d+)/i;
           if (headingPattern.test(rawText)) {
+            // Ignore if this is actually a link (like an inserted cross reference)
+            if (el.tagName === 'A' || el.closest('a')) return;
             // Check if element is a paragraph or top block or strong tag
             const isBlock = el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'LI' || el.parentElement?.tagName === 'P';
             if (isBlock) {
               // Extract first line or concise title
-              const firstLine = rawText.split('\n')[0].trim();
-              const cleanTitle = firstLine.length > 80 ? `${firstLine.substring(0, 77)}...` : firstLine;
+              let firstLine = rawText.split('\n')[0].trim().replace(/\s+/g, ' ');
+              const cleanTitle = firstLine.length > 55 ? `${firstLine.substring(0, 52)}...` : firstLine;
               matchedHeadingElements.push({ el, title: cleanTitle });
             }
           }
@@ -172,21 +184,25 @@ export class CrossReferenceService {
 
         // 1. Process <table> elements
         tableElements.forEach((el, index) => {
-          const caption =
+          let caption =
             el.querySelector('caption')?.innerText?.trim() ||
             el.getAttribute('data-table') ||
             el.getAttribute('title') ||
             `Table ${index + 1}`;
+          
+          caption = caption.replace(/\s+/g, ' ');
+          caption = caption.length > 55 ? `${caption.substring(0, 52)}...` : caption;
           matchedTableElements.push({ el, title: caption });
         });
 
         // 2. Process text containing "Table 1", "Table 2", etc.
         tableTextCandidates.forEach((el) => {
           if (tableElements.includes(el)) return;
+          if (el.tagName === 'A' || el.closest('a')) return;
           const text = (el.innerText || '').trim();
           if (/^Table\s+\d+/i.test(text)) {
-            const firstLine = text.split('\n')[0].trim();
-            const cleanTitle = firstLine.length > 60 ? `${firstLine.substring(0, 57)}...` : firstLine;
+            let firstLine = text.split('\n')[0].trim().replace(/\s+/g, ' ');
+            const cleanTitle = firstLine.length > 55 ? `${firstLine.substring(0, 52)}...` : firstLine;
             matchedTableElements.push({ el, title: cleanTitle });
           }
         });
@@ -223,22 +239,26 @@ export class CrossReferenceService {
 
         // 1. Process <figure> / <img> elements
         figureElements.forEach((el, index) => {
-          const caption =
+          let caption =
             el.getAttribute('data-figure') ||
             el.getAttribute('alt') ||
             el.querySelector('figcaption')?.innerText?.trim() ||
             el.getAttribute('title') ||
             `Figure ${index + 1}`;
+            
+          caption = caption.replace(/\s+/g, ' ');
+          caption = caption.length > 55 ? `${caption.substring(0, 52)}...` : caption;
           matchedFigureElements.push({ el, title: caption });
         });
 
         // 2. Process text containing "Figure 1", "Fig. 1", "Figure 2: ...", etc.
         figureTextCandidates.forEach((el) => {
           if (figureElements.includes(el)) return;
+          if (el.tagName === 'A' || el.closest('a')) return;
           const text = (el.innerText || '').trim();
           if (/^(figure|fig\.?)\s+\d+/i.test(text)) {
-            const firstLine = text.split('\n')[0].trim();
-            const cleanTitle = firstLine.length > 60 ? `${firstLine.substring(0, 57)}...` : firstLine;
+            let firstLine = text.split('\n')[0].trim().replace(/\s+/g, ' ');
+            const cleanTitle = firstLine.length > 55 ? `${firstLine.substring(0, 52)}...` : firstLine;
             matchedFigureElements.push({ el, title: cleanTitle });
           }
         });
@@ -341,7 +361,12 @@ export class CrossReferenceService {
       });
     });
 
-    const allPages = Array.from(document.querySelectorAll('[data-page-id], section[data-page-id]'));
+    const allPages = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-page-id], section[data-page-id], [data-editor-page]')
+    ).filter((el) => {
+      if (el.closest('aside') || el.closest('[role="dialog"]') || el.closest('header') || el.closest('nav')) return false;
+      return el.hasAttribute('data-editor-page') || el.hasAttribute('contenteditable') || el.querySelector('[contenteditable]') !== null;
+    });
 
     return anchors.map((anchor, index) => {
       const targetType = (anchor.getAttribute('data-cross-ref') as CrossReferenceTarget) || 'custom';
@@ -349,10 +374,15 @@ export class CrossReferenceService {
       const label = anchor.innerText?.trim() || `Reference ${index + 1}`;
 
       let pageNumber = 1;
-      const pageEl = anchor.closest('[data-page-id], section[data-page-id]');
+      const pageEl = anchor.closest('[data-page-id], section[data-page-id], [data-editor-page]');
       if (pageEl) {
-        const idx = allPages.indexOf(pageEl as HTMLElement);
-        if (idx !== -1) pageNumber = idx + 1;
+        const explicitIndex = pageEl.getAttribute('data-page-index');
+        if (explicitIndex && !isNaN(parseInt(explicitIndex, 10))) {
+          pageNumber = parseInt(explicitIndex, 10) + 1;
+        } else {
+          const idx = allPages.indexOf(pageEl as HTMLElement);
+          if (idx !== -1) pageNumber = idx + 1;
+        }
       }
 
       return {
@@ -380,7 +410,7 @@ export class CrossReferenceService {
       editor ||
       (typeof document !== 'undefined'
         ? (document.querySelector('[contenteditable="true"]:focus') as HTMLElement) ||
-          (document.querySelector('[contenteditable="true"]') as HTMLElement)
+        (document.querySelector('[contenteditable="true"]') as HTMLElement)
         : null);
 
     if (!activeEditor || !target) return false;
@@ -528,8 +558,26 @@ export class CrossReferenceService {
       return false;
     }
 
-    // Perform smooth scroll into view
-    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Find the nearest scrollable ancestor
+    let scrollParent: HTMLElement | null = targetEl.parentElement;
+    while (scrollParent && scrollParent !== document.body) {
+      const overflowY = window.getComputedStyle(scrollParent).overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && scrollParent.scrollHeight > scrollParent.clientHeight) {
+        break;
+      }
+      scrollParent = scrollParent.parentElement;
+    }
+
+    if (scrollParent && scrollParent !== document.body) {
+      // Precise scroll calculation relative to the scroll parent
+      const parentRect = scrollParent.getBoundingClientRect();
+      const targetRect = targetEl.getBoundingClientRect();
+      const scrollY = scrollParent.scrollTop + (targetRect.top - parentRect.top) - (parentRect.height / 2) + (targetRect.height / 2);
+      scrollParent.scrollTo({ top: scrollY, behavior: 'smooth' });
+    } else {
+      // Fallback
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
     // Flash ring / background highlight
     const originalTransition = targetEl.style.transition;
