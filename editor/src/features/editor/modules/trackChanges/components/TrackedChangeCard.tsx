@@ -3,9 +3,9 @@
  * Module: Track Changes
  * Feature: Tracked Change Item Card
  * Description:
- * Card component presenting an individual tracked change with human-readable
- * action labels, text diff preview, scroll-to-view selection, Accept/Reject
- * actions, and interactive comment threads matching the reference screenshot.
+ * Card component presenting an individual tracked change in a clean white box
+ * with human-readable action labels, text diff preview, scroll-to-view selection,
+ * Accept/Reject actions, and interactive comment threads.
  * --------------------------------------------------------
  */
 
@@ -59,14 +59,14 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       className={cn(
         "group flex flex-col gap-2.5 rounded-xl border p-3.5 text-xs transition-all cursor-pointer shadow-xs",
         isSelected
-          ? "border-blue-500 bg-[#1e2430] ring-1 ring-blue-500/40"
-          : "border-slate-800/80 bg-[#161b22] hover:border-slate-700/80"
+          ? "border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/30 dark:bg-[#162536] dark:border-blue-500"
+          : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-[#111D29]"
       )}
     >
       {/* 1. Header: Author & Formatted Time */}
       <div className="flex items-center justify-between">
         <span
-          className="font-semibold text-slate-100 truncate max-w-[150px] text-xs"
+          className="font-semibold text-slate-800 dark:text-slate-100 truncate max-w-[150px] text-xs"
           title={change.author}
         >
           {change.author || "Current User"}
@@ -79,17 +79,17 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       {/* 2. Badge & Change ID */}
       <div className="flex items-center gap-2 flex-wrap">
         {change.type === "delete" && (
-          <span className="rounded bg-[#3f1619] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#f87171] border border-[#5d1c24]">
+          <span className="rounded bg-rose-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/60">
             DELETION
           </span>
         )}
         {change.type === "insert" && (
-          <span className="rounded bg-[#0f2d1e] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#4ade80] border border-[#1b5035]">
+          <span className="rounded bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/60">
             INSERTION
           </span>
         )}
         {change.type === "edit" && (
-          <span className="rounded bg-[#382405] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#fbbf24] border border-[#5c3c0a]">
+          <span className="rounded bg-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/60">
             EDIT
           </span>
         )}
@@ -103,24 +103,24 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       {(change.newText || change.originalText) && (
         <div className="my-0.5">
           {change.type === "insert" && change.newText && (
-            <div className="border-l-2 border-emerald-500 pl-2 text-xs font-medium text-emerald-400 break-words">
+            <div className="border-l-2 border-emerald-500 pl-2 text-xs font-medium text-emerald-700 dark:text-emerald-400 break-words bg-emerald-50/30 p-1 rounded-r">
               {change.newText}
             </div>
           )}
           {change.type === "delete" && change.originalText && (
-            <div className="border-l-2 border-rose-500 pl-2 text-xs font-medium text-rose-400 line-through break-words">
+            <div className="border-l-2 border-rose-500 pl-2 text-xs font-medium text-rose-700 dark:text-rose-400 line-through break-words bg-rose-50/30 p-1 rounded-r">
               {change.originalText}
             </div>
           )}
           {change.type === "edit" && (
-            <div className="border-l-2 border-amber-500 pl-2 text-xs space-y-0.5">
+            <div className="border-l-2 border-amber-500 pl-2 text-xs space-y-0.5 bg-amber-50/20 p-1 rounded-r">
               {change.originalText && (
-                <div className="text-rose-400 line-through text-[11px] break-words">
+                <div className="text-rose-700 dark:text-rose-400 line-through text-[11px] break-words">
                   {change.originalText}
                 </div>
               )}
               {change.newText && (
-                <div className="text-emerald-400 font-medium underline text-xs break-words">
+                <div className="text-emerald-700 dark:text-emerald-400 font-medium underline text-xs break-words">
                   {change.newText}
                 </div>
               )}
@@ -137,7 +137,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
         <button
           type="button"
           onClick={() => acceptChange(change.id)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#1b5035] bg-[#0f2d1e]/50 py-1.5 text-xs font-medium text-[#4ade80] hover:bg-[#0f2d1e] transition-colors"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-400"
         >
           <Check className="h-3.5 w-3.5" />
           <span>Accept</span>
@@ -145,7 +145,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
         <button
           type="button"
           onClick={() => rejectChange(change.id)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#5d1c24] bg-[#3f1619]/50 py-1.5 text-xs font-medium text-[#f87171] hover:bg-[#3f1619] transition-colors"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-400"
         >
           <XIcon className="h-3.5 w-3.5" />
           <span>Reject</span>
@@ -154,10 +154,10 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
 
       {/* 5. Comments Section */}
       <div
-        className="border-t border-slate-800/80 pt-2"
+        className="border-t border-slate-100 dark:border-slate-800 pt-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
             <span>Comments ({change.comments?.length || 0})</span>
@@ -165,7 +165,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
-            className="text-xs text-slate-400 hover:text-slate-200 transition-colors font-medium"
+            className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors font-medium"
           >
             {showComments ? "Hide" : "Show"}
           </button>
@@ -178,9 +178,9 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                 {change.comments.map((c: Comment) => (
                   <div
                     key={c.id}
-                    className="rounded-lg border border-slate-800 bg-[#10141b] p-2 text-xs"
+                    className="rounded-lg border border-slate-200 bg-slate-50/80 p-2 text-xs text-slate-700 dark:border-slate-800 dark:bg-[#07131E] dark:text-slate-300"
                   >
-                    <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400 mb-1">
+                    <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                       <span>{c.author}</span>
                       <span>
                         {new Date(c.timestamp).toLocaleTimeString([], {
@@ -190,14 +190,14 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                         })}
                       </span>
                     </div>
-                    <div className="text-slate-200 break-words leading-relaxed">
+                    <div className="text-slate-800 dark:text-slate-200 break-words leading-relaxed">
                       {c.text}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-[11px] text-slate-500 italic">No comments on this change yet.</p>
+              <p className="text-[11px] text-slate-400 italic">No comments on this change yet.</p>
             )}
 
             <form onSubmit={handleAddComment} className="flex gap-1.5 pt-1">
@@ -206,7 +206,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Add a comment..."
-                className="h-8 flex-1 rounded-md border border-slate-700 bg-[#10141b] px-2.5 text-xs text-white outline-none placeholder:text-slate-500 focus:border-blue-500"
+                className="h-8 flex-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-[#0078d4] focus:bg-white dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
               />
               <button
                 type="submit"

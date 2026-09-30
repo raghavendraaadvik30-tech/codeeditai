@@ -31,9 +31,7 @@ import {
   DEFAULT_AUTHOR,
 } from "../constants";
 import {
-  escapeAttr,
-  escapeHtml,
-  getClosestTcElement,
+  isInsideTcElement,
   generateChangeId,
   getHumanReadableChangeLabel,
 } from "../utils";
@@ -54,7 +52,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const trackRef = useRef<boolean>(true);
+  const trackRef = useRef<boolean>(trackChanges);
 
   const setTrackChanges = useCallback(
     (val: boolean | ((prev: boolean) => boolean)) => {
@@ -111,35 +109,24 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
   const user = DEFAULT_AUTHOR;
   const userRef = useRef(user);
 
-  // Load changes on doc switch
-  useEffect(() => {
-    if (!model.id) return;
-    const load = async () => {
-      const list = await trackChangesService.getTrackedChanges(model.id);
-      if (list && list.length > 0) {
-        setTrackedChanges(list);
-      }
-      setTcLoadedDocId(model.id);
-    };
-    load();
-  }, [model.id]);
-
-  // Persist changes when updated
-  useEffect(() => {
-    if (!model.id || tcLoadedDocId !== model.id) return;
-    trackChangesService.saveChanges(model.id, trackedChanges);
-  }, [trackedChanges, model.id, tcLoadedDocId]);
-
   /**
-   * Scans document page DOM nodes and model.pageHtml for <ins> and <del> tags with data-tc-id,
-   * extracting text, authors, timestamps, and updating trackedChanges state.
+   * Scans document page DOM nodes for <ins> and <del> tags,
+   * auto-repairs missing IDs, extracts text, authors, timestamps,
+   * and synchronizes trackedChanges state with 100% fidelity.
    */
   const syncTrackedChangesFromDOM = useCallback(() => {
     if (typeof window === "undefined" || typeof document === "undefined") return;
 
+    // 1. Collect all unique tracked DOM elements strictly within editable page areas
     const domElements = Array.from(
-      document.querySelectorAll("[data-tc-id]")
-    ) as HTMLElement[];
+      new Set(
+        Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '[contenteditable="true"] ins, [contenteditable="true"] del, [contenteditable="true"] [data-tc], [contenteditable="true"] [data-tc-id]'
+          )
+        )
+      )
+    );
 
     const changeMap: Record<
       string,
@@ -154,10 +141,23 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
       }
     > = {};
 
-    // 1. Scan live DOM elements
     domElements.forEach((el) => {
-      const id = el.getAttribute("data-tc-id");
-      if (!id) return;
+      // Auto-assign ID and tracking attributes if missing
+      let id = el.getAttribute("data-tc-id");
+      if (!id) {
+        id = generateChangeId();
+        el.setAttribute("data-tc-id", id);
+      }
+      if (!el.getAttribute("data-tc")) {
+        el.setAttribute("data-tc", el.tagName.toLowerCase());
+      }
+      if (!el.getAttribute("data-user")) {
+        el.setAttribute("data-user", userRef.current);
+      }
+      if (!el.getAttribute("data-ts")) {
+        el.setAttribute("data-ts", String(Date.now()));
+      }
+
       const tc = el.getAttribute("data-tc") || el.tagName.toLowerCase();
       const author = el.getAttribute("data-user") || DEFAULT_AUTHOR;
       const timestamp = Number(el.getAttribute("data-ts") || Date.now());
@@ -168,7 +168,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
         pageEl?.getAttribute("data-editor-page") ||
         undefined;
       const parentBlock = el.closest(
-        "p, h1, h2, h3, h4, h5, h6, table, li, blockquote"
+        "p, h1, h2, h3, h4, h5, h6, table, li, blockquote, div"
       );
       const contextTag = parentBlock?.tagName;
 
@@ -177,100 +177,133 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
       }
 
       if (tc.includes("ins") || el.tagName === "INS") {
-        changeMap[id].insText = (changeMap[id].insText || "") + text;
+        changeMap[id].insText = text;
       } else if (tc.includes("del") || el.tagName === "DEL") {
-        changeMap[id].delText = (changeMap[id].delText || "") + text;
+        changeMap[id].delText = text;
       }
     });
 
-    // 2. Scan model.pageHtml to guarantee no changes are missed during render cycles
+    // 2. Scan model.pageHtml ONLY for unmounted/off-screen pages
+    const mountedPageIds = new Set(
+      Array.from(document.querySelectorAll('[data-page-id], [data-editor-page]'))
+        .map((el) => el.getAttribute("data-page-id") || el.getAttribute("data-editor-page"))
+        .filter(Boolean)
+    );
+
     if (model.pageHtml) {
-      Object.entries(model.pageHtml).forEach(([pageId, html]) => {
-        if (!html || !html.includes("data-tc-id")) return;
+      Object.entries(model.pageHtml).forEach(([pId, html]) => {
+        if (mountedPageIds.has(pId)) return; // Already scanned live from DOM
+        if (!html || (!html.includes("<ins") && !html.includes("<del") && !html.includes("data-tc"))) return;
+
         const temp = document.createElement("div");
         temp.innerHTML = html;
-        const pageTcEls = Array.from(temp.querySelectorAll("[data-tc-id]")) as HTMLElement[];
+        const pageTcEls = Array.from(temp.querySelectorAll<HTMLElement>("ins, del, [data-tc], [data-tc-id]"));
         pageTcEls.forEach((el) => {
-          const id = el.getAttribute("data-tc-id");
-          if (!id) return;
+          const id = el.getAttribute("data-tc-id") || generateChangeId();
+          if (changeMap[id]) return;
           const tc = el.getAttribute("data-tc") || el.tagName.toLowerCase();
           const author = el.getAttribute("data-user") || DEFAULT_AUTHOR;
           const timestamp = Number(el.getAttribute("data-ts") || Date.now());
           const text = el.textContent || "";
           const parentBlock = el.closest(
-            "p, h1, h2, h3, h4, h5, h6, table, li, blockquote"
+            "p, h1, h2, h3, h4, h5, h6, table, li, blockquote, div"
           );
           const contextTag = parentBlock?.tagName;
 
           if (!changeMap[id]) {
-            changeMap[id] = { id, author, timestamp, contextTag, pageId };
+            changeMap[id] = { id, author, timestamp, contextTag, pageId: pId };
           }
 
           if (tc.includes("ins") || el.tagName === "INS") {
-            if (changeMap[id].insText === undefined) changeMap[id].insText = text;
+            changeMap[id].insText = text;
           } else if (tc.includes("del") || el.tagName === "DEL") {
-            if (changeMap[id].delText === undefined) changeMap[id].delText = text;
+            changeMap[id].delText = text;
           }
         });
       });
     }
 
     setTrackedChanges((prev) => {
+      // Preserve accepted/rejected history
       const nextNonPending = prev.filter((c) => c.status !== "pending");
+      const existingNonPendingIds = new Set(nextNonPending.map((c) => c.id));
 
-      const pendingReconstructed = Object.values(changeMap).map((item) => {
-        let type: "insert" | "delete" | "edit" = "insert";
-        let originalText = "";
-        let newText = "";
+      const pendingReconstructed = Object.values(changeMap)
+        .filter((item) => !existingNonPendingIds.has(item.id))
+        .map((item) => {
+          let type: "insert" | "delete" | "edit" = "insert";
+          let originalText = "";
+          let newText = "";
 
-        if (item.insText !== undefined && item.delText !== undefined) {
-          type = "edit";
-          originalText = item.delText;
-          newText = item.insText;
-        } else if (item.insText !== undefined) {
-          type = "insert";
-          newText = item.insText;
-        } else if (item.delText !== undefined) {
-          type = "delete";
-          originalText = item.delText;
-        }
+          if (item.insText !== undefined && item.delText !== undefined) {
+            type = "edit";
+            originalText = item.delText;
+            newText = item.insText;
+          } else if (item.insText !== undefined) {
+            type = "insert";
+            newText = item.insText;
+          } else if (item.delText !== undefined) {
+            type = "delete";
+            originalText = item.delText;
+          }
 
-        const existing = prev.find((c) => c.id === item.id);
-        const comments = existing ? existing.comments : [];
-        const label =
-          getHumanReadableChangeLabel(
+          const existing = prev.find((c) => c.id === item.id);
+          const comments = existing ? existing.comments : [];
+          const label = getHumanReadableChangeLabel(
             type,
             originalText,
             newText,
             item.contextTag
           );
 
-        return {
-          id: item.id,
-          author: item.author,
-          timestamp: item.timestamp,
-          type,
-          originalText,
-          newText,
-          status: "pending" as const,
-          comments,
-          label,
-          pageId: item.pageId,
-        };
-      });
+          return {
+            id: item.id,
+            author: item.author,
+            timestamp: item.timestamp,
+            type,
+            originalText,
+            newText,
+            status: "pending" as const,
+            comments,
+            label,
+            pageId: item.pageId,
+          };
+        });
 
       const validPending = pendingReconstructed.filter(
         (c) =>
           c.type === "edit"
-            ? (c.newText !== undefined && c.newText.length > 0) || (c.originalText !== undefined && c.originalText.length > 0)
+            ? Boolean((c.newText && c.newText.length > 0) || (c.originalText && c.originalText.length > 0))
             : c.type === "insert"
-            ? c.newText !== undefined && c.newText.length > 0
-            : c.originalText !== undefined && c.originalText.length > 0
+            ? Boolean(c.newText && c.newText.length > 0)
+            : Boolean(c.originalText && c.originalText.length > 0)
       );
 
       return [...nextNonPending, ...validPending];
     });
   }, [model.pageHtml]);
+
+  // Load changes on doc switch
+  useEffect(() => {
+    if (!model.id) return;
+    const load = async () => {
+      const list = await trackChangesService.getTrackedChanges(model.id);
+      if (list && list.length > 0) {
+        setTrackedChanges(list);
+      }
+      setTcLoadedDocId(model.id);
+      setTimeout(() => {
+        syncTrackedChangesFromDOM();
+      }, 50);
+    };
+    load();
+  }, [model.id, syncTrackedChangesFromDOM]);
+
+  // Persist changes when updated
+  useEffect(() => {
+    if (!model.id || tcLoadedDocId !== model.id) return;
+    trackChangesService.saveChanges(model.id, trackedChanges);
+  }, [trackedChanges, model.id, tcLoadedDocId]);
 
   // Continuous MutationObserver: ensures any DOM mutation in editable areas syncs tracked changes immediately
   useEffect(() => {
@@ -299,7 +332,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       syncTrackedChangesFromDOM();
-    }, 100);
+    }, 50);
     return () => clearTimeout(timer);
   }, [model.id, syncTrackedChangesFromDOM]);
 
@@ -327,13 +360,14 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
    */
   const acceptChange = useCallback(
     (changeId: string) => {
-      const els = document.querySelectorAll(`[data-tc-id="${changeId}"]`);
+      const els = Array.from(document.querySelectorAll(`[data-tc-id="${changeId}"]`));
       const pagesToUpdate = new Set<string>();
 
       els.forEach((el) => {
         const pageEl = el.closest("[data-editor-page], [data-page-id]");
         const pageId = pageEl?.getAttribute("data-page-id") || pageEl?.getAttribute("data-editor-page");
-        const parent = el.parentNode!;
+        const parent = el.parentNode;
+        if (!parent) return;
         const tag = el.tagName;
 
         if (tag === "INS") {
@@ -380,13 +414,14 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
    */
   const rejectChange = useCallback(
     (changeId: string) => {
-      const els = document.querySelectorAll(`[data-tc-id="${changeId}"]`);
+      const els = Array.from(document.querySelectorAll(`[data-tc-id="${changeId}"]`));
       const pagesToUpdate = new Set<string>();
 
       els.forEach((el) => {
         const pageEl = el.closest("[data-editor-page], [data-page-id]");
         const pageId = pageEl?.getAttribute("data-page-id") || pageEl?.getAttribute("data-editor-page");
-        const parent = el.parentNode!;
+        const parent = el.parentNode;
+        if (!parent) return;
         const tag = el.tagName;
 
         if (tag === "DEL") {
@@ -432,7 +467,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
   const acceptAll = useCallback(() => {
     const pendingIds = Array.from(
       new Set(
-        Array.from(document.querySelectorAll("[data-tc-id]")).map((el) =>
+        Array.from(document.querySelectorAll("ins, del, [data-tc-id]")).map((el) =>
           el.getAttribute("data-tc-id")
         )
       )
@@ -449,7 +484,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
   const rejectAll = useCallback(() => {
     const pendingIds = Array.from(
       new Set(
-        Array.from(document.querySelectorAll("[data-tc-id]")).map((el) =>
+        Array.from(document.querySelectorAll("ins, del, [data-tc-id]")).map((el) =>
           el.getAttribute("data-tc-id")
         )
       )
@@ -464,7 +499,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
    * Navigates to previous tracked change in the document and selects it.
    */
   const prevChange = useCallback(() => {
-    const els = Array.from(document.querySelectorAll("[data-tc-id]"));
+    const els = Array.from(document.querySelectorAll("ins, del, [data-tc-id]"));
     if (els.length === 0) return;
     const sel = window.getSelection();
     let currentIdx = -1;
@@ -472,7 +507,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
       const node = sel.getRangeAt(0).startContainer;
       const currentEl = node.nodeType === Node.TEXT_NODE ? node.parentNode : node;
       if (currentEl instanceof HTMLElement) {
-        const tcEl = currentEl.closest("[data-tc-id]");
+        const tcEl = currentEl.closest("ins, del, [data-tc-id]");
         if (tcEl) {
           currentIdx = els.indexOf(tcEl as HTMLElement);
         }
@@ -499,7 +534,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
    * Navigates to next tracked change in the document and selects it.
    */
   const nextChange = useCallback(() => {
-    const els = Array.from(document.querySelectorAll("[data-tc-id]"));
+    const els = Array.from(document.querySelectorAll("ins, del, [data-tc-id]"));
     if (els.length === 0) return;
     const sel = window.getSelection();
     let currentIdx = -1;
@@ -507,7 +542,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
       const node = sel.getRangeAt(0).startContainer;
       const currentEl = node.nodeType === Node.TEXT_NODE ? node.parentNode : node;
       if (currentEl instanceof HTMLElement) {
-        const tcEl = currentEl.closest("[data-tc-id]");
+        const tcEl = currentEl.closest("ins, del, [data-tc-id]");
         if (tcEl) {
           currentIdx = els.indexOf(tcEl as HTMLElement);
         }
@@ -542,7 +577,10 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
       if (!sel || sel.rangeCount === 0) return;
       const range = sel.getRangeAt(0);
 
-      const inputType = e?.inputType || (e as unknown as { nativeEvent?: { inputType?: string } })?.nativeEvent?.inputType || "";
+      const inputType =
+        e?.inputType ||
+        (e as unknown as { nativeEvent?: { inputType?: string } })?.nativeEvent?.inputType ||
+        "";
       if (!inputType) return;
 
       const isInsert =
@@ -551,111 +589,145 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
         inputType === "insertFromPaste" ||
         inputType === "insertReplacementText";
 
+      // -------------------------------------------------------------
+      // 1. INSERTION / TYPING / PASTE / REPLACEMENT
+      // -------------------------------------------------------------
       if (isInsert) {
-        let text = e?.data || (e as unknown as { nativeEvent?: { data?: string } })?.nativeEvent?.data || "";
-        if (inputType === "insertFromPaste" && (e as unknown as { dataTransfer?: DataTransfer }).dataTransfer) {
+        let text =
+          e?.data ||
+          (e as unknown as { nativeEvent?: { data?: string } })?.nativeEvent?.data ||
+          "";
+        if (
+          inputType === "insertFromPaste" &&
+          (e as unknown as { dataTransfer?: DataTransfer }).dataTransfer
+        ) {
           text = (e as unknown as { dataTransfer: DataTransfer }).dataTransfer.getData("text/plain");
         }
         if (!text && inputType !== "insertCompositionText") return;
 
-        const delEl = getClosestTcElement(range.startContainer, range.startOffset, "del[data-tc]");
-
-        if (delEl) {
+        // If caret is inside or touching a <del> element, reposition outside it
+        const insideDel = isInsideTcElement(range.startContainer, "del, [data-tc*='del']");
+        if (insideDel) {
           const r = document.createRange();
-          r.setStartAfter(delEl);
+          r.setStartAfter(insideDel);
           r.collapse(true);
           sel.removeAllRanges();
           sel.addRange(r);
         }
 
         const activeRange = sel.getRangeAt(0);
-        const activeInsEl = getClosestTcElement(
-          activeRange.startContainer,
-          activeRange.startOffset,
-          "ins[data-tc]"
-        );
+        const activeInsEl = isInsideTcElement(activeRange.startContainer, "ins, [data-tc*='ins']");
 
-        if (!activeInsEl) {
-          e.preventDefault();
-          const changeId = generateChangeId();
-          const author = userRef.current;
-          const ts = Date.now();
+        // If selection is collapsed and cursor is strictly inside an existing <ins>,
+        // allow the browser to natively insert into that <ins> element.
+        if (activeInsEl && activeRange.collapsed) {
+          return;
+        }
 
-          const parentBlock = (activeRange.startContainer.nodeType === Node.ELEMENT_NODE
+        // New insertion or replacement edit:
+        e.preventDefault();
+        const changeId = generateChangeId();
+        const author = userRef.current;
+        const ts = Date.now();
+
+        const parentBlock = (
+          activeRange.startContainer.nodeType === Node.ELEMENT_NODE
             ? (activeRange.startContainer as HTMLElement)
             : activeRange.startContainer.parentElement
-          )?.closest("p, h1, h2, h3, h4, h5, h6, table, li");
-          const contextTag = parentBlock?.tagName;
+        )?.closest("p, h1, h2, h3, h4, h5, h6, table, li, div");
+        const contextTag = parentBlock?.tagName;
 
-          const isEdit = !activeRange.collapsed;
-          const label = getHumanReadableChangeLabel(
-            isEdit ? "edit" : "insert",
-            isEdit ? activeRange.toString() : "",
-            text,
-            contextTag
-          );
+        const isEdit = !activeRange.collapsed;
+        const origText = isEdit ? activeRange.toString() : "";
+        const label = getHumanReadableChangeLabel(
+          isEdit ? "edit" : "insert",
+          origText,
+          text,
+          contextTag
+        );
 
-          const newChange: TrackedChange = {
-            id: changeId,
-            author,
-            timestamp: ts,
-            type: isEdit ? "edit" : "insert",
-            originalText: isEdit ? activeRange.toString() : "",
-            newText: text,
-            status: "pending",
-            comments: [],
-            label,
-            pageId,
-          };
-          setTrackedChanges((prev) => [...prev.filter((c) => c.id !== changeId), newChange]);
+        const newChange: TrackedChange = {
+          id: changeId,
+          author,
+          timestamp: ts,
+          type: isEdit ? "edit" : "insert",
+          originalText: origText,
+          newText: text,
+          status: "pending",
+          comments: [],
+          label,
+          pageId,
+        };
+        setTrackedChanges((prev) => [...prev.filter((c) => c.id !== changeId), newChange]);
 
-          const html = activeRange.collapsed
-            ? `<ins data-tc="ins" data-tc-id="${changeId}" data-user="${escapeAttr(
-                author
-              )}" data-ts="${ts}">${escapeHtml(text)}</ins>`
-            : `<del data-tc="edit-del" data-tc-id="${changeId}" data-user="${escapeAttr(
-                author
-              )}" data-ts="${ts}">${escapeHtml(
-                activeRange.toString()
-              )}</del><ins data-tc="edit-ins" data-tc-id="${changeId}" data-user="${escapeAttr(
-                author
-              )}" data-ts="${ts}">${escapeHtml(text)}</ins>`;
+        if (isEdit) {
+          // Edit: create <del> and <ins> elements
+          const delEl = document.createElement("del");
+          delEl.setAttribute("data-tc", "edit-del");
+          delEl.setAttribute("data-tc-id", changeId);
+          delEl.setAttribute("data-user", author);
+          delEl.setAttribute("data-ts", String(ts));
+          delEl.textContent = origText;
 
-          const success = document.execCommand("insertHTML", false, html);
-          if (!success) {
-            if (!activeRange.collapsed) {
-              activeRange.deleteContents();
-            }
-            const temp = document.createElement("div");
-            temp.innerHTML = html;
-            const frag = document.createDocumentFragment();
-            while (temp.firstChild) {
-              frag.appendChild(temp.firstChild);
-            }
-            activeRange.insertNode(frag);
+          const insEl = document.createElement("ins");
+          insEl.setAttribute("data-tc", "edit-ins");
+          insEl.setAttribute("data-tc-id", changeId);
+          insEl.setAttribute("data-user", author);
+          insEl.setAttribute("data-ts", String(ts));
+          insEl.textContent = text;
+
+          activeRange.deleteContents();
+          const frag = document.createDocumentFragment();
+          frag.appendChild(delEl);
+          frag.appendChild(insEl);
+          activeRange.insertNode(frag);
+
+          const r = document.createRange();
+          if (insEl.firstChild) {
+            r.setStart(insEl.firstChild, (insEl.firstChild as Text).length);
+          } else {
+            r.selectNodeContents(insEl);
           }
+          r.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(r);
+        } else {
+          // Insertion: create <ins> element
+          const insEl = document.createElement("ins");
+          insEl.setAttribute("data-tc", "ins");
+          insEl.setAttribute("data-tc-id", changeId);
+          insEl.setAttribute("data-user", author);
+          insEl.setAttribute("data-ts", String(ts));
+          insEl.textContent = text;
 
-          const el = document.querySelector(`ins[data-tc-id="${changeId}"]`);
-          if (el) {
-            const textChild = el.firstChild || el;
-            const r = document.createRange();
-            if (textChild.nodeType === Node.TEXT_NODE) {
-              r.setStart(textChild, (textChild as Text).length);
-              r.collapse(true);
-            } else {
-              r.selectNodeContents(el);
-              r.collapse(false);
-            }
-            sel.removeAllRanges();
-            sel.addRange(r);
-          }
+          activeRange.insertNode(insEl);
 
-          const targetEl = ((e.target instanceof Element ? e.target : activeRange.startContainer.parentElement) || document.activeElement) as HTMLElement | null;
-          if (targetEl && typeof targetEl.dispatchEvent === "function") {
-            targetEl.dispatchEvent(new Event("input", { bubbles: true }));
+          const r = document.createRange();
+          if (insEl.firstChild) {
+            r.setStart(insEl.firstChild, (insEl.firstChild as Text).length);
+          } else {
+            r.selectNodeContents(insEl);
           }
+          r.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(r);
         }
-      } else if (inputType.startsWith("delete")) {
+
+        const targetEl = (
+          (e.target instanceof Element ? e.target : activeRange.startContainer.parentElement) ||
+          document.activeElement
+        ) as HTMLElement | null;
+        if (targetEl && typeof targetEl.dispatchEvent === "function") {
+          targetEl.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+
+        syncTrackedChangesFromDOM();
+      }
+
+      // -------------------------------------------------------------
+      // 2. DELETION (BACKSPACE / DELETE / CUT)
+      // -------------------------------------------------------------
+      else if (inputType.startsWith("delete")) {
         const isBackspace = inputType.endsWith("Backward");
 
         if (inputType === "deleteByCut") {
@@ -666,7 +738,39 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        // Case 2A: Collapsed Caret Deletion
         if (range.collapsed) {
+          // If caret is inside an <ins>:
+          const activeIns = isInsideTcElement(range.startContainer, "ins, [data-tc*='ins']");
+          if (activeIns) {
+            const textContent = activeIns.textContent || "";
+            // If <ins> only has 1 character, remove the <ins> element cleanly
+            if (textContent.length <= 1) {
+              e.preventDefault();
+              const parent = activeIns.parentNode;
+              if (parent) {
+                const r = document.createRange();
+                r.setStartBefore(activeIns);
+                r.collapse(true);
+                parent.removeChild(activeIns);
+                sel.removeAllRanges();
+                sel.addRange(r);
+
+                const targetEl = (
+                  (e.target instanceof Element ? e.target : parent) || document.activeElement
+                ) as HTMLElement | null;
+                if (targetEl && typeof targetEl.dispatchEvent === "function") {
+                  targetEl.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                syncTrackedChangesFromDOM();
+              }
+              return;
+            }
+            // If <ins> has multiple characters, browser native deletion inside <ins> works cleanly
+            return;
+          }
+
+          // Otherwise, deleting regular document text:
           const originalRange = range.cloneRange();
           const direction = isBackspace ? "backward" : "forward";
           const granularity = inputType.includes("Word") ? "word" : "character";
@@ -680,58 +784,25 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
             return;
           }
 
-          const startIns = getClosestTcElement(
-            targetRange.startContainer,
-            targetRange.startOffset,
-            "ins[data-tc]"
-          );
-          const endIns = getClosestTcElement(
-            targetRange.endContainer,
-            targetRange.endOffset,
-            "ins[data-tc]"
-          );
-
+          // If the extended range is completely inside an <ins>, let native handle
+          const startIns = isInsideTcElement(targetRange.startContainer, "ins, [data-tc*='ins']");
+          const endIns = isInsideTcElement(targetRange.endContainer, "ins, [data-tc*='ins']");
           if (startIns && endIns && startIns === endIns) {
             sel.removeAllRanges();
             sel.addRange(originalRange);
             return;
           }
 
-          const startDel = getClosestTcElement(
-            targetRange.startContainer,
-            targetRange.startOffset,
-            "del[data-tc]"
-          );
-          const endDel = getClosestTcElement(
-            targetRange.endContainer,
-            targetRange.endOffset,
-            "del[data-tc]"
-          );
-          const delEl = startDel || endDel;
-
-          if (delEl) {
-            e.preventDefault();
-            const r = document.createRange();
-            if (isBackspace) {
-              r.setStartBefore(delEl);
-            } else {
-              r.setStartAfter(delEl);
-            }
-            r.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(r);
-            return;
-          }
-
           e.preventDefault();
           const changeId = generateChangeId();
           const author = userRef.current;
           const ts = Date.now();
 
-          const parentBlock = (targetRange.startContainer.nodeType === Node.ELEMENT_NODE
-            ? (targetRange.startContainer as HTMLElement)
-            : targetRange.startContainer.parentElement
-          )?.closest("p, h1, h2, h3, h4, h5, h6, table, li");
+          const parentBlock = (
+            targetRange.startContainer.nodeType === Node.ELEMENT_NODE
+              ? (targetRange.startContainer as HTMLElement)
+              : targetRange.startContainer.parentElement
+          )?.closest("p, h1, h2, h3, h4, h5, h6, table, li, div");
           const contextTag = parentBlock?.tagName;
           const label = getHumanReadableChangeLabel("delete", text, "", contextTag);
 
@@ -749,76 +820,79 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
           };
           setTrackedChanges((prev) => [...prev.filter((c) => c.id !== changeId), newChange]);
 
-          const html = `<del data-tc="del" data-tc-id="${changeId}" data-user="${escapeAttr(
-            author
-          )}" data-ts="${ts}">${escapeHtml(text)}</del>`;
+          const delEl = document.createElement("del");
+          delEl.setAttribute("data-tc", "del");
+          delEl.setAttribute("data-tc-id", changeId);
+          delEl.setAttribute("data-user", author);
+          delEl.setAttribute("data-ts", String(ts));
+          delEl.textContent = text;
 
-          const success = document.execCommand("insertHTML", false, html);
-          if (!success) {
-            targetRange.deleteContents();
-            const temp = document.createElement("div");
-            temp.innerHTML = html;
-            const frag = document.createDocumentFragment();
-            while (temp.firstChild) {
-              frag.appendChild(temp.firstChild);
-            }
-            targetRange.insertNode(frag);
+          targetRange.deleteContents();
+          targetRange.insertNode(delEl);
+
+          const r = document.createRange();
+          if (isBackspace) {
+            r.setStartBefore(delEl);
+          } else {
+            r.setStartAfter(delEl);
           }
+          r.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(r);
 
-          const el = document.querySelector(`del[data-tc-id="${changeId}"]`);
-          if (el) {
-            const r = document.createRange();
-            if (isBackspace) {
-              r.setStartBefore(el);
-            } else {
-              r.setStartAfter(el);
-            }
-            r.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(r);
-          }
-
-          const targetEl = ((e.target instanceof Element ? e.target : targetRange.startContainer.parentElement) || document.activeElement) as HTMLElement | null;
+          const targetEl = (
+            (e.target instanceof Element ? e.target : delEl.parentElement) ||
+            document.activeElement
+          ) as HTMLElement | null;
           if (targetEl && typeof targetEl.dispatchEvent === "function") {
             targetEl.dispatchEvent(new Event("input", { bubbles: true }));
           }
-        } else {
-          const frag = range.cloneContents();
-          const hasBlocks =
-            frag.querySelector("p, h1, h2, h3, h4, h5, h6, li, ul, ol, table, tr, td, th, div") !==
-            null;
+          syncTrackedChangesFromDOM();
+        }
 
-          if (hasBlocks) {
-            return;
-          }
-
-          const startIns = getClosestTcElement(
-            range.startContainer,
-            range.startOffset,
-            "ins[data-tc]"
-          );
-          const endIns = getClosestTcElement(
-            range.endContainer,
-            range.endOffset,
-            "ins[data-tc]"
-          );
-
-          if (startIns && endIns && startIns === endIns) {
-            return;
-          }
-
-          e.preventDefault();
+        // Case 2B: Non-Collapsed Range Deletion (Selected Text)
+        else {
           const text = range.toString();
           if (!text) return;
 
+          const startIns = isInsideTcElement(range.startContainer, "ins, [data-tc*='ins']");
+          const endIns = isInsideTcElement(range.endContainer, "ins, [data-tc*='ins']");
+          if (startIns && endIns && startIns === endIns) {
+            const fullInsText = startIns.textContent || "";
+            if (fullInsText.trim() === text.trim() || fullInsText.length <= text.length) {
+              e.preventDefault();
+              const parent = startIns.parentNode;
+              if (parent) {
+                const r = document.createRange();
+                r.setStartBefore(startIns);
+                r.collapse(true);
+                parent.removeChild(startIns);
+                sel.removeAllRanges();
+                sel.addRange(r);
+
+                const targetEl = (
+                  (e.target instanceof Element ? e.target : parent) || document.activeElement
+                ) as HTMLElement | null;
+                if (targetEl && typeof targetEl.dispatchEvent === "function") {
+                  targetEl.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                syncTrackedChangesFromDOM();
+              }
+              return;
+            }
+            return;
+          }
+
+          e.preventDefault();
           const changeId = generateChangeId();
           const author = userRef.current;
           const ts = Date.now();
 
-          const parentBlock = (range.startContainer.nodeType === Node.ELEMENT_NODE
-            ? (range.startContainer as HTMLElement)
-            : range.startContainer.parentElement
-          )?.closest("p, h1, h2, h3, h4, h5, h6, table, li");
+          const parentBlock = (
+            range.startContainer.nodeType === Node.ELEMENT_NODE
+              ? (range.startContainer as HTMLElement)
+              : range.startContainer.parentElement
+          )?.closest("p, h1, h2, h3, h4, h5, h6, table, li, div");
           const contextTag = parentBlock?.tagName;
           const label = getHumanReadableChangeLabel("delete", text, "", contextTag);
 
@@ -836,39 +910,34 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
           };
           setTrackedChanges((prev) => [...prev.filter((c) => c.id !== changeId), newChange]);
 
-          const html = `<del data-tc="del" data-tc-id="${changeId}" data-user="${escapeAttr(
-            author
-          )}" data-ts="${ts}">${escapeHtml(text)}</del>`;
+          const delEl = document.createElement("del");
+          delEl.setAttribute("data-tc", "del");
+          delEl.setAttribute("data-tc-id", changeId);
+          delEl.setAttribute("data-user", author);
+          delEl.setAttribute("data-ts", String(ts));
+          delEl.textContent = text;
 
-          const success = document.execCommand("insertHTML", false, html);
-          if (!success) {
-            range.deleteContents();
-            const temp = document.createElement("div");
-            temp.innerHTML = html;
-            const frag = document.createDocumentFragment();
-            while (temp.firstChild) {
-              frag.appendChild(temp.firstChild);
-            }
-            range.insertNode(frag);
-          }
+          range.deleteContents();
+          range.insertNode(delEl);
 
-          const el = document.querySelector(`del[data-tc-id="${changeId}"]`);
-          if (el) {
-            const r = document.createRange();
-            r.setStartAfter(el);
-            r.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(r);
-          }
+          const r = document.createRange();
+          r.setStartAfter(delEl);
+          r.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(r);
 
-          const targetEl = ((e.target instanceof Element ? e.target : range.startContainer.parentElement) || document.activeElement) as HTMLElement | null;
+          const targetEl = (
+            (e.target instanceof Element ? e.target : delEl.parentElement) ||
+            document.activeElement
+          ) as HTMLElement | null;
           if (targetEl && typeof targetEl.dispatchEvent === "function") {
             targetEl.dispatchEvent(new Event("input", { bubbles: true }));
           }
+          syncTrackedChangesFromDOM();
         }
       }
     },
-    []
+    [syncTrackedChangesFromDOM]
   );
 
   /**
@@ -893,12 +962,12 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
   }, [syncTrackedChangesFromDOM]);
 
   /**
-   * Delegated mouse click handler for inline Alt+Click (Accept) & Shift+Click (Reject).
+   * Delegated mouse click handler for selecting changes & Alt+Click (Accept) / Shift+Click (Reject).
    */
   const handleClick = useCallback(
     (ev: MouseEvent, _pageId: string) => {
       const target = ev.target as HTMLElement;
-      const node = target.closest("[data-tc-id]") as HTMLElement;
+      const node = target.closest("ins, del, [data-tc-id]") as HTMLElement;
       if (!node) return;
       const changeId = node.getAttribute("data-tc-id");
       if (!changeId) return;
@@ -975,3 +1044,5 @@ export function useTrackChanges() {
   }
   return context;
 }
+
+export default TrackChangesProvider;

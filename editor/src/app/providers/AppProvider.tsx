@@ -36,7 +36,7 @@ import { QueryProvider } from "./QueryProvider";
 // - logout
 // - token/session handling
 import { AuthProvider } from "../../features/auth/index";
-import { SettingsProvider } from "../../features/editor/settings";
+import { SettingsProvider } from "../../features/editor/modules/settings";
 
 
 

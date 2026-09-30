@@ -9,7 +9,6 @@
 import { useState, useRef } from "react";
 import {
   FilePlus,
-  CornerDownLeft,
   Trash2,
   Hash,
   ChevronDown,
@@ -190,11 +189,6 @@ export default function InsertTab() {
   // ------------------------------------------------------------------------
   // Other Insert Handlers
   // ------------------------------------------------------------------------
-  const handlePageBreak = () => {
-    const pageBreakMarker = `<div class="page-break" style="page-break-after: always; break-after: page; border-top: 2px dashed #94a3b8; margin: 16px 0; position: relative;" data-page-break="true"><span style="position: absolute; top: -10px; right: 8px; background: #f1f5f9; padding: 0 6px; font-size: 10px; color: #64748b; font-family: monospace; border-radius: 3px;">Page Break</span></div><p><br></p>`;
-    handleInsertHTML(pageBreakMarker);
-  };
-
   const handleDeletePage = () => {
     if (!activePage || model.pages.length <= 1) return;
 
@@ -219,13 +213,6 @@ export default function InsertTab() {
         onClick={() => addPage()}
       >
         Add Page
-      </RibbonButton>
-
-      <RibbonButton
-        icon={<CornerDownLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-        onClick={handlePageBreak}
-      >
-        Page Break
       </RibbonButton>
 
       <RibbonButton
