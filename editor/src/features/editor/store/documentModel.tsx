@@ -175,9 +175,9 @@ export interface HistoryEntry {
 const uid = () =>
   Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 8);
 
-const STORAGE_KEY = "editor_document";
-const SAVED_DOCS_KEY = "editor_saved_documents";
-const HISTORY_KEY = "editor_document_history";
+const STORAGE_KEY = "editor_document_v2";
+const SAVED_DOCS_KEY = "editor_saved_documents_v2";
+const HISTORY_KEY = "editor_document_history_v2";
 
 const DEFAULT_HTML = `
 <p></p>

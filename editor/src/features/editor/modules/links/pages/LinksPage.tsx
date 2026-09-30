@@ -151,7 +151,7 @@ function LinksPageContent() {
   ];
 
   return (
-    <div className="flex h-full w-full flex-col select-none overflow-hidden bg-[#F8FAFC] dark:bg-[#07131E] text-slate-800 dark:text-slate-100">
+    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-[#F8FAFC] dark:bg-[#07131E] text-slate-800 dark:text-slate-100">
       {/* Top Fixed Area (Tabs + Form + Controls) - Fits neatly without scrollbar */}
       <div className="shrink-0 p-2.5 space-y-2">
         {/* Main Selectable Tabs (Side-by-Side: 1. INTERNAL REFERENCE | 2. CROSS REFERENCES) */}
@@ -227,7 +227,7 @@ function LinksPageContent() {
 
       {/* BOTTOM SECTION: LINKS HISTORY (Hidden in Email part only) */}
       {!(activeMainTab === 'internal' && internalSubTab === 'email') && (
-        <div className="flex-1 min-h-0 flex flex-col px-2.5 pb-2.5 pt-0">
+        <div className="flex flex-col px-2.5 pb-2.5 pt-0">
           <LinksHistorySection
             history={history}
             isRefreshing={isRefreshing}

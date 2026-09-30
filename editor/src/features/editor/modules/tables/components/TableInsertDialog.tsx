@@ -30,10 +30,11 @@ export function buildCustomTableHTML(config: {
   textSize: string;
   titleOption: "with" | "without" | "only";
   autoFit: boolean;
+  tableNumber: number;
 }): string {
-  const { rows, columns, headingSize, textSize, titleOption, autoFit } = config;
+  const { rows, columns, headingSize, textSize, titleOption, autoFit, tableNumber } = config;
 
-  const captionText = "Table 1: Table Title";
+  const captionText = `Table ${tableNumber}: Table Title`;
   const captionHtml = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">${captionText}</p>`;
 
   if (titleOption === "only") {
@@ -161,6 +162,12 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
   };
 
   const handleInsert = () => {
+    let existingTables = 0;
+    if (typeof document !== 'undefined') {
+      existingTables = document.querySelectorAll('table[data-table="true"], table.editor-table').length;
+    }
+    const tableNumber = existingTables + 1;
+
     const html = buildCustomTableHTML({
       rows,
       columns,
@@ -168,6 +175,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
       textSize,
       titleOption,
       autoFit,
+      tableNumber,
     });
 
     if (onInsert) {

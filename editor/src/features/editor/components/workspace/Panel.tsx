@@ -359,6 +359,8 @@ import { WritingPage } from "../../modules/writing";
 import { LinksPage } from "../../modules/links";
 import { TrackChangesPage } from "../../modules/trackChanges";
 import { SymbolsPage } from "../../modules/symbols";
+import { ReferencePanel } from "../../modules/reference";
+import { AppendicesPanel } from "../../modules/appendices";
 
 /* --------------------------------
    PROPS
@@ -382,6 +384,8 @@ export const PANEL_MAP: Partial<Record<ModuleId, ComponentType>> = {
   symbols: SymbolsPage,
   trackChanges: TrackChangesPage,
   settings: SettingsPage,
+  references: ReferencePanel,
+  appendices: AppendicesPanel,
 };
 
 /* --------------------------------
