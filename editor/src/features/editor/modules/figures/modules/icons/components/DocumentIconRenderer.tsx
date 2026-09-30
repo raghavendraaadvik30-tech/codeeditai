@@ -18,6 +18,7 @@ export interface IconConfig {
 interface DocumentIconRendererProps {
   config: IconConfig;
   figureEl: HTMLElement;
+  onDelete?: () => void;
 }
 
 type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
@@ -25,6 +26,7 @@ type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 export default function DocumentIconRenderer({
   config,
   figureEl,
+  onDelete,
 }: DocumentIconRendererProps) {
   const [x, setX] = useState<number>(config.x || 0);
   const [y, setY] = useState<number>(config.y || 0);
@@ -33,6 +35,7 @@ export default function DocumentIconRenderer({
   const [rotate, setRotate] = useState<number>(config.rotate || 0);
   const color = "#000000";
   const [isSelected, setIsSelected] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -126,10 +129,88 @@ export default function DocumentIconRenderer({
     return 1;
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    figureEl.remove();
-    notifyDocumentChange();
+  // Right-click context menu listener on figure element
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsSelected(true);
+      setContextMenuPos({ x: e.clientX, y: e.clientY });
+    };
+
+    figureEl.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      figureEl.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [figureEl]);
+
+  // Close context menu on outside click or escape
+  useEffect(() => {
+    if (!contextMenuPos) return;
+
+    const handlePointerDown = () => {
+      setContextMenuPos(null);
+    };
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setContextMenuPos(null);
+      }
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleEsc);
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [contextMenuPos]);
+
+  // Keyboard Delete & Backspace listener when icon is selected
+  useEffect(() => {
+    if (!isSelected) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleDelete();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [isSelected, figureEl, onDelete]);
+
+  const handleDelete = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsSelected(false);
+    setContextMenuPos(null);
+
+    if (onDelete) {
+      onDelete();
+    } else {
+      const pageContainer = figureEl.closest('[contenteditable="true"]') as HTMLElement | null;
+      figureEl.remove();
+      if (pageContainer) {
+        pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
   };
 
   const handleSizeChange = (delta: number) => {
@@ -527,9 +608,36 @@ export default function DocumentIconRenderer({
             type="button"
             title="Delete Icon"
             onClick={handleDelete}
-            className="p-1 rounded text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors"
+            onPointerDown={(e) => e.stopPropagation()}
+            className="p-1 rounded text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Context Menu on Right Click */}
+      {contextMenuPos && (
+        <div
+          data-editor-ui="true"
+          className="fixed z-[99999] w-44 rounded-lg border border-slate-200 bg-white/98 backdrop-blur-md p-1 shadow-xl text-xs text-slate-800 animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-slate-800 dark:text-slate-200"
+          style={{
+            top: Math.max(8, Math.min(contextMenuPos.y, window.innerHeight - 80)),
+            left: Math.max(8, Math.min(contextMenuPos.x, window.innerWidth - 180)),
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-red-50 text-red-600 dark:hover:bg-red-950/50 font-medium transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-600" />
+            <span>Delete Icon</span>
           </button>
         </div>
       )}

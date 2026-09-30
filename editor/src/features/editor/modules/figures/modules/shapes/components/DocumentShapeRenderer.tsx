@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Trash2, Type } from "lucide-react";
 import ShapeIcon from "./ShapeIcon";
 import type { CanvasShape } from "../types/shape";
 
 interface DocumentShapeRendererProps {
   config: CanvasShape;
   figureEl: HTMLElement;
+  onDelete?: () => void;
 }
 
 type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
@@ -12,6 +14,7 @@ type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 export default function DocumentShapeRenderer({
   config,
   figureEl,
+  onDelete,
 }: DocumentShapeRendererProps) {
   const [x, setX] = useState<number>(config.x || 0);
   const [y, setY] = useState<number>(config.y || 0);
@@ -21,7 +24,10 @@ export default function DocumentShapeRenderer({
   const [strokeColor] = useState<string>(config.strokeColor || "#000000");
   const [strokeWidth] = useState<number>(config.strokeWidth || 1.5);
   const [rotate] = useState<number>(config.rotate || 0);
-  const [text] = useState<string>(config.text || "");
+  const [text, setText] = useState<string>(config.text || "");
+  const [isEditingText, setIsEditingText] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
+  const textInputRef = useRef<HTMLInputElement>(null);
   const initialSelected =
     config.selected !== undefined
       ? config.selected
@@ -97,9 +103,71 @@ export default function DocumentShapeRenderer({
     };
   }, [config.id]);
 
+  const handleDelete = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsSelected(false);
+    setContextMenuPos(null);
+
+    if (onDelete) {
+      onDelete();
+    } else {
+      const pageContainer = figureEl.closest('[contenteditable="true"]') as HTMLElement | null;
+      figureEl.remove();
+      if (pageContainer) {
+        pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+  };
+
+  const handleTextChange = (val: string) => {
+    setText(val);
+    updateDOMConfig({ text: val });
+    notifyDocumentChange();
+  };
+
+  // Right-click context menu listener on figure element
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsSelected(true);
+      setContextMenuPos({ x: e.clientX, y: e.clientY });
+    };
+
+    figureEl.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      figureEl.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [figureEl]);
+
+  // Close context menu on outside click or escape
+  useEffect(() => {
+    if (!contextMenuPos) return;
+
+    const handlePointerDown = () => {
+      setContextMenuPos(null);
+    };
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setContextMenuPos(null);
+      }
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleEsc);
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [contextMenuPos]);
+
   // Keyboard Delete & Backspace listener when shape is selected
   useEffect(() => {
-    if (!isSelected) return;
+    if (!isSelected || isEditingText) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement as HTMLElement | null;
@@ -115,8 +183,7 @@ export default function DocumentShapeRenderer({
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
         e.stopPropagation();
-        figureEl.remove();
-        notifyDocumentChange();
+        handleDelete();
       }
     };
 
@@ -124,7 +191,14 @@ export default function DocumentShapeRenderer({
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true);
     };
-  }, [isSelected, figureEl]);
+  }, [isSelected, isEditingText, figureEl, onDelete]);
+
+  useEffect(() => {
+    if (isEditingText && textInputRef.current) {
+      textInputRef.current.focus();
+      textInputRef.current.select();
+    }
+  }, [isEditingText]);
 
   // Synchronize figure element styles (position, transform, dimensions)
   useEffect(() => {
@@ -454,12 +528,29 @@ export default function DocumentShapeRenderer({
           strokeWidth={strokeWidth || 1.5}
         />
 
-        {/* Optional Text inside shape (non-blocking so dragging works smoothly) */}
-        {text && (
+        {/* Optional Text inside shape (editable on demand or read-only) */}
+        {isEditingText ? (
+          <input
+            ref={textInputRef}
+            type="text"
+            value={text}
+            onChange={(e) => handleTextChange(e.target.value)}
+            onBlur={() => setIsEditingText(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === "Escape") {
+                setIsEditingText(false);
+              }
+              e.stopPropagation();
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="absolute inset-x-2 text-center text-xs font-semibold bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 rounded px-1 py-0.5 border border-blue-500 shadow-xs z-30 outline-hidden pointer-events-auto"
+          />
+        ) : text ? (
           <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-900 dark:text-slate-100 pointer-events-none px-2 select-none">
             {text}
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* EXACTLY 8 INTERACTIVE RESIZE HANDLES WHEN SELECTED */}
@@ -514,6 +605,84 @@ export default function DocumentShapeRenderer({
             title="Resize shape width (Middle-Left)"
           />
         </>
+      )}
+
+      {/* Floating Toolbar Controls when selected */}
+      {isSelected && (
+        <div
+          data-editor-ui="true"
+          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900/95 text-white p-1.5 rounded-xl shadow-xl text-[11px] backdrop-blur-xs z-50 whitespace-nowrap"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          {/* Edit Button */}
+          <button
+            type="button"
+            title="Edit Text"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditingText(true);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-slate-700 text-slate-200 hover:text-white transition-colors cursor-pointer"
+          >
+            <Type className="w-3.5 h-3.5" />
+            <span>Edit</span>
+          </button>
+
+          <div className="w-px h-3.5 bg-slate-700 mx-0.5" />
+
+          {/* Delete Button */}
+          <button
+            type="button"
+            title="Delete Shape"
+            onClick={handleDelete}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete</span>
+          </button>
+        </div>
+      )}
+
+      {/* Context Menu on Right Click */}
+      {contextMenuPos && (
+        <div
+          data-editor-ui="true"
+          className="fixed z-[99999] w-40 rounded-lg border border-slate-200 bg-white/98 backdrop-blur-md p-1 shadow-xl text-xs text-slate-800 animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-slate-800 dark:text-slate-200"
+          style={{
+            top: Math.max(8, Math.min(contextMenuPos.y, window.innerHeight - 90)),
+            left: Math.max(8, Math.min(contextMenuPos.x, window.innerWidth - 170)),
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setContextMenuPos(null);
+              setIsEditingText(true);
+            }}
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer"
+          >
+            <Type className="w-3.5 h-3.5" />
+            <span>Edit</span>
+          </button>
+          <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-red-50 text-red-600 dark:hover:bg-red-950/50 font-medium transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-600" />
+            <span>Delete</span>
+          </button>
+        </div>
       )}
     </div>
   );
