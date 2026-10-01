@@ -20,6 +20,7 @@ export default function WritingPanel() {
   } = useWritingContext();
 
   const {
+    activeCase,
     applyCase,
     applyFormatting,
     applyAlignment,
@@ -28,9 +29,7 @@ export default function WritingPanel() {
     clearHighlight,
     applyBullets,
     applyNumbering,
-    applyMultilevel,
-    toggleMultilevel,
-  } = useWriting();
+     } = useWriting();
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -55,36 +54,46 @@ export default function WritingPanel() {
           scrollbar-thumb-slate-300
         "
       >
+
+        {/* CASE */}
         <CaseSection
           actions={caseActions}
+          activeCase={activeCase}
           onApply={applyCase}
         />
 
+        {/* FORMATTING */}
         <FormattingSection
           tools={formattingTools}
           onApply={applyFormatting}
         />
 
+        {/* FONT COLOR */}
         <FontColorSection
           onApply={applyFontColor}
         />
 
+        {/* HIGHLIGHT */}
         <HighlightSection
           onApply={applyHighlight}
           onClear={clearHighlight}
         />
 
+        {/* ALIGNMENT */}
         <AlignmentSection
           tools={alignmentTools}
           onApply={applyAlignment}
         />
 
+        {/* LISTS */}
         <ListSection
           tools={listTools}
           onApplyBullets={applyBullets}
           onApplyNumbering={applyNumbering}
-        
+          //onApplyMultilevel={applyMultilevel}
+         // onToggleMultilevel={toggleMultilevel}
         />
+
       </div>
 
       {/* FOOTER */}

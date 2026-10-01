@@ -1,12 +1,16 @@
-import { useCallback } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { useEditor } from "../../../context/EditorContext";
 
 import { transformCurrentSelection } from "../utils/writingUtils";
 
 import type {
-  AlignmentTool,
-  CaseAction,
+ CaseAction,
   FormattingTool,
 } from "../types/writing.types";
 
@@ -15,7 +19,6 @@ export function useWriting() {
 
   const {
     exec,
-    applyBulletStyle,
     applyNumberingStyle,
     applyMultilevelStyle,
     toggleMultilevelList,
@@ -23,34 +26,182 @@ export function useWriting() {
     editorRef,
   } = editor;
 
+  /*
+   * Currently selected/applied case button.
+   *
+   * Example:
+   *
+   * UPPER CASE -> activeCase = "UPPER CASE"
+   * lower case -> activeCase = "lower case"
+   */
+  const [activeCase, setActiveCase] =
+    useState<string | null>(null);
+
+  /*
+   * Stores the actual text that is currently selected.
+   *
+   * This allows us to keep the active button while the
+   * same text remains selected.
+   */
+  const activeSelectionTextRef =
+    useRef<string>("");
+
   /**
    * Applies a case transformation.
+   *
+   * IMPORTANT:
+   *
+   * 1. Restore the editor selection.
+   * 2. Transform the selected text.
+   * 3. Restore the SAME selection.
+   * 4. Keep the selected text active.
+   * 5. Highlight the selected case button.
    */
   const applyCase = useCallback(
     (action: CaseAction) => {
+      /*
+       * Restore the selection because the mouse is now
+       * interacting with the writing panel.
+       */
       const restored = restoreEditorSelection();
 
       if (!restored) {
         return;
       }
 
+      const selection = window.getSelection();
+
+      if (
+        !selection ||
+        selection.rangeCount === 0 ||
+        selection.isCollapsed
+      ) {
+        return;
+      }
+
+      /*
+       * Save the selected text BEFORE transformation.
+       */
+      const selectedText = selection.toString();
+
+      if (!selectedText) {
+        return;
+      }
+
+      /*
+       * Save it for active-case tracking.
+       */
+      activeSelectionTextRef.current =
+        selectedText;
+
+      /*
+       * Transform the selected text.
+       *
+       * writingUtils is responsible for restoring
+       * the actual browser selection after changing
+       * the text.
+       */
       const changed = transformCurrentSelection(
-        action.transform
+        action.transform,
+        editorRef.current
       );
 
-      if (changed && editorRef.current) {
+      if (!changed) {
+        return;
+      }
+
+      /*
+       * Mark this case button as active.
+       */
+      setActiveCase(action.label);
+
+      /*
+       * Notify React/editor that the content changed.
+       */
+      if (editorRef.current) {
         editorRef.current.dispatchEvent(
           new Event("input", {
             bubbles: true,
           })
         );
       }
+
+      /*
+       * Make absolutely sure the editor selection
+       * remains active after the DOM update.
+       */
+      requestAnimationFrame(() => {
+        restoreEditorSelection();
+      });
     },
     [
       restoreEditorSelection,
       editorRef,
     ]
   );
+
+  /**
+   * Clear active case when the user selects
+   * completely different text.
+   *
+   * If the same text is still selected, keep
+   * the active case button highlighted.
+   */
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const selection = window.getSelection();
+
+      if (
+        !selection ||
+        selection.rangeCount === 0 ||
+        selection.isCollapsed
+      ) {
+        return;
+      }
+
+      const currentText =
+        selection.toString();
+
+      if (!currentText) {
+        return;
+      }
+
+      const previousText =
+        activeSelectionTextRef.current;
+
+      /*
+       * Same selected text:
+       * keep the active case.
+       */
+      if (
+        previousText &&
+        currentText === previousText
+      ) {
+        return;
+      }
+
+      /*
+       * User selected different text.
+       * Remove the previous active case.
+       */
+      setActiveCase(null);
+
+      activeSelectionTextRef.current =
+        currentText;
+    };
+
+    document.addEventListener(
+      "selectionchange",
+      handleSelectionChange
+    );
+
+    return () => {
+      document.removeEventListener(
+        "selectionchange",
+        handleSelectionChange
+      );
+    };
+  }, []);
 
   /**
    * Applies text formatting.
@@ -75,12 +226,70 @@ export function useWriting() {
   /**
    * Applies font color.
    */
-  const applyFontColor = useCallback(
-    (color: string) => {
-      exec("foreColor", color);
-    },
-    [exec]
-  );
+/**
+ * Applies font color while keeping the selected text active.
+ *
+ * Behavior:
+ * Select text
+ * → click color
+ * → color is applied
+ * → same text remains selected
+ * → click another color
+ * → same selection gets the new color
+ */
+const applyFontColor = useCallback(
+  (color: string) => {
+    /*
+     * First restore the selection that was saved
+     * before the user interacted with the Writing panel.
+     */
+    const restored = restoreEditorSelection();
+
+    if (!restored) {
+      return;
+    }
+
+    /*
+     * Apply the color to the restored selection.
+     */
+    exec("foreColor", color);
+
+    /*
+     * Tell the editor that its content changed.
+     */
+    if (editorRef.current) {
+      editorRef.current.dispatchEvent(
+        new Event("input", {
+          bubbles: true,
+        })
+      );
+    }
+
+    /*
+     * execCommand can collapse the browser selection.
+     *
+     * Restore the exact saved selection after the
+     * browser finishes updating the DOM.
+     */
+    requestAnimationFrame(() => {
+      restoreEditorSelection();
+    });
+
+    /*
+     * Extra restoration after the DOM/input event.
+     * This helps when the editor rerenders after the
+     * input event.
+     */
+    setTimeout(() => {
+      restoreEditorSelection();
+    }, 0);
+  },
+  [
+    restoreEditorSelection,
+    exec,
+    editorRef,
+  ]
+);
 
   /**
    * Applies text highlight.
@@ -104,150 +313,186 @@ export function useWriting() {
 
   /**
    * Applies bullet list.
-   *
-   * Values:
-   *
-   * disc
-   * circle
-   * square
-   *
-   * custom:★
-   * custom:✓
-   * custom:◆
-   * custom:➤
    */
   const applyBullets = useCallback(
-  (style?: string) => {
-    console.log("applyBullets called:", style);
+    (style?: string) => {
+      const restored =
+        restoreEditorSelection();
 
-    const restored = restoreEditorSelection();
+      if (!restored) {
+        return;
+      }
 
-    console.log("selection restored:", restored);
+      if (!editorRef.current) {
+        return;
+      }
 
-    if (!restored) {
-      console.log("NO SELECTION");
-      return;
-    }
+      /*
+       * Normal bullet
+       */
+      if (!style || style === "disc") {
+        exec("insertUnorderedList");
+        return;
+      }
 
-    if (!editorRef.current) {
-      console.log("NO EDITOR REF");
-      return;
-    }
+      /*
+       * Circle
+       */
+      if (style === "circle") {
+        exec("insertUnorderedList");
 
-    /*
-     * Normal bullet
-     */
-    if (!style || style === "disc") {
-      exec("insertUnorderedList");
-      return;
-    }
+        setTimeout(() => {
+          const selection =
+            window.getSelection();
 
-    /*
-     * Circle
-     */
-    if (style === "circle") {
-      exec("insertUnorderedList");
-
-      setTimeout(() => {
-        const selection = window.getSelection();
-
-        if (!selection || selection.rangeCount === 0) {
-          return;
-        }
-
-        let node: Node | null =
-          selection.getRangeAt(0).startContainer;
-
-        while (node && node !== editorRef.current) {
-          if (node instanceof HTMLUListElement) {
-            node.style.listStyleType = "circle";
-            break;
+          if (
+            !selection ||
+            selection.rangeCount === 0
+          ) {
+            return;
           }
 
-          node = node.parentNode;
-        }
-      }, 0);
+          let node: Node | null =
+            selection
+              .getRangeAt(0)
+              .startContainer;
 
-      return;
-    }
+          while (
+            node &&
+            node !== editorRef.current
+          ) {
+            if (
+              node instanceof
+              HTMLUListElement
+            ) {
+              node.style.listStyleType =
+                "circle";
 
-    /*
-     * Square
-     */
-    if (style === "square") {
-      exec("insertUnorderedList");
+              break;
+            }
 
-      setTimeout(() => {
-        const selection = window.getSelection();
+            node = node.parentNode;
+          }
+        }, 0);
 
-        if (!selection || selection.rangeCount === 0) {
-          return;
-        }
+        return;
+      }
 
-        let node: Node | null =
-          selection.getRangeAt(0).startContainer;
+      /*
+       * Square
+       */
+      if (style === "square") {
+        exec("insertUnorderedList");
 
-        while (node && node !== editorRef.current) {
-          if (node instanceof HTMLUListElement) {
-            node.style.listStyleType = "square";
-            break;
+        setTimeout(() => {
+          const selection =
+            window.getSelection();
+
+          if (
+            !selection ||
+            selection.rangeCount === 0
+          ) {
+            return;
           }
 
-          node = node.parentNode;
-        }
-      }, 0);
+          let node: Node | null =
+            selection
+              .getRangeAt(0)
+              .startContainer;
 
-      return;
-    }
+          while (
+            node &&
+            node !== editorRef.current
+          ) {
+            if (
+              node instanceof
+              HTMLUListElement
+            ) {
+              node.style.listStyleType =
+                "square";
 
-    /*
-     * Custom bullet
-     */
-    if (style.startsWith("custom:")) {
-      const bulletChar = style.substring(7);
+              break;
+            }
 
-      exec("insertUnorderedList");
+            node = node.parentNode;
+          }
+        }, 0);
 
-      setTimeout(() => {
-        const selection = window.getSelection();
+        return;
+      }
 
-        if (!selection || selection.rangeCount === 0) {
-          return;
-        }
+      /*
+       * Custom bullet
+       */
+      if (style.startsWith("custom:")) {
+        const bulletChar =
+          style.substring(7);
 
-        let node: Node | null =
-          selection.getRangeAt(0).startContainer;
+        exec("insertUnorderedList");
 
-        while (node && node !== editorRef.current) {
-          if (node instanceof HTMLUListElement) {
-            node.style.listStyleType = "none";
-            node.setAttribute(
-              "data-custom-bullet",
-              bulletChar
-            );
+        setTimeout(() => {
+          const selection =
+            window.getSelection();
 
-            node
-              .querySelectorAll(":scope > li")
-              .forEach((li) => {
-                li.setAttribute(
-                  "data-custom-bullet",
-                  bulletChar
-                );
-
-                (li as HTMLElement).style.listStyleType =
-                  "none";
-              });
-
-            break;
+          if (
+            !selection ||
+            selection.rangeCount === 0
+          ) {
+            return;
           }
 
-          node = node.parentNode;
-        }
-      }, 0);
-    }
-  },
-  [restoreEditorSelection, exec, editorRef]
-);
+          let node: Node | null =
+            selection
+              .getRangeAt(0)
+              .startContainer;
+
+          while (
+            node &&
+            node !== editorRef.current
+          ) {
+            if (
+              node instanceof
+              HTMLUListElement
+            ) {
+              node.style.listStyleType =
+                "none";
+
+              node.setAttribute(
+                "data-custom-bullet",
+                bulletChar
+              );
+
+              node
+                .querySelectorAll(
+                  ":scope > li"
+                )
+                .forEach((li) => {
+                  li.setAttribute(
+                    "data-custom-bullet",
+                    bulletChar
+                  );
+
+                  (
+                    li as HTMLElement
+                  ).style.listStyleType =
+                    "none";
+                });
+
+              break;
+            }
+
+            node = node.parentNode;
+          }
+        }, 0);
+      }
+    },
+    [
+      restoreEditorSelection,
+      exec,
+      editorRef,
+    ]
+  );
+
   /**
    * Applies numbered list style.
    */
@@ -311,14 +556,28 @@ export function useWriting() {
   return {
     editor,
 
+    /*
+     * CASE
+     */
+    activeCase,
     applyCase,
+
+    /*
+     * FORMATTING
+     */
     applyFormatting,
     applyAlignment,
 
+    /*
+     * COLORS
+     */
     applyFontColor,
     applyHighlight,
     clearHighlight,
 
+    /*
+     * LISTS
+     */
     applyBullets,
     applyNumbering,
     applyMultilevel,
