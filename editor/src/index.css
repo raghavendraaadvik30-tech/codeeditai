@@ -164,7 +164,6 @@ body,
 ========================================================== */
 @media print {
   @page {
-    size: A4 portrait;
     margin: 0mm;
   }
 
@@ -212,12 +211,6 @@ body,
   .print-page,
   .print-preview-page,
   section[data-page-id] {
-    width: 210mm !important;
-    min-width: 210mm !important;
-    max-width: 210mm !important;
-    min-height: 297mm !important;
-    height: 297mm !important;
-    max-height: 297mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     box-shadow: none !important;
@@ -229,6 +222,11 @@ body,
     break-after: page !important;
     page-break-inside: avoid !important;
     box-sizing: border-box !important;
+  }
+
+  .print-last-page {
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
 
   /* Ensure background colors and borders render in print */
@@ -451,6 +449,19 @@ del[data-tc*="edit"],
 }
 .thin-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.8);
+}
+
+/* Hide selected workspace section scrollbars without disabling scrolling. */
+.settings-page-scroll,
+.tables-page-scroll,
+.document-page-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.settings-page-scroll::-webkit-scrollbar,
+.tables-page-scroll::-webkit-scrollbar,
+.document-page-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* ========================================

@@ -13,10 +13,10 @@ import { printService } from "../../../services/printService";
 export function usePrint() {
   const [isPrinting, setIsPrinting] = useState(false);
 
-  const printDocument = useCallback(() => {
+  const printDocument = useCallback(async () => {
     setIsPrinting(true);
     try {
-      printService.printDocument();
+      await printService.printDocument();
     } finally {
       setIsPrinting(false);
     }

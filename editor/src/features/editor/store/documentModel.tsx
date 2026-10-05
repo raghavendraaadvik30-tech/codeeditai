@@ -535,7 +535,11 @@ interface DocumentContextType {
   insertDocument: (title?: string) => void;
   insertUploadedDocument: (
     title: string,
-    pagesHtml: string[]
+    pagesHtml: string[],
+    pageLayout?: {
+      orientation: "portrait" | "landscape";
+      paperSize: { name: string; width: number; height: number };
+    }
   ) => DocumentModel;
   resetDocument: () => void;
   refreshHistory: () => void;
@@ -1331,8 +1335,29 @@ export function DocumentModelProvider({
   ============================================================ */
 
   const insertUploadedDocument = useCallback(
-    (title: string, pagesHtml: string[]): DocumentModel => {
-      const section = createDefaultSection("section_1");
+    (
+      title: string,
+      pagesHtml: string[],
+      pageLayout?: {
+        orientation: "portrait" | "landscape";
+        paperSize: { name: string; width: number; height: number };
+      }
+    ): DocumentModel => {
+      const defaultSection = createDefaultSection("section_1");
+      const section: SectionModel = pageLayout
+        ? {
+            ...defaultSection,
+            orientation: pageLayout.orientation,
+            paperSize: pageLayout.paperSize,
+            marginPreset: "custom",
+            marginConfig: { top: 0, bottom: 0, left: 0, right: 0 },
+            header: "",
+            footer: "",
+            showPageNumbers: false,
+            headerTopDistance: 0,
+            footerBottomDistance: 0,
+          }
+        : defaultSection;
       const validPages =
         pagesHtml.length > 0
           ? pagesHtml.map((h) => (h && h.trim() ? h.trim() : DEFAULT_HTML))
@@ -1358,7 +1383,7 @@ export function DocumentModelProvider({
         sections: [
           {
             ...section,
-            showPageNumbers: true,
+            showPageNumbers: pageLayout ? false : true,
             pageNumberPosition: "footer",
             pageNumberAlignment: "right",
             pageNumberFormat: "1",

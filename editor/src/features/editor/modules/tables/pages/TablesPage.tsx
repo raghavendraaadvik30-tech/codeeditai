@@ -74,7 +74,7 @@ function TablesPageContent() {
       </div>
 
       {/* 2. SCROLLABLE SIDEBAR BODY */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+      <div className="tables-page-scroll flex-1 overflow-y-auto p-3 space-y-4">
         {/* QUICK GRID PICKER */}
         <div className="space-y-2">
           <button

@@ -13,6 +13,16 @@ export const PictureHydration: React.FC = () => {
   mountsRef.current = mounts;
 
   const scanDocumentForPictures = useCallback(() => {
+    // PDF imports are full-page content, not floating pictures. Older saved
+    // imports may already have been wrapped before this exclusion existed;
+    // unwrap them so the original page-sized image and dimensions survive.
+    document.querySelectorAll("figure.editor-picture-figure").forEach((figure) => {
+      const importedPage = figure.querySelector<HTMLImageElement>("img[data-imported-pdf-page='true']");
+      if (importedPage?.parentElement) {
+        figure.replaceWith(importedPage);
+      }
+    });
+
     // Find all picture figures inside contenteditable containers (excluding shapes and icons)
     const rawFound = Array.from(
       document.querySelectorAll(
@@ -33,6 +43,10 @@ export const PictureHydration: React.FC = () => {
     editablePages.forEach((page) => {
       const allImgs = Array.from(page.querySelectorAll("img")) as HTMLImageElement[];
       allImgs.forEach((img) => {
+        // Keep a PDF page image at the page's physical size. Picture hydration
+        // assigns ordinary inserted pictures a fixed canvas size and caption.
+        if (img.matches("img[data-imported-pdf-page='true']")) return;
+
         // Skip images inside React portal mounts of non-picture modules
         if (
           img.closest(".editor-shape-mount") ||

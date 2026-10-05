@@ -110,7 +110,7 @@ function SettingsPageContent() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-[#0c1929] overflow-y-auto">
+    <div className="settings-page-scroll flex h-full flex-col bg-white dark:bg-[#0c1929] overflow-y-auto">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-2xl dark:bg-slate-100 dark:text-slate-900 animate-in fade-in slide-in-from-bottom-4">

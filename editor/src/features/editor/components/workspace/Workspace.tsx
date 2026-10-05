@@ -801,10 +801,13 @@ function DocumentPage({
     initHistory(pageId, html || "<p><br></p>");
   }, [pageId, initHistory]);
 
+  const isImportedPdfPage = /<img\b[^>]*data-imported-pdf-page/i.test(html);
   const marginL = section?.marginConfig?.left ?? 96;
   const marginR = section?.marginConfig?.right ?? 96;
-  const bodyPaddingTop = 8;
-  const bodyPaddingBottom = Math.max(16, Math.min(32, (section?.marginConfig?.bottom ?? 96) - 64));
+  const bodyPaddingTop = isImportedPdfPage ? 0 : 8;
+  const bodyPaddingBottom = isImportedPdfPage
+    ? 0
+    : Math.max(16, Math.min(32, (section?.marginConfig?.bottom ?? 96) - 64));
 
   const { model: docModel, updateSection: docUpdateSection } = useDocumentModel();
   const {
@@ -1359,14 +1362,20 @@ function DocumentPage({
     }
 
     // ------------------------------------------------------------------
-    // Select All in Current Page: Ctrl + A / Cmd + A
+    // Select the complete document body, including content on other pages.
     // ------------------------------------------------------------------
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "a" || e.key === "A")) {
       e.preventDefault();
       const sel = window.getSelection();
-      if (sel) {
+      const pageEditors = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-editor-page]")
+      ).filter((pageEditor) => pageEditor.isContentEditable);
+      if (sel && pageEditors.length > 0) {
         const range = document.createRange();
-        range.selectNodeContents(container);
+        const firstPage = pageEditors[0];
+        const lastPage = pageEditors[pageEditors.length - 1];
+        range.setStart(firstPage, 0);
+        range.setEnd(lastPage, lastPage.childNodes.length);
         sel.removeAllRanges();
         sel.addRange(range);
       }
@@ -1791,7 +1800,7 @@ function DocumentPage({
     hasPageNumberInHeader
   );
 
-  const headerHeight = isDraft
+  const headerHeight = isImportedPdfPage ? 0 : isDraft
     ? 0
     : isHeaderFooterActive
       ? Math.max(36, section?.headerTopDistance ?? 48)
@@ -1815,8 +1824,10 @@ function DocumentPage({
         ? 6
         : 4;
 
-  const footerHeight = isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
-  const contentHeight = Math.max(100, pageHeight - headerHeight - footerHeight);
+  const footerHeight = isImportedPdfPage ? 0 : isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
+  const contentHeight = isImportedPdfPage
+    ? pageHeight
+    : Math.max(100, pageHeight - headerHeight - footerHeight);
 
   const getBorderStyle = (): React.CSSProperties => {
     if (!section?.pageBorders || section.pageBorders.style === "none") {
@@ -2210,7 +2221,7 @@ function DocumentPage({
         </div>
 
         {/* DOCUMENT HEADER */}
-        {!isDraft && (
+        {!isDraft && !isImportedPdfPage && (
           <div
             data-hf-container="header"
             data-page-id={pageId}
@@ -2507,7 +2518,7 @@ function DocumentPage({
         )}
 
         {/* DOCUMENT FOOTER */}
-        {!isDraft && (
+        {!isDraft && !isImportedPdfPage && (
           <div
             data-hf-container="footer"
             data-page-id={pageId}
