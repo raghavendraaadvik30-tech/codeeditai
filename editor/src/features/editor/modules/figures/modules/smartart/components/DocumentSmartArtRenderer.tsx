@@ -13,7 +13,8 @@
  * --------------------------------------------------------
  */
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Plus,
   Trash2,
@@ -33,6 +34,11 @@ import {
   ChevronRight,
   FileText,
   X,
+  Check,
+  Quote,
+  TrendingUp,
+  Layers,
+  CircleDot,
 } from 'lucide-react';
 import type { SmartArtModel, SmartArtNode, SmartArtStyle } from '@/features/editor/modules/figures/modules/smartart/types';
 import {
@@ -66,12 +72,97 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
   const [showLayoutDropdown, setShowLayoutDropdown] = useState(false);
   const [showStyleDropdown, setShowStyleDropdown] = useState(false);
 
-  // Context menu state
-  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
-
   // Resizing state
   const resizeStartRef = useRef<{ startX: number; startY: number; startW: number; startH: number; handle: string } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Floating contextual toolbar state & ref
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number; isBelow: boolean } | null>(null);
+
+  const updateToolbarPosition = useCallback(() => {
+    if (!isSelected || !containerRef.current) {
+      setToolbarPos(null);
+      return;
+    }
+
+    const rect = containerRef.current.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) {
+      return;
+    }
+
+    const toolbarEl = toolbarRef.current;
+    const toolbarWidth = toolbarEl?.offsetWidth || 700;
+    const toolbarHeight = toolbarEl?.offsetHeight || 38;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const viewportPadding = 8;
+    const gap = 8;
+
+    // Preferred position: strictly ABOVE the SmartArt object
+    let top = rect.top - toolbarHeight - gap;
+    let isBelow = false;
+
+    // Only fallback to below if physically insufficient space above the top of the viewport
+    // (i.e. SmartArt is scrolled up touching the very top of the window, top < 8px)
+    if (top < viewportPadding) {
+      if (rect.bottom + gap + toolbarHeight <= viewportHeight - viewportPadding) {
+        top = rect.bottom + gap;
+        isBelow = true;
+      } else {
+        top = viewportPadding;
+      }
+    }
+
+    // Preferred horizontal position: horizontally centered over the SmartArt
+    let left = rect.left + (rect.width - toolbarWidth) / 2;
+
+    // Clamp horizontally to stay completely within viewport bounds
+    const maxLeft = Math.max(viewportPadding, viewportWidth - toolbarWidth - viewportPadding);
+    if (left < viewportPadding) {
+      left = viewportPadding;
+    } else if (left > maxLeft) {
+      left = maxLeft;
+    }
+
+    setToolbarPos({
+      top: Math.round(top),
+      left: Math.round(left),
+      isBelow,
+    });
+  }, [isSelected]);
+
+  // Sync toolbar position on selection, scroll, window resize, and SmartArt resize
+  useLayoutEffect(() => {
+    if (!isSelected) {
+      setToolbarPos(null);
+      return;
+    }
+
+    updateToolbarPosition();
+
+    const handleScrollOrResize = () => {
+      updateToolbarPosition();
+    };
+
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      ro = new ResizeObserver(() => {
+        updateToolbarPosition();
+      });
+      ro.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+      if (ro) ro.disconnect();
+    };
+  }, [isSelected, updateToolbarPosition, smartArt.width, smartArt.height, smartArt.alignment, showTextPane]);
 
   // Active color scheme
   const currentScheme = useMemo(() => {
@@ -89,17 +180,113 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     return SMARTART_LAYOUTS[smartArt.category] || [];
   }, [smartArt.category]);
 
-  // Click outside to close floating dropdowns / context menu
+  // Click outside to close floating dropdowns
   useEffect(() => {
     const handleWindowClick = () => {
       setShowColorDropdown(false);
       setShowLayoutDropdown(false);
       setShowStyleDropdown(false);
-      setContextMenuPos(null);
     };
     window.addEventListener('click', handleWindowClick);
     return () => window.removeEventListener('click', handleWindowClick);
   }, []);
+
+  // Helper to determine whether an event target is a SmartArt text-editing element (State 2)
+  const isSmartArtTextEditingTarget = useCallback((target: EventTarget | null): boolean => {
+    if (!target || !(target instanceof HTMLElement)) return false;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return true;
+    if (target.isContentEditable) return true;
+    if (
+      target.closest(
+        'input, textarea, [contenteditable="true"], [data-smartart-text-editor], [data-smartart-text-pane], figcaption, [data-smartart-caption], .smartart-caption-inline-input'
+      )
+    ) {
+      return true;
+    }
+    return false;
+  }, []);
+
+  const isSmartArtTextEditingActive = useCallback((): boolean => {
+    const activeEl = document.activeElement;
+    return isSmartArtTextEditingTarget(activeEl);
+  }, [isSmartArtTextEditingTarget]);
+
+  // Isolate keyboard events originating from SmartArt text inputs so they NEVER bubble out
+  // to the parent contenteditable document or trigger figure/page deletion.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleContainerKeyDown = (e: KeyboardEvent) => {
+      if (isSmartArtTextEditingTarget(e.target)) {
+        // STATE 2: SmartArt text is being edited.
+        // Stop propagation so Backspace, Delete, Enter, and Arrow keys never bubble to the outer contenteditable document or object deletion handlers.
+        e.stopPropagation();
+      }
+    };
+
+    const handleContainerKeyUp = (e: KeyboardEvent) => {
+      if (isSmartArtTextEditingTarget(e.target)) {
+        e.stopPropagation();
+      }
+    };
+
+    container.addEventListener('keydown', handleContainerKeyDown);
+    container.addEventListener('keyup', handleContainerKeyUp);
+
+    return () => {
+      container.removeEventListener('keydown', handleContainerKeyDown);
+      container.removeEventListener('keyup', handleContainerKeyUp);
+    };
+  }, [isSmartArtTextEditingTarget]);
+
+  // Keyboard Delete & Backspace listener when SmartArt object is selected (State 1)
+  useEffect(() => {
+    if (!isSelected) return;
+
+    const handleObjectKeyDown = (e: KeyboardEvent) => {
+      // MODE B GUARD: Never delete SmartArt if an input or text editing context is active
+      if (isSmartArtTextEditingTarget(e.target) || isSmartArtTextEditingActive()) {
+        return;
+      }
+
+      // Guard if document.activeElement is any input, textarea, or contentEditable
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.isContentEditable ||
+          activeEl.closest('input, textarea, [contenteditable="true"]'))
+      ) {
+        return;
+      }
+
+      // Guard if event target is an input/textarea
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          target.closest('input, textarea, [contenteditable="true"]'))
+      ) {
+        return;
+      }
+
+      // MODE A: Only delete the SmartArt object if no text editing element is active
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        e.stopPropagation();
+        onDeleteSmartArt();
+      }
+    };
+
+    window.addEventListener('keydown', handleObjectKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleObjectKeyDown);
+    };
+  }, [isSelected, onDeleteSmartArt, isSmartArtTextEditingTarget, isSmartArtTextEditingActive]);
 
   // Handle node text edit
   const handleNodeTextChange = (nodeId: string, newText: string) => {
@@ -109,6 +296,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     onUpdateSmartArt({
       ...smartArt,
       nodes: updatedNodes,
+      updatedAt: new Date().toISOString(),
     });
   };
 
@@ -119,6 +307,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     onUpdateSmartArt({
       ...smartArt,
       nodes: updatedNodes,
+      updatedAt: new Date().toISOString(),
     });
   };
 
@@ -126,15 +315,21 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
   const handleAddShape = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const count = smartArt.nodes.length + 1;
+    const hasSubtitle = smartArt.nodes.some((n) => n.subtitle !== undefined);
     const newNode: SmartArtNode = {
       id: `node-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       text: `Step ${count}`,
-      subtitle: smartArt.nodes[0]?.subtitle ? `Description for step ${count}` : undefined,
+      subtitle: hasSubtitle
+        ? `Description for step ${count}`
+        : smartArt.category === 'List'
+        ? `Description for step ${count}`
+        : undefined,
       level: 1,
     };
     onUpdateSmartArt({
       ...smartArt,
       nodes: [...smartArt.nodes, newNode],
+      updatedAt: new Date().toISOString(),
     });
     setSelectedNodeId(newNode.id);
   };
@@ -224,6 +419,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     onUpdateSmartArt({
       ...smartArt,
       style,
+      updatedAt: new Date().toISOString(),
     });
     setShowStyleDropdown(false);
   };
@@ -249,12 +445,11 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     });
   };
 
-  // Context Menu
+  // Context Menu - prevent browser default context menu (user uses top contextual toolbar)
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setActiveSmartArt(smartArt);
-    setContextMenuPos({ x: e.clientX, y: e.clientY });
   };
 
   // Resizing logic
@@ -286,6 +481,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       if (containerRef.current) {
         containerRef.current.style.width = `${newW}px`;
         containerRef.current.style.height = `${newH}px`;
+        updateToolbarPosition();
       }
     };
 
@@ -400,6 +596,12 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                           type="text"
                           value={node.text}
                           onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onKeyUp={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={() => setSelectedNodeId(node.id)}
+                          data-smartart-text-editor="true"
+                          placeholder="Step title..."
                           className={`w-full font-bold text-xs bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 ${
                             smartArt.style === 'outline' ? 'text-slate-900 dark:text-white' : 'text-white'
                           }`}
@@ -407,8 +609,14 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         {node.subtitle !== undefined && (
                           <input
                             type="text"
-                            value={node.subtitle}
+                            value={node.subtitle ?? ''}
                             onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            onKeyUp={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
+                            onFocus={() => setSelectedNodeId(node.id)}
+                            data-smartart-text-editor="true"
+                            placeholder="Description..."
                             className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 mt-0.5 ${
                               smartArt.style === 'outline' ? 'text-slate-600 dark:text-slate-300' : 'text-white/80'
                             }`}
@@ -462,6 +670,12 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       type="text"
                       value={node.text}
                       onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Step title..."
                       className={`w-full text-center bg-transparent border-none font-bold text-xs focus:outline-none focus:bg-white/20 rounded px-1 ${
                         smartArt.style === 'outline' ? 'text-slate-900 dark:text-white' : 'text-white'
                       }`}
@@ -469,8 +683,14 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     {node.subtitle !== undefined && (
                       <input
                         type="text"
-                        value={node.subtitle}
+                        value={node.subtitle ?? ''}
                         onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Description..."
                         className={`w-full text-center bg-transparent border-none text-[11px] mt-1 focus:outline-none focus:bg-white/20 rounded px-1 ${
                           smartArt.style === 'outline' ? 'text-slate-600 dark:text-slate-300' : 'text-white/80'
                         }`}
@@ -527,13 +747,25 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     type="text"
                     value={node.text}
                     onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(node.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Step title..."
                     className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded px-1"
                   />
                   {node.subtitle !== undefined && (
                     <input
                       type="text"
-                      value={node.subtitle}
+                      value={node.subtitle ?? ''}
                       onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Description..."
                       className="w-full text-center bg-transparent border-none text-white/80 text-[11px] mt-1 focus:outline-none focus:bg-white/20 rounded px-1"
                     />
                   )}
@@ -575,6 +807,12 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     type="text"
                     value={node.text}
                     onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(node.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Step title..."
                     className={`w-full font-bold text-xs bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 ${
                       smartArt.style === 'outline' ? 'text-slate-900 dark:text-white' : 'text-white'
                     }`}
@@ -582,8 +820,14 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   {node.subtitle !== undefined && (
                     <input
                       type="text"
-                      value={node.subtitle}
+                      value={node.subtitle ?? ''}
                       onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Description..."
                       className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 mt-0.5 ${
                         smartArt.style === 'outline' ? 'text-slate-600 dark:text-slate-300' : 'text-white/80'
                       }`}
@@ -626,6 +870,12 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         type="text"
                         value={node.text}
                         onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Step title..."
                         className={`w-full font-bold text-xs bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 ${
                           smartArt.style === 'outline' ? 'text-slate-900 dark:text-white' : 'text-white'
                         }`}
@@ -633,8 +883,14 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       {node.subtitle !== undefined && (
                         <input
                           type="text"
-                          value={node.subtitle}
+                          value={node.subtitle ?? ''}
                           onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onKeyUp={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={() => setSelectedNodeId(node.id)}
+                          data-smartart-text-editor="true"
+                          placeholder="Description..."
                           className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 mt-0.5 ${
                             smartArt.style === 'outline' ? 'text-slate-600 dark:text-slate-300' : 'text-white/80'
                           }`}
@@ -685,6 +941,12 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         type="text"
                         value={node.text}
                         onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Step title..."
                         className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 ${
                           smartArt.style === 'outline' ? 'text-slate-900 dark:text-white' : 'text-white'
                         }`}
@@ -692,8 +954,14 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       {node.subtitle !== undefined && (
                         <input
                           type="text"
-                          value={node.subtitle}
+                          value={node.subtitle ?? ''}
                           onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onKeyUp={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={() => setSelectedNodeId(node.id)}
+                          data-smartart-text-editor="true"
+                          placeholder="Description..."
                           className={`w-full text-center text-[10px] bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 mt-0.5 ${
                             smartArt.style === 'outline' ? 'text-slate-600 dark:text-slate-300' : 'text-white/80'
                           }`}
@@ -738,13 +1006,25 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       type="text"
                       value={node.text}
                       onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Step title..."
                       className="w-full text-center font-bold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded px-1"
                     />
                     {node.subtitle !== undefined && (
                       <input
                         type="text"
-                        value={node.subtitle}
+                        value={node.subtitle ?? ''}
                         onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Description..."
                         className="w-full text-center text-[11px] text-slate-500 dark:text-slate-400 bg-transparent border-none focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded px-1"
                       />
                     )}
@@ -784,6 +1064,12 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     type="text"
                     value={node.text}
                     onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(node.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Step title..."
                     className={`w-full font-bold text-xs bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 ${
                       smartArt.style === 'outline' ? 'text-slate-900 dark:text-white' : 'text-white'
                     }`}
@@ -791,8 +1077,14 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   {node.subtitle !== undefined && (
                     <input
                       type="text"
-                      value={node.subtitle}
+                      value={node.subtitle ?? ''}
                       onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Description..."
                       className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-white/20 rounded px-1 mt-1 ${
                         smartArt.style === 'outline' ? 'text-slate-600 dark:text-slate-300' : 'text-white/80'
                       }`}
@@ -816,44 +1108,64 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       );
     }
 
+    // =============================================================
     // 1. LIST CATEGORY
+    // =============================================================
     if (cat === 'List') {
-      if (layId === 'chevronList') {
+      // 1.1 BASIC LIST
+      if (layId === 'basicList') {
         return (
-          <div className="flex items-center justify-center gap-2 w-full h-full p-4 overflow-x-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+          <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
             {nodes.map((node, i) => {
-              const bg = colors[i % colors.length];
+              const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+              const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
+              const styleObj = getStyleClass(bg);
+
               return (
                 <div
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
-                  className={`relative flex-1 min-w-[120px] max-w-[200px] h-32 flex flex-col justify-center items-center p-3 text-white transition-transform cursor-pointer shadow-md ${
-                    isNodeSelected ? 'ring-2 ring-blue-600 scale-[1.02]' : 'hover:brightness-105'
+                  className={`flex items-stretch rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs transition-all cursor-pointer dark:bg-slate-900 dark:border-slate-800 ${
+                    isNodeSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:border-slate-300'
                   }`}
-                  style={{
-                    backgroundColor: bg,
-                    clipPath: 'polygon(0% 0%, 82% 0%, 100% 50%, 82% 100%, 0% 100%, 18% 50%)',
-                    paddingLeft: i > 0 ? '1.5rem' : '1rem',
-                  }}
                 >
-                  <span className="text-[11px] font-bold opacity-80 mb-1 uppercase tracking-wider">
-                    Step {i + 1}
-                  </span>
-                  <input
-                    type="text"
-                    value={node.text}
-                    onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
-                    className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded px-1"
-                  />
-                  {node.subtitle !== undefined && (
+                  <div
+                    className="w-12 shrink-0 flex items-center justify-center font-bold text-white text-xs shadow-inner"
+                    style={styleObj}
+                  >
+                    <span className="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center text-xs">
+                      {origIndex + 1}
+                    </span>
+                  </div>
+                  <div className="flex-1 p-2.5 min-w-0" style={{ backgroundColor: `${bg}08` }}>
                     <input
                       type="text"
-                      value={node.subtitle}
-                      onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
-                      className="w-full text-center bg-transparent border-none text-white/80 text-[11px] mt-1 focus:outline-none focus:bg-white/20 rounded px-1"
+                      value={node.text}
+                      onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Point title..."
+                      className="w-full font-bold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-white/40 dark:focus:bg-slate-800 rounded px-1"
                     />
-                  )}
+                    {node.subtitle !== undefined && (
+                      <input
+                        type="text"
+                        value={node.subtitle ?? ''}
+                        onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Point details..."
+                        className="w-full text-[11px] text-slate-600 dark:text-slate-300 bg-transparent border-none focus:outline-none focus:bg-white/40 dark:focus:bg-slate-800 rounded px-1 mt-0.5"
+                      />
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -861,40 +1173,118 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
         );
       }
 
-      if (layId === 'horizontalList') {
+      // 1.2 VERTICAL LIST
+      if (layId === 'verticalList') {
         return (
-          <div className="flex items-stretch justify-center gap-3 w-full h-full p-4 overflow-x-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+          <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
             {nodes.map((node, i) => {
-              const bg = colors[i % colors.length];
+              const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+              const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
+              const styleObj = getStyleClass(bg);
+
               return (
                 <div
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
-                  className={`flex-1 min-w-[120px] max-w-[220px] flex flex-col rounded-lg border border-slate-200 bg-white shadow-xs overflow-hidden transition-all dark:bg-slate-900 dark:border-slate-800 ${
+                  className={`flex items-center gap-3 p-2.5 rounded-xl border bg-white dark:bg-slate-900 transition-all cursor-pointer ${
+                    isNodeSelected
+                      ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                  }`}
+                  style={{ borderLeft: `5px solid ${bg}` }}
+                >
+                  <div
+                    className="w-8 h-8 shrink-0 rounded-full text-white font-bold flex items-center justify-center text-xs shadow-xs"
+                    style={styleObj}
+                  >
+                    {origIndex + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={node.text}
+                      onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="List item..."
+                      className="w-full font-bold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-blue-50 dark:focus:bg-slate-800 rounded px-1"
+                    />
+                    {node.subtitle !== undefined && (
+                      <input
+                        type="text"
+                        value={node.subtitle ?? ''}
+                        onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Description..."
+                        className="w-full text-[11px] text-slate-500 dark:text-slate-400 bg-transparent border-none focus:outline-none focus:bg-blue-50 dark:focus:bg-slate-800 rounded px-1 mt-0.5"
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      // 1.3 HORIZONTAL LIST
+      if (layId === 'horizontalList') {
+        return (
+          <div className="flex items-stretch justify-center gap-3 w-full h-full p-4 overflow-x-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+            {nodes.map((node, i) => {
+              const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+              const bg = colors[origIndex % colors.length];
+              const isNodeSelected = selectedNodeId === node.id;
+              const styleObj = getStyleClass(bg);
+
+              return (
+                <div
+                  key={node.id}
+                  onClick={(e) => handleNodeClick(e, node.id)}
+                  className={`flex-1 min-w-[140px] max-w-[220px] flex flex-col rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden transition-all cursor-pointer dark:bg-slate-900 dark:border-slate-800 ${
                     isNodeSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:border-slate-300'
                   }`}
                 >
                   <div
                     className="p-2.5 text-white font-semibold text-xs text-center flex items-center justify-center gap-1.5"
-                    style={{ backgroundColor: bg }}
+                    style={styleObj}
                   >
-                    <span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-[10px]">
-                      {i + 1}
+                    <span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-[10px] font-bold">
+                      {origIndex + 1}
                     </span>
                     <input
                       type="text"
                       value={node.text}
                       onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Concept..."
                       className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded"
                     />
                   </div>
-                  <div className="p-3 flex-1 flex flex-col justify-center">
+                  <div className="p-3 flex-1 flex flex-col justify-center bg-slate-50/50 dark:bg-slate-900/50">
                     <textarea
-                      rows={2}
-                      value={node.subtitle || 'Add details...'}
+                      rows={3}
+                      value={node.subtitle ?? ''}
                       onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
-                      className="w-full text-xs text-slate-600 dark:text-slate-300 bg-transparent border-none resize-none focus:outline-none focus:bg-slate-50 dark:focus:bg-slate-800 rounded p-1 text-center"
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Details..."
+                      className="w-full text-xs text-slate-600 dark:text-slate-300 bg-transparent border-none resize-none focus:outline-none focus:bg-white dark:focus:bg-slate-800 rounded p-1 text-center"
                     />
                   </div>
                 </div>
@@ -904,40 +1294,174 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
         );
       }
 
-      // Default List: vertical / basic list cards
+      // 1.4 GROUPED LIST
+      if (layId === 'groupedList') {
+        return (
+          <div className="flex flex-col justify-start gap-3 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+            {nodes.map((node, i) => {
+              const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+              const bg = colors[origIndex % colors.length];
+              const isNodeSelected = selectedNodeId === node.id;
+              const styleObj = getStyleClass(bg);
+
+              return (
+                <div
+                  key={node.id}
+                  onClick={(e) => handleNodeClick(e, node.id)}
+                  className={`flex items-stretch gap-2.5 p-1 rounded-xl border border-slate-200 bg-white transition-all cursor-pointer dark:bg-slate-900 dark:border-slate-800 ${
+                    isNodeSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:border-slate-300'
+                  }`}
+                >
+                  <div
+                    className="w-36 shrink-0 p-3 rounded-lg text-white shadow-xs flex flex-col justify-center items-center text-center"
+                    style={styleObj}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-80 mb-0.5">
+                      Group {origIndex + 1}
+                    </span>
+                    <input
+                      type="text"
+                      value={node.text}
+                      onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Group name..."
+                      className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded px-1"
+                    />
+                  </div>
+                  <div className="flex-1 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col justify-center">
+                    <input
+                      type="text"
+                      value={node.subtitle ?? ''}
+                      onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Sub-item 1 • Sub-item 2..."
+                      className="w-full text-xs text-slate-700 dark:text-slate-200 bg-transparent border-none focus:outline-none focus:bg-white dark:focus:bg-slate-800 rounded px-1"
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      // 1.5 STACKED LIST
+      if (layId === 'stackedList') {
+        return (
+          <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+            {nodes.map((node, i) => {
+              const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+              const bg = colors[origIndex % colors.length];
+              const isNodeSelected = selectedNodeId === node.id;
+
+              return (
+                <div
+                  key={node.id}
+                  onClick={(e) => handleNodeClick(e, node.id)}
+                  className={`flex items-center gap-3 p-3 rounded-lg border border-slate-200 transition-all cursor-pointer dark:border-slate-800 ${
+                    isNodeSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:border-slate-300'
+                  }`}
+                  style={{
+                    backgroundColor: `${bg}10`,
+                    borderLeft: `6px solid ${bg}`,
+                  }}
+                >
+                  <div
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: bg }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={node.text}
+                      onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Layer title..."
+                      className="w-full font-bold text-xs text-slate-900 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-white/60 dark:focus:bg-slate-800 rounded px-1"
+                    />
+                    {node.subtitle !== undefined && (
+                      <input
+                        type="text"
+                        value={node.subtitle ?? ''}
+                        onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Layer description..."
+                        className="w-full text-[11px] text-slate-600 dark:text-slate-300 bg-transparent border-none focus:outline-none focus:bg-white/60 dark:focus:bg-slate-800 rounded px-1 mt-0.5"
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      // 1.6 NUMBERED LIST (and fallback)
       return (
         <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
           {nodes.map((node, i) => {
-            const bg = colors[i % colors.length];
+            const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+            const bg = colors[origIndex % colors.length];
             const isNodeSelected = selectedNodeId === node.id;
+            const styleObj = getStyleClass(bg);
+
             return (
               <div
                 key={node.id}
                 onClick={(e) => handleNodeClick(e, node.id)}
-                className={`flex items-center gap-3 p-2.5 rounded-lg border bg-white dark:bg-slate-900 transition-all ${
+                className={`flex items-center gap-3.5 p-2.5 rounded-xl border bg-white dark:bg-slate-900 transition-all cursor-pointer ${
                   isNodeSelected
                     ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-sm'
                     : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
                 }`}
               >
                 <div
-                  className="w-8 h-8 shrink-0 rounded-md text-white font-bold flex items-center justify-center text-xs shadow-xs"
-                  style={{ backgroundColor: bg }}
+                  className="w-9 h-9 shrink-0 rounded-full text-white font-extrabold flex items-center justify-center text-sm shadow-xs"
+                  style={styleObj}
                 >
-                  {i + 1}
+                  {origIndex + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <input
                     type="text"
                     value={node.text}
                     onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
-                    className="w-full font-semibold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-blue-50 dark:focus:bg-slate-800 rounded px-1"
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(node.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Priority title..."
+                    className="w-full font-bold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-blue-50 dark:focus:bg-slate-800 rounded px-1"
                   />
                   {node.subtitle !== undefined && (
                     <input
                       type="text"
-                      value={node.subtitle}
+                      value={node.subtitle ?? ''}
                       onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Priority description..."
                       className="w-full text-[11px] text-slate-500 dark:text-slate-400 bg-transparent border-none focus:outline-none focus:bg-blue-50 dark:focus:bg-slate-800 rounded px-1 mt-0.5"
                     />
                   )}
@@ -949,22 +1473,124 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       );
     }
 
-    // 2. CYCLE CATEGORY
+    // =============================================================
+    // 2. CYCLE CATEGORY (basicCycle, continuousCycle, radialCycle, segmentedCycle, circularCycle)
+    // =============================================================
     if (cat === 'Cycle') {
-      const radius = 110;
       const count = nodes.length;
+
+      // 2.1 RADIAL CYCLE (Central hub + satellite nodes)
+      if (layId === 'radialCycle') {
+        const centerNode = nodes[0];
+        const satelliteNodes = nodes.slice(1);
+        const satCount = Math.max(1, satelliteNodes.length);
+        const radius = 105;
+
+        return (
+          <div className="relative w-full h-full flex items-center justify-center p-4 overflow-hidden">
+            {/* SVG Connecting Spoke Lines */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
+              {satelliteNodes.map((_, i) => {
+                const angle = (i / satCount) * 2 * Math.PI - Math.PI / 2;
+                return (
+                  <line
+                    key={i}
+                    x1="50%"
+                    y1="50%"
+                    x2={`calc(50% + ${Math.cos(angle) * radius}px)`}
+                    y2={`calc(50% + ${Math.sin(angle) * radius}px)`}
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeDasharray="4 3"
+                  />
+                );
+              })}
+            </svg>
+
+            {/* Central Hub Node */}
+            {centerNode && (
+              <div
+                onClick={(e) => handleNodeClick(e, centerNode.id)}
+                className={`absolute z-10 w-28 h-20 rounded-2xl flex flex-col items-center justify-center p-2 text-white shadow-xl cursor-pointer transition-transform ${
+                  selectedNodeId === centerNode.id ? 'ring-3 ring-blue-500 scale-110' : 'hover:scale-105'
+                }`}
+                style={getStyleClass(colors[0])}
+              >
+                <span className="text-[9px] font-bold uppercase tracking-wider opacity-80 mb-0.5">
+                  Core Hub
+                </span>
+                <input
+                  type="text"
+                  value={centerNode.text}
+                  onChange={(e) => handleNodeTextChange(centerNode.id, e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onKeyUp={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={() => setSelectedNodeId(centerNode.id)}
+                  data-smartart-text-editor="true"
+                  placeholder="Hub title..."
+                  className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded px-1 truncate"
+                />
+              </div>
+            )}
+
+            {/* Satellite Nodes */}
+            {satelliteNodes.map((node, i) => {
+              const angle = (i / satCount) * 2 * Math.PI - Math.PI / 2;
+              const x = Math.cos(angle) * radius;
+              const y = Math.sin(angle) * radius;
+              const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+              const bg = colors[origIndex % colors.length];
+              const isNodeSelected = selectedNodeId === node.id;
+
+              return (
+                <div
+                  key={node.id}
+                  onClick={(e) => handleNodeClick(e, node.id)}
+                  className={`absolute z-10 w-24 h-16 rounded-xl flex flex-col items-center justify-center p-1.5 text-white shadow-md cursor-pointer transition-transform ${
+                    isNodeSelected ? 'ring-3 ring-blue-500 scale-110' : 'hover:scale-105'
+                  }`}
+                  style={{
+                    transform: `translate(${x}px, ${y}px)`,
+                    ...getStyleClass(bg),
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={node.text}
+                    onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(node.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Satellite..."
+                    className="w-full text-center bg-transparent border-none text-white font-bold text-[11px] focus:outline-none focus:bg-white/20 rounded px-1 truncate"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      // 2.2 CONTINUOUS CYCLE / SEGMENTED / CIRCULAR / BASIC CYCLE
+      const radius = 110;
       return (
-        <div className="relative w-full h-full flex items-center justify-center p-4">
+        <div className="relative w-full h-full flex items-center justify-center p-4 overflow-hidden">
+          {/* Central Loop Indicator */}
           <div className="absolute w-24 h-24 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center opacity-60 pointer-events-none">
             <Sparkles className="w-5 h-5 text-slate-400" />
           </div>
 
           {nodes.map((node, i) => {
-            const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
+            const angle = (i / Math.max(1, count)) * 2 * Math.PI - Math.PI / 2;
             const x = Math.cos(angle) * radius;
             const y = Math.sin(angle) * radius;
-            const bg = colors[i % colors.length];
+            const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+            const bg = colors[origIndex % colors.length];
             const isNodeSelected = selectedNodeId === node.id;
+            const styleObj = getStyleClass(bg);
 
             return (
               <div
@@ -975,16 +1601,22 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 }`}
                 style={{
                   transform: `translate(${x}px, ${y}px)`,
-                  backgroundColor: bg,
+                  ...styleObj,
                 }}
               >
                 <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest">
-                  {i + 1}
+                  Stage {origIndex + 1}
                 </span>
                 <input
                   type="text"
                   value={node.text}
                   onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onKeyUp={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={() => setSelectedNodeId(node.id)}
+                  data-smartart-text-editor="true"
+                  placeholder="Cycle step..."
                   className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded px-1 truncate"
                 />
               </div>
@@ -994,40 +1626,137 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       );
     }
 
-    // 3. HIERARCHY CATEGORY
+    // =============================================================
+    // 3. HIERARCHY CATEGORY (basicHierarchy, horizontalHierarchy, labeledHierarchy, organizationHierarchy, multiLevelHierarchy)
+    // =============================================================
     if (cat === 'Hierarchy') {
+      // 3.1 HORIZONTAL HIERARCHY (Left-to-Right tree)
+      if (layId === 'horizontalHierarchy') {
+        const rootNode = nodes[0];
+        const branchNodes = nodes.slice(1);
+
+        return (
+          <div className="flex items-center justify-center gap-6 w-full h-full p-4 overflow-x-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+            {/* Left Parent Root Card */}
+            {rootNode && (
+              <div className="relative flex items-center">
+                <div
+                  onClick={(e) => handleNodeClick(e, rootNode.id)}
+                  className={`w-40 p-3 rounded-xl text-white shadow-md text-center cursor-pointer transition-all ${
+                    selectedNodeId === rootNode.id ? 'ring-3 ring-blue-500 scale-105' : 'hover:scale-102'
+                  }`}
+                  style={getStyleClass(colors[0])}
+                >
+                  <span className="text-[10px] font-bold opacity-80 uppercase tracking-wider block mb-0.5">
+                    Parent Origin
+                  </span>
+                  <input
+                    type="text"
+                    value={rootNode.text}
+                    onChange={(e) => handleNodeTextChange(rootNode.id, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(rootNode.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Origin title..."
+                    className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded truncate"
+                  />
+                </div>
+                {branchNodes.length > 0 && (
+                  <div className="w-6 h-0.5 bg-slate-400 dark:bg-slate-600" />
+                )}
+              </div>
+            )}
+
+            {/* Right Branches (stacked vertically) */}
+            {branchNodes.length > 0 && (
+              <div className="relative flex flex-col justify-center gap-3">
+                {/* Vertical Distribution Spine */}
+                <div
+                  className="absolute left-0 w-0.5 bg-slate-400 dark:bg-slate-600"
+                  style={{
+                    top: '20px',
+                    bottom: '20px',
+                  }}
+                />
+
+                {branchNodes.map((branch, idx) => {
+                  const origIndex = smartArt.nodes.findIndex((n) => n.id === branch.id);
+                  const bg = colors[origIndex % colors.length];
+                  const isNodeSelected = selectedNodeId === branch.id;
+
+                  return (
+                    <div key={branch.id} className="relative flex items-center pl-6">
+                      <div className="absolute left-0 w-6 h-0.5 bg-slate-400 dark:bg-slate-600" />
+                      <div
+                        onClick={(e) => handleNodeClick(e, branch.id)}
+                        className={`w-40 p-2.5 rounded-lg text-white shadow-xs cursor-pointer transition-all ${
+                          isNodeSelected ? 'ring-3 ring-blue-500 scale-105' : 'hover:scale-102'
+                        }`}
+                        style={getStyleClass(bg)}
+                      >
+                        <input
+                          type="text"
+                          value={branch.text}
+                          onChange={(e) => handleNodeTextChange(branch.id, e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onKeyUp={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={() => setSelectedNodeId(branch.id)}
+                          data-smartart-text-editor="true"
+                          placeholder="Branch title..."
+                          className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded truncate"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // 3.2 TOP-DOWN HIERARCHIES (basicHierarchy, organizationHierarchy, labeledHierarchy, multiLevelHierarchy)
       const rootNode = nodes[0];
       const childrenNodes = nodes.slice(1);
 
       return (
-        <div className="flex flex-col items-center justify-center gap-6 w-full h-full p-4">
+        <div className="flex flex-col items-center justify-center gap-5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
           {rootNode && (
             <div className="relative flex flex-col items-center">
               <div
                 onClick={(e) => handleNodeClick(e, rootNode.id)}
-                className={`w-44 p-2.5 rounded-lg text-white shadow-md text-center cursor-pointer transition-all ${
-                  selectedNodeId === rootNode.id ? 'ring-3 ring-blue-500 scale-105' : ''
+                className={`w-48 p-2.5 rounded-xl text-white shadow-md text-center cursor-pointer transition-all ${
+                  selectedNodeId === rootNode.id ? 'ring-3 ring-blue-500 scale-105' : 'hover:scale-102'
                 }`}
-                style={{ backgroundColor: colors[0] }}
+                style={getStyleClass(colors[0])}
               >
-                <span className="text-[10px] font-bold opacity-80 uppercase tracking-wider block">
-                  Executive / Lead
+                <span className="text-[10px] font-bold opacity-80 uppercase tracking-wider block mb-0.5">
+                  {layId === 'organizationHierarchy' ? 'Executive Director' : 'Top Level'}
                 </span>
                 <input
                   type="text"
                   value={rootNode.text}
                   onChange={(e) => handleNodeTextChange(rootNode.id, e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onKeyUp={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={() => setSelectedNodeId(rootNode.id)}
+                  data-smartart-text-editor="true"
+                  placeholder="Lead title..."
                   className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded"
                 />
               </div>
               {childrenNodes.length > 0 && (
-                <div className="w-0.5 h-6 bg-slate-400 dark:bg-slate-600" />
+                <div className="w-0.5 h-5 bg-slate-400 dark:bg-slate-600" />
               )}
             </div>
           )}
 
           {childrenNodes.length > 0 && (
-            <div className="relative flex items-center justify-center gap-3 w-full">
+            <div className="relative flex items-center justify-center gap-3 w-full max-w-xl">
               <div
                 className="absolute top-0 h-0.5 bg-slate-400 dark:bg-slate-600"
                 style={{
@@ -1037,29 +1766,44 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               />
 
               {childrenNodes.map((child, idx) => {
-                const bg = colors[(idx + 1) % colors.length];
+                const origIndex = smartArt.nodes.findIndex((n) => n.id === child.id);
+                const bg = colors[origIndex % colors.length];
                 const isNodeSelected = selectedNodeId === child.id;
+                const styleObj = getStyleClass(bg);
+
                 return (
-                  <div key={child.id} className="relative flex flex-col items-center flex-1 max-w-[160px]">
+                  <div key={child.id} className="relative flex flex-col items-center flex-1 min-w-[100px] max-w-[160px]">
                     <div className="w-0.5 h-4 bg-slate-400 dark:bg-slate-600" />
                     <div
                       onClick={(e) => handleNodeClick(e, child.id)}
-                      className={`w-full p-2.5 rounded-lg text-white shadow-xs text-center cursor-pointer transition-all ${
+                      className={`w-full p-2.5 rounded-xl text-white shadow-xs text-center cursor-pointer transition-all ${
                         isNodeSelected ? 'ring-3 ring-blue-500 scale-105' : 'hover:scale-[1.02]'
                       }`}
-                      style={{ backgroundColor: bg }}
+                      style={styleObj}
                     >
                       <input
                         type="text"
                         value={child.text}
                         onChange={(e) => handleNodeTextChange(child.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(child.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Node title..."
                         className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded truncate"
                       />
                       {child.subtitle !== undefined && (
                         <input
                           type="text"
-                          value={child.subtitle}
+                          value={child.subtitle ?? ''}
                           onChange={(e) => handleNodeSubtitleChange(child.id, e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onKeyUp={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={() => setSelectedNodeId(child.id)}
+                          data-smartart-text-editor="true"
+                          placeholder="Subtitle..."
                           className="w-full text-center bg-transparent border-none text-white/80 text-[10px] mt-0.5 focus:outline-none focus:bg-white/20 rounded truncate"
                         />
                       )}
@@ -1073,32 +1817,37 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       );
     }
 
-    // 4. MATRIX CATEGORY
+    // =============================================================
+    // 4. MATRIX CATEGORY (Basic Matrix)
+    // =============================================================
     if (cat === 'Matrix') {
       return (
-        <div className="w-full h-full p-4 flex items-center justify-center">
+        <div className="w-full h-full p-4 flex items-center justify-center overflow-auto overscroll-contain">
           <div className="grid grid-cols-2 gap-3 w-full max-w-lg aspect-square max-h-[320px]">
             {nodes.slice(0, 4).map((node, i) => {
-              const bg = colors[i % colors.length];
+              const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+              const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
+              const quadrantLabel = `Q${i + 1}`;
+
               return (
                 <div
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
-                  className={`rounded-xl p-3.5 flex flex-col justify-between shadow-xs border transition-all cursor-pointer ${
+                  className={`rounded-xl p-3 flex flex-col justify-between shadow-xs border transition-all cursor-pointer ${
                     isNodeSelected ? 'ring-3 ring-blue-500 shadow-md' : 'hover:scale-[1.01]'
                   }`}
                   style={{
-                    backgroundColor: `${bg}15`,
-                    borderColor: `${bg}50`,
+                    backgroundColor: `${bg}12`,
+                    borderColor: `${bg}60`,
                   }}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-1">
                     <span
                       className="px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider"
                       style={{ backgroundColor: bg }}
                     >
-                      Q{i + 1}
+                      {quadrantLabel}
                     </span>
                   </div>
                   <div className="my-auto">
@@ -1106,13 +1855,25 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       type="text"
                       value={node.text}
                       onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Quadrant title..."
                       className="w-full font-bold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-white/40 rounded p-1"
                     />
                     <textarea
                       rows={2}
-                      value={node.subtitle || 'Quadrant details...'}
+                      value={node.subtitle ?? ''}
                       onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
-                      className="w-full text-[11px] text-slate-600 dark:text-slate-400 bg-transparent border-none resize-none focus:outline-none focus:bg-white/40 rounded p-1 mt-1"
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Quadrant details..."
+                      className="w-full text-[11px] text-slate-600 dark:text-slate-400 bg-transparent border-none resize-none focus:outline-none focus:bg-white/40 rounded p-1 mt-0.5"
                     />
                   </div>
                 </div>
@@ -1123,38 +1884,130 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       );
     }
 
-    // 5. PYRAMID CATEGORY
+    // =============================================================
+    // 5. PYRAMID CATEGORY (basicPyramid, segmentedPyramid, pyramidList, layeredPyramid)
+    // =============================================================
     if (cat === 'Pyramid') {
       const reversed = [...nodes].reverse();
       const count = reversed.length;
 
+      // 5.1 PYRAMID LIST (Pyramid tiers on left linked to cards on right)
+      if (layId === 'pyramidList') {
+        return (
+          <div className="flex items-center justify-center gap-4 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+            {/* Left Stacked Pyramid */}
+            <div className="flex-1 flex flex-col items-center gap-2 max-w-[240px]">
+              {reversed.map((node, i) => {
+                const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+                const bg = colors[origIndex % colors.length];
+                const widthPercent = 40 + (i / Math.max(1, count - 1)) * 60;
+                const isNodeSelected = selectedNodeId === node.id;
+
+                return (
+                  <div
+                    key={node.id}
+                    onClick={(e) => handleNodeClick(e, node.id)}
+                    className={`h-11 rounded-lg text-white shadow-sm flex items-center justify-center px-2 cursor-pointer transition-all ${
+                      isNodeSelected ? 'ring-3 ring-blue-500 scale-105 z-10' : 'hover:brightness-105'
+                    }`}
+                    style={{
+                      width: `${widthPercent}%`,
+                      backgroundColor: bg,
+                    }}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                      L{count - i}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Detailed Callout Cards */}
+            <div className="flex-1 flex flex-col gap-2 max-w-xs">
+              {reversed.map((node, i) => {
+                const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+                const bg = colors[origIndex % colors.length];
+                const isNodeSelected = selectedNodeId === node.id;
+
+                return (
+                  <div
+                    key={node.id}
+                    onClick={(e) => handleNodeClick(e, node.id)}
+                    className={`p-2 rounded-lg border bg-white dark:bg-slate-900 transition-all cursor-pointer ${
+                      isNodeSelected ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-xs' : 'border-slate-200 dark:border-slate-800'
+                    }`}
+                    style={{ borderLeft: `4px solid ${bg}` }}
+                  >
+                    <input
+                      type="text"
+                      value={node.text}
+                      onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setSelectedNodeId(node.id)}
+                      data-smartart-text-editor="true"
+                      placeholder="Tier title..."
+                      className="w-full font-bold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-slate-100 rounded px-1"
+                    />
+                    {node.subtitle !== undefined && (
+                      <input
+                        type="text"
+                        value={node.subtitle ?? ''}
+                        onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        data-smartart-text-editor="true"
+                        placeholder="Details..."
+                        className="w-full text-[11px] text-slate-500 dark:text-slate-400 bg-transparent border-none focus:outline-none focus:bg-slate-100 rounded px-1 mt-0.5"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      }
+
+      // 5.2 BASIC / SEGMENTED / LAYERED PYRAMIDS
       return (
-        <div className="flex flex-col items-center justify-center gap-2 w-full h-full p-4">
+        <div className="flex flex-col items-center justify-center gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
           {reversed.map((node, i) => {
-            const originalIndex = nodes.findIndex((n) => n.id === node.id);
+            const originalIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
             const bg = colors[originalIndex % colors.length];
             const isNodeSelected = selectedNodeId === node.id;
             const widthPercent = 35 + (i / Math.max(1, count - 1)) * 60;
+            const styleObj = getStyleClass(bg);
 
             return (
               <div
                 key={node.id}
                 onClick={(e) => handleNodeClick(e, node.id)}
-                className={`h-12 rounded-lg text-white shadow-sm flex items-center justify-center px-4 transition-all cursor-pointer ${
+                className={`h-12 rounded-xl text-white shadow-sm flex items-center justify-center px-4 transition-all cursor-pointer ${
                   isNodeSelected ? 'ring-3 ring-blue-500 scale-[1.02] z-10' : 'hover:brightness-105'
                 }`}
                 style={{
                   width: `${widthPercent}%`,
-                  backgroundColor: bg,
+                  ...styleObj,
                 }}
               >
-                <span className="text-[10px] font-bold opacity-80 mr-2 uppercase tracking-wider">
+                <span className="text-[10px] font-bold opacity-80 mr-2 uppercase tracking-wider shrink-0">
                   L{count - i}
                 </span>
                 <input
                   type="text"
                   value={node.text}
                   onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onKeyUp={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={() => setSelectedNodeId(node.id)}
+                  data-smartart-text-editor="true"
+                  placeholder="Layer title..."
                   className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded px-1"
                 />
               </div>
@@ -1164,39 +2017,219 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       );
     }
 
-    // 6. TEXT CARD CATEGORY (Default)
+    // =============================================================
+    // 6. TEXT CARD CATEGORY (standardCards, headerCards, multiColumnCards, calloutCard, statCard)
+    // =============================================================
+    // 6.1 CALLOUT CARD (Single / executive quotation banner)
+    if (layId === 'calloutCard') {
+      const node = nodes[0] || { id: 'callout-1', text: 'Executive Quote', subtitle: 'SmartArt callout message' };
+      const bg = colors[0];
+      const isNodeSelected = selectedNodeId === node.id;
+
+      return (
+        <div className="w-full h-full p-6 flex items-center justify-center">
+          <div
+            onClick={(e) => handleNodeClick(e, node.id)}
+            className={`w-full max-w-xl p-6 rounded-2xl border bg-white dark:bg-slate-900 shadow-md relative transition-all cursor-pointer ${
+              isNodeSelected ? 'ring-3 ring-blue-500 shadow-xl' : 'hover:shadow-lg'
+            }`}
+            style={{ borderLeft: `8px solid ${bg}` }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
+                style={{ backgroundColor: bg }}
+              >
+                <Quote className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                value={node.text}
+                onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                onKeyUp={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => setSelectedNodeId(node.id)}
+                data-smartart-text-editor="true"
+                placeholder="Callout Headline..."
+                className="font-extrabold text-sm text-slate-900 dark:text-white bg-transparent border-none focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded px-1 flex-1"
+              />
+            </div>
+            <textarea
+              rows={3}
+              value={node.subtitle ?? ''}
+              onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+              onKeyDown={(e) => e.stopPropagation()}
+              onKeyUp={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onFocus={() => setSelectedNodeId(node.id)}
+              data-smartart-text-editor="true"
+              placeholder="Enter callout quote or key statement details..."
+              className="w-full text-xs text-slate-600 dark:text-slate-300 bg-transparent border-none resize-none focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded p-1 leading-relaxed"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // 6.2 STAT CARD (KPI / Metric cards with bold numbers)
+    if (layId === 'statCard') {
+      return (
+        <div className="grid grid-cols-3 gap-3.5 w-full h-full p-4 items-center overflow-x-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+          {nodes.map((node, i) => {
+            const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+            const bg = colors[origIndex % colors.length];
+            const isNodeSelected = selectedNodeId === node.id;
+
+            return (
+              <div
+                key={node.id}
+                onClick={(e) => handleNodeClick(e, node.id)}
+                className={`p-4 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-xs flex flex-col items-center text-center justify-between transition-all cursor-pointer ${
+                  isNodeSelected ? 'ring-3 ring-blue-500 shadow-md' : 'hover:border-slate-300'
+                }`}
+                style={{ borderTop: `4px solid ${bg}` }}
+              >
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white mb-2"
+                  style={{ backgroundColor: bg }}
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                </div>
+                <input
+                  type="text"
+                  value={node.text}
+                  onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onKeyUp={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={() => setSelectedNodeId(node.id)}
+                  data-smartart-text-editor="true"
+                  placeholder="99.9%"
+                  className="w-full text-center font-extrabold text-xl text-slate-900 dark:text-white bg-transparent border-none focus:outline-none focus:bg-slate-100 rounded"
+                />
+                <input
+                  type="text"
+                  value={node.subtitle ?? ''}
+                  onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onKeyUp={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={() => setSelectedNodeId(node.id)}
+                  data-smartart-text-editor="true"
+                  placeholder="Metric Label..."
+                  className="w-full text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-transparent border-none focus:outline-none focus:bg-slate-100 rounded mt-1"
+                />
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // 6.3 HEADER CARDS (Solid color header banners)
+    if (layId === 'headerCards') {
+      return (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full h-full p-4 overflow-y-auto overscroll-contain items-start" onWheel={(e) => e.stopPropagation()}>
+          {nodes.map((node, i) => {
+            const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+            const bg = colors[origIndex % colors.length];
+            const isNodeSelected = selectedNodeId === node.id;
+            const styleObj = getStyleClass(bg);
+
+            return (
+              <div
+                key={node.id}
+                onClick={(e) => handleNodeClick(e, node.id)}
+                className={`rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs flex flex-col justify-between transition-all cursor-pointer dark:bg-slate-900 dark:border-slate-800 ${
+                  isNodeSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:border-slate-300'
+                }`}
+              >
+                <div
+                  className="p-2.5 text-white font-bold text-xs text-center shadow-xs"
+                  style={styleObj}
+                >
+                  <input
+                    type="text"
+                    value={node.text}
+                    onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(node.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Plan Title..."
+                    className="w-full text-center bg-transparent border-none text-white font-bold text-xs focus:outline-none focus:bg-white/20 rounded"
+                  />
+                </div>
+                <div className="p-3 bg-white dark:bg-slate-900 flex-1">
+                  <textarea
+                    rows={2}
+                    value={node.subtitle ?? ''}
+                    onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setSelectedNodeId(node.id)}
+                    data-smartart-text-editor="true"
+                    placeholder="Description details..."
+                    className="w-full text-[11px] text-slate-600 dark:text-slate-400 bg-transparent border-none resize-none focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded p-1"
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // 6.4 STANDARD / MULTI-COLUMN CARDS (Default Text Card)
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full h-full p-4 overflow-y-auto overscroll-contain items-start" onWheel={(e) => e.stopPropagation()}>
         {nodes.map((node, i) => {
-          const bg = colors[i % colors.length];
+          const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
+          const bg = colors[origIndex % colors.length];
           const isNodeSelected = selectedNodeId === node.id;
+
           return (
             <div
               key={node.id}
               onClick={(e) => handleNodeClick(e, node.id)}
-              className={`rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs flex flex-col justify-between transition-all dark:bg-slate-900 dark:border-slate-800 ${
+              className={`rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs flex flex-col justify-between transition-all cursor-pointer dark:bg-slate-900 dark:border-slate-800 ${
                 isNodeSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:border-slate-300'
               }`}
               style={{ borderTop: `4px solid ${bg}` }}
             >
               <div className="flex items-center justify-between mb-2">
                 <span
-                  className="w-6 h-6 rounded-full text-white font-bold text-[10px] flex items-center justify-center"
+                  className="w-6 h-6 rounded-full text-white font-bold text-[10px] flex items-center justify-center shadow-xs"
                   style={{ backgroundColor: bg }}
                 >
-                  {i + 1}
+                  {origIndex + 1}
                 </span>
               </div>
               <input
                 type="text"
                 value={node.text}
                 onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                onKeyUp={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => setSelectedNodeId(node.id)}
+                data-smartart-text-editor="true"
+                placeholder="Card title..."
                 className="w-full font-bold text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded p-1"
               />
               <textarea
                 rows={2}
-                value={node.subtitle || 'Card summary statement...'}
+                value={node.subtitle ?? ''}
                 onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                onKeyUp={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => setSelectedNodeId(node.id)}
+                data-smartart-text-editor="true"
+                placeholder="Card summary statement..."
                 className="w-full text-[11px] text-slate-500 dark:text-slate-400 bg-transparent border-none resize-none focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded p-1 mt-1"
               />
             </div>
@@ -1206,14 +2239,26 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     );
   };
 
+
   return (
-    <div
-      ref={containerRef}
+    <>
+      <div
+        ref={containerRef}
       onClick={(e) => {
         e.stopPropagation();
         setActiveSmartArt(smartArt);
       }}
       onContextMenu={handleContextMenu}
+      onKeyDown={(e) => {
+        if (isSmartArtTextEditingTarget(e.target)) {
+          e.stopPropagation();
+        }
+      }}
+      onKeyUp={(e) => {
+        if (isSmartArtTextEditingTarget(e.target)) {
+          e.stopPropagation();
+        }
+      }}
       className={`relative group select-none rounded-xl flex transition-all duration-150 ${
         isSelected
           ? 'ring-2 ring-[#0078d4] shadow-xl'
@@ -1225,12 +2270,181 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
         backgroundColor: smartArt.backgroundColor || '#ffffff',
       }}
     >
+      {/* Toolbar moved outside container to floating portal above SmartArt */}
+
       {/* --------------------------------------------------------
-          CONTEXTUAL FLOATING ACTION TOOLBAR (Visible when selected)
+          SMARTART TEXT PANE (Word-style Side Panel)
+         -------------------------------------------------------- */}
+      {isSelected && showTextPane && (
+        <div
+          className="w-56 shrink-0 h-full border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0c1622] rounded-l-xl p-3 flex flex-col justify-between z-20 shadow-xs"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="shrink-0 flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-blue-600" />
+                <span>Text</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowTextPane(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                title="Close Text Pane"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div
+              onWheel={(e) => e.stopPropagation()}
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1 space-y-1.5"
+              style={{
+                scrollbarWidth: 'thin',
+              }}
+            >
+              {smartArt.nodes.map((node, i) => {
+                const isNodeSelected = selectedNodeId === node.id;
+                return (
+                  <div
+                    key={node.id}
+                    onClick={() => setSelectedNodeId(node.id)}
+                    className={`flex flex-col gap-1 p-1.5 rounded-md border transition-all ${
+                      isNodeSelected
+                        ? 'border-blue-500 bg-white shadow-xs dark:bg-slate-900'
+                        : 'border-transparent hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 w-full">
+                      <span className="w-5 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0 select-none">
+                        {i + 1}.
+                      </span>
+                      <input
+                        type="text"
+                        value={node.text}
+                        onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        data-smartart-text-editor="true"
+                        placeholder="Point text..."
+                        className="w-full text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none"
+                      />
+                      {smartArt.nodes.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveShape(node.id, e)}
+                          className="text-slate-300 hover:text-red-500 p-0.5 rounded transition-opacity"
+                          title="Delete Step"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                    {node.subtitle !== undefined && (
+                      <input
+                        type="text"
+                        value={node.subtitle ?? ''}
+                        onChange={(e) => handleNodeSubtitleChange(node.id, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onFocus={() => setSelectedNodeId(node.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        data-smartart-text-editor="true"
+                        placeholder="Description..."
+                        className="w-full text-[11px] text-slate-500 dark:text-slate-400 bg-transparent border-none focus:outline-none pl-6"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddShape}
+            className="shrink-0 mt-3 flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg border border-dashed border-slate-300 text-slate-600 hover:bg-white hover:border-slate-400 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 text-xs font-medium transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5 text-blue-600" />
+            <span>Add Item</span>
+          </button>
+        </div>
+      )}
+
+      {/* --------------------------------------------------------
+          LIVE DIAGRAM GRAPHIC CONTAINER
+         -------------------------------------------------------- */}
+      <div className="flex-1 min-w-0 h-full overflow-hidden rounded-r-xl">
+        {renderLayoutContent()}
+      </div>
+
+      {/* --------------------------------------------------------
+          RESIZE HANDLES (8 handles matching Office behavior)
          -------------------------------------------------------- */}
       {isSelected && (
+        <>
+          {/* NW */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 'nw')}
+            className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nwse-resize z-30 shadow-xs"
+          />
+          {/* N */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 'n')}
+            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ns-resize z-30 shadow-xs"
+          />
+          {/* NE */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 'ne')}
+            className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nesw-resize z-30 shadow-xs"
+          />
+          {/* E */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 'e')}
+            className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ew-resize z-30 shadow-xs"
+          />
+          {/* SE */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 'se')}
+            className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nwse-resize z-30 shadow-xs"
+          />
+          {/* S */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 's')}
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ns-resize z-30 shadow-xs"
+          />
+          {/* SW */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 'sw')}
+            className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nesw-resize z-30 shadow-xs"
+          />
+          {/* W */}
+          <div
+            onPointerDown={(e) => handleResizePointerDown(e, 'w')}
+            className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ew-resize z-30 shadow-xs"
+          />
+        </>
+      )}
+    </div>
+
+      {/* --------------------------------------------------------
+          CONTEXTUAL FLOATING ACTION TOOLBAR (Visible when selected)
+          Rendered via React Portal into document.body above the SmartArt
+         -------------------------------------------------------- */}
+      {isSelected && toolbarPos && createPortal(
         <div
-          className="absolute -top-11 left-0 z-40 flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-slate-200 shadow-xl dark:bg-[#111D29] dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs animate-in fade-in slide-in-from-bottom-2 duration-150 flex-wrap"
+          ref={toolbarRef}
+          role="toolbar"
+          aria-label="SmartArt Editing Toolbar"
+          data-no-print="true"
+          style={{
+            top: `${toolbarPos.top}px`,
+            left: `${toolbarPos.left}px`,
+          }}
+          className="fixed z-50 flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-slate-200 shadow-xl dark:bg-[#111D29] dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs animate-in fade-in zoom-in-95 duration-100 flex-nowrap select-none whitespace-nowrap print:hidden"
+          onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Add Shape */}
@@ -1348,7 +2562,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
             </button>
 
             {showColorDropdown && (
-              <div className="absolute top-full left-0 mt-1 w-52 p-1.5 bg-white border border-slate-200 rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-slate-800 z-50 animate-in fade-in zoom-in-95">
+              <div className={`absolute ${toolbarPos.isBelow && toolbarPos.top + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 w-52 p-1.5 bg-white border border-slate-200 rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-slate-800 z-50 animate-in fade-in zoom-in-95`}>
                 <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                   Color Themes
                 </span>
@@ -1396,20 +2610,31 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
             </button>
 
             {showStyleDropdown && (
-              <div className="absolute top-full left-0 mt-1 w-44 p-1.5 bg-white border border-slate-200 rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-slate-800 z-50 animate-in fade-in zoom-in-95">
-                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+              <div
+                className={`absolute ${
+                  toolbarPos.isBelow && toolbarPos.top + 250 > window.innerHeight
+                    ? 'bottom-full mb-1'
+                    : 'top-full mt-1'
+                } left-0 min-w-[180px] w-48 p-1.5 bg-white border border-slate-200 rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-slate-800 z-50 animate-in fade-in zoom-in-95 flex flex-col gap-0.5 whitespace-normal`}
+              >
+                <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 block border-b border-slate-100 dark:border-slate-800/80 mb-0.5">
                   SmartArt Style
                 </span>
-                {(['flat', 'gradient', 'glass', 'outline'] as SmartArtStyle[]).map((st) => (
+                {(['flat', 'outline'] as SmartArtStyle[]).map((st) => (
                   <button
                     key={st}
                     type="button"
                     onClick={() => handleSelectStyle(st)}
-                    className={`w-full text-left px-2 py-1.5 rounded text-xs capitalize hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                      smartArt.style === st ? 'font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/50' : 'text-slate-700 dark:text-slate-200'
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs capitalize text-left transition-colors ${
+                      smartArt.style === st
+                        ? 'font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/50 dark:text-blue-400'
+                        : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
-                    {st} Style
+                    <span>{st} Style</span>
+                    {smartArt.style === st && (
+                      <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -1427,7 +2652,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 setShowStyleDropdown(false);
               }}
               className="flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors"
-              title="Change Process Layout"
+              title="Change SmartArt Layout"
             >
               <Layout className="w-3.5 h-3.5 text-emerald-500" />
               <span>Layout</span>
@@ -1435,7 +2660,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
             </button>
 
             {showLayoutDropdown && (
-              <div className="absolute top-full left-0 mt-1 w-56 max-h-60 overflow-y-auto p-1.5 bg-white border border-slate-200 rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-slate-800 z-50 animate-in fade-in zoom-in-95">
+              <div className={`absolute ${toolbarPos.isBelow && toolbarPos.top + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 w-56 max-h-60 overflow-y-auto p-1.5 bg-white border border-slate-200 rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-slate-800 z-50 animate-in fade-in zoom-in-95`}>
                 <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                   {smartArt.category} Layouts
                 </span>
@@ -1502,257 +2727,9 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
-        </div>
+        </div>,
+        document.body
       )}
-
-      {/* --------------------------------------------------------
-          SMARTART TEXT PANE (Word-style Side Panel)
-         -------------------------------------------------------- */}
-      {isSelected && showTextPane && (
-        <div
-          className="w-56 shrink-0 h-full border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0c1622] rounded-l-xl p-3 flex flex-col justify-between z-20 shadow-xs"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            <div className="shrink-0 flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-800">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-blue-600" />
-                <span>Text</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowTextPane(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                title="Close Text Pane"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <div
-              onWheel={(e) => e.stopPropagation()}
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1 space-y-1.5"
-              style={{
-                scrollbarWidth: 'thin',
-              }}
-            >
-              {smartArt.nodes.map((node, i) => {
-                const isNodeSelected = selectedNodeId === node.id;
-                return (
-                  <div
-                    key={node.id}
-                    onClick={() => setSelectedNodeId(node.id)}
-                    className={`flex items-center gap-1.5 p-1 rounded-md border transition-all ${
-                      isNodeSelected
-                        ? 'border-blue-500 bg-white shadow-xs dark:bg-slate-900'
-                        : 'border-transparent hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <span className="w-6 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0 select-none">
-                      {i + 1}.
-                    </span>
-                    <input
-                      type="text"
-                      value={node.text}
-                      onChange={(e) => handleNodeTextChange(node.id, e.target.value)}
-                      placeholder="Type text..."
-                      className="w-full text-xs text-slate-800 dark:text-slate-100 bg-transparent border-none focus:outline-none"
-                    />
-                    {smartArt.nodes.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={(e) => handleRemoveShape(node.id, e)}
-                        className="text-slate-300 hover:text-red-500 p-0.5 rounded transition-opacity"
-                        title="Delete Step"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleAddShape}
-            className="shrink-0 mt-3 flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg border border-dashed border-slate-300 text-slate-600 hover:bg-white hover:border-slate-400 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 text-xs font-medium transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5 text-blue-600" />
-            <span>Add Item</span>
-          </button>
-        </div>
-      )}
-
-      {/* --------------------------------------------------------
-          LIVE DIAGRAM GRAPHIC CONTAINER
-         -------------------------------------------------------- */}
-      <div className="flex-1 min-w-0 h-full overflow-hidden rounded-r-xl">
-        {renderLayoutContent()}
-      </div>
-
-      {/* --------------------------------------------------------
-          RESIZE HANDLES (8 handles matching Office behavior)
-         -------------------------------------------------------- */}
-      {isSelected && (
-        <>
-          {/* NW */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 'nw')}
-            className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nwse-resize z-30 shadow-xs"
-          />
-          {/* N */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 'n')}
-            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ns-resize z-30 shadow-xs"
-          />
-          {/* NE */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 'ne')}
-            className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nesw-resize z-30 shadow-xs"
-          />
-          {/* E */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 'e')}
-            className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ew-resize z-30 shadow-xs"
-          />
-          {/* SE */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 'se')}
-            className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nwse-resize z-30 shadow-xs"
-          />
-          {/* S */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 's')}
-            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ns-resize z-30 shadow-xs"
-          />
-          {/* SW */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 'sw')}
-            className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-nesw-resize z-30 shadow-xs"
-          />
-          {/* W */}
-          <div
-            onPointerDown={(e) => handleResizePointerDown(e, 'w')}
-            className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-white border-2 border-[#0078d4] rounded-xs cursor-ew-resize z-30 shadow-xs"
-          />
-        </>
-      )}
-
-      {/* --------------------------------------------------------
-          RIGHT-CLICK CONTEXT MENU
-         -------------------------------------------------------- */}
-      {contextMenuPos && (
-        <div
-          className="fixed z-50 w-56 bg-white border border-slate-200 rounded-lg shadow-2xl p-1.5 text-xs dark:bg-[#111D29] dark:border-slate-800 animate-in fade-in zoom-in-95"
-          style={{ top: contextMenuPos.y, left: contextMenuPos.x }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              handleAddShape();
-              setContextMenuPos(null);
-            }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-800 dark:text-slate-100"
-          >
-            <Plus className="w-4 h-4 text-blue-600" />
-            <span>Add Step</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              handleRemoveShape();
-              setContextMenuPos(null);
-            }}
-            disabled={smartArt.nodes.length <= 1}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-800 dark:text-slate-100 disabled:opacity-40"
-          >
-            <Trash2 className="w-4 h-4 text-slate-500" />
-            <span>Remove Step</span>
-          </button>
-
-          <div className="h-px bg-slate-200 dark:bg-slate-800 my-1" />
-
-          <button
-            type="button"
-            onClick={() => {
-              handleMoveBefore();
-              setContextMenuPos(null);
-            }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-800 dark:text-slate-100"
-          >
-            <ArrowUp className="w-4 h-4 text-blue-600" />
-            <span>Move Before</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              handleMoveAfter();
-              setContextMenuPos(null);
-            }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-800 dark:text-slate-100"
-          >
-            <ArrowDown className="w-4 h-4 text-blue-600" />
-            <span>Move After</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              handleToggleDirection();
-              setContextMenuPos(null);
-            }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-800 dark:text-slate-100"
-          >
-            <ArrowLeftRight className="w-4 h-4 text-amber-500" />
-            <span>Right to Left</span>
-          </button>
-
-          <div className="h-px bg-slate-200 dark:bg-slate-800 my-1" />
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowColorDropdown(true);
-              setContextMenuPos(null);
-            }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-800 dark:text-slate-100"
-          >
-            <Palette className="w-4 h-4 text-amber-500" />
-            <span>Change Colors...</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowLayoutDropdown(true);
-              setContextMenuPos(null);
-            }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-800 dark:text-slate-100"
-          >
-            <Layout className="w-4 h-4 text-emerald-500" />
-            <span>Change Layout...</span>
-          </button>
-
-          <div className="h-px bg-slate-200 dark:bg-slate-800 my-1" />
-
-          <button
-            type="button"
-            onClick={() => {
-              onDeleteSmartArt();
-              setContextMenuPos(null);
-            }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-red-50 text-red-600 dark:hover:bg-red-950/50 font-medium"
-          >
-            <Trash2 className="w-4 h-4 text-red-600" />
-            <span>Delete SmartArt</span>
-          </button>
-        </div>
-      )}
-    </div>
+    </>
   );
 };

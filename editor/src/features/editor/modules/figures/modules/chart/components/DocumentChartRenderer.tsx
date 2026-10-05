@@ -75,6 +75,13 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
   const [height, setHeight] = useState<number>(chart.height || 340);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const layoutButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (activeChartId !== chart.id) {
+      setIsLayoutOptionsOpen(false);
+    }
+  }, [activeChartId, chart.id]);
 
   const getFigureElement = (): HTMLElement | null => {
     return propFigureEl || containerRef.current?.closest('.editor-chart-figure') || null;
@@ -111,13 +118,37 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
   // Derive Recharts dataset from categories & series
   const rechartsData = useMemo(() => {
     return chart.categories.map((cat, catIdx) => {
-      const row: Record<string, string | number> = { category: cat };
+      const row: Record<string, string | number | null> = { category: cat };
       chart.series.forEach((s) => {
-        row[s.name] = s.values[catIdx] ?? 0;
+        const raw = s.values[catIdx];
+        if (raw === '' || raw === null || raw === undefined) {
+          row[s.name] = null;
+        } else {
+          const num = typeof raw === 'number' ? raw : parseFloat(raw);
+          row[s.name] = isNaN(num) ? null : num;
+        }
       });
       return row;
     });
   }, [chart.categories, chart.series]);
+
+  // Derive Scatter dataset (memoized to prevent unstable array references across renders)
+  const scatterPoints = useMemo(() => {
+    if (chart.chartType !== 'scatter') return [];
+    return chart.categories
+      .map((cat, idx) => {
+        const raw = chart.series[0]?.values[idx];
+        if (raw === '' || raw === null || raw === undefined) return null;
+        const num = typeof raw === 'number' ? raw : parseFloat(raw);
+        if (isNaN(num)) return null;
+        return {
+          x: (idx + 1) * 10,
+          y: num,
+          name: cat,
+        };
+      })
+      .filter((pt): pt is { x: number; y: number; name: string } => pt !== null);
+  }, [chart.chartType, chart.categories, chart.series]);
 
   // Derive active color palette
   const activePalette = useMemo(() => {
@@ -128,7 +159,6 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
   const handleChartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setActiveChart(chart);
-    setIsLayoutOptionsOpen(true);
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -148,7 +178,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
     onUpdateChart({
       ...chart,
       title: newTitle,
-      caption: `Figure: ${newTitle}`,
+      caption: chart.caption || `Figure: ${newTitle}`,
       updatedAt: new Date().toISOString(),
     });
   };
@@ -180,8 +210,8 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
     const startX = e.clientX;
     const startY = e.clientY;
-    const initialX = x;
-    const initialY = y;
+    const initialX = chart.position?.x ?? x ?? 0;
+    const initialY = chart.position?.y ?? y ?? 0;
     const el = getFigureElement();
     const scale = el ? getWorkspaceScale(el) : 1;
 
@@ -222,13 +252,9 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
       setY(curY);
 
       if (el) {
-        if (chart.wrapMode === 'behind' || chart.wrapMode === 'inFront') {
-          el.style.left = `${curX}px`;
-          el.style.top = `${curY}px`;
-          el.style.transform = 'none';
-        } else {
-          el.style.transform = `translate(${curX}px, ${curY}px)`;
-        }
+        el.style.left = `${curX}px`;
+        el.style.top = `${curY}px`;
+        el.style.transform = 'none';
       }
     };
 
@@ -249,13 +275,13 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
 
-      if (isDraggingStarted) {
-        onUpdateChart({
-          ...chart,
-          position: { x: curX, y: curY },
-          updatedAt: new Date().toISOString(),
-        });
-      }
+      if (!isDraggingStarted) return;
+
+      onUpdateChart({
+        ...chart,
+        position: { x: curX, y: curY },
+        updatedAt: new Date().toISOString(),
+      });
     };
 
     window.addEventListener('pointermove', onPointerMove);
@@ -284,8 +310,8 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
     const startY = e.clientY;
     const startWidth = width;
     const startHeight = height;
-    const startXPos = x;
-    const startYPos = y;
+    const startXPos = chart.position?.x ?? x ?? 0;
+    const startYPos = chart.position?.y ?? y ?? 0;
     const el = getFigureElement();
     const scale = el ? getWorkspaceScale(el) : 1;
 
@@ -335,13 +361,9 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
       if (el) {
         el.style.width = `${newWidth}px`;
-        if (chart.wrapMode === 'behind' || chart.wrapMode === 'inFront') {
-          el.style.left = `${newX}px`;
-          el.style.top = `${newY}px`;
-          el.style.transform = 'none';
-        } else {
-          el.style.transform = `translate(${newX}px, ${newY}px)`;
-        }
+        el.style.left = `${newX}px`;
+        el.style.top = `${newY}px`;
+        el.style.transform = 'none';
       }
     };
 
@@ -489,10 +511,18 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
     // Pie / Doughnut uses first series mapped over categories
     if (chart.chartType === 'pie' || chart.chartType === 'doughnut') {
-      const pieData = chart.categories.map((cat, idx) => ({
-        name: cat,
-        value: chart.series[0]?.values[idx] ?? 0,
-      }));
+      const pieData = chart.categories
+        .map((cat, idx) => {
+          const raw = chart.series[0]?.values[idx];
+          if (raw === '' || raw === null || raw === undefined) return null;
+          const num = typeof raw === 'number' ? raw : parseFloat(raw);
+          if (isNaN(num)) return null;
+          return {
+            name: cat,
+            value: num,
+          };
+        })
+        .filter((pt): pt is { name: string; value: number } => pt !== null);
 
       const isDoughnut = chart.chartType === 'doughnut';
 
@@ -529,12 +559,6 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
     // Scatter Chart
     if (chart.chartType === 'scatter') {
-      const scatterPoints = chart.categories.map((cat, idx) => ({
-        x: (idx + 1) * 10,
-        y: chart.series[0]?.values[idx] ?? 0,
-        name: cat,
-      }));
-
       return (
         <ResponsiveContainer width="100%" height={effectiveChartHeight}>
           <ScatterChart margin={{ top: 10, right: 15, bottom: 20, left: 10 }}>
@@ -555,7 +579,12 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
             />
             <Tooltip cursor={{ strokeDasharray: '3 3' }} />
             {chart.showLegend && <Legend verticalAlign="bottom" height={28} />}
-            <Scatter name={chart.series[0]?.name || 'Series 1'} data={scatterPoints} fill={activePalette[0]} />
+            <Scatter
+              name={chart.series[0]?.name || 'Series 1'}
+              data={scatterPoints}
+              fill={activePalette[0]}
+              isAnimationActive={false}
+            />
           </ScatterChart>
         </ResponsiveContainer>
       );
@@ -661,8 +690,8 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
         className="chart-display-frame w-full p-2 rounded-lg select-none"
         style={{
           position: 'relative',
-          zIndex: chart.wrapMode === 'behind' ? 1 : (chart.wrapMode === 'inFront' ? 20 : 1),
-          backgroundColor: chart.backgroundColor || '#ffffff',
+          zIndex: chart.wrapMode === 'behind' ? 0 : (chart.wrapMode === 'inFront' ? 25 : 10),
+          backgroundColor: chart.wrapMode === 'behind' ? 'transparent' : (chart.backgroundColor || '#ffffff'),
           borderRadius: `${chart.borderRadius || 8}px`,
           border: isEditingThisChart ? '1px solid #e2e8f0' : undefined,
           boxShadow: isEditingThisChart ? '0 1px 2px 0 rgba(0,0,0,0.04)' : undefined,
@@ -769,9 +798,11 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
           >
             {/* Button 1: Layout Options */}
             <button
+              ref={layoutButtonRef}
               type="button"
               title="Layout Options"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setIsLayoutOptionsOpen((prev) => !prev);
               }}
               className={`w-[30px] h-[30px] rounded-xs flex items-center justify-center shadow-md border transition-all cursor-pointer ${
@@ -796,6 +827,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               onClose={() => setIsLayoutOptionsOpen(false)}
               onUpdateChart={onUpdateChart}
               onSeeMore={() => setIsSpreadsheetOpen(true)}
+              anchorRef={layoutButtonRef}
             />
           </div>
         </>
