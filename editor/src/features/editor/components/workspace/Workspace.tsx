@@ -802,12 +802,18 @@ function DocumentPage({
   }, [pageId, initHistory]);
 
   const isImportedPdfPage = /<img\b[^>]*data-imported-pdf-page/i.test(html);
-  const marginL = section?.marginConfig?.left ?? 96;
-  const marginR = section?.marginConfig?.right ?? 96;
-  const bodyPaddingTop = isImportedPdfPage ? 0 : 8;
+  const usesImportedPageLayout = Boolean(section?.importedLayout);
+  const isMirroredMarginPage = section?.marginPreset === "mirrored";
+  const isRightHandPage = pageNumber % 2 === 1;
+  const gutter = usesImportedPageLayout ? section?.gutter ?? 0 : 0;
+  const marginL = (section?.marginConfig?.left ?? 96) + (gutter && (!isMirroredMarginPage || isRightHandPage) ? gutter : 0);
+  const marginR = (section?.marginConfig?.right ?? 96) + (gutter && isMirroredMarginPage && !isRightHandPage ? gutter : 0);
+  const marginT = section?.marginConfig?.top ?? 96;
+  const marginB = section?.marginConfig?.bottom ?? 96;
+  const bodyPaddingTop = isImportedPdfPage || usesImportedPageLayout ? 0 : 8;
   const bodyPaddingBottom = isImportedPdfPage
     ? 0
-    : Math.max(16, Math.min(32, (section?.marginConfig?.bottom ?? 96) - 64));
+    : usesImportedPageLayout ? 0 : Math.max(16, Math.min(32, marginB - 64));
 
   const { model: docModel, updateSection: docUpdateSection } = useDocumentModel();
   const {
@@ -1800,7 +1806,7 @@ function DocumentPage({
     hasPageNumberInHeader
   );
 
-  const headerHeight = isImportedPdfPage ? 0 : isDraft
+  const headerHeight = isImportedPdfPage || usesImportedPageLayout ? 0 : isDraft
     ? 0
     : isHeaderFooterActive
       ? Math.max(36, section?.headerTopDistance ?? 48)
@@ -1808,7 +1814,7 @@ function DocumentPage({
         ? Math.max(28, section?.headerTopDistance ?? 48)
         : Math.max(18, Math.min(26, (section?.headerTopDistance ?? 48) - 22));
 
-  const headerPaddingTop = isDraft
+  const headerPaddingTop = usesImportedPageLayout ? 0 : isDraft
     ? 0
     : isHeaderFooterActive
       ? Math.max(8, (section?.headerTopDistance ?? 48) - 34)
@@ -1816,7 +1822,7 @@ function DocumentPage({
         ? Math.max(6, (section?.headerTopDistance ?? 48) - 34)
         : 4;
 
-  const headerPaddingBottom = isDraft
+  const headerPaddingBottom = usesImportedPageLayout ? 0 : isDraft
     ? 0
     : isHeaderFooterActive
       ? 8
@@ -1824,9 +1830,11 @@ function DocumentPage({
         ? 6
         : 4;
 
-  const footerHeight = isImportedPdfPage ? 0 : isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
+  const footerHeight = isImportedPdfPage || usesImportedPageLayout ? 0 : isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = isImportedPdfPage
     ? pageHeight
+    : usesImportedPageLayout
+      ? Math.max(0, pageHeight - marginT - marginB)
     : Math.max(100, pageHeight - headerHeight - footerHeight);
 
 
@@ -2184,7 +2192,8 @@ function DocumentPage({
           <div
             data-hf-container="header"
             data-page-id={pageId}
-            onDoubleClick={(e) => {
+            onClick={(e) => {
+              if (isHeaderFooterActive) return;
               e.stopPropagation();
               enterHeaderFooterMode("header", section?.id, pageId);
             }}
@@ -2200,11 +2209,15 @@ function DocumentPage({
               }
         `}
             style={{
+              position: usesImportedPageLayout ? "absolute" : "relative",
+              top: usesImportedPageLayout ? `${section?.headerTopDistance ?? 48}px` : undefined,
+              left: usesImportedPageLayout ? 0 : undefined,
+              right: usesImportedPageLayout ? 0 : undefined,
               paddingLeft: `${marginL}px`,
               paddingRight: `${marginR}px`,
               paddingTop: `${headerPaddingTop}px`,
               paddingBottom: `${headerPaddingBottom}px`,
-              minHeight: `${headerHeight}px`,
+              minHeight: usesImportedPageLayout ? undefined : `${headerHeight}px`,
             }}
           >
             {/* Editor-only Header Section Label */}
@@ -2352,6 +2365,11 @@ function DocumentPage({
             }
           }}
           style={{
+            position: usesImportedPageLayout ? "absolute" : undefined,
+            top: usesImportedPageLayout ? `${marginT}px` : undefined,
+            left: usesImportedPageLayout ? 0 : undefined,
+            right: usesImportedPageLayout ? 0 : undefined,
+            bottom: usesImportedPageLayout ? `${marginB}px` : undefined,
             minHeight: `${contentHeight}px`,
             height: isEditingChartOnThisPage ? "auto" : `${contentHeight}px`,
             maxHeight: isEditingChartOnThisPage ? undefined : `${contentHeight}px`,
@@ -2481,7 +2499,8 @@ function DocumentPage({
           <div
             data-hf-container="footer"
             data-page-id={pageId}
-            onDoubleClick={(e) => {
+            onClick={(e) => {
+              if (isHeaderFooterActive) return;
               e.stopPropagation();
               enterHeaderFooterMode("footer", section?.id, pageId);
             }}
@@ -2497,11 +2516,15 @@ function DocumentPage({
               }
         `}
             style={{
+              position: usesImportedPageLayout ? "absolute" : "relative",
+              left: usesImportedPageLayout ? 0 : undefined,
+              right: usesImportedPageLayout ? 0 : undefined,
+              bottom: usesImportedPageLayout ? `${section?.footerBottomDistance ?? 48}px` : undefined,
               paddingLeft: `${marginL}px`,
               paddingRight: `${marginR}px`,
-              paddingTop: "10px",
-              paddingBottom: `${Math.max(8, (section?.footerBottomDistance ?? 48) - 34)}px`,
-              minHeight: `${footerHeight}px`,
+              paddingTop: usesImportedPageLayout ? 0 : "10px",
+              paddingBottom: usesImportedPageLayout ? 0 : `${Math.max(8, (section?.footerBottomDistance ?? 48) - 34)}px`,
+              minHeight: usesImportedPageLayout ? undefined : `${footerHeight}px`,
             }}
           >
             {/* Editor-only Footer Section Label */}

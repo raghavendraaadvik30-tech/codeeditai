@@ -28,7 +28,7 @@ EditorHeader
 No direct API/backend communication. 
 It is a UI layout component that composes reusable header components.
 */
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import {
   Save,
@@ -82,6 +82,8 @@ export default function HeaderActions() {
 
   const [savedFlash, setSavedFlash] =
     useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const [saveAsOpen, setSaveAsOpen] =
     useState(false);
@@ -96,9 +98,15 @@ export default function HeaderActions() {
     pagesToImport: string[];
     fileName: string;
     pageLayout?: ImportedPageLayout;
+    pageLayouts?: ImportedPageLayout[];
   } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadSequenceRef = useRef(0);
+  const latestInsertRef = useRef(insertUploadedDocument);
+  useEffect(() => {
+    latestInsertRef.current = insertUploadedDocument;
+  }, [insertUploadedDocument]);
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -110,9 +118,10 @@ export default function HeaderActions() {
   const executeUpload = (
     title: string,
     pagesToImport: string[],
-    pageLayout?: ImportedPageLayout
+    pageLayout?: ImportedPageLayout,
+    pageLayouts?: ImportedPageLayout[],
   ) => {
-    insertUploadedDocument(title, pagesToImport, pageLayout);
+    latestInsertRef.current(title, pagesToImport, pageLayout, pageLayouts);
     setIsEditable(true);
     setPendingPermissionFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -120,10 +129,17 @@ export default function HeaderActions() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+    const sequence = ++uploadSequenceRef.current;
+    setUploadError(null);
+    setPendingUpload(null);
+    setShowLimitAlert(false);
+    setUploading(true);
 
     try {
-      const { title, html, pages, pageLayout } = await parseUploadedFile(file);
+      const { title, html, pages, pageLayout, pageLayouts } = await parseUploadedFile(file);
+      if (sequence !== uploadSequenceRef.current) return;
 
       const pagesToImport =
         pages && pages.length > 0 ? pages : [html || "<p><br/></p>"];
@@ -142,23 +158,34 @@ export default function HeaderActions() {
           pagesToImport,
           fileName: file.name,
           pageLayout,
+          pageLayouts,
         });
         setShowLimitAlert(true);
         return;
       }
 
-      executeUpload(docTitle, pagesToImport, pageLayout);
+      executeUpload(docTitle, pagesToImport, pageLayout, pageLayouts);
     } catch (err) {
       console.error("Error processing file upload:", err);
+      if (sequence === uploadSequenceRef.current) {
+        setUploadError(err instanceof Error ? err.message : "The document could not be imported.");
+      }
+    } finally {
+      if (sequence === uploadSequenceRef.current) setUploading(false);
     }
   };
 
   const handleConfirmUpload = () => {
     setShowLimitAlert(false);
     if (!pendingUpload) return;
-    const { title, pagesToImport, pageLayout } = pendingUpload;
+    const { title, pagesToImport, pageLayout, pageLayouts } = pendingUpload;
     setPendingUpload(null);
-    executeUpload(title, pagesToImport, pageLayout);
+    try {
+      executeUpload(title, pagesToImport, pageLayout, pageLayouts);
+    } catch (err) {
+      console.error("Error saving imported document:", err);
+      setUploadError(err instanceof Error ? err.message : "The document could not be saved.");
+    }
   };
 
   const handleCancelUpload = () => {
@@ -536,7 +563,7 @@ export default function HeaderActions() {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".docx,.doc,.html,.htm,.txt,.text,.md,.markdown,.json,.rtf,text/*"
+        accept=".docx,.doc,.pdf,.html,.htm,.txt,.text,.md,.markdown,.json,.rtf,text/*"
         className="hidden"
         onChange={handleFileChange}
       />
@@ -562,8 +589,25 @@ export default function HeaderActions() {
         title="Upload Document from File Manager"
       >
         <Upload className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-        <span>Upload</span>
+        <span>{uploading ? "Importing…" : "Upload"}</span>
       </Button>
+
+      {uploadError && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="fixed bottom-4 right-4 z-[10000] max-w-md rounded-lg border border-red-200 bg-white px-4 py-3 text-sm text-red-800 shadow-xl dark:border-red-900 dark:bg-slate-950 dark:text-red-200"
+        >
+          <p>{uploadError}</p>
+          <button
+            type="button"
+            className="mt-2 text-xs font-semibold underline"
+            onClick={() => setUploadError(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Top Permission Prompt for File Upload (Word-Style Protected View Top Banner) */}
       {pendingPermissionFile && (
