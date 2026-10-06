@@ -1,4 +1,4 @@
-/**
+  /**
  * AuthGuard protects authenticated routes.
  * Checks authentication state before rendering protected pages.
  * Redirects unauthenticated users to the Login page.
