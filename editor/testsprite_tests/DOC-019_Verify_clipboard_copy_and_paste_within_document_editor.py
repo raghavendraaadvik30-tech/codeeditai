@@ -40,16 +40,89 @@ async def run_test():
         except Exception:
             pass
         
+        # -> Fill Workspace, Email, and Password fields and click the 'Login' button
+        # Enter Workspace text field
+        elem = page.get_by_role("textbox", name="Workspace")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author")
+        
+        # -> Fill Workspace, Email, and Password fields and click the 'Login' button
+        # example@email.com email field
+        elem = page.get_by_role("textbox", name="Email")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author@gmail.com")
+        
+        # -> Fill Workspace, Email, and Password fields and click the 'Login' button
+        # •••••••• password field
+        elem = page.get_by_role("textbox", name="Password")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author123")
+        
+        # -> Fill Workspace, Email, and Password fields and click the 'Login' button
+        # Login button
+        elem = page.get_by_role("button", name="Login")
+        await elem.click(timeout=10000)
+        
+        # -> Select the 'Clipboard test string', copy it (Ctrl+C), move the caret to the next line (Enter), and paste it (Ctrl+V) into the editor.
+        # Select the 'Clipboard test string', copy it (Ctrl+C), move the caret to the next line (Enter), and paste it (Ctrl+V) into the editor.
+        elem = page.locator("section > .overflow-hidden")
+        await elem.click(timeout=10000)
+        
+        # -> Select the 'Clipboard test string', copy it (Ctrl+C), move the caret to the next line (Enter), and paste it (Ctrl+V) into the editor.
+        # Select the 'Clipboard test string', copy it (Ctrl+C), move the caret to the next line (Enter), and paste it (Ctrl+V) into the editor.
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Clipboard test string")
+        
+        # -> Type 'Clipboard test string' into the document editor, copy it, paste on the next line, and then verify both occurrences appear.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.click(timeout=10000)
+        
+        # -> Type 'Clipboard test string' into the document editor, copy it, paste it on the next line, and verify two identical occurrences of 'Clipboard test string' on the page.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.click(timeout=10000)
+        
+        # -> Type 'Clipboard test string' into the document editor, copy it, paste it on the next line, and verify two identical occurrences of 'Clipboard test string' on the page.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Clipboard test string")
+        
+        # -> Type 'Clipboard test string' into the document editor, copy it, press Enter to move to the next line, paste it, and verify two identical occurrences of 'Clipboard test string'.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.click(timeout=10000)
+        
+        # -> Type 'Clipboard test string' into the document editor, copy it, press Enter to move to the next line, paste it, and verify two identical occurrences of 'Clipboard test string'.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Clipboard test string")
+        
+        # -> Type 'Clipboard test string' into the document editor, copy it, paste it on the next line, and verify two identical occurrences of 'Clipboard test string' in the editor.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.click(timeout=10000)
+        
+        # -> Type 'Clipboard test string' into the document editor, copy it, paste it on the next line, and verify two identical occurrences of 'Clipboard test string' in the editor.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Clipboard test string")
+        
+        # -> In the document editor, select all visible text, copy it (Ctrl+C), press Enter to move to a new line, paste the copied text (Ctrl+V), and then inspect the editor's visible text to verify whether two identical occurrences appear.
+        # C C l i p b o a r dt e s ts t r i n g
+        elem = page.locator("div").filter(has_text=re.compile(r"^CClipboardteststring$"))
+        await elem.click(timeout=10000)
+        
         # --> Assertions to verify final state
         
-        # --> The page does not contain 'Clipboard test string', so the clipboard paste could not be performed.
+        # --> The editor did not contain the exact pasted text 'Clipboard test string' at the target position.
         # Assert-outcome: failed
-        # Assert: Expected the Workspace input to contain 'Clipboard test string'.
-        await expect(page.get_by_role("textbox", name="Workspace").nth(0)).to_have_value("Clipboard test string", timeout=15000), "Expected the Workspace input to contain 'Clipboard test string'."
-        
-        # --> Test blocked by environment/access constraints during agent run
-        # Reason: TEST BLOCKED The clipboard test could not be run — the page does not contain the required text to copy and paste. Observations: - The page shows a "Sign In" login form (Workspace, Email, Password fields and a Login button). - No visible text 'Clipboard test string' was found on the page, so selection and copy cannot be performed.
-        raise AssertionError("Test blocked during agent run: " + "TEST BLOCKED The clipboard test could not be run \u2014 the page does not contain the required text to copy and paste. Observations: - The page shows a \"Sign In\" login form (Workspace, Email, Password fields and a Login button). - No visible text 'Clipboard test string' was found on the page, so selection and copy cannot be performed." + " — the exported script cannot reproduce a PASS in this environment.")
+        # Assert: Expected the editor element to contain 'Clipboard test string' at the target position.
+        await expect(page.locator("xpath=/html/body/div/div/div/div/main/section/main/div[2]/div/section/div[3]").nth(0)).to_have_text("Clipboard test string", timeout=15000), "Expected the editor element to contain 'Clipboard test string' at the target position."
         await asyncio.sleep(5)
 
     finally:

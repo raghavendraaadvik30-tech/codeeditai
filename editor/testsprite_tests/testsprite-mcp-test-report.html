@@ -1213,7 +1213,7 @@ body {
         </div>
         <div class="metadata-row">
           <div class="metadata-label text-body-medium">Date</div>
-          <div class="metadata-value text-body">24/9/2026</div>
+          <div class="metadata-value text-body">29/9/2026</div>
         </div>
         <div class="metadata-row">
           <div class="metadata-label text-body-medium">Prepared by</div>
@@ -1237,43 +1237,39 @@ body {
             <li><span class="coverage-highlight">0/0</span> of tests passed</li>
             <li><span class="coverage-highlight">Key gaps / risks:</span>
             
-              <p>&amp; Defect Investigation</p>
-<h3>🔴 Primary Finding / Risk: Automated Test Authentication Barrier</h3>
+              <h3>🔴 Defect 1: Backspace at Page Boundary Fails to Merge / Remove Trailing Page (<code>DOC-006</code>)</h3>
 <ul>
-<li><strong>Severity:</strong> High (Blocks automated browser test runners from reaching <code>/editor</code>)</li>
-<li><strong>Defect Description:</strong>
-The <code>/editor</code> route is guarded by <code>AuthGuard.tsx</code>. When TestSprite automated browser navigates to <code>/editor</code>, it is redirected to <code>/login</code>.
-The automated runner submitted fallback test values:
-<ul>
-<li>Workspace: <code>test-workspace</code></li>
-<li>Email: <code>example@gmail.com</code></li>
-<li>Password: <code>password123</code></li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Observed Behavior:</strong> Pressing Backspace at the start of Page 2 fails to remove the Page Break element from the DOM and does not collapse the empty page back into Page 1.</li>
+<li><strong>Suspected Source Area:</strong> <code>src/features/editor/components/canvas/PaginationEngine.tsx</code> or <code>src/features/editor/hooks/useDocumentKeydown.ts</code>.</li>
+<li><strong>Investigation Area:</strong> Ensure the keydown handler for <code>Backspace</code> detects when the cursor offset is 0 within a page block following a <code>PageBreak</code> node and dispatches a node deletion action.</li>
 </ul>
-</li>
-<li><strong>Root Cause in Source Code:</strong>
-In [AuthService.ts](file:///g:/frontend/editor/src/features/auth/services/AuthService.ts#L43-L83), mock authentication strictly checks hardcoded credentials:<pre><code class="language-ts">// Admin Login:
-workspace: &quot;admin&quot;
-email: &quot;admin@gmail.com&quot;
-password: &quot;admin123&quot;
-
-// Author Login:
-workspace: &quot;author&quot;
-email: &quot;author@gmail.com&quot;
-password: &quot;author123&quot;
-</code></pre>
-Any other credentials throw <code>&quot;Invalid workspace, email, or password&quot;</code>, halting test execution at the login form.</li>
-<li><strong>Recommended Action for CI/CD / Automated Testing:</strong>
-<ol>
-<li>Update TestSprite session environment variables in <code>testsprite_tests/tmp/config.json</code> with the valid mock credentials:
+<h3>🔴 Defect 2: Clipboard Paste Concatenates Words and Strips Whitespace (<code>DOC-019</code>)</h3>
 <ul>
-<li><code>LOGIN_WORKSPACE</code>: <code>&quot;admin&quot;</code></li>
-<li><code>LOGIN_USER</code>: <code>&quot;admin@gmail.com&quot;</code></li>
-<li><code>LOGIN_PASSWORD</code>: <code>&quot;admin123&quot;</code></li>
+<li><strong>Severity:</strong> Medium / High</li>
+<li><strong>Observed Behavior:</strong> Pasting copied text (<code>Clipboard test string</code>) into the editor collapses spaces into <code>CClipboardteststring</code> in both the canvas and the Track Changes revision tracker.</li>
+<li><strong>Suspected Source Area:</strong> Clipboard paste event handler in editor canvas or Track Changes text diffing engine (<code>useTrackChanges.ts</code>).</li>
+<li><strong>Investigation Area:</strong> Check <code>onPaste</code> event handler sanitization logic to ensure <code>text/plain</code> whitespace characters are preserved during insertion.</li>
 </ul>
-</li>
-<li>Alternatively, configure <code>AuthGuard.tsx</code> to permit a test bypass query parameter or mock token in development/test environment (e.g. <code>?testMode=true</code>).</li>
-</ol>
-</li>
+<h3>🔴 Defect 3: Cut Operation Race Condition / Incorrect Buffer Content (<code>DOC-020</code>)</h3>
+<ul>
+<li><strong>Severity:</strong> Medium / High</li>
+<li><strong>Observed Behavior:</strong> Performing a cut operation on selected text failed to place the expected string on the clipboard, subsequently pasting <code>DDestinationhere</code>.</li>
+<li><strong>Suspected Source Area:</strong> <code>useDocumentClipboard.ts</code> or keyboard shortcut listener for <code>Ctrl+X</code>.</li>
+<li><strong>Investigation Area:</strong> Verify that selection range is captured before deleting the text node and properly written to <code>navigator.clipboard</code>.</li>
+</ul>
+<h3>⚠️ Risk / UX Gap 1: Inaccessible Inline Document Title Modification (<code>DOC-017</code>)</h3>
+<ul>
+<li><strong>Severity:</strong> Medium</li>
+<li><strong>Observed Behavior:</strong> The document header renders the title as static text (<code>Untitled Document</code>), without an editable text input or modal trigger for renaming.</li>
+<li><strong>Investigation Area:</strong> Add an editable input or click-to-rename modal in <code>HeaderActions.tsx</code> / <code>EditorHeader.tsx</code>.</li>
+</ul>
+<h3>⚠️ Risk 2: App Reload Hanging on Loading View (<code>DOC-022</code>)</h3>
+<ul>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Observed Behavior:</strong> Reloading the <code>/editor</code> route directly caused the application to hang indefinitely on <code>Loading system view...</code> spinner.</li>
+<li><strong>Suspected Source Area:</strong> <code>AuthGuard.tsx</code> / <code>useAuth.ts</code> token rehydration on hard refresh, or initialization promise in <code>EditorContext.tsx</code>.</li>
+<li><strong>Investigation Area:</strong> Ensure localStorage authentication state is resolved synchronously before mounting the editor route.</li>
 </ul>
 
             </li>

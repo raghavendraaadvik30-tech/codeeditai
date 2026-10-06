@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { Image as ImageIcon, ChevronDown, HardDrive, Globe, Type, FileImage } from 'lucide-react';
+import { Image as ImageIcon, ChevronDown, HardDrive, Globe, FileImage } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -80,10 +80,6 @@ export const PicturesSection: React.FC = () => {
     }
   };
 
-  const insertTitleOnly = () => {
-    const html = generateTitleOnlyHTML();
-    insertHTML(html);
-  };
 
   const insertPictureOnly = () => {
     triggerFilePicker("withoutTitle");
@@ -164,13 +160,6 @@ export const PicturesSection: React.FC = () => {
                   <span>Insert image without title</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={insertTitleOnly}
-                  className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
-                >
-                  <Type className="h-3.5 w-3.5 text-slate-500" />
-                  <span>Title only</span>
-                </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
 

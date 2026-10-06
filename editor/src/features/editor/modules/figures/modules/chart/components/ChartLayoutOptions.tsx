@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useState, useLayoutEffect, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import type { ChartModel, TextWrapMode, ChartPositionMode } from '../types/chart.types';
 export type { TextWrapMode, ChartPositionMode };
@@ -9,6 +10,7 @@ interface ChartLayoutOptionsProps {
   onClose: () => void;
   onUpdateChart: (updated: ChartModel) => void;
   onSeeMore?: () => void;
+  anchorRef?: React.RefObject<HTMLElement | null>;
 }
 
 export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
@@ -17,9 +19,140 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
   onClose,
   onUpdateChart,
   onSeeMore,
+  anchorRef,
 }) => {
   const selectedWrap: TextWrapMode = chart.wrapMode || 'inline';
   const positionMode: ChartPositionMode = chart.positionMode || 'moveWithText';
+
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{
+    top: number;
+    left: number;
+    side: 'right' | 'left';
+    notchTop: number;
+  } | null>(null);
+
+  const updatePosition = useCallback(() => {
+    if (!isOpen) {
+      setPos(null);
+      return;
+    }
+
+    const anchorEl = anchorRef?.current;
+    if (!anchorEl) return;
+
+    const anchorRect = anchorEl.getBoundingClientRect();
+    if (anchorRect.width === 0 && anchorRect.height === 0) return;
+
+    const panelEl = panelRef.current;
+    const panelWidth = panelEl?.offsetWidth || 230;
+    const panelHeight = panelEl?.offsetHeight || 260;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const viewportPadding = 12;
+    const gap = 8;
+
+    // Detect top boundary: keep below top ribbon/header if present
+    const headerEl = document.querySelector('header');
+    const minTop = headerEl ? Math.max(viewportPadding, headerEl.getBoundingClientRect().bottom + 4) : 48;
+    const maxBottom = viewportHeight - viewportPadding;
+
+    // Available space on the right and left of the anchor button
+    const spaceOnRight = viewportWidth - anchorRect.right;
+    const spaceOnLeft = anchorRect.left;
+
+    let side: 'right' | 'left' = 'right';
+    let left = anchorRect.right + gap;
+
+    // If there is not enough room on the right, but enough on the left -> flip to left
+    if (spaceOnRight < panelWidth + gap + viewportPadding && spaceOnLeft >= panelWidth + gap + viewportPadding) {
+      side = 'left';
+      left = anchorRect.left - panelWidth - gap;
+    } else if (spaceOnRight < panelWidth + gap + viewportPadding && spaceOnLeft < panelWidth + gap + viewportPadding) {
+      // If neither side has full space, choose the side with more space and clamp
+      if (spaceOnLeft > spaceOnRight) {
+        side = 'left';
+        left = Math.max(viewportPadding, anchorRect.left - panelWidth - gap);
+      } else {
+        side = 'right';
+        left = Math.min(anchorRect.right + gap, viewportWidth - panelWidth - viewportPadding);
+      }
+    }
+
+    // Horizontal viewport clamp
+    if (left < viewportPadding) {
+      left = viewportPadding;
+    } else if (left + panelWidth > viewportWidth - viewportPadding) {
+      left = viewportWidth - panelWidth - viewportPadding;
+    }
+
+    // Vertical placement: align top with anchor button top
+    let top = anchorRect.top;
+
+    // Bottom viewport clamp (shift upward if close to bottom)
+    if (top + panelHeight > maxBottom) {
+      top = maxBottom - panelHeight;
+    }
+
+    // Top viewport clamp (keep below header/ribbon)
+    if (top < minTop) {
+      top = minTop;
+    }
+
+    // Triangular notch alignment to the center of the anchor button
+    const anchorCenterY = anchorRect.top + anchorRect.height / 2;
+    const notchTop = Math.max(12, Math.min(anchorCenterY - top - 6, panelHeight - 20));
+
+    setPos({
+      top: Math.round(top),
+      left: Math.round(left),
+      side,
+      notchTop: Math.round(notchTop),
+    });
+  }, [isOpen, anchorRef]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setPos(null);
+      return;
+    }
+
+    updatePosition();
+
+    const handleScrollOrResize = () => {
+      updatePosition();
+    };
+
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [isOpen, updatePosition, chart.position?.x, chart.position?.y, chart.width, chart.height]);
+
+  // Click outside to close
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (e: MouseEvent | PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(target as Node) &&
+        (!anchorRef?.current || !anchorRef.current.contains(target as Node))
+      ) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [isOpen, onClose, anchorRef]);
 
   if (!isOpen) return null;
 
@@ -39,16 +172,44 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
     });
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div
+      ref={panelRef}
       data-editor-ui="true"
-      className="absolute left-10 top-0 w-[230px] bg-[#242424] border border-[#444444] rounded-xs shadow-2xl p-3 z-50 text-white font-sans select-none animate-in fade-in zoom-in-95 duration-100"
+      style={{
+        top: pos ? `${pos.top}px` : '0px',
+        left: pos ? `${pos.left}px` : '0px',
+        visibility: pos ? 'visible' : 'hidden',
+      }}
+      className="fixed w-[230px] bg-[#242424] border border-[#444444] rounded-xs shadow-2xl p-3 z-50 text-white font-sans select-none animate-in fade-in zoom-in-95 duration-100"
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
-      {/* Left triangular notch pointing to the Layout Options button */}
-      <div className="absolute -left-2 top-3 w-0 h-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-[#242424]" />
-      <div className="absolute -left-[9px] top-3 w-0 h-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-[#444444] -z-10" />
+      {/* Notch pointing to the Layout Options button */}
+      {pos && pos.side === 'right' && (
+        <>
+          <div
+            className="absolute -left-2 w-0 h-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-[#242424]"
+            style={{ top: `${pos.notchTop}px` }}
+          />
+          <div
+            className="absolute -left-[9px] w-0 h-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-[#444444] -z-10"
+            style={{ top: `${pos.notchTop}px` }}
+          />
+        </>
+      )}
+      {pos && pos.side === 'left' && (
+        <>
+          <div
+            className="absolute -right-2 w-0 h-0 border-y-[6px] border-y-transparent border-l-[8px] border-l-[#242424]"
+            style={{ top: `${pos.notchTop}px` }}
+          />
+          <div
+            className="absolute -right-[9px] w-0 h-0 border-y-[6px] border-y-transparent border-l-[8px] border-l-[#444444] -z-10"
+            style={{ top: `${pos.notchTop}px` }}
+          />
+        </>
+      )}
 
       {/* Header */}
       <div className="flex items-center justify-between pb-1 border-b border-[#383838]">
@@ -73,11 +234,10 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
         <button
           type="button"
           onClick={() => handleSelectWrap('inline')}
-          className={`p-1 rounded-xs border transition-all ${
-            selectedWrap === 'inline'
-              ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-              : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
-          }`}
+          className={`p-1 rounded-xs border transition-all ${selectedWrap === 'inline'
+            ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+            : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+            }`}
           title="In Line with Text"
         >
           <svg width="42" height="30" viewBox="0 0 42 30" fill="none">
@@ -98,87 +258,14 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           With Text Wrapping
         </p>
         <div className="grid grid-cols-3 gap-1.5">
-          {/* 1. Square */}
-          <button
-            type="button"
-            onClick={() => handleSelectWrap('square')}
-            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${
-              selectedWrap === 'square'
-                ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-                : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
-            }`}
-            title="Square"
-          >
-            <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
-              <line x1="3" y1="6" x2="10" y2="6" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="12" x2="10" y2="12" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="18" x2="10" y2="18" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="24" x2="10" y2="24" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <path d="M 13 24 C 13 13, 27 13, 27 24" stroke="#ffffff" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-              <line x1="30" y1="6" x2="37" y2="6" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="30" y1="12" x2="37" y2="12" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="30" y1="18" x2="37" y2="18" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="30" y1="24" x2="37" y2="24" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </button>
-
-          {/* 2. Tight */}
-          <button
-            type="button"
-            onClick={() => handleSelectWrap('tight')}
-            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${
-              selectedWrap === 'tight'
-                ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-                : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
-            }`}
-            title="Tight"
-          >
-            <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
-              <line x1="3" y1="6" x2="13" y2="6" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="12" x2="11" y2="12" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="18" x2="10" y2="18" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="24" x2="10" y2="24" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <path d="M 13 24 C 13 13, 27 13, 27 24" stroke="#ffffff" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-              <line x1="27" y1="6" x2="37" y2="6" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="29" y1="12" x2="37" y2="12" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="30" y1="18" x2="37" y2="18" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="30" y1="24" x2="37" y2="24" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </button>
-
-          {/* 3. Through */}
-          <button
-            type="button"
-            onClick={() => handleSelectWrap('through')}
-            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${
-              selectedWrap === 'through'
-                ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-                : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
-            }`}
-            title="Through"
-          >
-            <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
-              <line x1="3" y1="6" x2="14" y2="6" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="12" x2="12" y2="12" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="18" x2="11" y2="18" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="3" y1="24" x2="10" y2="24" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <path d="M 13 24 C 13 13, 27 13, 27 24" stroke="#ffffff" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-              <line x1="26" y1="6" x2="37" y2="6" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="28" y1="12" x2="37" y2="12" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="29" y1="18" x2="37" y2="18" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-              <line x1="30" y1="24" x2="37" y2="24" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </button>
-
-          {/* 4. Top and Bottom */}
+          {/* Top and Bottom */}
           <button
             type="button"
             onClick={() => handleSelectWrap('topBottom')}
-            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${
-              selectedWrap === 'topBottom'
-                ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-                : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
-            }`}
+            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'topBottom'
+              ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+              : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+              }`}
             title="Top and Bottom"
           >
             <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
@@ -192,11 +279,10 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           <button
             type="button"
             onClick={() => handleSelectWrap('behind')}
-            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${
-              selectedWrap === 'behind'
-                ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-                : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
-            }`}
+            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'behind'
+              ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+              : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+              }`}
             title="Behind Text"
           >
             <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
@@ -214,11 +300,10 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           <button
             type="button"
             onClick={() => handleSelectWrap('inFront')}
-            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${
-              selectedWrap === 'inFront'
-                ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-                : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
-            }`}
+            className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'inFront'
+              ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+              : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+              }`}
             title="In Front of Text"
           >
             <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
@@ -282,6 +367,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           See more...
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -18,6 +18,10 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
   onOpenChangeType,
 }) => {
   const [activeCell, setActiveCell] = useState<{ row: number; col: number } | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const cellWasAlreadyActiveRef = useRef<boolean>(false);
+
   const [contextMenuPos, setContextMenuPos] = useState<{
     x: number;
     y: number;
@@ -25,6 +29,157 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
     seriesIdx?: number;
   } | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  // Navigate to target cell by grid coordinates (row, col)
+  const navigateToCell = (targetRow: number, targetCol: number) => {
+    const targetInput = tableContainerRef.current?.querySelector<HTMLInputElement>(
+      `input[data-row="${targetRow}"][data-col="${targetCol}"]`
+    );
+
+    if (targetInput) {
+      setActiveCell({ row: targetRow, col: targetCol });
+      setIsEditing(false);
+      targetInput.focus({ preventScroll: true });
+      targetInput.select();
+      targetInput.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+  };
+
+  const handleCellMouseDown = (row: number, col: number) => {
+    cellWasAlreadyActiveRef.current =
+      activeCell?.row === row && activeCell?.col === col;
+  };
+
+  const handleCellClick = (
+    e: React.MouseEvent<HTMLInputElement>,
+    row: number,
+    col: number
+  ) => {
+    if (cellWasAlreadyActiveRef.current) {
+      setIsEditing(true);
+    } else {
+      setActiveCell({ row, col });
+      setIsEditing(false);
+      e.currentTarget.select();
+    }
+  };
+
+  const handleCellKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    row: number,
+    col: number
+  ) => {
+    // STATE 2 — CELL IS ACTIVELY BEING EDITED
+    if (isEditing) {
+      // Preserve normal text-editing behavior: caret movement, home, end, selection
+      if (
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight' ||
+        e.key === 'Home' ||
+        e.key === 'End'
+      ) {
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        setIsEditing(false);
+        navigateToCell(row + 1, col);
+        return;
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        setIsEditing(false);
+        navigateToCell(row, e.shiftKey ? col - 1 : col + 1);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsEditing(false);
+        e.currentTarget.select();
+        return;
+      }
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setIsEditing(false);
+        navigateToCell(e.key === 'ArrowUp' ? row - 1 : row + 1, col);
+        return;
+      }
+      return;
+    }
+
+    // STATE 1 — CELL IS NOT BEING TEXT-EDITED (Navigation mode)
+    if (
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight'
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      let targetRow = row;
+      let targetCol = col;
+
+      if (e.key === 'ArrowUp') targetRow -= 1;
+      if (e.key === 'ArrowDown') targetRow += 1;
+      if (e.key === 'ArrowLeft') targetCol -= 1;
+      if (e.key === 'ArrowRight') targetCol += 1;
+
+      navigateToCell(targetRow, targetCol);
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        navigateToCell(row - 1, col);
+      } else {
+        navigateToCell(row + 1, col);
+      }
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        navigateToCell(row, col - 1);
+      } else {
+        navigateToCell(row, col + 1);
+      }
+      return;
+    }
+
+    if (e.key === 'F2') {
+      e.preventDefault();
+      setIsEditing(true);
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsEditing(false);
+      return;
+    }
+
+    // Any typing key puts the cell into active text-edit mode
+    if (
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.metaKey &&
+      (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete')
+    ) {
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault();
+        if (col === 0) {
+          handleCategoryChange(row - 1, '');
+        } else {
+          handleValueChange(row - 1, col - 1, '');
+        }
+        return;
+      }
+      setIsEditing(true);
+    }
+  };
 
   // Close context menu on outside click or ESC
   useEffect(() => {
@@ -77,13 +232,24 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
 
   // Handle Value Change
   const handleValueChange = (catIdx: number, seriesIdx: number, rawVal: string) => {
-    const num = parseFloat(rawVal);
-    const validNum = isNaN(num) ? 0 : num;
+    let valToStore: number | string = '';
+    const trimmed = rawVal.trim();
+    if (trimmed === '') {
+      valToStore = '';
+    } else {
+      const num = parseFloat(trimmed);
+      // Keep valid numbers; if in the middle of typing a decimal point like "2.", preserve string
+      if (!isNaN(num) && !trimmed.endsWith('.')) {
+        valToStore = num;
+      } else {
+        valToStore = trimmed;
+      }
+    }
 
     const nextSeries = chart.series.map((s, i) => {
       if (i === seriesIdx) {
         const nextVals = [...s.values];
-        nextVals[catIdx] = validNum;
+        nextVals[catIdx] = valToStore;
         return { ...s, values: nextVals };
       }
       return s;
@@ -227,7 +393,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
     const nextSeries = chart.series.map((s, i) => {
       if (i === seriesIdx) {
         const nextVals = [...s.values];
-        nextVals[catIdx] = 0;
+        nextVals[catIdx] = '';
         return { ...s, values: nextVals };
       }
       return s;
@@ -318,7 +484,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
       </div>
 
       {/* SPREADSHEET GRID CONTAINER (Horizontal & Vertical Scrollable, Controlled Height) */}
-      <div className="data-editor-table-container max-h-[190px] overflow-x-auto overflow-y-auto border-b border-slate-200">
+      <div ref={tableContainerRef} className="data-editor-table-container max-h-[190px] overflow-x-auto overflow-y-auto border-b border-slate-200">
         <table className="w-full border-collapse text-xs font-mono">
           {/* COLUMN LETTERS ROW (A, B, C, D...) */}
           <thead>
@@ -355,10 +521,16 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 >
                   <div className="flex items-center justify-between w-full h-full px-1.5 py-1">
                     <input
+                      data-row={0}
+                      data-col={sIdx + 1}
                       type="text"
                       value={series.name}
                       onChange={(e) => handleSeriesNameChange(sIdx, e.target.value)}
+                      onMouseDown={() => handleCellMouseDown(0, sIdx + 1)}
+                      onClick={(e) => handleCellClick(e, 0, sIdx + 1)}
+                      onDoubleClick={() => setIsEditing(true)}
                       onFocus={() => setActiveCell({ row: 0, col: sIdx + 1 })}
+                      onKeyDown={(e) => handleCellKeyDown(e, 0, sIdx + 1)}
                       className="w-full h-6 text-xs font-semibold text-blue-700 bg-transparent outline-none font-sans"
                     />
                     {chart.series.length > 1 && (
@@ -400,17 +572,24 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                   }`}
                 >
                   <input
+                    data-row={catIdx + 1}
+                    data-col={0}
                     type="text"
                     value={cat}
                     onChange={(e) => handleCategoryChange(catIdx, e.target.value)}
+                    onMouseDown={() => handleCellMouseDown(catIdx + 1, 0)}
+                    onClick={(e) => handleCellClick(e, catIdx + 1, 0)}
+                    onDoubleClick={() => setIsEditing(true)}
                     onFocus={() => setActiveCell({ row: catIdx + 1, col: 0 })}
+                    onKeyDown={(e) => handleCellKeyDown(e, catIdx + 1, 0)}
                     className="w-full h-7 px-2 text-xs font-medium text-slate-800 bg-transparent outline-none font-sans"
                   />
                 </td>
 
                 {/* Editable Series Values (Columns B, C, D...) */}
                 {chart.series.map((s, sIdx) => {
-                  const val = s.values[catIdx] ?? 0;
+                  const rawVal = s.values[catIdx];
+                  const displayVal = (rawVal === '' || rawVal === null || rawVal === undefined) ? '' : rawVal;
                   const isSelected =
                     activeCell?.row === catIdx + 1 && activeCell?.col === sIdx + 1;
 
@@ -423,11 +602,17 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                       }`}
                     >
                       <input
-                        type="number"
-                        step="any"
-                        value={val}
+                        data-row={catIdx + 1}
+                        data-col={sIdx + 1}
+                        type="text"
+                        inputMode="decimal"
+                        value={displayVal}
                         onChange={(e) => handleValueChange(catIdx, sIdx, e.target.value)}
+                        onMouseDown={() => handleCellMouseDown(catIdx + 1, sIdx + 1)}
+                        onClick={(e) => handleCellClick(e, catIdx + 1, sIdx + 1)}
+                        onDoubleClick={() => setIsEditing(true)}
                         onFocus={() => setActiveCell({ row: catIdx + 1, col: sIdx + 1 })}
+                        onKeyDown={(e) => handleCellKeyDown(e, catIdx + 1, sIdx + 1)}
                         className="w-full h-7 px-2 text-xs text-right text-slate-900 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </td>

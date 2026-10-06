@@ -40,21 +40,70 @@ async def run_test():
         except Exception:
             pass
         
+        # -> Open the sign-in page (login form) so the Workspace/Email/Password fields and the 'Sign In' button are visible.
+        await page.goto("http://localhost:5173/login")
+        try:
+            await page.wait_for_load_state("domcontentloaded", timeout=5000)
+        except Exception:
+            pass
+        
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button to sign in.
+        # Enter Workspace text field
+        elem = page.get_by_role("textbox", name="Workspace")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author")
+        
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button to sign in.
+        # example@email.com email field
+        elem = page.get_by_role("textbox", name="Email")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author@gmail.com")
+        
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button to sign in.
+        # •••••••• password field
+        elem = page.get_by_role("textbox", name="Password")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author123")
+        
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button to sign in.
+        # Login button
+        elem = page.get_by_role("button", name="Login")
+        await elem.click(timeout=10000)
+        
+        # -> Reload the editor page and wait for the editor to render so the editor can be interacted with.
+        await page.goto("http://localhost:5173/editor")
+        try:
+            await page.wait_for_load_state("domcontentloaded", timeout=5000)
+        except Exception:
+            pass
+        
+        # -> Insert 'Text to cut' into the document, select it, and cut it with Ctrl+X (focus the document, add the text, select the phrase, press Ctrl+X).
+        # Insert 'Text to cut' into the document, select it, and cut it with Ctrl+X (focus the document, add the text, select the phrase, press Ctrl+X).
+        elem = page.locator("section > .overflow-hidden")
+        await elem.click(timeout=10000)
+        
+        # -> Insert 'Text to cut' into the document, select it, and cut it with Ctrl+X (focus the document, add the text, select the phrase, press Ctrl+X).
+        # Insert 'Text to cut' into the document, select it, and cut it with Ctrl+X (focus the document, add the text, select the phrase, press Ctrl+X).
+        elem = page.get_by_text("TTexttocutDDestinationhere")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Text to cut\n\nDestination here")
+        
+        # -> Click the paragraph containing 'tt oc' to place the caret and paste using Ctrl+V.
+        # T T e x tt oc u t
+        elem = page.get_by_text("TTexttocut")
+        await elem.click(timeout=10000)
+        
         # --> Assertions to verify final state
         
-        # --> Could not verify the selected text was removed because the editable source text 'Text to cut' was not present on the page.
+        # --> The Track Changes deletion entry does not show the removed phrase 'Text to cut'.
         # Assert-outcome: failed
-        # Assert: Expected the page element to contain the text 'Text to cut' so the test could select and cut it.
-        await expect(page.locator("#root").nth(0)).to_contain_text("Text to cut", timeout=15000), "Expected the page element to contain the text 'Text to cut' so the test could select and cut it."
+        # Assert: Expected the Track Changes deletion entry to show the removed text 'Text to cut'.
+        await expect(page.locator("xpath=/html/body/div/div/div/div/main/aside[2]/div/div[2]/div/div/div[3]/div/div[3]/div").nth(0)).to_have_text("Text to cut", timeout=15000), "Expected the Track Changes deletion entry to show the removed text 'Text to cut'."
         
-        # --> Could not verify that 'Text to cut' appears at the new caret location because the text to paste was missing from the page.
+        # --> 'Text to cut' was not pasted at the new caret location.
         # Assert-outcome: failed
-        # Assert: Expected the page to contain the text 'Text to cut' so it could be pasted at the new caret location.
-        await expect(page.locator("#root").nth(0)).to_contain_text("Text to cut", timeout=15000), "Expected the page to contain the text 'Text to cut' so it could be pasted at the new caret location."
-        
-        # --> Test blocked by environment/access constraints during agent run
-        # Reason: TEST BLOCKED The required editable text to perform the cut-and-paste test was not present on the page, so the interaction could not be executed. Observations: - The page shows a Login/Sign In form with visible fields: 'Workspace', 'Email', and 'Password'. - No editable paragraph, contenteditable region, or text labeled 'Text to cut' was found on the page, so selection + Ctrl+X and paste (Ctrl+V...
-        raise AssertionError("Test blocked during agent run: " + "TEST BLOCKED The required editable text to perform the cut-and-paste test was not present on the page, so the interaction could not be executed. Observations: - The page shows a Login/Sign In form with visible fields: 'Workspace', 'Email', and 'Password'. - No editable paragraph, contenteditable region, or text labeled 'Text to cut' was found on the page, so selection + Ctrl+X and paste (Ctrl+V..." + " — the exported script cannot reproduce a PASS in this environment.")
+        # Assert: Expected the new caret location to contain the text 'Text to cut'.
+        await expect(page.locator("#root").nth(0)).to_contain_text("Text to cut", timeout=15000), "Expected the new caret location to contain the text 'Text to cut'."
         await asyncio.sleep(5)
 
     finally:

@@ -145,7 +145,6 @@ export async function fetchAllGoogleFonts(): Promise<GoogleFont[]> {
     return POPULAR_GOOGLE_FONTS;
   }
 }
-
 /**
  * Dynamically loads a Google Font by injecting a stylesheet link tag into <head>.
  * This uses Google's public CSS2 CDN which does not require any API key.

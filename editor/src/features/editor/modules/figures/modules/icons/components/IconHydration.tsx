@@ -30,7 +30,6 @@ export const IconHydration: React.FC = () => {
     const newMounts: IconMountInfo[] = [];
 
     foundFigureEls.forEach((figEl) => {
-      figEl.oncontextmenu = (e) => e.preventDefault();
       const iconId = figEl.getAttribute("data-icon-id");
       const mountEl = figEl.querySelector(".editor-icon-mount") as HTMLElement | null;
       const rawConfig = figEl.getAttribute("data-icon-config");
@@ -98,11 +97,25 @@ export const IconHydration: React.FC = () => {
     };
   }, [scanDocumentForIcons]);
 
+  const handleDeleteIcon = useCallback((iconId: string, figEl: HTMLElement) => {
+    const pageContainer = figEl.closest('[contenteditable="true"]') as HTMLElement | null;
+    figEl.remove();
+    if (pageContainer) {
+      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    setMounts((prev) => prev.filter((m) => m.id !== iconId));
+  }, []);
+
   return (
     <>
       {mounts.map((m) =>
         ReactDOM.createPortal(
-          <DocumentIconRenderer key={m.id} config={m.config} figureEl={m.figureEl} />,
+          <DocumentIconRenderer
+            key={m.id}
+            config={m.config}
+            figureEl={m.figureEl}
+            onDelete={() => handleDeleteIcon(m.id, m.figureEl)}
+          />,
           m.mountEl
         )
       )}
