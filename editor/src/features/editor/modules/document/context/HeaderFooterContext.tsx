@@ -65,7 +65,7 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
       setActivePageId(targetPageId);
       setActiveSectionId(targetSecId);
 
-      // Focus the corresponding header/footer container after DOM paints
+      // Focus the corresponding header/footer container after DOM paints if not already focused
       setTimeout(() => {
         const selector =
           type === "header"
@@ -74,15 +74,19 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
 
         const el = document.querySelector(selector) as HTMLElement | null;
         if (el) {
-          el.focus();
-          // Place caret at end
-          const range = document.createRange();
-          range.selectNodeContents(el);
-          range.collapse(false);
           const sel = window.getSelection();
-          if (sel) {
-            sel.removeAllRanges();
-            sel.addRange(range);
+          const alreadyInside =
+            el.contains(document.activeElement) ||
+            (Boolean(sel && sel.rangeCount > 0 && sel.anchorNode && el.contains(sel.anchorNode)));
+          if (!alreadyInside) {
+            el.focus();
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            range.collapse(false);
+            if (sel) {
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
           }
         }
       }, 50);
