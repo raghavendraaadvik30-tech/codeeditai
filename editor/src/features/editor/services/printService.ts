@@ -40,6 +40,8 @@ export const printService = {
           clone.style.setProperty(property, `${heightMm}mm`, "important");
         }
         clone.style.setProperty("page", pageName);
+        clone.style.setProperty("overflow", "hidden", "important");
+        clone.style.setProperty("box-sizing", "border-box", "important");
         pageRules.push(`@page ${pageName} { size: ${widthMm}mm ${heightMm}mm; margin: 0; }`);
       }
 

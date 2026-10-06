@@ -11,6 +11,7 @@ import type { ReactNode, RefObject } from "react";
 
 import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
 import { useDocumentModel } from "../store/documentModel";
+import { loadGoogleFont } from "../modules/document/api/fontapi";
 
 interface SavedSelectionData {
   range: Range;
@@ -811,6 +812,7 @@ useEffect(() => {
   }, [restoreEditorSelection, editorRef]);
 
   const applyFontFamily = useCallback((font: string) => {
+    loadGoogleFont(font);
     restoreEditorSelection();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;

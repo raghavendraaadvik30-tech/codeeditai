@@ -55,11 +55,12 @@ export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
   const fileName = file.name.trim();
   const cleanTitle = fileName.replace(/\.[^/.]+$/, "") || "Uploaded Document";
   const extension = fileName.toLowerCase().split(".").pop() || "";
-  const supported = new Set(["docx", "doc", "pdf", "html", "htm", "json", "md", "markdown", "txt", "text", "rtf"]);
-  if (!supported.has(extension)) throw new Error(`The .${extension || "unknown"} format is not supported.`);
-  if (extension === "pdf" && file.type && !["application/pdf", "application/x-pdf"].includes(file.type.toLowerCase())) {
-    throw new Error("The selected file is not a PDF.");
+  if (extension === "pdf" || (file.type && ["application/pdf", "application/x-pdf"].includes(file.type.toLowerCase()))) {
+    throw new Error("PDF files cannot be uploaded directly. Please upload a Word (.docx), HTML, or text document.");
   }
+
+  const supported = new Set(["docx", "doc", "html", "htm", "json", "md", "markdown", "txt", "text", "rtf"]);
+  if (!supported.has(extension)) throw new Error(`The .${extension || "unknown"} format is not supported.`);
 
   try {
     if (extension === "docx") {
@@ -72,12 +73,6 @@ export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
         pageLayout,
         pageLayouts,
       };
-    }
-
-    if (extension === "pdf") {
-      const buffer = await file.arrayBuffer();
-      const { html, pages, pageLayout, pageLayouts } = await parsePdfBuffer(buffer);
-      return { title: cleanTitle, html, pages, pageLayout, pageLayouts };
     }
 
     if (extension === "html" || extension === "htm") {
@@ -128,8 +123,23 @@ export function splitHtmlIntoPages(html: string): string[] {
     '[data-page-break], .page-break, hr[class*="page-break"], [style*="page-break-before: always"], [style*="break-before: page"]'
   );
   const flush = () => {
-    const content = current.join("").trim();
-    if (content) pages.push(content);
+    let content = current.join("").trim();
+    if (content) {
+      // Strip any residual page-break marker elements from the page content
+      // so they do not trigger cascading secondary runtime splits in the workspace
+      const pageDoc = new DOMParser().parseFromString(content, "text/html");
+      pageDoc.querySelectorAll('[data-page-break="true"], [data-page-break], .page-break').forEach((marker) => {
+        // If the marker has no meaningful text, remove it
+        if (!marker.textContent?.trim()) {
+          marker.remove();
+        } else {
+          marker.removeAttribute("data-page-break");
+          marker.classList.remove("page-break");
+        }
+      });
+      content = pageDoc.body.innerHTML.trim();
+      if (content) pages.push(content);
+    }
     current = [];
   };
   const splitTableAtRowBreaks = (table: Element): Element[] => {
@@ -168,6 +178,24 @@ export function splitHtmlIntoPages(html: string): string[] {
   for (const node of Array.from(doc.body.childNodes)) {
     if (node instanceof Element && isBreak(node)) {
       flush();
+      const isMarkerOnly =
+        (node.getAttribute("data-page-break") === "true" ||
+          node.classList.contains("page-break") ||
+          node.localName === "hr") &&
+        !node.textContent?.trim();
+      if (!isMarkerOnly) {
+        const cleanNode = node.cloneNode(true) as Element;
+        cleanNode.removeAttribute("data-page-break");
+        cleanNode.classList.remove("page-break");
+        const existingStyle = cleanNode.getAttribute("style") || "";
+        const cleanStyle = existingStyle
+          .replace(/page-break-before\s*:\s*always;?/gi, "")
+          .replace(/break-before\s*:\s*page;?/gi, "")
+          .trim();
+        if (cleanStyle) cleanNode.setAttribute("style", cleanStyle);
+        else cleanNode.removeAttribute("style");
+        current.push(sanitizeImportedHtml(cleanNode.outerHTML));
+      }
     } else if (node.nodeType === Node.COMMENT_NODE && /page[-_ ]?break/i.test(node.textContent || "")) {
       flush();
     } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -242,8 +270,14 @@ async function parseDocxBuffer(buffer: ArrayBuffer): Promise<{
   let previousFooter: string | undefined;
   for (const [sectionIndex, part] of sectionParts.entries()) {
     const section = part.properties ?? sectionProperties;
-    const layout = getWordPageLayout(section, mirroredMargins);
-    if (!layout) continue;
+    const defaultLayout: ImportedPageLayout = {
+      orientation: "portrait",
+      paperSize: { name: "Imported DOCX", width: 816, height: 1056 },
+      marginConfig: { top: 96, bottom: 96, left: 96, right: 96 },
+    };
+    const layout = getWordPageLayout(section, mirroredMargins) ??
+      getWordPageLayout(sectionProperties, mirroredMargins) ??
+      defaultLayout;
     layout.sectionKey = `docx-section-${sectionIndex + 1}`;
     if (section) {
       layout.headerHtml = await readWordHeaderFooter(zip, section, "headerReference", relationships, resolveTarget, wordStyles) ?? previousHeader;
@@ -259,10 +293,7 @@ async function parseDocxBuffer(buffer: ArrayBuffer): Promise<{
     previousFooter = layout.footerHtml;
     if (!part.html.trim()) continue;
     const sectionPages = splitHtmlIntoPages(part.html);
-    const sectionType = section ? wordValue(directChild(section, "type"), "val", "nextPage") : "nextPage";
-    const firstPageIndex = sectionType === "continuous" && pages.length > 0 ? 1 : 0;
-    if (firstPageIndex === 1 && sectionPages[0]?.trim()) pages[pages.length - 1] += sectionPages[0];
-    for (const page of sectionPages.slice(firstPageIndex)) {
+    for (const page of sectionPages) {
       if (!page.trim()) continue;
       pages.push(page);
       pageLayouts.push(layout);
@@ -523,12 +554,24 @@ async function readWordHeaderFooter(
 }
 
 function directChild(parent: Element, localName: string): Element | undefined {
-  return Array.from(parent.children).find((child) => child.localName === localName);
+  const target = localName.toLowerCase();
+  return Array.from(parent.children).find((child) => {
+    const name = (child.localName || child.nodeName.replace(/^.*:/, "")).toLowerCase();
+    return name === target;
+  });
 }
 
 function wordAttribute(element: Element | undefined, name: string): string | null {
   if (!element) return null;
-  return element.getAttribute(name) ?? Array.from(element.attributes).find((attribute) => attribute.localName === name)?.value ?? null;
+  const target = name.toLowerCase();
+  return (
+    element.getAttribute(name) ??
+    element.getAttribute(`w:${name}`) ??
+    Array.from(element.attributes).find(
+      (attribute) => (attribute.localName || attribute.nodeName.replace(/^.*:/, "")).toLowerCase() === target
+    )?.value ??
+    null
+  );
 }
 
 function wordValue(element: Element | undefined, name: string, fallback = ""): string {
@@ -645,7 +688,7 @@ async function renderWordParagraph(
   const sectionBreak = directChild(properties ?? document.createElement("div"), "sectPr");
   const sectionBreakType = wordAttribute(directChild(sectionBreak ?? document.createElement("div"), "type"), "val") ?? "nextPage";
   const isEmpty = !content.replace(/<br\s*\/?\s*>/gi, "").trim();
-  if (isEmpty && !paragraphStyle.breakBefore && !sectionBreak) return "";
+  if (isEmpty && !paragraphStyle.breakBefore && !sectionBreak) return "<p><br/></p>";
   const prefix = paragraphStyle.breakBefore ? '<div data-page-break="true"></div>' : "";
   const numPr = resolvedWordProperties(paragraphProperties, "numPr");
   const numberId = wordValue(numPr, "numId");
@@ -688,7 +731,7 @@ async function renderWordInlineChildren(
         } else if (item.localName === "br" || item.localName === "cr") {
           if (wordAttribute(item, "type") === "page") runParts.push('<div data-page-break="true"></div>');
           else runParts.push("<br/>");
-        } else if (item.localName === "lastRenderedPageBreak") {
+        } else if (item.localName === "lastRenderedPageBreak" || item.nodeName.toLowerCase().endsWith("lastrenderedpagebreak")) {
           runParts.push('<div data-page-break="true"></div>');
         } else if (item.localName === "drawing" || item.localName === "pict") {
           const image = await renderWordImage(item, zip, relationships, resolveTarget);
@@ -744,9 +787,9 @@ async function renderWordInlineChildren(
       parts.push(rel?.external && /^https?:|^mailto:/i.test(rel.target)
         ? `<a href="${escapeHtml(rel.target)}">${content}</a>`
         : content);
-    } else if (child.localName === "lastRenderedPageBreak") {
+    } else if (child.localName === "lastRenderedPageBreak" || child.nodeName.toLowerCase().endsWith("lastrenderedpagebreak")) {
       parts.push('<div data-page-break="true"></div>');
-    } else if (["sdt", "sdtContent", "customXml", "smartTag", "ins", "del", "moveTo", "moveFrom", "dir", "bdo", "fldSimple", "ruby", "rt"].includes(child.localName)) {
+    } else if (["sdt", "sdtcontent", "customxml", "smarttag", "ins", "del", "moveto", "movefrom", "dir", "bdo", "fldsimple", "ruby", "rt", "flddata"].includes(child.localName?.toLowerCase() || child.nodeName.replace(/^.*:/, "").toLowerCase())) {
       parts.push(await renderWordInlineChildren(child, zip, relationships, resolveTarget, wordStyles, paragraphRunProperties));
     }
   }
@@ -941,7 +984,7 @@ function sanitizeImportedHtml(html: string): string {
 }
 
 /** Render each source PDF page once and preserve its physical dimensions. */
-async function parsePdfBuffer(buffer: ArrayBuffer): Promise<{
+export async function parsePdfBuffer(buffer: ArrayBuffer): Promise<{
   html: string;
   pages: string[];
   pageLayout: ImportedPageLayout;
@@ -973,9 +1016,191 @@ async function parsePdfBuffer(buffer: ArrayBuffer): Promise<{
         throw new Error(`PDF page ${pageNumber} could not be read. The file may have a damaged page tree.`, { cause: error });
       });
 
-      // Keep the editor page at the source's physical size while limiting the
-      // raster surface used to represent it. Large scans can otherwise create
-      // canvases that exhaust the browser's memory before import completes.
+      // 1. Try to extract real, editable text content from the PDF page
+      let extractedHtml: string | null = null;
+      try {
+        const textContent = await page.getTextContent();
+        interface PdfRawItem {
+          str: string;
+          transform: number[];
+          fontName?: string;
+          height?: number;
+          width?: number;
+        }
+        const rawItems: PdfRawItem[] = (textContent.items as unknown[]).filter(
+          (item: unknown): item is PdfRawItem => {
+            const candidate = item as { str?: unknown; transform?: unknown };
+            return typeof candidate?.str === "string" && Array.isArray(candidate?.transform);
+          }
+        );
+
+        const totalChars = rawItems.reduce((acc: number, it: PdfRawItem) => acc + it.str.trim().length, 0);
+
+        if (totalChars > 0) {
+          const viewport1 = page.getViewport({ scale: 1 });
+          const viewHeight = viewport1.height;
+          const viewWidth = viewport1.width;
+
+          interface PositionedItem {
+            str: string;
+            x: number;
+            y: number;
+            fontSize: number;
+            isBold: boolean;
+            isItalic: boolean;
+          }
+
+          // Convert PDF coordinates (origin at bottom-left) to browser coordinates (top-down)
+          const positionedItems: PositionedItem[] = rawItems
+            .filter((item: PdfRawItem) => item.str.length > 0)
+            .map((item: PdfRawItem) => {
+              const tx = item.transform[4] || 0;
+              const ty = item.transform[5] || 0;
+              const visualY = viewHeight - ty;
+              const fontSize = Math.hypot(item.transform[0], item.transform[1]) || item.height || 12;
+              const fontName = (item.fontName || "").toLowerCase();
+              const isBold =
+                fontName.includes("bold") ||
+                fontName.includes("black") ||
+                fontName.includes("heavy") ||
+                fontName.includes("bld");
+              const isItalic =
+                fontName.includes("italic") ||
+                fontName.includes("oblique") ||
+                fontName.includes("ital");
+
+              return {
+                str: item.str,
+                x: tx,
+                y: visualY,
+                fontSize,
+                isBold,
+                isItalic,
+              };
+            });
+
+          // Sort items: primarily visual Y top-down, secondarily X left-to-right
+          positionedItems.sort((a: PositionedItem, b: PositionedItem) => {
+            const yDiff = a.y - b.y;
+            if (Math.abs(yDiff) > 3) return yDiff;
+            return a.x - b.x;
+          });
+
+          // Group items into lines
+          interface LineData {
+            y: number;
+            words: PositionedItem[];
+          }
+          const lines: LineData[] = [];
+          for (const item of positionedItems) {
+            let line = lines.find((l: LineData) => Math.abs(l.y - item.y) <= Math.max(3, item.fontSize * 0.35));
+            if (!line) {
+              line = { y: item.y, words: [] };
+              lines.push(line);
+            }
+            line.words.push(item);
+          }
+
+          lines.sort((a: LineData, b: LineData) => a.y - b.y);
+
+          // Group lines into paragraphs and headings
+          const htmlBlocks: string[] = [];
+          let currentParagraph: string[] = [];
+          let prevLineY = 0;
+          let prevFontSize = 12;
+
+          for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+            const line = lines[lineIdx];
+            line.words.sort((a: PositionedItem, b: PositionedItem) => a.x - b.x);
+
+            let lineText = "";
+            for (let w = 0; w < line.words.length; w++) {
+              const word = line.words[w];
+              let piece = escapeHtml(word.str);
+              if (word.isBold) piece = `<strong>${piece}</strong>`;
+              if (word.isItalic) piece = `<em>${piece}</em>`;
+
+              if (w > 0) {
+                const prevWord = line.words[w - 1];
+                if (
+                  !lineText.endsWith(" ") &&
+                  !word.str.startsWith(" ") &&
+                  word.x > prevWord.x + prevWord.str.length * word.fontSize * 0.35
+                ) {
+                  lineText += " ";
+                }
+              }
+              lineText += piece;
+            }
+
+            const cleanLine = lineText.trim();
+            if (!cleanLine) continue;
+
+            const avgFontSize =
+              line.words.reduce((sum: number, w: PositionedItem) => sum + w.fontSize, 0) / (line.words.length || 1);
+            const isHeading1 = avgFontSize >= 22;
+            const isHeading2 = avgFontSize >= 17 && !isHeading1;
+            const isHeading3 = avgFontSize >= 14 && !isHeading1 && !isHeading2;
+
+            const verticalGap = lineIdx > 0 ? line.y - prevLineY : 0;
+            const isNewParagraph =
+              verticalGap > Math.max(16, prevFontSize * 1.5) ||
+              isHeading1 ||
+              isHeading2 ||
+              isHeading3;
+
+            if (isNewParagraph && currentParagraph.length > 0) {
+              htmlBlocks.push(`<p>${currentParagraph.join(" ")}</p>`);
+              currentParagraph = [];
+            }
+
+            if (isHeading1) {
+              htmlBlocks.push(`<h1>${cleanLine}</h1>`);
+            } else if (isHeading2) {
+              htmlBlocks.push(`<h2>${cleanLine}</h2>`);
+            } else if (isHeading3) {
+              htmlBlocks.push(`<h3>${cleanLine}</h3>`);
+            } else {
+              currentParagraph.push(cleanLine);
+            }
+
+            prevLineY = line.y;
+            prevFontSize = avgFontSize;
+          }
+
+          if (currentParagraph.length > 0) {
+            htmlBlocks.push(`<p>${currentParagraph.join(" ")}</p>`);
+          }
+
+          if (htmlBlocks.length > 0) {
+            extractedHtml = htmlBlocks.join("");
+            const isLandscape = viewWidth > viewHeight;
+            const pxWidth = Math.round(viewWidth * (96 / 72));
+            const pxHeight = Math.round(viewHeight * (96 / 72));
+
+            pages.push(extractedHtml);
+            pageLayouts.push({
+              orientation: isLandscape ? "landscape" : "portrait",
+              paperSize: {
+                name: "Imported PDF",
+                width: isLandscape ? pxHeight : pxWidth,
+                height: isLandscape ? pxWidth : pxHeight,
+              },
+              marginConfig: { top: 96, bottom: 96, left: 96, right: 96 },
+            });
+          }
+        }
+      } catch (err) {
+        console.warn(`Could not extract text layer from PDF page ${pageNumber}, falling back to canvas:`, err);
+      }
+
+      // If page had text and was successfully extracted, move to next page
+      if (extractedHtml) {
+        page.cleanup();
+        continue;
+      }
+
+      // 2. Fallback: Pure scanned image rendering for pages with no text layer
       const pdfPointsToCssPixels = 96 / 72;
       const pageViewport = page.getViewport({ scale: pdfPointsToCssPixels });
       const maxRenderPixels = 2_500_000;
@@ -997,8 +1222,6 @@ async function parsePdfBuffer(buffer: ArrayBuffer): Promise<{
         await page.render({ canvas, canvasContext: context, viewport: renderViewport }).promise;
         imageUrl = canvas.toDataURL("image/jpeg", 0.68);
       } catch (error) {
-        // Retry the page at half resolution for PDFs with unusually expensive
-        // images or transparency groups. Page geometry remains unchanged.
         canvas.width = 0;
         canvas.height = 0;
         const retryScale = pixelScale * 0.5;

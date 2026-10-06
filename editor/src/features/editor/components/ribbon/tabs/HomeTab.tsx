@@ -24,7 +24,11 @@ import RibbonDivider from "../controls/RibbonDivider";
 
 import { useEditor } from "../../../context/EditorContext";
 
-import { fetchAllGoogleFonts } from "../../../modules/document/api/fontapi";
+import {
+  fetchAllGoogleFonts,
+  loadGoogleFont,
+  STANDARD_SYSTEM_FONTS,
+} from "../../../modules/document/api/fontapi";
 export default function HomeTab() {
   const {
     undo,
@@ -52,9 +56,6 @@ const [fonts, setFonts] = useState<string[]>([
 const [fontsLoading, setFontsLoading] =
   useState(false);
 
-const [fontsError, setFontsError] =
-  useState<string | null>(null);
-
   const [isUndoDropdownOpen, setIsUndoDropdownOpen] = useState(false);
   const [isRedoDropdownOpen, setIsRedoDropdownOpen] = useState(false);
   const [undoHoverIndex, setUndoHoverIndex] = useState<number | null>(null);
@@ -76,42 +77,26 @@ const [fontsError, setFontsError] =
   const loadFonts = async () => {
     try {
       setFontsLoading(true);
-      setFontsError(null);
 
-      const googleFonts =
-        await fetchAllGoogleFonts();
+      const googleFonts = await fetchAllGoogleFonts();
 
       if (cancelled) return;
 
-      const fontNames = googleFonts.map(
-        (font) => font.family
-      );
+      const fontNames = googleFonts.map((font) => font.family);
 
-      /*
-       * Keep Calibri because it is commonly used
-       * by the editor even though it is not a
-       * Google Font.
-       */
       const allFonts = Array.from(
         new Set([
-          "Calibri",
+          ...STANDARD_SYSTEM_FONTS,
           ...fontNames,
         ])
       );
 
       setFonts(allFonts);
     } catch (error) {
-      console.error(
-        "Failed to load Google Fonts:",
-        error
-      );
+      console.warn("Failed to load Google Fonts catalog:", error);
 
       if (!cancelled) {
-        setFontsError(
-          "Unable to load fonts"
-        );
-
-        setFonts(["Calibri"]);
+        setFonts(STANDARD_SYSTEM_FONTS);
       }
     } finally {
       if (!cancelled) {
@@ -193,6 +178,7 @@ const [fontsError, setFontsError] =
         const matchedFont = fonts.find((f) => f.toLowerCase() === firstFont.toLowerCase());
         if (matchedFont) {
           setFontName(matchedFont);
+          loadGoogleFont(matchedFont);
         }
       } catch {
         // ignore
@@ -203,7 +189,7 @@ const [fontsError, setFontsError] =
     return () => {
       document.removeEventListener("selectionchange", updateToolbar);
     };
-  }, []);
+  }, [fonts]);
 
   return (
     <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 select-none">
@@ -211,17 +197,19 @@ const [fontsError, setFontsError] =
           Font Family
       ====================================================== */}
       <RibbonSelect
-  width={190}
-  label={fontsLoading ? "Loading fonts..." : fontName}
-  options={fonts.map((font) => ({
-    label: font,
-    onSelect: () => {
-      setFontName(font);
-      applyFontFamily(font);
-    },
-  }))}
-  disabled={fontsLoading}
-/>
+        width={190}
+        label={fontsLoading ? "Loading fonts..." : fontName}
+        options={fonts.map((font) => ({
+          label: font,
+          style: { fontFamily: font },
+          onSelect: () => {
+            setFontName(font);
+            loadGoogleFont(font);
+            applyFontFamily(font);
+          },
+        }))}
+        disabled={fontsLoading}
+      />
 
       {/* =====================================================
           Font Size

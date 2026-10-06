@@ -30,9 +30,9 @@ export function buildCustomTableHTML(config: {
   textSize: string;
   titleOption: "with" | "without" | "only";
   autoFit: boolean;
-  tableNumber: number;
+  tableNumber?: number;
 }): string {
-  const { rows, columns, headingSize, textSize, titleOption, autoFit, tableNumber } = config;
+  const { rows, columns, headingSize, textSize, titleOption, autoFit, tableNumber = 1 } = config;
 
   const captionText = `Table ${tableNumber}: Table Title`;
   const captionHtml = `<p class="doc-table-caption font-bold" style="font-size: 11pt; font-weight: 700; margin: 12px 0 4px 0; font-family: Calibri, 'Segoe UI', Arial, sans-serif;">${captionText}</p>`;
