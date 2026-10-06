@@ -781,7 +781,6 @@ function DocumentPage({
   const localEditorRef = useRef<HTMLDivElement | null>(null);
   const lastHtmlRef = useRef<string | null>(null);
   const consecutiveEnterRef = useRef<boolean>(false);
-  const lastEnterTimeRef = useRef<number>(0);
 
   const { activeChartId, isSpreadsheetOpen } = useChartContext();
   const isEditingChartOnThisPage = Boolean(
@@ -1278,7 +1277,7 @@ function DocumentPage({
     }
   }, [allPages, bodyPaddingBottom, marginL, marginR, onAddPage, onChange, onSetPageHtml, onSetActivePage, pageHtmlMap, pageId, section, zoom]);
 
-  // If a forced page break has trailing nodes on this page, trigger overflow pagination
+  // If a forced page break has trailing nodes on this page, or content overflows, trigger pagination
   useEffect(() => {
     const element = localEditorRef.current;
     if (!element) return;
@@ -1293,6 +1292,8 @@ function DocumentPage({
       if (bIdx !== -1 && bIdx < children.length - 1) {
         checkAndPaginateOverflow();
       }
+    } else if (element.scrollHeight > element.clientHeight + 4) {
+      checkAndPaginateOverflow();
     }
   }, [html, checkAndPaginateOverflow]);
 
@@ -1416,80 +1417,34 @@ function DocumentPage({
     // ------------------------------------------------------------------
     if (e.key === "Enter" && e.shiftKey && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      consecutiveEnterRef.current = false;
       insertLineBreak();
       return;
     }
 
     // ------------------------------------------------------------------
-    // 4. Normal Enter:
-    // Single Enter creates normal paragraph break on current page.
-    // Double Enter (consecutive Enter on empty paragraph) creates page break.
+    // 4. Enter Key Handling:
+    // Ctrl+Enter or Cmd+Enter -> Manual Page Break
+    // Normal Enter -> Native paragraph creation on current page, check overflow
     // ------------------------------------------------------------------
     if (e.key === "Enter" && !e.shiftKey) {
+      if (e.ctrlKey || e.metaKey) {
+        // Ctrl+Enter or Cmd+Enter: Manual Page Break
+        e.preventDefault();
+        insertPageBreak();
+        return;
+      }
+
       const sel = window.getSelection();
       const node = sel?.anchorNode;
       const el = node?.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node?.parentElement;
       const cell = el?.closest("td, th") as HTMLTableCellElement | null;
       if (cell) {
         // Normal Enter in table cell: keep typing inside the cell without pagination
-        consecutiveEnterRef.current = false;
         return;
       }
 
-      // Identify the current block element where cursor is positioned
-      const currentBlock = (el?.closest("p, div, h1, h2, h3, li, blockquote") as HTMLElement | null) || el;
-      const isBlockEmpty = Boolean(
-        currentBlock &&
-        currentBlock !== container &&
-        (currentBlock.textContent?.trim() === "" ||
-          currentBlock.innerHTML === "<br>" ||
-          currentBlock.innerHTML === "<br/>" ||
-          currentBlock.innerHTML.trim() === "")
-      );
-
-      const now = Date.now();
-      const isConsecutive = consecutiveEnterRef.current && now - lastEnterTimeRef.current < 2500;
-
-      if (isConsecutive && isBlockEmpty) {
-        // DOUBLE ENTER: Consecutive Enter on empty line -> Page break to next page
-        e.preventDefault();
-        consecutiveEnterRef.current = false;
-
-        // Clean up the empty paragraph so no unwanted empty paragraph or blank space is left behind
-        if (currentBlock && currentBlock !== container && container.contains(currentBlock)) {
-          if (container.children.length > 1) {
-            currentBlock.remove();
-          } else {
-            currentBlock.innerHTML = "<br>";
-          }
-        }
-
-        const remainingHtml = container.innerHTML.trim() || "<p><br/></p>";
-        lastHtmlRef.current = remainingHtml;
-        onChange(remainingHtml);
-
-        const nextPage = allPages[pageIndex + 1];
-        if (!nextPage) {
-          const newPageId = onAddPage(pageId, "<p><br></p>");
-          setTimeout(() => {
-            onSetActivePage(newPageId);
-            focusPage(newPageId, "start");
-          }, 50);
-        } else {
-          onSetActivePage(nextPage.id);
-          setTimeout(() => {
-            focusPage(nextPage.id, "start");
-          }, 50);
-        }
-        return;
-      }
-
-      // SINGLE ENTER: Normal paragraph break on current page
-      consecutiveEnterRef.current = true;
-      lastEnterTimeRef.current = now;
-
-      // Allow browser native paragraph creation on current page
+      // Normal Enter: Browser creates a new paragraph on current page
+      // Check for content overflow after the DOM has updated
       setTimeout(() => {
         checkAndPaginateOverflow();
       }, 100);
@@ -1682,60 +1637,20 @@ function DocumentPage({
       return;
     }
 
-    const containerRect = container.getBoundingClientRect();
     const referenceChild = lastEditableChild || lastChild;
     const lastChildRect = referenceChild.getBoundingClientRect();
-    const effectiveLineHeight = 28 * (zoom / 100);
 
     // Case B: Clicking below the last paragraph on the page (Word-style Click-to-Position Cursor)
     if (e.clientY > lastChildRect.bottom + 6) {
       e.preventDefault();
       container.focus();
 
-      const maxAllowedBottom = containerRect.bottom - 28 * (zoom / 100);
-      const diffY = e.clientY - lastChildRect.bottom;
-      let linesToAdd = Math.max(1, Math.round(diffY / effectiveLineHeight));
-
-      // Ensure we don't exceed the page boundary
-      const maxPossibleLines = Math.max(
-        1,
-        Math.floor((maxAllowedBottom - lastChildRect.bottom) / effectiveLineHeight)
-      );
-      linesToAdd = Math.min(linesToAdd, maxPossibleLines);
-
-      let targetP: HTMLElement = referenceChild;
-      const isLastEmpty =
-        referenceChild.tagName === "P" &&
-        (referenceChild.innerHTML === "<br>" ||
-          referenceChild.innerHTML === "<br/>" ||
-          referenceChild.textContent?.trim() === "");
-
-      const startCount = isLastEmpty ? 1 : 0;
-      for (let i = startCount; i < linesToAdd; i++) {
-        const p = document.createElement("p");
-        p.innerHTML = "<br>";
-        if (lastChild !== referenceChild && lastChild.parentNode === container) {
-          container.insertBefore(p, lastChild);
-        } else {
-          container.appendChild(p);
-        }
-        targetP = p;
-      }
-
-      if (isLastEmpty && linesToAdd === 1) {
-        targetP = referenceChild;
-      }
-
-      const updatedHtml = cleanChartMountsForHtml(container.innerHTML);
-      lastHtmlRef.current = updatedHtml;
-      onChange(updatedHtml);
-
-      // Place caret '|' inside target paragraph where user clicked
+      // Position cursor at the end of the content on this page without injecting unwanted blank paragraphs
       const sel = window.getSelection();
       if (sel) {
         const range = document.createRange();
-        range.selectNodeContents(targetP);
-        range.collapse(true);
+        range.selectNodeContents(referenceChild);
+        range.collapse(false);
         sel.removeAllRanges();
         sel.addRange(range);
       }
@@ -1836,8 +1751,6 @@ function DocumentPage({
     : usesImportedPageLayout
       ? Math.max(0, pageHeight - marginT - marginB)
     : Math.max(100, pageHeight - headerHeight - footerHeight);
-
-
 
   const extractCleanTitle = (src?: string, fileName?: string): string => {
     if (fileName && fileName.trim() && fileName !== "Online Picture") {

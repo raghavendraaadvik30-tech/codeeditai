@@ -565,6 +565,8 @@ interface DocumentContextType {
     options?: {
       insertPosition?: "append" | "afterActive" | "replace";
       autoEnablePageNumbers?: boolean;
+      pageLayout?: ImportedPageLayout;
+      pageLayouts?: ImportedPageLayout[];
     }
   ) => void;
 }
@@ -1587,20 +1589,59 @@ export function DocumentModelProvider({
       options?: {
         insertPosition?: "append" | "afterActive" | "replace";
         autoEnablePageNumbers?: boolean;
+        pageLayout?: ImportedPageLayout;
+        pageLayouts?: ImportedPageLayout[];
       }
     ) => {
       setModel((prev) => {
-        const section = prev.sections[0] || createDefaultSection();
+        const defaultSection = prev.sections[0] || createDefaultSection("section_1");
         const validPages =
           pagesHtml.length > 0
             ? pagesHtml.map((h) => (h && h.trim() ? h.trim() : DEFAULT_HTML))
             : [DEFAULT_HTML];
 
-        const targetSectionId = section.id;
-        const newPages: PageModel[] = validPages.map(() => ({
-          id: "page_" + uid(),
-          sectionId: targetSectionId,
-        }));
+        const importedSections = new Map<string, SectionModel>();
+        const newPages: PageModel[] = validPages.map((_, index) => {
+          const layout = options?.pageLayouts?.[index] ?? options?.pageLayout;
+          if (!layout) {
+            return { id: "page_" + uid(), sectionId: defaultSection.id };
+          }
+
+          const layoutKey = JSON.stringify(layout);
+          let section = importedSections.get(layoutKey);
+          if (!section) {
+            const sectionId = `section_imported_${uid()}`;
+            section = {
+              ...defaultSection,
+              id: sectionId,
+              orientation: layout.orientation,
+              paperSize: layout.paperSize,
+              marginPreset: layout.mirroredMargins ? "mirrored" : "custom",
+              importedLayout: true,
+              marginConfig: layout.marginConfig ?? { top: 96, bottom: 96, left: 96, right: 96 },
+              gutter: layout.gutter ?? 0,
+              header: layout.headerHtml ?? "",
+              footer: layout.footerHtml ?? "",
+              headerHtml: layout.headerHtml,
+              footerHtml: layout.footerHtml,
+              firstHeader: layout.firstHeaderHtml ?? layout.headerHtml ?? "",
+              firstFooter: layout.firstFooterHtml ?? layout.footerHtml ?? "",
+              evenHeader: layout.evenHeaderHtml ?? layout.headerHtml ?? "",
+              evenFooter: layout.evenFooterHtml ?? layout.footerHtml ?? "",
+              firstHeaderHtml: layout.firstHeaderHtml,
+              firstFooterHtml: layout.firstFooterHtml,
+              evenHeaderHtml: layout.evenHeaderHtml,
+              evenFooterHtml: layout.evenFooterHtml,
+              differentFirstPage: layout.differentFirstPage ?? false,
+              differentOddEven: layout.differentOddEven ?? false,
+              showPageNumbers: options?.autoEnablePageNumbers ?? false,
+              headerTopDistance: layout.headerTopDistance ?? 48,
+              footerBottomDistance: layout.footerBottomDistance ?? 48,
+            };
+            importedSections.set(layoutKey, section);
+          }
+          return { id: "page_" + uid(), sectionId: section.id };
+        });
 
         const newPageHtml: Record<string, string> = {};
         newPages.forEach((p, idx) => {
@@ -1649,12 +1690,22 @@ export function DocumentModelProvider({
           combinedPageHtml = { ...prev.pageHtml, ...newPageHtml };
         }
 
-        // Always enable inbuilt page number on all sections
-        const updatedSections = (
-          prev.sections.length > 0 ? prev.sections : [section]
-        ).map((sec) => ({
+        const newSectionsList = Array.from(importedSections.values());
+        const combinedSections =
+          mode === "replace" || existingIsEmpty
+            ? newSectionsList.length > 0
+              ? newSectionsList
+              : prev.sections.length > 0
+                ? prev.sections
+                : [defaultSection]
+            : [
+                ...(prev.sections.length > 0 ? prev.sections : [defaultSection]),
+                ...newSectionsList,
+              ];
+
+        const updatedSections = combinedSections.map((sec) => ({
           ...sec,
-          showPageNumbers: true,
+          showPageNumbers: options?.autoEnablePageNumbers ?? sec.showPageNumbers,
           pageNumberPosition: sec.pageNumberPosition || "footer",
           pageNumberAlignment: sec.pageNumberAlignment || "right",
           pageNumberFormat: sec.pageNumberFormat || "1",
@@ -1676,6 +1727,24 @@ export function DocumentModelProvider({
         } catch {
           // ignore
         }
+
+        // Keep savedDocuments synchronized
+        setSavedDocuments((prevList) => {
+          const list = [...prevList];
+          const idx = list.findIndex((d) => d.id === newModel.id);
+          if (idx >= 0) {
+            list[idx] = newModel;
+          } else {
+            list.unshift(newModel);
+          }
+          const capped = list.slice(0, MAX_DOCUMENTS);
+          try {
+            localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(capped));
+          } catch {
+            // ignore
+          }
+          return capped;
+        });
 
         setActivePage(newPages[0]?.id || combinedPages[0]?.id || null);
         return newModel;

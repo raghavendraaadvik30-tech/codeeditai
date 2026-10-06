@@ -10,9 +10,9 @@ import { useEditor } from "../../../context/EditorContext";
 import { transformCurrentSelection } from "../utils/writingUtils";
 
 import type {
-  AlignmentTool,
   CaseAction,
   FormattingTool,
+  AlignmentTool,
 } from "../types/writing.types";
 
 export function useWriting() {

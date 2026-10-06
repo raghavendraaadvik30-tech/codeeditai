@@ -28,7 +28,7 @@ EditorHeader
 No direct API/backend communication. 
 It is a UI layout component that composes reusable header components.
 */
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 import {
   Save,
@@ -39,6 +39,7 @@ import {
   Upload,
   ShieldAlert,
   AlertTriangle,
+  AlertCircle,
 } from "lucide-react";
 
 import { parseUploadedFile, type ImportedPageLayout } from "../../utils/fileImportUtil";
@@ -103,10 +104,6 @@ export default function HeaderActions() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadSequenceRef = useRef(0);
-  const latestInsertRef = useRef(insertUploadedDocument);
-  useEffect(() => {
-    latestInsertRef.current = insertUploadedDocument;
-  }, [insertUploadedDocument]);
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -121,7 +118,7 @@ export default function HeaderActions() {
     pageLayout?: ImportedPageLayout,
     pageLayouts?: ImportedPageLayout[],
   ) => {
-    latestInsertRef.current(title, pagesToImport, pageLayout, pageLayouts);
+    insertUploadedDocument(title, pagesToImport, pageLayout, pageLayouts);
     setIsEditable(true);
     setPendingPermissionFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -131,6 +128,19 @@ export default function HeaderActions() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+
+    // Check if user is attempting to upload a PDF file
+    const fileName = file.name.trim();
+    const extension = fileName.toLowerCase().split(".").pop() || "";
+    const isPdf =
+      extension === "pdf" ||
+      (file.type ? ["application/pdf", "application/x-pdf"].includes(file.type.toLowerCase()) : false);
+
+    if (isPdf) {
+      setUploadError("PDF files cannot be uploaded directly. Please upload a Word (.docx), HTML, or text document.");
+      return;
+    }
+
     const sequence = ++uploadSequenceRef.current;
     setUploadError(null);
     setPendingUpload(null);
@@ -594,18 +604,40 @@ export default function HeaderActions() {
 
       {uploadError && (
         <div
-          role="alert"
-          aria-live="assertive"
-          className="fixed bottom-4 right-4 z-[10000] max-w-md rounded-lg border border-red-200 bg-white px-4 py-3 text-sm text-red-800 shadow-xl dark:border-red-900 dark:bg-slate-950 dark:text-red-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="upload-error-dialog-title"
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <p>{uploadError}</p>
-          <button
-            type="button"
-            className="mt-2 text-xs font-semibold underline"
-            onClick={() => setUploadError(null)}
-          >
-            Dismiss
-          </button>
+          <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-5 shadow-2xl dark:border-red-900/60 dark:bg-[#0c1929]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 id="upload-error-dialog-title" className="text-sm font-bold text-slate-900 dark:text-white">
+                  {uploadError.toLowerCase().includes("pdf") ? "PDF Upload Restricted" : "Upload Error"}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {uploadError.toLowerCase().includes("pdf") ? "Document format notice" : "Unable to process document"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-4 rounded-xl bg-red-50/80 p-3.5 text-xs leading-relaxed text-red-950 dark:bg-red-950/30 dark:text-red-200 border border-red-200/80 dark:border-red-900/40">
+              <p>{uploadError}</p>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setUploadError(null)}
+                className="flex items-center gap-1.5 rounded-xl bg-[#0078d4] px-4 py-2 text-xs font-semibold text-white hover:bg-[#005a9e] transition-colors shadow-sm"
+              >
+                <span>OK</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -238,9 +238,19 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
     <div className="flex flex-col bg-white dark:bg-[#0B1520] border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 shadow-xs select-none space-y-2">
       {/* Reference Type Pills Grid */}
       <div>
-        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-          Reference Type
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Reference Type
+          </label>
+          <button
+            type="button"
+            onClick={handleManualRefresh}
+            title="Refresh targets"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5"
+          >
+            <RefreshCw className={cn("h-3 w-3", isScanning && "animate-spin text-blue-500")} />
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-1.5">
           {referenceTypes.map((type) => {
             const Icon = type.icon;

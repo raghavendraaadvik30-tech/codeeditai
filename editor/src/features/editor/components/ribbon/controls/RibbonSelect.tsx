@@ -21,6 +21,7 @@ import { ChevronDown } from "lucide-react";
 export interface RibbonSelectOption {
   label: string;
   onSelect: () => void;
+  style?: React.CSSProperties;
 }
 
 interface RibbonSelectProps {
@@ -139,6 +140,7 @@ export default function RibbonSelect({
                 option.onSelect();
                 setIsOpen(false);
               }}
+              style={option.style}
               className="
                 block
                 w-full

@@ -515,14 +515,16 @@ export default function DocumentPage() {
           <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">
             Document Manager
           </h3>
-          <button
-            type="button"
-            onClick={handleCreateDoc}
-            className="flex h-7 items-center gap-1 rounded-md bg-[#0078d4] px-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#005a9e]"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleCreateDoc}
+              className="flex h-7 items-center gap-1 rounded-md bg-[#0078d4] px-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#005a9e]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New
+            </button>
+          </div>
         </div>
 
         {/* Search Input */}

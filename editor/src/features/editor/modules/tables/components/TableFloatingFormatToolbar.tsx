@@ -39,6 +39,7 @@ import {
   Indent,
   Outdent,
 } from "lucide-react";
+import { loadGoogleFont } from "../../document/api/fontapi";
 
 // --------------------------------------------------------------------------
 // Configuration Constants
@@ -278,6 +279,7 @@ export function TableFloatingFormatToolbar() {
   const applyFontFamily = (font: string) => {
     setCurrentFont(font);
     setFontMenuOpen(false);
+    loadGoogleFont(font);
     execFormat("fontName", font);
   };
 
