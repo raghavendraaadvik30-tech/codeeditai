@@ -4,7 +4,7 @@
  * Comprehensive document file parser for the Document Editor.
  * Supports:
  * - Word documents (.docx) via JSZip and OpenXML parsing
- * - PDF documents (.pdf) via native text stream extraction
+ * - PDF documents (.pdf) rendered page-by-page with PDF.js
  * - HTML documents (.html, .htm) via DOMParser
  * - Markdown files (.md, .markdown)
  * - Structured JSON documents (.json)
@@ -15,10 +15,16 @@
 
 import JSZip from "jszip";
 
+export interface ImportedPageLayout {
+  orientation: "portrait" | "landscape";
+  paperSize: { name: string; width: number; height: number };
+}
+
 export interface ParsedDocument {
   title: string;
   html: string;
   pages: string[];
+  pageLayout?: ImportedPageLayout;
 }
 
 /**
@@ -40,8 +46,8 @@ export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
 
     if (lowerName.endsWith(".pdf")) {
       const buffer = await file.arrayBuffer();
-      const { html, pages } = parsePdfBuffer(buffer);
-      return { title: cleanTitle, html, pages };
+      const { html, pages, pageLayout } = await parsePdfBuffer(buffer);
+      return { title: cleanTitle, html, pages, pageLayout };
     }
 
     if (lowerName.endsWith(".html") || lowerName.endsWith(".htm")) {
@@ -68,6 +74,11 @@ export async function parseUploadedFile(file: File): Promise<ParsedDocument> {
     return { title: cleanTitle, html, pages };
   } catch (err) {
     console.error("Error parsing uploaded file:", err);
+    // A PDF is binary. Treating it as plain text creates fake content and
+    // misleading page counts, so preserve the error instead of importing bytes.
+    if (lowerName.endsWith(".pdf")) {
+      throw new Error("Unable to render this PDF. Please verify the file and try again.", { cause: err });
+    }
     // Fallback: try plain text
     try {
       const text = await file.text();
@@ -283,6 +294,27 @@ function splitLongParagraph(innerHtml: string, maxCharsPerChunk = 600): string[]
   return chunks.length > 0 ? chunks : [`<p>${innerHtml}</p>`];
 }
 
+// Retained for the DOCX fallback path; PDF files are rendered by PDF.js below.
+function extractPrintableStrings(bytes: Uint8Array): string {
+  const chunks: string[] = [];
+  let current: number[] = [];
+
+  for (const byte of bytes) {
+    if ((byte >= 32 && byte <= 126) || byte === 10 || byte === 13) {
+      current.push(byte);
+    } else {
+      if (current.length >= 6) chunks.push(new TextDecoder().decode(new Uint8Array(current)));
+      current = [];
+    }
+  }
+  if (current.length >= 6) chunks.push(new TextDecoder().decode(new Uint8Array(current)));
+
+  const valid = chunks
+    .filter((chunk) => !chunk.includes("[Content_Types]") && !chunk.includes("word/") && !chunk.includes("schemas."))
+    .slice(0, 500);
+  return valid.map((value) => `<p>${escapeHtml(value)}</p>`).join("") || "<p><br/></p>";
+}
+
 /**
  * Parses DOCX ArrayBuffer by reading the ZIP archive via JSZip and extracting word/document.xml.
  */
@@ -475,100 +507,68 @@ function fallbackRegexXmlExtract(xml: string): string {
   return `<p>${escapeHtml(texts.join(" "))}</p>`;
 }
 
-function extractPrintableStrings(bytes: Uint8Array): string {
-  const chunks: string[] = [];
-  let current: number[] = [];
+/** Render each source PDF page once and preserve its physical dimensions. */
+async function parsePdfBuffer(buffer: ArrayBuffer): Promise<{
+  html: string;
+  pages: string[];
+  pageLayout: ImportedPageLayout;
+}> {
+  const [{ getDocument, GlobalWorkerOptions }, worker] = await Promise.all([
+    import("pdfjs-dist"),
+    import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+  ]);
+  GlobalWorkerOptions.workerSrc = worker.default;
+  const loadingTask = getDocument({ data: new Uint8Array(buffer) });
+  const pages: string[] = [];
+  let pageLayout: ImportedPageLayout | undefined;
 
-  for (let i = 0; i < bytes.length; i++) {
-    const b = bytes[i];
-    if ((b >= 32 && b <= 126) || b === 10 || b === 13) {
-      current.push(b);
-    } else {
-      if (current.length >= 6) {
-        chunks.push(new TextDecoder().decode(new Uint8Array(current)));
-      }
-      current = [];
-    }
-  }
-  if (current.length >= 6) {
-    chunks.push(new TextDecoder().decode(new Uint8Array(current)));
-  }
-
-  const valid = chunks
-    .filter((c) => !c.includes("[Content_Types]") && !c.includes("word/") && !c.includes("schemas."))
-    .slice(0, 500);
-
-  return valid.map((t) => `<p>${escapeHtml(t)}</p>`).join("") || "<p><br/></p>";
-}
-
-/**
- * Parses PDF documents by extracting page streams and text blocks into document pages.
- */
-function parsePdfBuffer(buffer: ArrayBuffer): { html: string; pages: string[] } {
   try {
-    const bytes = new Uint8Array(buffer);
-    const text = new TextDecoder("latin1").decode(bytes);
+    const pdf = await loadingTask.promise;
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      const page = await pdf.getPage(pageNumber);
+      // PDF coordinates are points (72 per inch); editor dimensions are CSS
+      // pixels (96 per inch). Convert once, then render at 1.5x that display size.
+      const pdfPointsToCssPixels = 96 / 72;
+      const cssViewport = page.getViewport({ scale: pdfPointsToCssPixels });
+      const renderViewport = page.getViewport({ scale: pdfPointsToCssPixels * 1.5 });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.ceil(renderViewport.width);
+      canvas.height = Math.ceil(renderViewport.height);
+      const context = canvas.getContext("2d", { alpha: false });
+      if (!context) throw new Error(`Could not create a canvas for PDF page ${pageNumber}.`);
 
-    // Count /Type /Page objects
-    const pageMatches = text.match(/\/Type\s*\/Page\b/g);
-    const pageCount = pageMatches ? pageMatches.length : 1;
+      await page.render({ canvas, canvasContext: context, viewport: renderViewport }).promise;
+      const imageUrl = canvas.toDataURL("image/jpeg", 0.88);
+      const width = cssViewport.width;
+      const height = cssViewport.height;
+      pages.push(
+        `<img data-imported-pdf-page="true" data-source-page="${pageNumber}" src="${imageUrl}" width="${width}" height="${height}" alt="PDF page ${pageNumber}" style="display:block;width:${width}px;height:${height}px;max-width:100%;max-height:100%;object-fit:contain;"/>`
+      );
+      canvas.width = 0;
+      canvas.height = 0;
 
-    // Extract text streams: BT ... ET
-    const streamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
-    const textChunks: string[] = [];
-    let match: RegExpExecArray | null;
-
-    while ((match = streamRegex.exec(text)) !== null) {
-      const streamContent = match[1];
-      const btRegex = /BT([\s\S]*?)ET/g;
-      let btMatch: RegExpExecArray | null;
-      while ((btMatch = btRegex.exec(streamContent)) !== null) {
-        const block = btMatch[1];
-        const tjRegex = /\((.*?)\)\s*Tj/g;
-        let tjMatch: RegExpExecArray | null;
-        while ((tjMatch = tjRegex.exec(block)) !== null) {
-          const raw = tjMatch[1].replace(/\\([()\\])/g, "$1").trim();
-          if (raw) textChunks.push(raw);
-        }
-
-        const tjArrayRegex = /\[(.*?)\]\s*TJ/g;
-        let tjArrayMatch: RegExpExecArray | null;
-        while ((tjArrayMatch = tjArrayRegex.exec(block)) !== null) {
-          const inner = tjArrayMatch[1];
-          const partRegex = /\((.*?)\)/g;
-          let partMatch: RegExpExecArray | null;
-          let combined = "";
-          while ((partMatch = partRegex.exec(inner)) !== null) {
-            combined += partMatch[1].replace(/\\([()\\])/g, "$1");
-          }
-          if (combined.trim()) textChunks.push(combined.trim());
-        }
+      if (pageNumber === 1) {
+        const isLandscape = width > height;
+        pageLayout = {
+          orientation: isLandscape ? "landscape" : "portrait",
+          paperSize: {
+            name: "Imported PDF",
+            width: isLandscape ? height : width,
+            height: isLandscape ? width : height,
+          },
+        };
       }
+      page.cleanup();
     }
-
-    if (textChunks.length === 0) {
-      const extracted = extractPrintableStrings(bytes);
-      const pages = splitHtmlIntoPages(extracted);
-      return { html: extracted, pages };
-    }
-
-    const chunkSizePerPage = Math.max(1, Math.ceil(textChunks.length / pageCount));
-    const pages: string[] = [];
-
-    for (let p = 0; p < pageCount; p++) {
-      const slice = textChunks.slice(p * chunkSizePerPage, (p + 1) * chunkSizePerPage);
-      if (slice.length > 0) {
-        const pHtml = slice.map((t) => `<p>${escapeHtml(t)}</p>`).join("");
-        pages.push(pHtml);
-      }
-    }
-
-    const validPages = pages.length > 0 ? pages : [textChunks.map((t) => `<p>${escapeHtml(t)}</p>`).join("")];
-    return { html: validPages.join(""), pages: validPages };
-  } catch {
-    const errHtml = "<p>Unable to parse PDF content.</p>";
-    return { html: errHtml, pages: [errHtml] };
+  } finally {
+    await loadingTask.destroy();
   }
+
+  if (!pageLayout || pages.length === 0) {
+    throw new Error("The PDF does not contain any renderable pages.");
+  }
+
+  return { html: pages.join(""), pages, pageLayout };
 }
 
 /**

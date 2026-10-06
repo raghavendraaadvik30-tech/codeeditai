@@ -1,4 +1,6 @@
-import { Palette } from "lucide-react";
+import { Palette, Check } from "lucide-react";
+import { useState } from "react";
+
 import { THEME_COLORS } from "../../constants/writing.constants";
 
 interface FontColorSectionProps {
@@ -8,6 +10,14 @@ interface FontColorSectionProps {
 export default function FontColorSection({
   onApply,
 }: FontColorSectionProps) {
+  const [activeColor, setActiveColor] =
+    useState<string | null>(null);
+
+  const handleApply = (color: string) => {
+    setActiveColor(color);
+    onApply(color);
+  };
+
   return (
     <section className="mb-6">
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -15,32 +25,87 @@ export default function FontColorSection({
       </h3>
 
       <div className="flex flex-wrap items-center gap-2">
-        {THEME_COLORS.map((color) => (
-          <button
-            key={color.name}
-            type="button"
-            onClick={() => onApply(color.value)}
-            title={color.name}
-            aria-label={`Apply ${color.name} font color`}
-            className="h-7 w-7 rounded border border-gray-200 transition hover:scale-105 hover:border-gray-400"
-            style={{
-              backgroundColor: color.value,
-            }}
-          />
-        ))}
+        {THEME_COLORS.map((color) => {
+          const isActive =
+            activeColor === color.value;
 
-        <label
-          title="Custom font color"
-          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-gray-200 text-gray-500 transition hover:bg-gray-100"
-        >
-          <Palette size={15} />
+          return (
+            <button
+              type="button"
+              onMouseDown={(event) => {
+                /*
+                 * Prevent the color palette button from
+                 * stealing the editor selection.
+                 */
+                event.preventDefault();
+              }}
+              onClick={() =>
+                handleApply(color.value)
+              }
+              title={color.name}
+              aria-label={`Apply ${color.name} font color`}
+              aria-pressed={isActive}
+              className={`
+                relative
+                h-7
+                w-7
+                rounded
+                border
+                transition-all
+                hover:scale-105
+                hover:border-gray-400
+                ${
+                  isActive
+                    ? "border-blue-600 ring-2 ring-blue-200"
+                    : "border-gray-200"
+                }
+              `}
+              style={{
+                backgroundColor: color.value,
+              }}
+            >
+              {isActive && (
+                <span
+                  className="
+                    absolute
+                    inset-0
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <Check
+                    size={14}
+                    strokeWidth={3}
+                    className="
+                      text-white
+                      drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]
+                    "
+                  />
+                </span>
+              )}
+            </button>
+          );
+        })}
 
-          <input
-            type="color"
-            className="sr-only"
-            onChange={(event) => onApply(event.target.value)}
-          />
-        </label>
+        {/* CUSTOM COLOR */}
+     <label
+  title="Custom font color"
+  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-gray-200 text-gray-500 transition hover:bg-gray-100"
+  onMouseDown={(event) => {
+    event.preventDefault();
+  }}
+>
+  <Palette size={15} />
+
+  <input
+    type="color"
+    className="sr-only"
+    onChange={(event) =>
+      onApply(event.target.value)
+    }
+  />
+</label>
       </div>
     </section>
   );

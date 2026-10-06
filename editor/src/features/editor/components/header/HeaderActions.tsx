@@ -41,7 +41,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-import { parseUploadedFile } from "../../utils/fileImportUtil";
+import { parseUploadedFile, type ImportedPageLayout } from "../../utils/fileImportUtil";
 import { documentService } from "../../services/documentService";
 import { printService } from "../../services/printService";
 
@@ -95,6 +95,7 @@ export default function HeaderActions() {
     title: string;
     pagesToImport: string[];
     fileName: string;
+    pageLayout?: ImportedPageLayout;
   } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -106,8 +107,12 @@ export default function HeaderActions() {
     }
   };
 
-  const executeUpload = (title: string, pagesToImport: string[]) => {
-    insertUploadedDocument(title, pagesToImport);
+  const executeUpload = (
+    title: string,
+    pagesToImport: string[],
+    pageLayout?: ImportedPageLayout
+  ) => {
+    insertUploadedDocument(title, pagesToImport, pageLayout);
     setIsEditable(true);
     setPendingPermissionFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -118,7 +123,7 @@ export default function HeaderActions() {
     if (!file) return;
 
     try {
-      const { title, html, pages } = await parseUploadedFile(file);
+      const { title, html, pages, pageLayout } = await parseUploadedFile(file);
 
       const pagesToImport =
         pages && pages.length > 0 ? pages : [html || "<p><br/></p>"];
@@ -136,12 +141,13 @@ export default function HeaderActions() {
           title: docTitle,
           pagesToImport,
           fileName: file.name,
+          pageLayout,
         });
         setShowLimitAlert(true);
         return;
       }
 
-      executeUpload(docTitle, pagesToImport);
+      executeUpload(docTitle, pagesToImport, pageLayout);
     } catch (err) {
       console.error("Error processing file upload:", err);
     }
@@ -150,9 +156,9 @@ export default function HeaderActions() {
   const handleConfirmUpload = () => {
     setShowLimitAlert(false);
     if (!pendingUpload) return;
-    const { title, pagesToImport } = pendingUpload;
+    const { title, pagesToImport, pageLayout } = pendingUpload;
     setPendingUpload(null);
-    executeUpload(title, pagesToImport);
+    executeUpload(title, pagesToImport, pageLayout);
   };
 
   const handleCancelUpload = () => {

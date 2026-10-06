@@ -12,6 +12,64 @@ import type { ReactNode, RefObject } from "react";
 import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
 import { useDocumentModel } from "../store/documentModel";
 
+interface SavedSelectionData {
+  range: Range;
+  pageId: string;
+  startContainer: Node;
+  startOffset: number;
+  endContainer: Node;
+  endOffset: number;
+  startTextOffset?: number;
+  endTextOffset?: number;
+}
+
+function getSelectionCharacterOffsets(element: HTMLElement, range: Range) {
+  try {
+    if (!element.contains(range.startContainer) || !element.contains(range.endContainer)) return null;
+    const startRange = range.cloneRange();
+    startRange.selectNodeContents(element);
+    startRange.setEnd(range.startContainer, range.startOffset);
+    const endRange = range.cloneRange();
+    endRange.selectNodeContents(element);
+    endRange.setEnd(range.endContainer, range.endOffset);
+    return { startOffset: startRange.toString().length, endOffset: endRange.toString().length };
+  } catch { return null; }
+}
+
+function getTextPointAtOffset(root: HTMLElement, targetOffset: number): { node: Text; offset: number } | null {
+  const safeOffset = Math.max(0, targetOffset);
+  let currentOffset = 0;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node: Node | null;
+  while ((node = walker.nextNode())) {
+    const textNode = node as Text;
+    const length = textNode.data.length;
+    if (safeOffset <= currentOffset + length) {
+      return { node: textNode, offset: Math.max(0, Math.min(safeOffset - currentOffset, length)) };
+    }
+    currentOffset += length;
+  }
+  let lastText: Text | null = null;
+  const endWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  while ((node = endWalker.nextNode())) lastText = node as Text;
+  return lastText ? { node: lastText, offset: lastText.data.length } : null;
+}
+
+function saveSelectionData(pageEl: HTMLElement, range: Range): SavedSelectionData | null {
+  const offsets = getSelectionCharacterOffsets(pageEl, range);
+  if (!offsets) return null;
+  return {
+    range: range.cloneRange(),
+    pageId: pageEl.getAttribute("data-page-id") || "",
+    startContainer: range.startContainer,
+    startOffset: range.startOffset,
+    endContainer: range.endContainer,
+    endOffset: range.endOffset,
+    startTextOffset: offsets.startOffset,
+    endTextOffset: offsets.endOffset,
+  };
+}
+
 export function getCaretCharacterOffsetWithin(element: HTMLElement): number {
   let caretOffset = 0;
   const sel = window.getSelection();
@@ -412,98 +470,240 @@ export function EditorProvider({
     useState<Selection | null>(null);
 
   // Saved selection tracking for active editor contenteditable pages
-  const savedSelectionRef = useRef<{
-    range: Range;
-    pageId: string;
-    startContainer: Node;
-    startOffset: number;
-    endContainer: Node;
-    endOffset: number;
-  } | null>(null);
+  const savedSelectionRef = useRef<SavedSelectionData | null>(null);
+const preserveSelectionRef = useRef(false);
 
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
+useEffect(() => {
+  const handleSelectionChange = () => {
+    /*
+     * IMPORTANT:
+     * While formatting is being applied, the browser can fire
+     * selectionchange several times. Do NOT overwrite the
+     * original selected range during that period.
+     */
+    if (preserveSelectionRef.current) {
+      return;
+    }
 
-      // Verify if selection originates inside an editor contenteditable page
-      const ancestor = range.commonAncestorContainer;
-      const el = ancestor.nodeType === Node.ELEMENT_NODE ? (ancestor as HTMLElement) : ancestor.parentElement;
-      const pageEl = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]');
-      if (!pageEl) {
-        // Selection is outside editor pages (e.g. in ribbon/toolbar/dialog) - retain previous saved selection
-        return;
-      }
-
-      const pageId = pageEl.getAttribute("data-page-id") || "";
-      savedSelectionRef.current = {
-        range: range.cloneRange(),
-        pageId,
-        startContainer: range.startContainer,
-        startOffset: range.startOffset,
-        endContainer: range.endContainer,
-        endOffset: range.endOffset,
-      };
-    };
-
-    document.addEventListener("selectionchange", handleSelectionChange);
-    return () => document.removeEventListener("selectionchange", handleSelectionChange);
-  }, []);
-
-  const restoreEditorSelection = useCallback((): boolean => {
     const sel = window.getSelection();
-    if (!sel) return false;
 
-    // 1. If active selection is already inside an editor page, keep it!
+    if (!sel || sel.rangeCount === 0) {
+      return;
+    }
+
+    const range = sel.getRangeAt(0);
+
+    const ancestor = range.commonAncestorContainer;
+
+    const el =
+      ancestor.nodeType === Node.ELEMENT_NODE
+        ? (ancestor as HTMLElement)
+        : ancestor.parentElement;
+
+    const pageEl =
+      el?.closest<HTMLElement>(
+        '[contenteditable="true"][data-page-id]'
+      );
+
+    if (!pageEl) {
+      /*
+       * Selection moved to toolbar/ribbon.
+       * KEEP the previous editor selection.
+       */
+      return;
+    }
+
+    const saved = saveSelectionData(
+      pageEl,
+      range
+    );
+
+    if (saved) {
+      savedSelectionRef.current = saved;
+    }
+  };
+
+  document.addEventListener(
+    "selectionchange",
+    handleSelectionChange
+  );
+
+  return () => {
+    document.removeEventListener(
+      "selectionchange",
+      handleSelectionChange
+    );
+  };
+}, []);
+  const restoreEditorSelection = useCallback((): boolean => {
+  const sel = window.getSelection();
+  if (!sel) return false;
+
+  /*
+   * IMPORTANT:
+   * Do NOT overwrite savedSelectionRef here.
+   *
+   * When the user clicks RED / BLUE / GREEN,
+   * the browser may move the selection to the toolbar.
+   *
+   * The selection saved before clicking the toolbar
+   * must remain the source of truth.
+   */
+
+  const saved = savedSelectionRef.current;
+
+  if (!saved) {
+    /*
+     * No saved selection yet.
+     * Use the current editor selection only as a fallback.
+     */
     if (sel.rangeCount > 0) {
-      const r = sel.getRangeAt(0);
-      const anc = r.commonAncestorContainer;
-      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
-      const pageEl = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]');
-      if (pageEl) {
-        if (document.activeElement !== pageEl && !pageEl.contains(document.activeElement)) {
-          pageEl.focus({ preventScroll: true });
+      const currentRange = sel.getRangeAt(0);
+
+      const ancestor = currentRange.commonAncestorContainer;
+
+      const el =
+        ancestor.nodeType === Node.ELEMENT_NODE
+          ? (ancestor as HTMLElement)
+          : ancestor.parentElement;
+
+      const pageEl = el?.closest<HTMLElement>(
+        '[contenteditable="true"][data-page-id]'
+      );
+
+      if (pageEl && !currentRange.collapsed) {
+        const currentSaved = saveSelectionData(
+          pageEl,
+          currentRange
+        );
+
+        if (currentSaved) {
+          savedSelectionRef.current = currentSaved;
         }
+
         return true;
       }
     }
 
-    // 2. Otherwise restore from savedSelectionRef
-    const saved = savedSelectionRef.current;
-    if (!saved) {
-      if (editorRef.current) {
-        editorRef.current.focus({ preventScroll: true });
-        return true;
-      }
-      return false;
+    if (editorRef.current) {
+      editorRef.current.focus({
+        preventScroll: true,
+      });
+
+      return true;
     }
 
-    const targetPage =
-      document.querySelector<HTMLElement>(`[contenteditable="true"][data-page-id="${saved.pageId}"]`) ||
-      editorRef.current;
+    return false;
+  }
 
-    if (!targetPage) return false;
+  /*
+   * Find the SAME page where the user originally
+   * selected the text.
+   */
+  const targetPage =
+    document.querySelector<HTMLElement>(
+      `[contenteditable="true"][data-page-id="${saved.pageId}"]`
+    ) || editorRef.current;
 
-    targetPage.focus({ preventScroll: true });
+  if (!targetPage) {
+    return false;
+  }
 
-    try {
-      if (targetPage.contains(saved.startContainer) && targetPage.contains(saved.endContainer)) {
+  /*
+   * Focus the editor without changing our saved
+   * character offsets.
+   */
+  targetPage.focus({
+    preventScroll: true,
+  });
+
+  try {
+    /*
+     * BEST METHOD:
+     * Restore using character offsets.
+     *
+     * This survives DOM changes caused by
+     * execCommand("foreColor").
+     */
+    if (
+      saved.startTextOffset !== undefined &&
+      saved.endTextOffset !== undefined
+    ) {
+      const startPoint = getTextPointAtOffset(
+        targetPage,
+        saved.startTextOffset
+      );
+
+      const endPoint = getTextPointAtOffset(
+        targetPage,
+        saved.endTextOffset
+      );
+
+      if (startPoint && endPoint) {
         const newRange = document.createRange();
-        newRange.setStart(saved.startContainer, saved.startOffset);
-        newRange.setEnd(saved.endContainer, saved.endOffset);
+
+        newRange.setStart(
+          startPoint.node,
+          startPoint.offset
+        );
+
+        newRange.setEnd(
+          endPoint.node,
+          endPoint.offset
+        );
+
         sel.removeAllRanges();
         sel.addRange(newRange);
-        return true;
-      } else {
-        sel.removeAllRanges();
-        sel.addRange(saved.range);
+
         return true;
       }
-    } catch {
-      return false;
     }
-  }, [editorRef]);
+
+    /*
+     * FALLBACK:
+     * Use the original DOM nodes if they still exist.
+     */
+    if (
+      targetPage.contains(saved.startContainer) &&
+      targetPage.contains(saved.endContainer)
+    ) {
+      const newRange = document.createRange();
+
+      newRange.setStart(
+        saved.startContainer,
+        saved.startOffset
+      );
+
+      newRange.setEnd(
+        saved.endContainer,
+        saved.endOffset
+      );
+
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+
+      return true;
+    }
+
+    /*
+     * LAST FALLBACK:
+     * Use the stored Range.
+     */
+    if (saved.range) {
+      sel.removeAllRanges();
+      sel.addRange(saved.range);
+
+      return true;
+    }
+  } catch (error) {
+    console.warn(
+      "Failed to restore editor selection:",
+      error
+    );
+  }
+
+  return false;
+}, [editorRef]);
 
   const getEditorSelection = useCallback((): Range | null => {
     const sel = window.getSelection();
@@ -603,15 +803,8 @@ export function EditorProvider({
       sel.removeAllRanges();
       sel.addRange(newRange);
 
-      const pageId = pageEl.getAttribute("data-page-id") || "";
-      savedSelectionRef.current = {
-        range: newRange.cloneRange(),
-        pageId,
-        startContainer: newRange.startContainer,
-        startOffset: newRange.startOffset,
-        endContainer: newRange.endContainer,
-        endOffset: newRange.endOffset,
-      };
+      const saved = saveSelectionData(pageEl, newRange);
+      if (saved) savedSelectionRef.current = saved;
     }
 
     pageEl.dispatchEvent(new Event("input", { bubbles: true }));
@@ -674,49 +867,226 @@ export function EditorProvider({
       sel.removeAllRanges();
       sel.addRange(newRange);
 
-      const pageId = pageEl.getAttribute("data-page-id") || "";
-      savedSelectionRef.current = {
-        range: newRange.cloneRange(),
-        pageId,
-        startContainer: newRange.startContainer,
-        startOffset: newRange.startOffset,
-        endContainer: newRange.endContainer,
-        endOffset: newRange.endOffset,
-      };
+      const saved = saveSelectionData(pageEl, newRange);
+      if (saved) savedSelectionRef.current = saved;
     }
 
     pageEl.dispatchEvent(new Event("input", { bubbles: true }));
   }, [restoreEditorSelection, editorRef]);
 
-  const applyFormatCommand = useCallback((command: string, value?: string) => {
-    restoreEditorSelection();
+  const applyFormatCommand = useCallback(
+  (command: string, value?: string) => {
+    /*
+     * ============================================================
+     * STEP 1
+     * Restore the ORIGINAL editor selection.
+     * ============================================================
+     */
+    const restored = restoreEditorSelection();
+
+    if (!restored) {
+      return;
+    }
+
     const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
+
+    if (!sel || sel.rangeCount === 0) {
+      return;
+    }
+
     const range = sel.getRangeAt(0);
 
-    const anc = range.commonAncestorContainer;
-    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
-    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
-
-    document.execCommand(command, false, value);
-
-    if (pageEl) {
-      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-      const currentSel = window.getSelection();
-      if (currentSel && currentSel.rangeCount > 0) {
-        const r = currentSel.getRangeAt(0);
-        const pageId = pageEl.getAttribute("data-page-id") || "";
-        savedSelectionRef.current = {
-          range: r.cloneRange(),
-          pageId,
-          startContainer: r.startContainer,
-          startOffset: r.startOffset,
-          endContainer: r.endContainer,
-          endOffset: r.endOffset,
-        };
-      }
+    /*
+     * We need an actual text selection.
+     */
+    if (range.collapsed) {
+      return;
     }
-  }, [restoreEditorSelection, editorRef]);
+
+    /*
+     * ============================================================
+     * STEP 2
+     * Find the editor page.
+     * ============================================================
+     */
+    const ancestor = range.commonAncestorContainer;
+
+    const el =
+      ancestor.nodeType === Node.ELEMENT_NODE
+        ? (ancestor as HTMLElement)
+        : ancestor.parentElement;
+
+    const pageEl =
+      el?.closest<HTMLElement>(
+        '[contenteditable="true"][data-page-id]'
+      ) || editorRef.current;
+
+    if (!pageEl) {
+      return;
+    }
+
+    /*
+     * ============================================================
+     * STEP 3
+     * SAVE THE EXACT CURRENT SELECTION
+     *
+     * This becomes the permanent selection we restore
+     * after RED / BLUE / GREEN.
+     * ============================================================
+     */
+    const saved = saveSelectionData(
+      pageEl,
+      range
+    );
+
+    if (!saved) {
+      return;
+    }
+
+    savedSelectionRef.current = saved;
+
+    /*
+     * ============================================================
+     * STEP 4
+     * LOCK selection tracking.
+     *
+     * Browser may fire selectionchange while execCommand
+     * modifies the DOM.
+     * ============================================================
+     */
+    preserveSelectionRef.current = true;
+
+    /*
+     * ============================================================
+     * STEP 5
+     * APPLY FORMAT
+     * ============================================================
+     */
+    try {
+      document.execCommand(
+        command,
+        false,
+        value
+      );
+    } catch (error) {
+      console.warn(
+        "Formatting command failed:",
+        error
+      );
+
+      preserveSelectionRef.current = false;
+      return;
+    }
+
+    /*
+     * ============================================================
+     * STEP 6
+     * Tell the editor that the HTML changed.
+     * ============================================================
+     */
+    pageEl.dispatchEvent(
+      new Event("input", {
+        bubbles: true,
+      })
+    );
+
+    /*
+     * ============================================================
+     * STEP 7
+     * Restore the SAME selection after DOM changes.
+     * ============================================================
+     */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        preserveSelectionRef.current = true;
+
+        /*
+         * IMPORTANT:
+         * restoreEditorSelection() will now ONLY restore
+         * savedSelectionRef.current.
+         *
+         * It will NOT overwrite it with the toolbar selection.
+         */
+        const restoredAgain =
+          restoreEditorSelection();
+
+        if (!restoredAgain) {
+          console.warn(
+            "Could not restore formatted text selection."
+          );
+        }
+
+        /*
+         * ========================================================
+         * STEP 8
+         * Keep the selection saved for the NEXT color click.
+         *
+         * Example:
+         *
+         * RED
+         *  ↓
+         * restore Hello World
+         *  ↓
+         * apply RED
+         *  ↓
+         * restore Hello World
+         *  ↓
+         * save SAME selection
+         * ========================================================
+         */
+        const finalSel = window.getSelection();
+
+        if (
+          finalSel &&
+          finalSel.rangeCount > 0
+        ) {
+          const finalRange =
+            finalSel.getRangeAt(0);
+
+          if (!finalRange.collapsed) {
+            const finalAncestor =
+              finalRange.commonAncestorContainer;
+
+            const finalEl =
+              finalAncestor.nodeType === Node.ELEMENT_NODE
+                ? (finalAncestor as HTMLElement)
+                : finalAncestor.parentElement;
+
+            const finalPage =
+              finalEl?.closest<HTMLElement>(
+                '[contenteditable="true"][data-page-id]'
+              ) || pageEl;
+
+            if (finalPage) {
+              const finalSaved =
+                saveSelectionData(
+                  finalPage,
+                  finalRange
+                );
+
+              if (finalSaved) {
+                savedSelectionRef.current =
+                  finalSaved;
+              }
+            }
+          }
+        }
+
+        /*
+         * Unlock selection tracking only after
+         * everything has been restored and saved.
+         */
+        setTimeout(() => {
+          preserveSelectionRef.current = false;
+        }, 0);
+      });
+    });
+  },
+  [
+    restoreEditorSelection,
+    editorRef,
+  ]
+);
 
   const applyBlockStyle = useCallback((tag: string) => {
     restoreEditorSelection();
@@ -790,9 +1160,9 @@ export function EditorProvider({
       document.execCommand("underline", false);
     }
     if (token.color && token.color !== "primary") {
-      document.execCommand("foreColor", false, token.color);
+      applyFormatCommand("foreColor", token.color);
     } else if (token.color === "primary") {
-      document.execCommand("foreColor", false, "#0078d4");
+      applyFormatCommand("foreColor", "#0078d4");
     }
     const align = token.alignment || token.align;
     if (align) {
@@ -803,7 +1173,7 @@ export function EditorProvider({
     }
 
     pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-  }, [restoreEditorSelection, applyFontSize, applyFontFamily, editorRef]);
+  }, [restoreEditorSelection, applyFontSize, applyFontFamily, applyFormatCommand, editorRef]);
 
   const focusEditor = () => {
     editorRef.current?.focus();

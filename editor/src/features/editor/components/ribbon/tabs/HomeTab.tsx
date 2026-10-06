@@ -10,16 +10,21 @@ Responsibilities:
 */
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+
 import {
   Undo2,
   Redo2,
   ChevronDown,
 } from "lucide-react";
-import { FONTS, FONT_SIZES } from "../constant";
+
+import { FONT_SIZES } from "../constant";
+
 import RibbonSelect from "../controls/RibbonSelect";
 import RibbonDivider from "../controls/RibbonDivider";
+
 import { useEditor } from "../../../context/EditorContext";
 
+import { fetchAllGoogleFonts } from "../../../modules/document/api/fontapi";
 export default function HomeTab() {
   const {
     undo,
@@ -34,8 +39,21 @@ export default function HomeTab() {
     applyFontFamily,
   } = useEditor();
 
-  const [fontName, setFontName] = useState("Calibri");
-  const [fontSize, setFontSize] = useState("12");
+  const [fontName, setFontName] =
+  useState("Calibri");
+
+const [fontSize, setFontSize] =
+  useState("12");
+
+const [fonts, setFonts] = useState<string[]>([
+  "Calibri",
+]);
+
+const [fontsLoading, setFontsLoading] =
+  useState(false);
+
+const [fontsError, setFontsError] =
+  useState<string | null>(null);
 
   const [isUndoDropdownOpen, setIsUndoDropdownOpen] = useState(false);
   const [isRedoDropdownOpen, setIsRedoDropdownOpen] = useState(false);
@@ -51,6 +69,63 @@ export default function HomeTab() {
   const preventFocusLoss = (e: MouseEvent<HTMLElement>) => {
     e.preventDefault();
   };
+
+  useEffect(() => {
+  let cancelled = false;
+
+  const loadFonts = async () => {
+    try {
+      setFontsLoading(true);
+      setFontsError(null);
+
+      const googleFonts =
+        await fetchAllGoogleFonts();
+
+      if (cancelled) return;
+
+      const fontNames = googleFonts.map(
+        (font) => font.family
+      );
+
+      /*
+       * Keep Calibri because it is commonly used
+       * by the editor even though it is not a
+       * Google Font.
+       */
+      const allFonts = Array.from(
+        new Set([
+          "Calibri",
+          ...fontNames,
+        ])
+      );
+
+      setFonts(allFonts);
+    } catch (error) {
+      console.error(
+        "Failed to load Google Fonts:",
+        error
+      );
+
+      if (!cancelled) {
+        setFontsError(
+          "Unable to load fonts"
+        );
+
+        setFonts(["Calibri"]);
+      }
+    } finally {
+      if (!cancelled) {
+        setFontsLoading(false);
+      }
+    }
+  };
+
+  loadFonts();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   useEffect(() => {
     const handleClickOutside = (e: globalThis.MouseEvent) => {
@@ -115,7 +190,7 @@ export default function HomeTab() {
         const fontSpan = targetEl.closest<HTMLElement>("span[style*='font-family']");
         const rawFont = fontSpan?.style.fontFamily || window.getComputedStyle(targetEl).fontFamily;
         const firstFont = rawFont.split(",")[0].replace(/['"]/g, "").trim();
-        const matchedFont = FONTS.find((f) => f.toLowerCase() === firstFont.toLowerCase());
+        const matchedFont = fonts.find((f) => f.toLowerCase() === firstFont.toLowerCase());
         if (matchedFont) {
           setFontName(matchedFont);
         }
@@ -136,16 +211,17 @@ export default function HomeTab() {
           Font Family
       ====================================================== */}
       <RibbonSelect
-        width={170}
-        label={fontName}
-        options={FONTS.map((font) => ({
-          label: font,
-          onSelect: () => {
-            setFontName(font);
-            applyFontFamily(font);
-          },
-        }))}
-      />
+  width={190}
+  label={fontsLoading ? "Loading fonts..." : fontName}
+  options={fonts.map((font) => ({
+    label: font,
+    onSelect: () => {
+      setFontName(font);
+      applyFontFamily(font);
+    },
+  }))}
+  disabled={fontsLoading}
+/>
 
       {/* =====================================================
           Font Size

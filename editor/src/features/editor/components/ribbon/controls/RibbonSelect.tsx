@@ -1,17 +1,18 @@
-/*Purpose:
+/*
+Purpose:
+
 Creates a reusable dropdown/select control for the editor ribbon.
 
 What it does:
 
-Displays the current label.
-Shows a dropdown arrow using ChevronDown.
-Receives dropdown options through the options prop.
-Executes option.onSelect when an option is clicked.
-Allows configurable width.
-Supports disabled state.
-Dropdown appears on click or hover.
-Prevents editor focus loss when interacting with the ribbon.
-Scrollable list for long options (font families, font sizes).
+- Displays the current label.
+- Shows a dropdown arrow.
+- Receives dropdown options through the options prop.
+- Executes option.onSelect when an option is clicked.
+- Allows configurable width.
+- Supports disabled state.
+- Prevents editor focus loss when interacting with the ribbon.
+- Scrollable list for long options such as font families and font sizes.
 */
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
@@ -36,22 +37,28 @@ export default function RibbonSelect({
   disabled = false,
 }: RibbonSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const preventFocusLoss = (event: MouseEvent<HTMLElement>) => {
-    // Keep editor focused and preserve active selection
     event.preventDefault();
   };
 
   useEffect(() => {
-    const handleOutsideClick = (e: globalThis.MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    const handleOutsideClick = (event: globalThis.MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
   }, []);
 
   return (
@@ -60,9 +67,7 @@ export default function RibbonSelect({
       onMouseDown={preventFocusLoss}
       className="relative select-none"
     >
-      {/* --------------------------------
-          SELECT BUTTON
-      -------------------------------- */}
+      {/* SELECT BUTTON */}
       <button
         type="button"
         disabled={disabled}
@@ -102,9 +107,7 @@ export default function RibbonSelect({
         />
       </button>
 
-      {/* --------------------------------
-          DROPDOWN
-      -------------------------------- */}
+      {/* DROPDOWN */}
       {isOpen && (
         <div
           onMouseDown={preventFocusLoss}

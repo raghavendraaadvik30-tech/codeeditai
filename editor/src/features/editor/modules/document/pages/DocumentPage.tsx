@@ -539,7 +539,7 @@ export default function DocumentPage() {
       </div>
 
       {/* 2. SCROLLABLE SIDEBAR BODY */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+      <div className="document-page-scroll flex-1 overflow-y-auto p-3 space-y-4">
         {/* ALL DOCUMENTS */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
