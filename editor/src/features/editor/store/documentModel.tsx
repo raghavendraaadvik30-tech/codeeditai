@@ -36,6 +36,7 @@ import React, {
 } from "react";
 
 import type { StyleOverrides, StyleOverride } from "../modules/styles/types/styles.types";
+import type { ImportedPageLayout } from "../utils/fileImportUtil";
 
 /* ============================================================
    Types
@@ -59,7 +60,9 @@ export interface SectionModel {
   pageNumberStyle?: string;
   orientation?: "portrait" | "landscape";
   marginPreset?: "normal" | "narrow" | "moderate" | "wide" | "mirrored" | "custom";
+  importedLayout?: boolean;
   marginConfig?: { top: number; bottom: number; left: number; right: number };
+  gutter?: number;
   paperSize?: { name: string; width: number; height: number };
   columns?: { type: "one" | "two" | "three" | "left" | "right" | "custom"; count: number; gap?: number };
   watermark?: {
@@ -463,6 +466,21 @@ function getInitialHistory(): HistoryEntry[] {
   return [];
 }
 
+function storeOptionalDocumentSnapshot(doc: DocumentModel): void {
+  try {
+    const pageContentSize = Object.values(doc.pageHtml).reduce((total, html) => total + html.length, 0);
+    if (pageContentSize > 750_000) return;
+
+    const serialized = JSON.stringify(doc);
+    // Saved documents and the active document already contain this content.
+    // Avoid tripling large imports in localStorage just for an optional snapshot.
+    if (serialized.length > 750_000) return;
+    localStorage.setItem(`editor_snapshot.${doc.id}.${doc.savedAt}`, serialized);
+  } catch {
+    // Snapshots are a best-effort recovery aid; they must not block saving.
+  }
+}
+
 /* ============================================================
    Context
 ============================================================ */
@@ -536,10 +554,8 @@ interface DocumentContextType {
   insertUploadedDocument: (
     title: string,
     pagesHtml: string[],
-    pageLayout?: {
-      orientation: "portrait" | "landscape";
-      paperSize: { name: string; width: number; height: number };
-    }
+    pageLayout?: ImportedPageLayout,
+    pageLayouts?: ImportedPageLayout[],
   ) => DocumentModel;
   resetDocument: () => void;
   refreshHistory: () => void;
@@ -1049,10 +1065,7 @@ export function DocumentModelProvider({
           );
 
           // 2. Snapshot
-          localStorage.setItem(
-            `editor_snapshot.${saved.id}.${saved.savedAt}`,
-            JSON.stringify(saved)
-          );
+          storeOptionalDocumentSnapshot(saved);
 
           // 3. Update saved documents list without duplicates
           const existingSaved = getStoredSavedDocuments();
@@ -1129,10 +1142,7 @@ export function DocumentModelProvider({
             JSON.stringify(saved)
           );
 
-          localStorage.setItem(
-            `editor_snapshot.${saved.id}.${saved.savedAt}`,
-            JSON.stringify(saved)
-          );
+          storeOptionalDocumentSnapshot(saved);
 
           const existingSaved = getStoredSavedDocuments();
           const docIndex = existingSaved.findIndex((d) => d.id === currentModel.id);
@@ -1338,35 +1348,57 @@ export function DocumentModelProvider({
     (
       title: string,
       pagesHtml: string[],
-      pageLayout?: {
-        orientation: "portrait" | "landscape";
-        paperSize: { name: string; width: number; height: number };
-      }
+      pageLayout?: ImportedPageLayout,
+      pageLayouts?: ImportedPageLayout[],
     ): DocumentModel => {
       const defaultSection = createDefaultSection("section_1");
-      const section: SectionModel = pageLayout
-        ? {
-            ...defaultSection,
-            orientation: pageLayout.orientation,
-            paperSize: pageLayout.paperSize,
-            marginPreset: "custom",
-            marginConfig: { top: 0, bottom: 0, left: 0, right: 0 },
-            header: "",
-            footer: "",
-            showPageNumbers: false,
-            headerTopDistance: 0,
-            footerBottomDistance: 0,
-          }
-        : defaultSection;
       const validPages =
         pagesHtml.length > 0
           ? pagesHtml.map((h) => (h && h.trim() ? h.trim() : DEFAULT_HTML))
           : [DEFAULT_HTML];
 
-      const newPages: PageModel[] = validPages.map(() => ({
-        id: "page_" + uid(),
-        sectionId: section.id,
-      }));
+      const importedSections = new Map<string, SectionModel>();
+      const newPages: PageModel[] = validPages.map((_, index) => {
+        const layout = pageLayouts?.[index] ?? pageLayout;
+        if (!layout) return { id: "page_" + uid(), sectionId: defaultSection.id };
+
+        const layoutKey = JSON.stringify(layout);
+        let section = importedSections.get(layoutKey);
+        if (!section) {
+          const sectionId = `section_${importedSections.size + 1}`;
+          section = {
+            ...defaultSection,
+            id: sectionId,
+            orientation: layout.orientation,
+            paperSize: layout.paperSize,
+            marginPreset: layout.mirroredMargins ? "mirrored" : "custom",
+            importedLayout: true,
+            marginConfig: layout.marginConfig ?? { top: 0, bottom: 0, left: 0, right: 0 },
+            gutter: layout.gutter ?? 0,
+            header: layout.headerHtml ?? "",
+            footer: layout.footerHtml ?? "",
+            headerHtml: layout.headerHtml,
+            footerHtml: layout.footerHtml,
+            firstHeader: layout.firstHeaderHtml ?? layout.headerHtml ?? "",
+            firstFooter: layout.firstFooterHtml ?? layout.footerHtml ?? "",
+            evenHeader: layout.evenHeaderHtml ?? layout.headerHtml ?? "",
+            evenFooter: layout.evenFooterHtml ?? layout.footerHtml ?? "",
+            firstHeaderHtml: layout.firstHeaderHtml,
+            firstFooterHtml: layout.firstFooterHtml,
+            evenHeaderHtml: layout.evenHeaderHtml,
+            evenFooterHtml: layout.evenFooterHtml,
+            differentFirstPage: layout.differentFirstPage ?? false,
+            differentOddEven: layout.differentOddEven ?? false,
+            showPageNumbers: false,
+            headerTopDistance: layout.headerTopDistance ?? 48,
+            footerBottomDistance: layout.footerBottomDistance ?? 48,
+          };
+          importedSections.set(layoutKey, section);
+        }
+        return { id: "page_" + uid(), sectionId: section.id };
+      });
+
+      const sections = importedSections.size ? Array.from(importedSections.values()) : [defaultSection];
 
       const newPageHtml: Record<string, string> = {};
       newPages.forEach((p, idx) => {
@@ -1380,15 +1412,13 @@ export function DocumentModelProvider({
         id: "doc_" + uid(),
         title: docTitle,
         pages: newPages,
-        sections: [
-          {
-            ...section,
-            showPageNumbers: pageLayout ? false : true,
-            pageNumberPosition: "footer",
-            pageNumberAlignment: "right",
-            pageNumberFormat: "1",
-          },
-        ],
+        sections: sections.map((section) => ({
+          ...section,
+          showPageNumbers: pageLayout || pageLayouts?.length ? false : true,
+          pageNumberPosition: "footer",
+          pageNumberAlignment: "right",
+          pageNumberFormat: "1",
+        })),
         pageHtml: newPageHtml,
         styleOverrides: {},
         savedAt: now,
@@ -1400,95 +1430,70 @@ export function DocumentModelProvider({
         },
       };
 
-      setModel((currentModel) => {
-        try {
-          const syncedCurrent = syncActiveDomToDoc(currentModel);
-          const savedList = getStoredSavedDocuments();
+      const syncedCurrent = syncActiveDomToDoc(model);
+      const savedList = getStoredSavedDocuments();
+      const currentIndex = savedList.findIndex((doc) => doc.id === syncedCurrent.id);
+      const baseList = [...savedList];
+      if (currentIndex >= 0) baseList[currentIndex] = syncedCurrent;
+      else baseList.unshift(syncedCurrent);
 
-          // 1. Preserve current document in list with latest content
-          const existingIdx = savedList.findIndex((d) => d.id === syncedCurrent.id);
-          let baseList: DocumentModel[];
-          if (existingIdx >= 0) {
-            baseList = [...savedList];
-            baseList[existingIdx] = syncedCurrent;
-          } else {
-            baseList = [syncedCurrent, ...savedList];
-          }
-
-          // Deduplicate baseList and exclude any doc matching freshDoc.id
-          const seenIds = new Set<string>();
-          const uniqueBaseList: DocumentModel[] = [];
-          for (const doc of baseList) {
-            if (doc && doc.id && doc.id !== freshDoc.id && !seenIds.has(doc.id)) {
-              seenIds.add(doc.id);
-              uniqueBaseList.push(doc);
-            }
-          }
-
-          // 2. Enforce MAX_DOCUMENTS (10)
-          const targetRetainCount = MAX_DOCUMENTS - 1; // 9
-          let prunedList = [...uniqueBaseList];
-
-          while (prunedList.length > targetRetainCount) {
-            const oldestDoc = findOldestDocument(prunedList);
-            if (!oldestDoc) break;
-
-            prunedList = prunedList.filter((d) => d.id !== oldestDoc.id);
-
-            // Clean up snapshots for the deleted oldest document
-            for (let i = localStorage.length - 1; i >= 0; i--) {
-              const key = localStorage.key(i);
-              if (key && key.startsWith(`editor_snapshot.${oldestDoc.id}.`)) {
-                localStorage.removeItem(key);
-              }
-            }
-
-            // Clean up history
-            try {
-              const nextHistory = getInitialHistory().filter((h) => h.id !== oldestDoc.id);
-              localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
-              setHistory(nextHistory);
-            } catch {
-              // ignore
-            }
-          }
-
-          // 3. Prepend freshDoc to list
-          const nextSaved = [freshDoc, ...prunedList].slice(0, MAX_DOCUMENTS);
-
-          localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
-          setSavedDocuments(nextSaved);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(freshDoc));
-
-          // Save snapshot and update history
-          try {
-            localStorage.setItem(
-              `editor_snapshot.${freshDoc.id}.${freshDoc.savedAt}`,
-              JSON.stringify(freshDoc)
-            );
-            const historyItems = getInitialHistory().filter((h) => h.id !== freshDoc.id);
-            historyItems.unshift({
-              id: freshDoc.id,
-              title: freshDoc.title,
-              savedAt: freshDoc.savedAt!,
-            });
-            const latest = historyItems.slice(0, 50);
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(latest));
-            setHistory(latest);
-          } catch {
-            // ignore
-          }
-        } catch {
-          // ignore
-        }
-
-        setActivePage(freshDoc.pages[0]?.id ?? null);
-        return freshDoc;
+      const seenIds = new Set<string>();
+      const uniqueList = baseList.filter((doc) => {
+        if (!doc?.id || doc.id === freshDoc.id || seenIds.has(doc.id)) return false;
+        seenIds.add(doc.id);
+        return true;
       });
+      let retained = [...uniqueList];
+      while (retained.length > MAX_DOCUMENTS - 1) {
+        const oldestDoc = findOldestDocument(retained);
+        if (!oldestDoc) break;
+        retained = retained.filter((doc) => doc.id !== oldestDoc.id);
+      }
+      const nextSaved = [freshDoc, ...retained];
+
+      const oldSaved = localStorage.getItem(SAVED_DOCS_KEY);
+      const oldActive = localStorage.getItem(STORAGE_KEY);
+      try {
+        localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(nextSaved));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(freshDoc));
+      } catch (error) {
+        try {
+          if (oldSaved === null) localStorage.removeItem(SAVED_DOCS_KEY);
+          else localStorage.setItem(SAVED_DOCS_KEY, oldSaved);
+          if (oldActive === null) localStorage.removeItem(STORAGE_KEY);
+          else localStorage.setItem(STORAGE_KEY, oldActive);
+        } catch (rollbackError) {
+          console.error("Could not roll back an incomplete document import:", rollbackError);
+        }
+        throw new Error("The imported document could not be saved. Your current document was kept unchanged.", { cause: error });
+      }
+
+      setModel(freshDoc);
+      setSavedDocuments(nextSaved);
+      setActivePage(freshDoc.pages[0]?.id ?? null);
+
+      const retainedIds = new Set(retained.map((doc) => doc.id));
+      const prunedIds = new Set(uniqueList.filter((doc) => !retainedIds.has(doc.id)).map((doc) => doc.id));
+      for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+        const key = localStorage.key(index);
+        if (key && Array.from(prunedIds).some((id) => key.startsWith(`editor_snapshot.${id}.`))) {
+          localStorage.removeItem(key);
+        }
+      }
+      const latest = getInitialHistory().filter((entry) => !prunedIds.has(entry.id) && entry.id !== freshDoc.id);
+      latest.unshift({ id: freshDoc.id, title: freshDoc.title, savedAt: freshDoc.savedAt! });
+      const nextHistory = latest.slice(0, 50);
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+      } catch {
+        // The imported document itself is already persisted in the active and
+        // File Manager records above. History metadata is optional.
+      }
+      setHistory(nextHistory);
 
       return freshDoc;
     },
-    []
+    [model]
   );
 
   /* ============================================================

@@ -1532,7 +1532,7 @@ export async function generateWordDocx(
     const paperSizeName = sec.paperSizeConfig?.name ?? sec.paperSize?.name;
     const paperCode = getPaperSizeCode(paperSizeName);
     const pgSzXml = `<w:pgSz w:w="${Math.round(paperW * 15)}" w:h="${Math.round(paperH * 15)}" w:orient="${sec.orientation === "landscape" ? "landscape" : "portrait"}"${paperCode ? ` w:code="${paperCode}"` : ""}/>`;
-    const pgMarXml = `<w:pgMar w:top="${Math.round(mg.top * 15)}" w:bottom="${Math.round(mg.bottom * 15)}" w:left="${Math.round(mg.left * 15)}" w:right="${Math.round(mg.right * 15)}" w:header="${Math.round(hDist * 15)}" w:footer="${Math.round(fDist * 15)}" w:gutter="0"/>`;
+    const pgMarXml = `<w:pgMar w:top="${Math.round(mg.top * 15)}" w:bottom="${Math.round(mg.bottom * 15)}" w:left="${Math.round(mg.left * 15)}" w:right="${Math.round(mg.right * 15)}" w:header="${Math.round(hDist * 15)}" w:footer="${Math.round(fDist * 15)}" w:gutter="${Math.round((sec.gutter ?? 0) * 15)}"/>`;
     const pgBordersXml = buildPgBordersXml(sec);
     const titlePgXml = sec.differentFirstPage ? "<w:titlePg/>" : "";
 
@@ -1698,10 +1698,12 @@ export async function generateWordDocx(
 </w:styles>`);
 
   const hasOddEven = model.sections.some((s) => s.differentOddEven);
+  const hasMirroredMargins = model.sections.some((s) => s.marginPreset === "mirrored");
   zip.file("word/settings.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:defaultTabStop w:val="720"/>
   ${hasOddEven ? "<w:evenAndOddHeaders/>" : ""}
+  ${hasMirroredMargins ? "<w:mirrorMargins/>" : ""}
 </w:settings>`);
 
   ctxMediaFiles.forEach((file) => {
