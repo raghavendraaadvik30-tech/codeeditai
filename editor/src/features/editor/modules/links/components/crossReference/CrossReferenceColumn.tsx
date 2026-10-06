@@ -309,6 +309,15 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
           <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300">
             For which target ({targets.length} found)
           </label>
+          <button
+            type="button"
+            onClick={handleManualRefresh}
+            className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400"
+            title="Scan document for targets"
+          >
+            <RefreshCw className={cn("h-3 w-3", isScanning && "animate-spin")} />
+            Refresh
+          </button>
         </div>
         {targets.length === 0 ? (
           <div className="p-2 text-center text-xs text-slate-500 bg-slate-50 dark:bg-[#111D29] rounded-md border border-dashed border-slate-300 dark:border-slate-700">

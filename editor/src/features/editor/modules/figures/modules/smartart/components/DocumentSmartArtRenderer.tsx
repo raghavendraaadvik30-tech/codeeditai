@@ -37,8 +37,6 @@ import {
   Check,
   Quote,
   TrendingUp,
-  Layers,
-  CircleDot,
 } from 'lucide-react';
 import type { SmartArtModel, SmartArtNode, SmartArtStyle } from '@/features/editor/modules/figures/modules/smartart/types';
 import {
@@ -1116,7 +1114,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       if (layId === 'basicList') {
         return (
           <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-            {nodes.map((node, i) => {
+            {nodes.map((node) => {
               const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
               const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
@@ -1177,7 +1175,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       if (layId === 'verticalList') {
         return (
           <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-            {nodes.map((node, i) => {
+            {nodes.map((node) => {
               const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
               const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
@@ -1239,7 +1237,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       if (layId === 'horizontalList') {
         return (
           <div className="flex items-stretch justify-center gap-3 w-full h-full p-4 overflow-x-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-            {nodes.map((node, i) => {
+            {nodes.map((node) => {
               const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
               const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
@@ -1298,7 +1296,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       if (layId === 'groupedList') {
         return (
           <div className="flex flex-col justify-start gap-3 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-            {nodes.map((node, i) => {
+            {nodes.map((node) => {
               const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
               const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
@@ -1357,7 +1355,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       if (layId === 'stackedList') {
         return (
           <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-            {nodes.map((node, i) => {
+            {nodes.map((node) => {
               const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
               const bg = colors[origIndex % colors.length];
               const isNodeSelected = selectedNodeId === node.id;
@@ -1416,7 +1414,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       // 1.6 NUMBERED LIST (and fallback)
       return (
         <div className="flex flex-col justify-start gap-2.5 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-          {nodes.map((node, i) => {
+          {nodes.map((node) => {
             const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
             const bg = colors[origIndex % colors.length];
             const isNodeSelected = selectedNodeId === node.id;
@@ -1681,7 +1679,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   }}
                 />
 
-                {branchNodes.map((branch, idx) => {
+                {branchNodes.map((branch) => {
                   const origIndex = smartArt.nodes.findIndex((n) => n.id === branch.id);
                   const bg = colors[origIndex % colors.length];
                   const isNodeSelected = selectedNodeId === branch.id;
@@ -1765,7 +1763,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 }}
               />
 
-              {childrenNodes.map((child, idx) => {
+              {childrenNodes.map((child) => {
                 const origIndex = smartArt.nodes.findIndex((n) => n.id === child.id);
                 const bg = colors[origIndex % colors.length];
                 const isNodeSelected = selectedNodeId === child.id;
@@ -1925,7 +1923,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
 
             {/* Right Detailed Callout Cards */}
             <div className="flex-1 flex flex-col gap-2 max-w-xs">
-              {reversed.map((node, i) => {
+              {reversed.map((node) => {
                 const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
                 const bg = colors[origIndex % colors.length];
                 const isNodeSelected = selectedNodeId === node.id;
@@ -2076,7 +2074,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     if (layId === 'statCard') {
       return (
         <div className="grid grid-cols-3 gap-3.5 w-full h-full p-4 items-center overflow-x-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-          {nodes.map((node, i) => {
+          {nodes.map((node) => {
             const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
             const bg = colors[origIndex % colors.length];
             const isNodeSelected = selectedNodeId === node.id;
@@ -2131,7 +2129,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     if (layId === 'headerCards') {
       return (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full h-full p-4 overflow-y-auto overscroll-contain items-start" onWheel={(e) => e.stopPropagation()}>
-          {nodes.map((node, i) => {
+          {nodes.map((node) => {
             const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
             const bg = colors[origIndex % colors.length];
             const isNodeSelected = selectedNodeId === node.id;
@@ -2186,7 +2184,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     // 6.4 STANDARD / MULTI-COLUMN CARDS (Default Text Card)
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full h-full p-4 overflow-y-auto overscroll-contain items-start" onWheel={(e) => e.stopPropagation()}>
-        {nodes.map((node, i) => {
+        {nodes.map((node) => {
           const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
           const bg = colors[origIndex % colors.length];
           const isNodeSelected = selectedNodeId === node.id;

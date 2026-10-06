@@ -10,7 +10,8 @@ import { useEditor } from "../../../context/EditorContext";
 import { transformCurrentSelection } from "../utils/writingUtils";
 
 import type {
- CaseAction,
+  AlignmentTool,
+  CaseAction,
   FormattingTool,
 } from "../types/writing.types";
 
