@@ -1368,6 +1368,13 @@ export function DocumentModelProvider({
         let section = importedSections.get(layoutKey);
         if (!section) {
           const sectionId = `section_${importedSections.size + 1}`;
+          const defaultMargin = { top: 96, bottom: 96, left: 96, right: 96 };
+          const resolvedMarginConfig = {
+            top: layout.marginConfig?.top && layout.marginConfig.top > 0 ? layout.marginConfig.top : defaultMargin.top,
+            bottom: layout.marginConfig?.bottom && layout.marginConfig.bottom > 0 ? layout.marginConfig.bottom : defaultMargin.bottom,
+            left: layout.marginConfig?.left && layout.marginConfig.left > 0 ? layout.marginConfig.left : defaultMargin.left,
+            right: layout.marginConfig?.right && layout.marginConfig.right > 0 ? layout.marginConfig.right : defaultMargin.right,
+          };
           section = {
             ...defaultSection,
             id: sectionId,
@@ -1375,7 +1382,7 @@ export function DocumentModelProvider({
             paperSize: layout.paperSize,
             marginPreset: layout.mirroredMargins ? "mirrored" : "custom",
             importedLayout: true,
-            marginConfig: layout.marginConfig ?? { top: 0, bottom: 0, left: 0, right: 0 },
+            marginConfig: resolvedMarginConfig,
             gutter: layout.gutter ?? 0,
             header: layout.headerHtml ?? "",
             footer: layout.footerHtml ?? "",
@@ -1392,8 +1399,8 @@ export function DocumentModelProvider({
             differentFirstPage: layout.differentFirstPage ?? false,
             differentOddEven: layout.differentOddEven ?? false,
             showPageNumbers: false,
-            headerTopDistance: layout.headerTopDistance ?? 48,
-            footerBottomDistance: layout.footerBottomDistance ?? 48,
+            headerTopDistance: layout.headerTopDistance && layout.headerTopDistance > 0 ? layout.headerTopDistance : 48,
+            footerBottomDistance: layout.footerBottomDistance && layout.footerBottomDistance > 0 ? layout.footerBottomDistance : 48,
           };
           importedSections.set(layoutKey, section);
         }
@@ -1611,6 +1618,13 @@ export function DocumentModelProvider({
           let section = importedSections.get(layoutKey);
           if (!section) {
             const sectionId = `section_imported_${uid()}`;
+            const defaultMargin = { top: 96, bottom: 96, left: 96, right: 96 };
+            const resolvedMarginConfig = {
+              top: layout.marginConfig?.top && layout.marginConfig.top > 0 ? layout.marginConfig.top : defaultMargin.top,
+              bottom: layout.marginConfig?.bottom && layout.marginConfig.bottom > 0 ? layout.marginConfig.bottom : defaultMargin.bottom,
+              left: layout.marginConfig?.left && layout.marginConfig.left > 0 ? layout.marginConfig.left : defaultMargin.left,
+              right: layout.marginConfig?.right && layout.marginConfig.right > 0 ? layout.marginConfig.right : defaultMargin.right,
+            };
             section = {
               ...defaultSection,
               id: sectionId,
@@ -1618,7 +1632,7 @@ export function DocumentModelProvider({
               paperSize: layout.paperSize,
               marginPreset: layout.mirroredMargins ? "mirrored" : "custom",
               importedLayout: true,
-              marginConfig: layout.marginConfig ?? { top: 96, bottom: 96, left: 96, right: 96 },
+              marginConfig: resolvedMarginConfig,
               gutter: layout.gutter ?? 0,
               header: layout.headerHtml ?? "",
               footer: layout.footerHtml ?? "",
@@ -1635,8 +1649,8 @@ export function DocumentModelProvider({
               differentFirstPage: layout.differentFirstPage ?? false,
               differentOddEven: layout.differentOddEven ?? false,
               showPageNumbers: options?.autoEnablePageNumbers ?? false,
-              headerTopDistance: layout.headerTopDistance ?? 48,
-              footerBottomDistance: layout.footerBottomDistance ?? 48,
+              headerTopDistance: layout.headerTopDistance && layout.headerTopDistance > 0 ? layout.headerTopDistance : 48,
+              footerBottomDistance: layout.footerBottomDistance && layout.footerBottomDistance > 0 ? layout.footerBottomDistance : 48,
             };
             importedSections.set(layoutKey, section);
           }
