@@ -14,7 +14,7 @@ export interface ChartSeries {
   id: string;
   name: string;
   color?: string;
-  values: number[];
+  values: (number | string)[];
   type?: 'bar' | 'line' | 'area'; // for combo
 }
 

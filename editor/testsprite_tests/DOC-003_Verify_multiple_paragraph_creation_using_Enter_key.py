@@ -40,16 +40,64 @@ async def run_test():
         except Exception:
             pass
         
+        # -> Open the Login page and sign in using Workspace 'author', Email 'author@gmail.com', Password 'author123'.
+        await page.goto("http://localhost:5173/login")
+        try:
+            await page.wait_for_load_state("domcontentloaded", timeout=5000)
+        except Exception:
+            pass
+        
+        # -> Fill Workspace with 'author', Email with 'author@gmail.com', Password with 'author123', then click the 'Login' button to sign in.
+        # Enter Workspace text field
+        elem = page.get_by_role("textbox", name="Workspace")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author")
+        
+        # -> Fill Workspace with 'author', Email with 'author@gmail.com', Password with 'author123', then click the 'Login' button to sign in.
+        # example@email.com email field
+        elem = page.get_by_role("textbox", name="Email")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author@gmail.com")
+        
+        # -> Fill Workspace with 'author', Email with 'author@gmail.com', Password with 'author123', then click the 'Login' button to sign in.
+        # •••••••• password field
+        elem = page.get_by_role("textbox", name="Password")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author123")
+        
+        # -> Fill Workspace with 'author', Email with 'author@gmail.com', Password with 'author123', then click the 'Login' button to sign in.
+        # Login button
+        elem = page.get_by_role("button", name="Login")
+        await elem.click(timeout=10000)
+        
+        # -> Type 'Paragraph 1: Primary introduction', press Enter, then type 'Paragraph 2: Detailed description of features' inside the editor and verify paragraphs/page count.
+        # Type 'Paragraph 1: Primary introduction', press Enter, then type 'Paragraph 2: Detailed description of features' inside the editor and verify paragraphs/page count.
+        elem = page.locator("div").filter(has_text=re.compile(r"^PParagraph1:Primaryintroduction$"))
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Paragraph 1: Primary introduction")
+        
+        # -> Type 'Paragraph 1: Primary introduction', press Enter, then type 'Paragraph 2: Detailed description of features' inside the editor and verify paragraphs/page count.
+        # Type 'Paragraph 1: Primary introduction', press Enter, then type 'Paragraph 2: Detailed description of features' inside the editor and verify paragraphs/page count.
+        elem = page.get_by_text("PParagraph1:PrimaryintroductionPParagraph2:Detaileddescriptionoffeatures")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Paragraph 2: Detailed description of features")
+        
         # --> Assertions to verify final state
         
-        # --> Could not verify two paragraphs on Page 1 because the app shows the Sign In form instead of an editable document area.
-        # Assert-outcome: failed
-        # Assert: Expected the Login button to not be visible so the editor could be accessed.
-        await expect(page.locator("xpath=/html/body/div/div/div/div/div/div[4]/div[2]/div[2]/button").nth(0)).not_to_be_visible(timeout=15000), "Expected the Login button to not be visible so the editor could be accessed."
+        # --> Editor shows the two paragraphs entered during the test.
+        await page.get_by_text("PParagraph1:").nth(0).scroll_into_view_if_needed()
+        # Assert-outcome: passed
+        # Assert: The first paragraph element is visible in the editor.
+        await expect(page.get_by_text("PParagraph1:").nth(0)).to_be_visible(timeout=15000), "The first paragraph element is visible in the editor."
+        await page.get_by_text("PParagraph2:").nth(0).scroll_into_view_if_needed()
+        # Assert-outcome: passed
+        # Assert: The second paragraph element is visible in the editor.
+        await expect(page.get_by_text("PParagraph2:").nth(0)).to_be_visible(timeout=15000), "The second paragraph element is visible in the editor."
         
-        # --> Test blocked by environment/access constraints during agent run
-        # Reason: TEST BLOCKED The test could not be run — the UI does not expose an editable document area to type paragraphs or create pages. Observations: - The page displays a 'Sign In' login form with Workspace, Email, and Password input fields. - No content-editable editor, textarea, 'Page 1' canvas, or controls to add paragraphs/pages are present in the visible UI.
-        raise AssertionError("Test blocked during agent run: " + "TEST BLOCKED The test could not be run \u2014 the UI does not expose an editable document area to type paragraphs or create pages. Observations: - The page displays a 'Sign In' login form with Workspace, Email, and Password input fields. - No content-editable editor, textarea, 'Page 1' canvas, or controls to add paragraphs/pages are present in the visible UI." + " — the exported script cannot reproduce a PASS in this environment.")
+        # --> Document footer indicates a single page (Page 1 of 1), so no Page 2 was created.
+        # Assert-outcome: passed
+        # Assert: The page indicator shows '1', indicating a single page.
+        await expect(page.locator("xpath=/html/body/div/div/div/div/main/section/main/div[2]/div/section/div[4]/div/div/span").nth(0)).to_have_text("1", timeout=15000), "The page indicator shows '1', indicating a single page."
         await asyncio.sleep(5)
 
     finally:

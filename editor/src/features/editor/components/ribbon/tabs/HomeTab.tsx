@@ -52,7 +52,7 @@ const [fonts, setFonts] = useState<string[]>([
 const [fontsLoading, setFontsLoading] =
   useState(false);
 
-const [fontsError, setFontsError] =
+const [_fontsError, setFontsError] =
   useState<string | null>(null);
 
   const [isUndoDropdownOpen, setIsUndoDropdownOpen] = useState(false);

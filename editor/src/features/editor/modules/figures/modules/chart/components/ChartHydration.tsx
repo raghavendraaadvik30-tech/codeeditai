@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import type { ChartModel } from '@/features/editor/modules/figures/modules/chart/types';
 import { useChartContext } from '@/features/editor/modules/figures/modules/chart/context';
-import { applyChartFigureStyles } from '@/features/editor/modules/figures/modules/chart/utils';
+import { applyChartFigureStyles, getDefaultChartCaption } from '@/features/editor/modules/figures/modules/chart/utils';
 import { DocumentChartRenderer } from './DocumentChartRenderer';
 
 interface ChartMountInfo {
@@ -61,6 +61,191 @@ export const ChartHydration: React.FC = () => {
           figEl.setAttribute('data-chart-wrap', effectiveChart.wrapMode || 'inline');
           applyChartFigureStyles(figEl, effectiveChart);
 
+          // Backward compatibility & fallback: ensure caption is present on chart model
+          let captionEl = figEl.querySelector('figcaption') as HTMLElement | null;
+          if (!effectiveChart.caption || !effectiveChart.caption.trim()) {
+            const domCaption = captionEl?.textContent?.trim();
+            effectiveChart.caption = domCaption || getDefaultChartCaption(effectiveChart.chartType);
+          }
+
+          // Ensure figcaption element exists in DOM
+          if (!captionEl) {
+            captionEl = document.createElement('figcaption');
+            figEl.appendChild(captionEl);
+          }
+
+          // Configure figcaption attributes and styles
+          captionEl.removeAttribute('contenteditable');
+          captionEl.setAttribute('data-chart-caption', 'true');
+          captionEl.style.marginTop = '4px';
+          captionEl.style.fontSize = '10pt';
+          captionEl.style.fontWeight = '600';
+          captionEl.style.color = '#475569';
+          captionEl.style.textAlign = 'center';
+          captionEl.style.fontFamily = "Calibri, 'Segoe UI', Arial, sans-serif";
+          captionEl.style.outline = 'none';
+          captionEl.style.borderBottom = '1px dashed transparent';
+          captionEl.style.cursor = 'text';
+          captionEl.style.minHeight = '1.2em';
+          captionEl.style.userSelect = 'text';
+
+          // Sync figcaption text only if user is not actively editing it
+          const isActivelyEditing = captionEl.contains(document.activeElement) || captionEl.querySelector('input') !== null;
+          if (!isActivelyEditing && captionEl.textContent !== effectiveChart.caption) {
+            captionEl.textContent = effectiveChart.caption;
+          }
+
+          // Attach interactive inline editing listeners once
+          if (!(captionEl as any).__captionEditingAttached) {
+            (captionEl as any).__captionEditingAttached = true;
+
+            const enterEditMode = (clickEvent?: MouseEvent) => {
+              // If already in edit mode, do nothing
+              if (captionEl.querySelector('input')) return;
+
+              const currentMount = mountsRef.current.find((m) => m.id === chartId);
+              const baseChart = currentMount?.chart || effectiveChart;
+              const currentText = captionEl.textContent?.trim() || baseChart.caption || getDefaultChartCaption(baseChart.chartType);
+
+              // Calculate initial character offset from click position if available
+              let charOffset = currentText.length;
+              if (clickEvent) {
+                if (document.caretRangeFromPoint) {
+                  const range = document.caretRangeFromPoint(clickEvent.clientX, clickEvent.clientY);
+                  if (range && range.startOffset !== undefined) {
+                    charOffset = range.startOffset;
+                  }
+                } else if ((document as any).caretPositionFromPoint) {
+                  const pos = (document as any).caretPositionFromPoint(clickEvent.clientX, clickEvent.clientY);
+                  if (pos && pos.offset !== undefined) {
+                    charOffset = pos.offset;
+                  }
+                }
+              }
+
+              captionEl.innerHTML = '';
+
+              const input = document.createElement('input');
+              input.type = 'text';
+              input.value = currentText;
+              input.className = 'chart-caption-inline-input';
+              input.style.width = '100%';
+              input.style.maxWidth = '100%';
+              input.style.background = 'transparent';
+              input.style.border = 'none';
+              input.style.borderBottom = '1.5px solid #3b82f6';
+              input.style.outline = 'none';
+              input.style.fontSize = '10pt';
+              input.style.fontWeight = '600';
+              input.style.color = '#475569';
+              input.style.textAlign = 'center';
+              input.style.fontFamily = "Calibri, 'Segoe UI', Arial, sans-serif";
+              input.style.padding = '0';
+              input.style.margin = '0';
+              input.style.boxSizing = 'border-box';
+              input.style.cursor = 'text';
+
+              captionEl.appendChild(input);
+
+              let isCommitted = false;
+
+              const commit = () => {
+                if (isCommitted) return;
+                isCommitted = true;
+
+                const rawVal = input.value.trim();
+                const newCaption = rawVal || currentText;
+
+                captionEl.innerHTML = '';
+                captionEl.textContent = newCaption;
+
+                const currentM = mountsRef.current.find((m) => m.id === chartId);
+                const chartToUpdate = currentM?.chart || baseChart;
+
+                if (newCaption !== chartToUpdate.caption) {
+                  const updatedChart: ChartModel = {
+                    ...chartToUpdate,
+                    caption: newCaption,
+                    updatedAt: new Date().toISOString(),
+                  };
+
+                  if (currentM) {
+                    currentM.chart = updatedChart;
+                  }
+
+                  // Update data-chart-config on the figure
+                  const encoded = encodeURIComponent(JSON.stringify(updatedChart));
+                  figEl.setAttribute('data-chart-config', encoded);
+
+                  // Sync with context
+                  setActiveChart(updatedChart);
+
+                  // Notify document page of DOM change once on commit so auto-save/undo tracks the edit
+                  const editable = figEl.closest('[contenteditable="true"]');
+                  if (editable) {
+                    editable.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                }
+              };
+
+              const cancel = () => {
+                if (isCommitted) return;
+                isCommitted = true;
+
+                captionEl.innerHTML = '';
+                captionEl.textContent = currentText;
+              };
+
+              // Keyboard handling with full insulation from outer editor
+              input.addEventListener('keydown', (e) => {
+                e.stopPropagation();
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  input.blur();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancel();
+                }
+              });
+
+              input.addEventListener('keyup', (e) => e.stopPropagation());
+              input.addEventListener('keypress', (e) => e.stopPropagation());
+              input.addEventListener('beforeinput', (e) => e.stopPropagation());
+              input.addEventListener('input', (e) => e.stopPropagation());
+
+              // Prevent mouse interactions from triggering figure dragging
+              input.addEventListener('pointerdown', (e) => e.stopPropagation());
+              input.addEventListener('mousedown', (e) => e.stopPropagation());
+              input.addEventListener('click', (e) => e.stopPropagation());
+              input.addEventListener('dblclick', (e) => e.stopPropagation());
+              input.addEventListener('contextmenu', (e) => e.stopPropagation());
+
+              input.addEventListener('blur', () => {
+                commit();
+              });
+
+              input.focus();
+              try {
+                input.setSelectionRange(charOffset, charOffset);
+              } catch {
+                // fallback
+              }
+            };
+
+            captionEl.addEventListener('click', (e) => {
+              e.stopPropagation();
+              enterEditMode(e);
+            });
+
+            captionEl.addEventListener('pointerdown', (e) => {
+              e.stopPropagation();
+            });
+
+            captionEl.addEventListener('mousedown', (e) => {
+              e.stopPropagation();
+            });
+          }
+
           newMounts.push({
             id: chartId,
             figureEl: figEl,
@@ -87,7 +272,7 @@ export const ChartHydration: React.FC = () => {
       }
       return newMounts;
     });
-  }, []);
+  }, [setActiveChart]);
 
   // Sync handler to update DOM attributes when changed from ribbon or context
   const handleSyncFromContext = useCallback(
@@ -121,8 +306,14 @@ export const ChartHydration: React.FC = () => {
 
       // Update figcaption
       const captionEl = mount.figureEl.querySelector('figcaption');
-      if (captionEl && updated.caption) {
-        captionEl.textContent = updated.caption;
+      if (captionEl) {
+        const isEditing = captionEl.contains(document.activeElement) || captionEl.querySelector('input') !== null;
+        if (!isEditing) {
+          const captionToSet = updated.caption || mount.chart?.caption || getDefaultChartCaption(updated.chartType);
+          if (captionEl.textContent !== captionToSet) {
+            captionEl.textContent = captionToSet;
+          }
+        }
       }
 
       const editable = mount.figureEl.closest('[contenteditable="true"]');
@@ -211,7 +402,25 @@ export const ChartHydration: React.FC = () => {
         [contenteditable="true"] > blockquote,
         [contenteditable="true"] > table {
           position: relative;
-          z-index: 5;
+          z-index: 2;
+          word-break: normal;
+          overflow-wrap: break-word;
+        }
+        .editor-chart-figure {
+          box-sizing: border-box;
+        }
+        .editor-chart-figure[data-chart-wrap="behind"] {
+          z-index: 0 !important;
+        }
+        .editor-chart-figure[data-chart-wrap="inFront"] {
+          z-index: 25 !important;
+        }
+        .editor-chart-figure[data-chart-wrap="square"],
+        .editor-chart-figure[data-chart-wrap="tight"],
+        .editor-chart-figure[data-chart-wrap="through"],
+        .editor-chart-figure[data-chart-wrap="topBottom"],
+        .editor-chart-figure[data-chart-wrap="inline"] {
+          z-index: 10 !important;
         }
       `}</style>
       {mounts.map((m) =>

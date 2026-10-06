@@ -23,7 +23,6 @@ export const ShapeHydration: React.FC = () => {
     const newMounts: ShapeMountInfo[] = [];
 
     foundFigureEls.forEach((figEl) => {
-      figEl.oncontextmenu = (e) => e.preventDefault();
       // Remove any erroneous picture/icon mounts that were mistakenly attached
       figEl.querySelectorAll(".editor-picture-mount, .editor-icon-mount").forEach((badMount) => badMount.remove());
 
@@ -106,11 +105,25 @@ export const ShapeHydration: React.FC = () => {
     };
   }, [scanDocumentForShapes]);
 
+  const handleDeleteShape = useCallback((shapeId: string, figEl: HTMLElement) => {
+    const pageContainer = figEl.closest('[contenteditable="true"]') as HTMLElement | null;
+    figEl.remove();
+    if (pageContainer) {
+      pageContainer.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    setMounts((prev) => prev.filter((m) => m.id !== shapeId));
+  }, []);
+
   return (
     <>
       {mounts.map((m) =>
         ReactDOM.createPortal(
-          <DocumentShapeRenderer key={m.id} config={m.config} figureEl={m.figureEl} />,
+          <DocumentShapeRenderer
+            key={m.id}
+            config={m.config}
+            figureEl={m.figureEl}
+            onDelete={() => handleDeleteShape(m.id, m.figureEl)}
+          />,
           m.mountEl
         )
       )}

@@ -43,7 +43,7 @@ export async function fetchAllGoogleFonts(): Promise<GoogleFont[]> {
 }
 export function loadGoogleFont(
   fontFamily: string,
-  variant = "400"
+  _variant = "400"
 ) {
   const id =
     `google-font-${fontFamily

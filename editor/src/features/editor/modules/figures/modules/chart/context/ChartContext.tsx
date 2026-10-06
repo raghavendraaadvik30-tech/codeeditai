@@ -8,7 +8,7 @@ import {
   ALL_CHART_STYLES,
   QUICK_LAYOUTS,
 } from '../constants/chart.constants';
-import { transposeChartData } from '../utils/chartUtil';
+import { transposeChartData, getDefaultChartCaption, isDefaultChartCaption } from '../utils/chartUtil';
 
 export interface ChartContextValue {
   activeChart: ChartModel | null;
@@ -91,7 +91,9 @@ export const ChartProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const changeChartType = useCallback(
     (type: ChartType) => {
       if (!activeChart) return;
-      updateActiveChart({ chartType: type });
+      const isDefault = isDefaultChartCaption(activeChart.caption, activeChart.chartType);
+      const newCaption = isDefault ? getDefaultChartCaption(type) : activeChart.caption;
+      updateActiveChart({ chartType: type, caption: newCaption });
       setIsChangeTypeModalOpen(false);
     },
     [activeChart, updateActiveChart]

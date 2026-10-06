@@ -40,16 +40,77 @@ async def run_test():
         except Exception:
             pass
         
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button.
+        # Enter Workspace text field
+        elem = page.get_by_role("textbox", name="Workspace")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author")
+        
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button.
+        # example@email.com email field
+        elem = page.get_by_role("textbox", name="Email")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author@gmail.com")
+        
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button.
+        # •••••••• password field
+        elem = page.get_by_role("textbox", name="Password")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("author123")
+        
+        # -> Fill the 'Workspace', 'Email', and 'Password' fields and click the 'Login' button.
+        # Login button
+        elem = page.get_by_role("button", name="Login")
+        await elem.click(timeout=10000)
+        
+        # -> Click inside the document editing area and type 'Test document content for automated editor validation.'
+        # Click inside the document editing area and type 'Test document content for automated editor validation.'
+        elem = page.locator("section > .overflow-hidden")
+        await elem.click(timeout=10000)
+        
+        # -> Click inside the document editing area and type 'Test document content for automated editor validation.'
+        # Click inside the document editing area and type 'Test document content for automated editor validation.'
+        elem = page.locator("div").filter(has_text=re.compile(r"^TTestdocumentcontentforautomatededitorvalidation\.$"))
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Test document content for automated editor validation.")
+        
+        # -> Click inside the document editor and type 'Test document content for automated editor validation.' then verify the editor contains that exact sentence.
+        # T T e s td o c u m e n tc o n t e n tf o ra u t o...
+        elem = page.locator("div").filter(has_text=re.compile(r"^TTestdocumentcontentforautomatededitorvalidation\.$"))
+        await elem.click(timeout=10000)
+        
+        # -> Click inside the document editor, type 'Test document content for automated editor validation.', then verify the editor contains that exact sentence.
+        # T T e s td o c u m e n tc o n t e n tf o ra u t o...
+        elem = page.locator("section > .overflow-hidden")
+        await elem.click(timeout=10000)
+        
+        # -> Click inside the document editor, clear existing content (Select All + Delete), type 'Test document content for automated editor validation.', and verify that exact sentence appears in the editor.
+        # T T e s td o c u m e n tc o n t e n tf o ra u t o...
+        elem = page.locator("section > .overflow-hidden")
+        await elem.click(timeout=10000)
+        
+        # -> Click the 'Disable Tracking' button in the Track Changes panel to turn off Track Changes and wait for the UI to settle.
+        # Disable Tracking button
+        elem = page.get_by_role("button", name="Disable Tracking")
+        await elem.click(timeout=10000)
+        
+        # -> Select all content in the editor and delete it (clear the editor), then type 'Test document content for automated editor validation.' into the editor.
+        # T T e s td o c u m e n tc o n t e n tf o ra u t o...
+        elem = page.locator("section > .overflow-hidden")
+        await elem.click(timeout=10000)
+        
+        # -> Select all content in the editor and delete it (clear the editor), then type 'Test document content for automated editor validation.' into the editor.
+        # T T e s td o c u m e n tc o n t e n tf o ra u t o...
+        elem = page.get_by_text("Test document content for")
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Test document content for automated editor validation.")
+        
         # --> Assertions to verify final state
         
-        # --> The contenteditable editor is not present on the page, so the test could not verify the document content.
-        # Assert-outcome: failed
-        # Assert: Expected Login button to be visible.
-        await expect(page.locator("xpath=/html/body/div/div/div/div/div/div[4]/div[2]/div[2]/button").nth(0)).to_have_text("Login", timeout=15000), "Expected Login button to be visible."
-        
-        # --> Test blocked by environment/access constraints during agent run
-        # Reason: TEST BLOCKED The contenteditable editor required for this test is not present on the page, so the test could not be run. Observations: - The page shows a 'LOGIN' sign-in form with 'Workspace', 'Email', and 'Password' inputs and a 'Login' button. - No contenteditable area or editor element was found (no elements matching contenteditable, role="textbox", #editor, .editor, or data-testid/data-qa e...
-        raise AssertionError("Test blocked during agent run: " + "TEST BLOCKED The contenteditable editor required for this test is not present on the page, so the test could not be run. Observations: - The page shows a 'LOGIN' sign-in form with 'Workspace', 'Email', and 'Password' inputs and a 'Login' button. - No contenteditable area or editor element was found (no elements matching contenteditable, role=\"textbox\", #editor, .editor, or data-testid/data-qa e..." + " — the exported script cannot reproduce a PASS in this environment.")
+        # --> Editor shows the typed sentence 'Test document content for automated editor validation.'.
+        # Assert-outcome: passed
+        # Assert: Verifies the editor's visible text equals the typed sentence.
+        await expect(page.locator("xpath=/html/body/div/div/div/div/main/section/main/div[2]/div/section/div[3]").nth(0)).to_have_text("Test document content for automated editor validation.", timeout=15000), "Verifies the editor's visible text equals the typed sentence."
         await asyncio.sleep(5)
 
     finally:

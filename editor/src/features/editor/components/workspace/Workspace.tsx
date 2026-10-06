@@ -1829,48 +1829,7 @@ function DocumentPage({
     ? pageHeight
     : Math.max(100, pageHeight - headerHeight - footerHeight);
 
-  const getBorderStyle = (): React.CSSProperties => {
-    if (!section?.pageBorders || section.pageBorders.style === "none") {
-      return {};
-    }
 
-    const {
-      style,
-      color = "#000000",
-      width = 2,
-      top = true,
-      bottom = true,
-      left = true,
-      right = true,
-    } = section.pageBorders;
-
-    const borderVal =
-      style === "double"
-        ? `${Math.max(3, width)}px double ${color}`
-        : style === "dashed"
-          ? `${width}px dashed ${color}`
-          : style === "dotted"
-            ? `${width}px dotted ${color}`
-            : style === "3d"
-              ? `${width}px inset ${color}`
-              : `${width}px solid ${color}`;
-
-    const styles: React.CSSProperties = {
-      boxSizing: "border-box",
-    };
-
-    if (top) styles.borderTop = borderVal;
-    if (bottom) styles.borderBottom = borderVal;
-    if (left) styles.borderLeft = borderVal;
-    if (right) styles.borderRight = borderVal;
-
-    if (style === "shadow") {
-      styles.boxShadow = "0 10px 30px rgba(0,0,0,0.25)";
-      styles.border = `${width}px solid ${color}`;
-    }
-
-    return styles;
-  };
 
   const extractCleanTitle = (src?: string, fileName?: string): string => {
     if (fileName && fileName.trim() && fileName !== "Online Picture") {
