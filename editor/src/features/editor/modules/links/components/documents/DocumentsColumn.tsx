@@ -211,7 +211,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                     <Calendar className="h-3 w-3" />
                     {doc.updatedAt}
                   </span>
-                  <span className="uppercase text-[9px] font-bold tracking-wider px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  <span className="uppercase text-[9px] font-bold tracking-wider px-1 py-[0.8px] rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                     {doc.extension}
                   </span>
                 </div>

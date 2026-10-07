@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10",
+    "@shadcn/lint": "^0.2.0",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",

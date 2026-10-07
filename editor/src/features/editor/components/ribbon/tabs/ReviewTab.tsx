@@ -99,7 +99,7 @@ export default function ReviewTab() {
       >
         <span>{trackChanges ? "Tracking ON" : "Track Changes"}</span>
         {pendingChanges > 0 && (
-          <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.2 text-[10px] font-bold text-amber-800 border border-amber-300">
+          <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-[0.8px] text-[10px] font-bold text-amber-800 border border-amber-300">
             {pendingChanges}
           </span>
         )}

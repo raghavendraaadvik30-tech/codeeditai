@@ -95,7 +95,7 @@ export function LinksHistorySection({
           <h3 className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
             LINKS HISTORY
           </h3>
-          <span className="rounded-full bg-slate-200 dark:bg-slate-700 px-1.5 py-0.2 text-[9px] font-bold text-slate-700 dark:text-slate-300">
+          <span className="rounded-full bg-slate-200 dark:bg-slate-700 px-1.5 py-[0.8px] text-[9px] font-bold text-slate-700 dark:text-slate-300">
             {history.length}
           </span>
         </div>

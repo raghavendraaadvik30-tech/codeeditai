@@ -6,6 +6,13 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* NOTE: project-specific JS-hook classes (resize-handle, rotate-handle,
+   chart-editing-workspace, chart-display-frame, chart-data-editor-container,
+   data-editor-table-container, menu-item-btn, cn-input-otp) carry no styles;
+   all visuals come from colocated Tailwind utilities. They are allowlisted
+   on shadcn/no-unknown-classes in eslint.config.js instead of @utility,
+   because an empty @utility fails the production build. */
+
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'IBM Plex Sans Variable', sans-serif;

@@ -63,7 +63,7 @@ export function BookmarkList({ bookmarks, onNavigate, onDelete }: BookmarkListPr
                       {bm.name}
                     </span>
                     {bm.pageNumber && (
-                      <span className="rounded bg-slate-100 px-1 py-0.2 text-[9px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                      <span className="rounded bg-slate-100 px-1 py-[0.8px] text-[9px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                         Page {bm.pageNumber}
                       </span>
                     )}
