@@ -228,7 +228,7 @@ export function TableControlsOverlay({
 
     const ratio = targetTotal / currentTotal;
     const newWidths = baseWidths.map((w) => Math.max(minW, Math.floor(w * ratio)));
-    let sum = newWidths.reduce((a, b) => a + b, 0);
+    const sum = newWidths.reduce((a, b) => a + b, 0);
     let diff = targetTotal - sum;
 
     let idx = 0;
@@ -259,7 +259,7 @@ export function TableControlsOverlay({
 
     const ratio = targetTotal / currentTotal;
     const newHeights = baseHeights.map((h) => Math.max(minH, Math.floor(h * ratio)));
-    let sum = newHeights.reduce((a, b) => a + b, 0);
+    const sum = newHeights.reduce((a, b) => a + b, 0);
     let diff = targetTotal - sum;
 
     let idx = 0;

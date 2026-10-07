@@ -86,37 +86,37 @@ import type { User } from "../types/dashboard.types";
 
 import {
 
-  Plus,
+  Plus,
 
-  Search,
+  Search,
 
-  Trash2,
+  Trash2,
 
-  Edit3,
+  Edit3,
 
-  Eye,
+  Eye,
 
-  X,
+  X,
 
-  Mail,
+  Mail,
 
-  User as UserIcon,
+  User as UserIcon,
 
-  Calendar,
+  Calendar,
 
-  Layers,
+  Layers,
 
-  AlertCircle,
+  AlertCircle,
 
-  FileSpreadsheet,
+  FileSpreadsheet,
 
-  Copy,
+  Copy,
 
-  Check,
+  Check,
 
-  ExternalLink,
+  ExternalLink,
 
-  Share2,
+  Share2,
   EyeOff,
 
 } from "lucide-react";
@@ -135,15 +135,15 @@ import { Label } from "@/shared/components/ui/label";
 
 import {
 
-  Dialog,
+  Dialog,
 
-  DialogContent,
+  DialogContent,
 
-  DialogHeader,
+  DialogHeader,
 
-  DialogTitle,
+  DialogTitle,
 
-  DialogFooter,
+  DialogFooter,
 
 } from "@/shared/components/ui/dialog";
 
@@ -151,15 +151,15 @@ import {
 
 import {
 
-  Select,
+  Select,
 
-  SelectContent,
+  SelectContent,
 
-  SelectItem,
+  SelectItem,
 
-  SelectTrigger,
+  SelectTrigger,
 
-  SelectValue,
+  SelectValue,
 
 } from "@/shared/components/ui/select";
 
@@ -167,79 +167,79 @@ import {
 
 /**
 
- * ============================================================
+ * ============================================================
 
- * UserManagement.tsx
+ * UserManagement.tsx
 
- * ============================================================
+ * ============================================================
 
- *
+ *
 
- * PURPOSE:
+ * PURPOSE:
 
- * Provides the complete User Directory interface.
+ * Provides the complete User Directory interface.
 
- *
+ *
 
- * RESPONSIBILITIES:
+ * RESPONSIBILITIES:
 
- * - Display users
+ * - Display users
 
- * - Search users
+ * - Search users
 
- * - Filter users by role
+ * - Filter users by role
 
- * - Export users to Excel
+ * - Export users to Excel
 
- * - Add users
+ * - Add users
 
- * - Edit users
+ * - Edit users
 
- * - View user details
+ * - View user details
 
- * - Delete users
+ * - Delete users
 
- * - Prepare/send invitation through the current frontend UI
+ * - Prepare/send invitation through the current frontend UI
 
- *
+ *
 
- * CURRENT DATA SOURCE:
+ * CURRENT DATA SOURCE:
 
- * useUsersStore() is currently used for local/mock state.
+ * useUsersStore() is currently used for local/mock state.
 
- *
+ *
 
- * BACKEND:
+ * BACKEND:
 
- * When the backend is connected, CRUD operations should move to:
+ * When the backend is connected, CRUD operations should move to:
 
- *
+ *
 
- * UserManagement
+ * UserManagement
 
- *      ↓
+ *      ↓
 
- * userService
+ * userService
 
- *      ↓
+ *      ↓
 
- * apiClient
+ * apiClient
 
- *      ↓
+ *      ↓
 
- * backend
+ * backend
 
- *
+ *
 
- * SECURITY:
+ * SECURITY:
 
- * Passwords are intentionally NOT stored, displayed, copied,
+ * Passwords are intentionally NOT stored, displayed, copied,
 
- * or included in the User model on the frontend.
+ * or included in the User model on the frontend.
 
- *
+ *
 
- */
+ */
 
 
 
@@ -247,9 +247,9 @@ import {
 
 /* ============================================================
 
-   ADD USER FORM
+   ADD USER FORM
 
-   ============================================================ */
+   ============================================================ */
 
 
 
@@ -266,9 +266,9 @@ interface AddUserFormInput {
 
 /* ============================================================
 
-   EDIT USER FORM
+   EDIT USER FORM
 
-   ============================================================ */
+   ============================================================ */
 
 
 
@@ -285,41 +285,41 @@ interface EditUserFormInput {
 
 /* ============================================================
 
-   ADD USER VALIDATION
+   ADD USER VALIDATION
 
-   ============================================================ */
+   ============================================================ */
 
 
 
 const addUserFormSchema = z.object({
 
-  fullName: z
+  fullName: z
 
-    .string()
+    .string()
 
-    .min(3, {
+    .min(3, {
 
-      message: "Full Name must contain at least 3 characters",
+      message: "Full Name must contain at least 3 characters",
 
-    }),
+    }),
 
 
 
-  email: z
+  email: z
 
-    .string()
+    .string()
 
-    .min(1, {
+    .min(1, {
 
-      message: "Email address is required",
+      message: "Email address is required",
 
-    })
+    })
 
-    .email({
+    .email({
 
-      message: "Provide a valid email address",
+      message: "Provide a valid email address",
 
-    }),
+    }),
 
   password: z.string().min(6, {
     message: "Password must contain at least 6 characters",
@@ -329,7 +329,7 @@ const addUserFormSchema = z.object({
 
 
 
-  role: z.enum(["Admin", "Author", "Reviewer"]),
+  role: z.enum(["Admin", "Author", "Reviewer"]),
 
 });
 
@@ -339,41 +339,41 @@ const addUserFormSchema = z.object({
 
 /* ============================================================
 
-   EDIT USER VALIDATION
+   EDIT USER VALIDATION
 
-   ============================================================ */
+   ============================================================ */
 
 
 
 const editUserFormSchema = z.object({
 
-  fullName: z
+  fullName: z
 
-    .string()
+    .string()
 
-    .min(3, {
+    .min(3, {
 
-      message: "Full Name must contain at least 3 characters",
+      message: "Full Name must contain at least 3 characters",
 
-    }),
+    }),
 
 
 
-  email: z
+  email: z
 
-    .string()
+    .string()
 
-    .min(1, {
+    .min(1, {
 
-      message: "Email address is required",
+      message: "Email address is required",
 
-    })
+    })
 
-    .email({
+    .email({
 
-      message: "Provide a valid email address",
+      message: "Provide a valid email address",
 
-    }),
+    }),
 
   password: z.string().optional().refine(
     (value) => !value || value.length >= 6,
@@ -382,7 +382,7 @@ const editUserFormSchema = z.object({
 
 
 
-  role: z.enum(["Admin", "Author", "Reviewer"]),
+  role: z.enum(["Admin", "Author", "Reviewer"]),
 
 });
 
@@ -392,94 +392,94 @@ const editUserFormSchema = z.object({
 
 /* ============================================================
 
-   COMPONENT
+   COMPONENT
 
-   ============================================================ */
+   ============================================================ */
 
 
 
 export default function UsersManagement() {
 
-  /* ----------------------------------------------------------
+  /* ----------------------------------------------------------
 
-     USER STORE
+     USER STORE
 
-     ---------------------------------------------------------- */
-
-
-
-  const {
-
-    users,
-
-    addUser,
-
-    updateUser,
-
-    deleteUser,
-
-    searchQuery,
-
-    setSearchQuery,
-
-    roleFilter,
-
-    setRoleFilter,
-
-  } = useUsersStore();
+     ---------------------------------------------------------- */
 
 
 
+  const {
+
+    users,
+
+    addUser,
+
+    updateUser,
+
+    deleteUser,
+
+    searchQuery,
+
+    setSearchQuery,
+
+    roleFilter,
+
+    setRoleFilter,
+
+  } = useUsersStore();
 
 
-  /* ----------------------------------------------------------
-
-     MODAL STATE
-
-     ---------------------------------------------------------- */
 
 
 
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  /* ----------------------------------------------------------
 
-  const [isEditOpen, setIsEditOpen] = useState(false);
+     MODAL STATE
+
+     ---------------------------------------------------------- */
+
+
+
+  const [isAddOpen, setIsAddOpen] = useState(false);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const [showAddPassword, setShowAddPassword] = useState(false);
   const [showEditPassword, setShowEditPassword] = useState(false);
 
-  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
 
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
-
-
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
 
 
-  /* ----------------------------------------------------------
-
-     SELECTED USER STATE
-
-     ---------------------------------------------------------- */
 
 
+  /* ----------------------------------------------------------
 
-  const [selectedUser, setSelectedUser] =
+     SELECTED USER STATE
 
-    useState<User | null>(null);
+     ---------------------------------------------------------- */
 
 
 
-  const [userToDelete, setUserToDelete] =
+  const [selectedUser, setSelectedUser] =
 
-    useState<{ id: string; name: string } | null>(null);
+    useState<User | null>(null);
 
 
 
-  const [inviteUser, setInviteUser] =
+  const [userToDelete, setUserToDelete] =
 
-    useState<User | null>(null);
+    useState<{ id: string; name: string } | null>(null);
+
+
+
+  const [inviteUser, setInviteUser] =
+
+    useState<User | null>(null);
 
   // Temporarily retain the password for the invitation preview.
   const [invitePassword, setInvitePassword] = useState<string>("");
@@ -492,162 +492,162 @@ export default function UsersManagement() {
 
 
 
-  /* ----------------------------------------------------------
+  /* ----------------------------------------------------------
 
-     COPY STATE
+     COPY STATE
 
-     ---------------------------------------------------------- */
-
-
-
-  const [copiedField, setCopiedField] =
-
-    useState<string | null>(null);
+     ---------------------------------------------------------- */
 
 
 
+  const [copiedField, setCopiedField] =
 
-
-  /* ==========================================================
-
-     SEARCH
-
-     ========================================================== */
-
-
-
-  const handleSearchChange = (
-
-    e: React.ChangeEvent<HTMLInputElement>
-
-  ) => {
-
-    setSearchQuery(e.target.value);
-
-  };
+    useState<string | null>(null);
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     ADD USER FORM
+     SEARCH
 
-     ========================================================== */
-
-
-
-  const {
-
-    register: registerAdd,
-
-    handleSubmit: handleAddSubmit,
-
-    control: controlAdd,
-
-    reset: resetAdd,
-
-    formState: { errors: errorsAdd },
-
-  } = useForm<AddUserFormInput>({
-
-    resolver: zodResolver(addUserFormSchema),
+     ========================================================== */
 
 
 
-    defaultValues: {
+  const handleSearchChange = (
 
-      fullName: "",
+    e: React.ChangeEvent<HTMLInputElement>
 
-      email: "",
+  ) => {
+
+    setSearchQuery(e.target.value);
+
+  };
+
+
+
+
+
+  /* ==========================================================
+
+     ADD USER FORM
+
+     ========================================================== */
+
+
+
+  const {
+
+    register: registerAdd,
+
+    handleSubmit: handleAddSubmit,
+
+    control: controlAdd,
+
+    reset: resetAdd,
+
+    formState: { errors: errorsAdd },
+
+  } = useForm<AddUserFormInput>({
+
+    resolver: zodResolver(addUserFormSchema),
+
+
+
+    defaultValues: {
+
+      fullName: "",
+
+      email: "",
       password: "",
 
-      role: "Author",
+      role: "Author",
 
-    },
+    },
 
-  });
-
-
-
-
-
-  /* ==========================================================
-
-     EDIT USER FORM
-
-     ========================================================== */
-
-
-
-  const {
-
-    register: registerEdit,
-
-    handleSubmit: handleEditSubmit,
-
-    control: controlEdit,
-
-    setValue: setEditValue,
-
-    reset: resetEdit,
-
-    formState: { errors: errorsEdit },
-
-  } = useForm<EditUserFormInput>({
-
-    resolver: zodResolver(editUserFormSchema),
-
-
-
-    defaultValues: {
-
-      fullName: "",
-
-      email: "",
-
-      password: "",
-
-      role: "Author",
-
-    },
-
-  });
+  });
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     ADD USER
+     EDIT USER FORM
 
-     ========================================================== */
-
-
-
-  const onAddSubmit = (data: AddUserFormInput) => {
-
-    addUser({
-
-      fullName: data.fullName,
-
-      email: data.email,
-
-      phone: "",
-
-      role: data.role,
-
-      status: "Active",
-
-    });
+     ========================================================== */
 
 
 
-    setIsAddOpen(false);
+  const {
 
-    // Keep the entered password for the invitation preview.
+    register: registerEdit,
+
+    handleSubmit: handleEditSubmit,
+
+    control: controlEdit,
+
+    setValue: setEditValue,
+
+    reset: resetEdit,
+
+    formState: { errors: errorsEdit },
+
+  } = useForm<EditUserFormInput>({
+
+    resolver: zodResolver(editUserFormSchema),
+
+
+
+    defaultValues: {
+
+      fullName: "",
+
+      email: "",
+
+      password: "",
+
+      role: "Author",
+
+    },
+
+  });
+
+
+
+
+
+  /* ==========================================================
+
+     ADD USER
+
+     ========================================================== */
+
+
+
+  const onAddSubmit = (data: AddUserFormInput) => {
+
+    addUser({
+
+      fullName: data.fullName,
+
+      email: data.email,
+
+      phone: "",
+
+      role: data.role,
+
+      status: "Active",
+
+    });
+
+
+
+    setIsAddOpen(false);
+
+    // Keep the entered password for the invitation preview.
     setInvitePassword(data.password);
 
     resetAdd();
@@ -655,31 +655,31 @@ export default function UsersManagement() {
 
 
 
-    /*
+    /*
 
-     * Open invitation preview for the newly created user.
+     * Open invitation preview for the newly created user.
 
-     *
+     *
 
-     * The password entered during provisioning is shown in the invitation preview so it can be copied.
+     * The password entered during provisioning is shown in the invitation preview so it can be copied.
 
-     */
+     */
 
-    setTimeout(() => {
+    setTimeout(() => {
 
-      const allUsers = useUsersStore.getState().users;
-
-
-
-      const newlyAdded = allUsers.find(
-
-        (user) => user.email === data.email
-
-      );
+      const allUsers = useUsersStore.getState().users;
 
 
 
-      if (newlyAdded) {
+      const newlyAdded = allUsers.find(
+
+        (user) => user.email === data.email
+
+      );
+
+
+
+      if (newlyAdded) {
         setUserPasswords((current) => ({
           ...current,
           [newlyAdded.id]: data.password,
@@ -691,340 +691,340 @@ export default function UsersManagement() {
         setIsInviteOpen(true);
       }
 
-    }, 100);
+    }, 100);
 
-  };
-
-
+  };
 
 
 
-  /* ==========================================================
-
-     EDIT USER
-
-     ========================================================== */
 
 
+  /* ==========================================================
 
-  const onEditSubmit = (data: EditUserFormInput) => {
+     EDIT USER
 
-    if (!selectedUser) {
-
-      return;
-
-    }
+     ========================================================== */
 
 
 
-    updateUser(selectedUser.id, {
+  const onEditSubmit = (data: EditUserFormInput) => {
 
-      fullName: data.fullName,
+    if (!selectedUser) {
 
-      email: data.email,
+      return;
 
-      role: data.role,
-
-      status: selectedUser.status || "Active",
-
-    });
+    }
 
 
 
-    setIsEditOpen(false);
+    updateUser(selectedUser.id, {
 
-    setSelectedUser(null);
+      fullName: data.fullName,
 
-    resetEdit();
+      email: data.email,
+
+      role: data.role,
+
+      status: selectedUser.status || "Active",
+
+    });
+
+
+
+    setIsEditOpen(false);
+
+    setSelectedUser(null);
+
+    resetEdit();
     setShowEditPassword(false);
 
-  };
+  };
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     OPEN EDIT MODAL
+     OPEN EDIT MODAL
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  const openEditModal = (user: User) => {
+  const openEditModal = (user: User) => {
 
-    setSelectedUser(user);
+    setSelectedUser(user);
 
 
 
-    setEditValue("fullName", user.fullName);
+    setEditValue("fullName", user.fullName);
 
-    setEditValue("email", user.email);
+    setEditValue("email", user.email);
 
-    setEditValue("password", "");
+    setEditValue("password", "");
 
-    setEditValue("role", user.role);
+    setEditValue("role", user.role);
 
 
 
-    setIsEditOpen(true);
+    setIsEditOpen(true);
 
-  };
+  };
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     OPEN VIEW MODAL
+     OPEN VIEW MODAL
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  const openViewModal = (user: User) => {
+  const openViewModal = (user: User) => {
 
-    setSelectedUser(user);
+    setSelectedUser(user);
 
-    setIsViewOpen(true);
+    setIsViewOpen(true);
 
-  };
+  };
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     DELETE
+     DELETE
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  const handleDeleteClick = (
+  const handleDeleteClick = (
 
-    id: string,
+    id: string,
 
-    name: string
+    name: string
 
-  ) => {
+  ) => {
 
-    setUserToDelete({
+    setUserToDelete({
 
-      id,
+      id,
 
-      name,
+      name,
 
-    });
+    });
 
 
 
-    setIsDeleteOpen(true);
+    setIsDeleteOpen(true);
 
-  };
+  };
 
 
 
 
 
-  const confirmDeleteAction = () => {
+  const confirmDeleteAction = () => {
 
-    if (!userToDelete) {
+    if (!userToDelete) {
 
-      return;
+      return;
 
-    }
+    }
 
 
 
-    deleteUser(userToDelete.id);
+    deleteUser(userToDelete.id);
 
 
 
-    setIsDeleteOpen(false);
+    setIsDeleteOpen(false);
 
-    setUserToDelete(null);
+    setUserToDelete(null);
 
-  };
+  };
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     EXPORT TO EXCEL
+     EXPORT TO EXCEL
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  const handleExportToExcel = () => {
+  const handleExportToExcel = () => {
 
-    const dataToExport = filteredUsers.map((user) => ({
+    const dataToExport = filteredUsers.map((user) => ({
 
-      "Full Name": user.fullName,
+      "Full Name": user.fullName,
 
-      "Email Address": user.email,
+      "Email Address": user.email,
 
-      Role: user.role,
+      Role: user.role,
 
-      Status: user.status || "Active",
+      Status: user.status || "Active",
 
-      "Created Date": user.createdDate,
+      "Created Date": user.createdDate,
 
-    }));
+    }));
 
 
 
-    const worksheet =
+    const worksheet =
 
-      XLSX.utils.json_to_sheet(dataToExport);
+      XLSX.utils.json_to_sheet(dataToExport);
 
 
 
-    const workbook =
+    const workbook =
 
-      XLSX.utils.book_new();
+      XLSX.utils.book_new();
 
 
 
-    XLSX.utils.book_append_sheet(
+    XLSX.utils.book_append_sheet(
 
-      workbook,
+      workbook,
 
-      worksheet,
+      worksheet,
 
-      "Users"
+      "Users"
 
-    );
+    );
 
 
 
-    XLSX.writeFile(
+    XLSX.writeFile(
 
-      workbook,
+      workbook,
 
-      "system_users_directory.xlsx"
+      "system_users_directory.xlsx"
 
-    );
+    );
 
-  };
+  };
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     SEARCH + ROLE FILTER
+     SEARCH + ROLE FILTER
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = users.filter((user) => {
 
-    const query = searchQuery.trim().toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
 
 
 
-    const matchesSearch =
+    const matchesSearch =
 
-      user.fullName.toLowerCase().includes(query) ||
+      user.fullName.toLowerCase().includes(query) ||
 
-      user.email.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query) ||
 
-      user.role.toLowerCase().includes(query) ||
+      user.role.toLowerCase().includes(query) ||
 
-      (user.status || "Active")
+      (user.status || "Active")
 
-        .toLowerCase()
+        .toLowerCase()
 
-        .includes(query);
+        .includes(query);
 
 
 
-    const matchesRole =
+    const matchesRole =
 
-      roleFilter === "All" ||
+      roleFilter === "All" ||
 
-      user.role === roleFilter;
+      user.role === roleFilter;
 
 
 
-    return matchesSearch && matchesRole;
+    return matchesSearch && matchesRole;
 
-  });
+  });
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     COPY HELPER
+     COPY HELPER
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  const handleCopy = async (
+  const handleCopy = async (
 
-    value: string,
+    value: string,
 
-    field: string
+    field: string
 
-  ) => {
+  ) => {
 
-    try {
+    try {
 
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value);
 
 
 
-      setCopiedField(field);
+      setCopiedField(field);
 
 
 
-      setTimeout(() => {
+      setTimeout(() => {
 
-        setCopiedField(null);
+        setCopiedField(null);
 
-      }, 2000);
+      }, 2000);
 
 
 
-    } catch (error) {
+    } catch (error) {
 
-      console.error(
+      console.error(
 
-        "Failed to copy value:",
+        "Failed to copy value:",
 
-        error
+        error
 
-      );
+      );
 
-    }
+    }
 
-  };
+  };
 
 
 
 
 
-  /* ==========================================================
+  /* ==========================================================
 
-     INVITATION CONTENT
+     INVITATION CONTENT
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  const invitationText = inviteUser
+  const invitationText = inviteUser
     ? `Dear ${inviteUser.fullName},
 
 You have been provisioned as a ${inviteUser.role} on our clinical platform.
@@ -1040,273 +1040,273 @@ Please use the credentials above to access the secure portal.`
 
   /* ==========================================================
 
-     RENDER
+     RENDER
 
-     ========================================================== */
+     ========================================================== */
 
 
 
-  return (
+  return (
 
-    <div
+    <div
 
-      className="space-y-6"
+      className="space-y-6"
 
-      id="users-module-container"
+      id="users-module-container"
 
-    >
+    >
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          HEADER
+          HEADER
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
 
 
-        <div>
+        <div>
 
 
 
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
 
-            User Directory
+            User Directory
 
-          </h1>
+          </h1>
 
 
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500">
 
-            Provision, manage, and audit user registry accounts.
+            Provision, manage, and audit user registry accounts.
 
-          </p>
+          </p>
 
 
 
-        </div>
+        </div>
 
 
 
-      </div>
+      </div>
 
 
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          SEARCH / FILTER / ACTIONS
+          SEARCH / FILTER / ACTIONS
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <div className="flex flex-col md:flex-row gap-3 items-center w-full">
+      <div className="flex flex-col md:flex-row gap-3 items-center w-full">
 
 
 
-        {/* Search */}
+        {/* Search */}
 
-        <div className="relative flex-1 w-full">
+        <div className="relative flex-1 w-full">
 
 
 
-          <Search
+          <Search
 
-            className="
+            className="
 
-              absolute
+              absolute
 
-              left-3.5
+              left-3.5
 
-              top-1/2
+              top-1/2
 
-              -translate-y-1/2
+              -translate-y-1/2
 
-              h-4
+              h-4
 
-              w-4
+              w-4
 
-              text-slate-400
+              text-slate-400
 
-            "
+            "
 
-          />
+          />
 
 
 
-          <Input
+          <Input
 
-            value={searchQuery}
+            value={searchQuery}
 
-            onChange={handleSearchChange}
+            onChange={handleSearchChange}
 
-            type="text"
+            type="text"
 
-            placeholder="Search by name or email..."
+            placeholder="Search by name or email..."
 
-            className="
+            className="
 
-              h-10
+              h-10
 
-              pl-10
+              pl-10
 
-              border-[#E5E7EB]
+              border-[#E5E7EB]
 
-              bg-white
+              bg-white
 
-              rounded-xl
+              rounded-xl
 
-              text-xs
+              text-xs
 
-              sm:text-sm
+              sm:text-sm
 
-              focus-visible:ring-blue-500/20
+              focus-visible:ring-blue-500/20
 
-            "
+            "
 
-            id="system-users-search-input"
+            id="system-users-search-input"
 
-          />
+          />
 
 
 
-          {searchQuery && (
+          {searchQuery && (
 
-            <button
+            <button
 
-              type="button"
+              type="button"
 
-              onClick={() => setSearchQuery("")}
+              onClick={() => setSearchQuery("")}
 
-              className="
+              className="
 
-                absolute
+                absolute
 
-                right-3
+                right-3
 
-                top-1/2
+                top-1/2
 
-                -translate-y-1/2
+                -translate-y-1/2
 
-                text-slate-400
+                text-slate-400
 
-                hover:text-slate-600
+                hover:text-slate-600
 
-                transition-colors
+                transition-colors
 
-              "
+              "
 
-              title="Clear search"
+              title="Clear search"
 
-              aria-label="Clear search"
+              aria-label="Clear search"
 
-            >
+            >
 
-              <X className="h-3.5 w-3.5" />
+              <X className="h-3.5 w-3.5" />
 
-            </button>
+            </button>
 
-          )}
+          )}
 
 
 
-        </div>
+        </div>
 
 
 
 
 
-        {/* Filters + Actions */}
+        {/* Filters + Actions */}
 
-        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 items-center shrink-0">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 items-center shrink-0">
 
 
 
-          {/* Role Filter */}
+          {/* Role Filter */}
 
-          <div className="w-full sm:w-44 shrink-0">
+          <div className="w-full sm:w-44 shrink-0">
 
 
 
-            <Select
+            <Select
 
-              value={roleFilter}
+              value={roleFilter}
 
-              onValueChange={(value) => {
+              onValueChange={(value) => {
 
-                if(value)
+                if(value)
 
-                setRoleFilter(value);
+                setRoleFilter(value);
 
-              }}
+              }}
 
-            >
+            >
 
 
 
-              <SelectTrigger
+              <SelectTrigger
 
-                className="
+                className="
 
-                  h-10
+                  h-10
 
-                  border-[#E5E7EB]
+                  border-[#E5E7EB]
 
-                  bg-white
+                  bg-white
 
-                  rounded-xl
+                  rounded-xl
 
-                  text-xs
+                  text-xs
 
-                  sm:text-sm
+                  sm:text-sm
 
-                  text-slate-800
+                  text-slate-800
 
-                  focus:ring-blue-500/20
+                  focus:ring-blue-500/20
 
-                "
+                "
 
-              >
+              >
 
-                <SelectValue placeholder="Filter roles" />
+                <SelectValue placeholder="Filter roles" />
 
-              </SelectTrigger>
+              </SelectTrigger>
 
 
 
-              <SelectContent className="bg-white border-[#E5E7EB]">
+              <SelectContent className="bg-white border-[#E5E7EB]">
 
 
 
-                <SelectItem value="All">
+                <SelectItem value="All">
 
-                  All
+                  All
 
-                </SelectItem>
+                </SelectItem>
 
 
 
-                <SelectItem value="Admin">
+                <SelectItem value="Admin">
 
-                  Admin
+                  Admin
 
-                </SelectItem>
+                </SelectItem>
 
 
 
-                <SelectItem value="Author">
+                <SelectItem value="Author">
 
-                  Author
+                  Author
 
-                </SelectItem>
+                </SelectItem>
 
 
 
@@ -1314,818 +1314,818 @@ Please use the credentials above to access the secure portal.`
 
 
 
-              </SelectContent>
+              </SelectContent>
 
 
 
-            </Select>
+            </Select>
 
 
 
-          </div>
+          </div>
 
 
 
 
 
-          {/* Export */}
+          {/* Export */}
 
-          <Button
+          <Button
 
-            onClick={handleExportToExcel}
+            onClick={handleExportToExcel}
 
-            variant="outline"
+            variant="outline"
 
-            className="
+            className="
 
-              w-full
+              w-full
 
-              sm:w-auto
+              sm:w-auto
 
-              h-10
+              h-10
 
-              px-4
+              px-4
 
-              rounded-xl
+              rounded-xl
 
-              text-slate-700
+              text-slate-700
 
-              hover:text-slate-900
+              hover:text-slate-900
 
-              border-[#E5E7EB]
+              border-[#E5E7EB]
 
-              bg-white
+              bg-white
 
-              flex
+              flex
 
-              items-center
+              items-center
 
-              justify-center
+              justify-center
 
-              gap-2
+              gap-2
 
-              text-xs
+              text-xs
 
-              font-bold
+              font-bold
 
-              transition-all
+              transition-all
 
-              hover:bg-slate-50
+              hover:bg-slate-50
 
-            "
+            "
 
-            title="Export to Excel"
+            title="Export to Excel"
 
-            id="export-to-excel-btn"
+            id="export-to-excel-btn"
 
-          >
+          >
 
-            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
 
-            <span>Export to Excel</span>
+            <span>Export to Excel</span>
 
-          </Button>
+          </Button>
 
 
 
 
 
-          {/* Add User */}
+          {/* Add User */}
 
-          <Button
+          <Button
 
-            onClick={() => setIsAddOpen(true)}
+            onClick={() => setIsAddOpen(true)}
 
-            className="
+            className="
 
-              w-full
+              w-full
 
-              sm:w-auto
+              sm:w-auto
 
-              bg-[#2563EB]
+              bg-[#2563EB]
 
-              hover:bg-blue-700
+              hover:bg-blue-700
 
-              text-white
+              text-white
 
-              font-bold
+              font-bold
 
-              h-10
+              h-10
 
-              px-4
+              px-4
 
-              rounded-xl
+              rounded-xl
 
-              shadow-sm
+              shadow-sm
 
-              shadow-blue-600/10
+              shadow-blue-600/10
 
-              hover:shadow-blue-600/20
+              hover:shadow-blue-600/20
 
-              transition-all
+              transition-all
 
-              gap-2
+              gap-2
 
-              flex
+              flex
 
-              items-center
+              items-center
 
-              justify-center
+              justify-center
 
-            "
+            "
 
-            id="add-user-trigger-btn"
+            id="add-user-trigger-btn"
 
-          >
+          >
 
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
 
-            <span>Add User</span>
+            <span>Add User</span>
 
-          </Button>
+          </Button>
 
 
 
-        </div>
+        </div>
 
 
 
-      </div>
+      </div>
 
 
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          USERS TABLE
+          USERS TABLE
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <Card
+      <Card
 
-        className="
+        className="
 
-          border
+          border
 
-          border-[#E5E7EB]
+          border-[#E5E7EB]
 
-          bg-white
+          bg-white
 
-          rounded-2xl
+          rounded-2xl
 
-          overflow-hidden
+          overflow-hidden
 
-          shadow-sm
+          shadow-sm
 
-          shadow-slate-100/50
+          shadow-slate-100/50
 
-        "
+        "
 
-      >
+      >
 
 
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto">
 
 
 
-          <table
+          <table
 
-            className="w-full text-left border-collapse"
+            className="w-full text-left border-collapse"
 
-            id="users-data-table-node"
+            id="users-data-table-node"
 
-          >
+          >
 
 
 
-            <thead>
+            <thead>
 
 
 
-              <tr
+              <tr
 
-                className="
+                className="
 
-                  bg-slate-50/70
+                  bg-slate-50/70
 
-                  border-b
+                  border-b
 
-                  border-[#E5E7EB]
+                  border-[#E5E7EB]
 
-                "
+                "
 
-              >
+              >
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
 
-                  Full Name
+                  Full Name
 
-                </th>
+                </th>
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
 
-                  Email Address
+                  Email Address
 
-                </th>
+                </th>
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
 
-                  Role
+                  Role
 
-                </th>
+                </th>
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
 
-                  Status
+                  Status
 
-                </th>
+                </th>
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
 
-                  Created Date
+                  Created Date
 
-                </th>
+                </th>
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
 
-                  Invitation
+                  Invitation
 
-                </th>
+                </th>
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase text-right">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase text-right">
 
-                  Actions
+                  Actions
 
-                </th>
+                </th>
 
 
 
-              </tr>
+              </tr>
 
 
 
-            </thead>
+            </thead>
 
 
 
 
 
-            <tbody className="divide-y divide-[#E5E7EB]">
+            <tbody className="divide-y divide-[#E5E7EB]">
 
 
 
-              {filteredUsers.length > 0 ? (
+              {filteredUsers.length > 0 ? (
 
 
 
-                filteredUsers.map((user) => (
+                filteredUsers.map((user) => (
 
 
 
-                  <tr
+                  <tr
 
-                    key={user.id}
+                    key={user.id}
 
-                    className="
+                    className="
 
-                      hover:bg-slate-50/70
+                      hover:bg-slate-50/70
 
-                      transition-all
+                      transition-all
 
-                      duration-150
+                      duration-150
 
-                    "
+                    "
 
-                  >
+                  >
 
 
 
-                    {/* Name */}
+                    {/* Name */}
 
-                    <td className="py-4 px-6 text-xs font-bold text-slate-900">
+                    <td className="py-4 px-6 text-xs font-bold text-slate-900">
 
-                      {user.fullName}
+                      {user.fullName}
 
-                    </td>
+                    </td>
 
 
 
 
 
-                    {/* Email */}
+                    {/* Email */}
 
-                    <td className="py-4 px-6 text-xs text-slate-600">
+                    <td className="py-4 px-6 text-xs text-slate-600">
 
-                      {user.email}
+                      {user.email}
 
-                    </td>
+                    </td>
 
 
 
 
 
-                    {/* Role */}
+                    {/* Role */}
 
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-6">
 
 
 
-                      <span
+                      <span
 
-                        className={`
+                        className={`
 
-                          inline-flex
+                          inline-flex
 
-                          items-center
+                          items-center
 
-                          gap-1.5
+                          gap-1.5
 
-                          px-2.5
+                          px-2.5
 
-                          py-0.5
+                          py-0.5
 
-                          rounded-full
+                          rounded-full
 
-                          text-[10px]
+                          text-[10px]
 
-                          font-bold
+                          font-bold
 
-                          tracking-wide
+                          tracking-wide
 
-                          uppercase
+                          uppercase
 
-                          ${
+                          ${
 
-                            user.role === "Admin"
+                            user.role === "Admin"
 
-                              ? "bg-indigo-50 text-indigo-700"
+                              ? "bg-indigo-50 text-indigo-700"
 
-                              : user.role === "Author"
+                              : user.role === "Author"
 
-                                ? "bg-blue-50 text-blue-700"
+                                ? "bg-blue-50 text-blue-700"
 
-                                : "bg-amber-50 text-amber-700"
+                                : "bg-amber-50 text-amber-700"
 
-                          }
+                          }
 
-                        `}
+                        `}
 
-                      >
+                      >
 
-                        <Layers className="h-2.5 w-2.5" />
+                        <Layers className="h-2.5 w-2.5" />
 
-                        {user.role}
+                        {user.role}
 
-                      </span>
+                      </span>
 
 
 
-                    </td>
+                    </td>
 
 
 
 
 
-                    {/* Status */}
+                    {/* Status */}
 
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-6">
 
 
 
-                      <span
+                      <span
 
-                        className={`
+                        className={`
 
-                          inline-flex
+                          inline-flex
 
-                          items-center
+                          items-center
 
-                          gap-1.5
+                          gap-1.5
 
-                          px-2.5
+                          px-2.5
 
-                          py-0.5
+                          py-0.5
 
-                          rounded-full
+                          rounded-full
 
-                          text-[10px]
+                          text-[10px]
 
-                          font-bold
+                          font-bold
 
-                          tracking-wide
+                          tracking-wide
 
-                          uppercase
+                          uppercase
 
-                          ${
+                          ${
 
-                            user.status === "Active"
+                            user.status === "Active"
 
-                              ? "bg-emerald-50 text-emerald-700"
+                              ? "bg-emerald-50 text-emerald-700"
 
-                              : user.status === "Inactive"
+                              : user.status === "Inactive"
 
-                                ? "bg-slate-100 text-slate-600"
+                                ? "bg-slate-100 text-slate-600"
 
-                                : "bg-orange-50 text-orange-700"
+                                : "bg-orange-50 text-orange-700"
 
-                          }
+                          }
 
-                        `}
+                        `}
 
-                      >
+                      >
 
 
 
-                        <span
+                        <span
 
-                          className={`
+                          className={`
 
-                            h-1.5
+                            h-1.5
 
-                            w-1.5
+                            w-1.5
 
-                            rounded-full
+                            rounded-full
 
-                            ${
+                            ${
 
-                              user.status === "Active"
+                              user.status === "Active"
 
-                                ? "bg-emerald-500 animate-pulse"
+                                ? "bg-emerald-500 animate-pulse"
 
-                                : user.status === "Inactive"
+                                : user.status === "Inactive"
 
-                                  ? "bg-slate-400"
+                                  ? "bg-slate-400"
 
-                                  : "bg-orange-500"
+                                  : "bg-orange-500"
 
-                            }
+                            }
 
-                          `}
+                          `}
 
-                        />
+                        />
 
 
 
-                        {user.status || "Active"}
+                        {user.status || "Active"}
 
 
 
-                      </span>
+                      </span>
 
 
 
-                    </td>
+                    </td>
 
 
 
 
 
-                    {/* Created Date */}
+                    {/* Created Date */}
 
-                    <td className="py-4 px-6 text-xs text-slate-500 font-mono">
+                    <td className="py-4 px-6 text-xs text-slate-500 font-mono">
 
-                      {user.createdDate}
+                      {user.createdDate}
 
-                    </td>
+                    </td>
 
 
 
 
 
-                    {/* Invitation */}
+                    {/* Invitation */}
 
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-6">
 
 
 
-                      <Button
+                      <Button
 
-                        size="sm"
+                        size="sm"
 
-                        variant="outline"
+                        variant="outline"
 
-                        onClick={() => {
+                        onClick={() => {
 
-                          setInviteUser(user);
+                          setInviteUser(user);
                           setInvitePassword(userPasswords[user.id] || "");
 
-                          setCopiedField(null);
+                          setCopiedField(null);
 
-                          setIsInviteOpen(true);
+                          setIsInviteOpen(true);
 
-                        }}
+                        }}
 
-                        className="
+                        className="
 
-                          h-7
+                          h-7
 
-                          px-2.5
+                          px-2.5
 
-                          rounded-lg
+                          rounded-lg
 
-                          border-blue-200
+                          border-blue-200
 
-                          hover:border-blue-400
+                          hover:border-blue-400
 
-                          bg-blue-50/50
+                          bg-blue-50/50
 
-                          hover:bg-blue-50
+                          hover:bg-blue-50
 
-                          text-blue-600
+                          text-blue-600
 
-                          font-bold
+                          font-bold
 
-                          text-[10px]
+                          text-[10px]
 
-                          sm:text-[11px]
+                          sm:text-[11px]
 
-                          flex
+                          flex
 
-                          items-center
+                          items-center
 
-                          gap-1
+                          gap-1
 
-                        "
+                        "
 
-                        title="Prepare email invitation"
+                        title="Prepare email invitation"
 
-                        id={`invite-action-btn-${user.id}`}
+                        id={`invite-action-btn-${user.id}`}
 
-                      >
+                      >
 
-                        <Mail className="h-3 w-3 text-blue-500" />
+                        <Mail className="h-3 w-3 text-blue-500" />
 
-                        <span>Invite</span>
+                        <span>Invite</span>
 
-                      </Button>
+                      </Button>
 
 
 
-                    </td>
+                    </td>
 
 
 
 
 
-                    {/* Actions */}
+                    {/* Actions */}
 
-                    <td className="py-4 px-6 text-right">
+                    <td className="py-4 px-6 text-right">
 
 
 
-                      <div className="inline-flex items-center gap-1">
+                      <div className="inline-flex items-center gap-1">
 
 
 
-                        {/* View */}
+                        {/* View */}
 
-                        <button
+                        <button
 
-                          type="button"
+                          type="button"
 
-                          onClick={() => openViewModal(user)}
+                          onClick={() => openViewModal(user)}
 
-                          className="
+                          className="
 
-                            p-1.5
+                            p-1.5
 
-                            rounded-lg
+                            rounded-lg
 
-                            border
+                            border
 
-                            border-slate-200
+                            border-slate-200
 
-                            bg-white
+                            bg-white
 
-                            text-slate-600
+                            text-slate-600
 
-                            hover:text-slate-900
+                            hover:text-slate-900
 
-                            hover:bg-slate-50
+                            hover:bg-slate-50
 
-                            transition-all
+                            transition-all
 
-                          "
+                          "
 
-                          title="View user"
+                          title="View user"
 
-                          id={`view-action-btn-${user.id}`}
+                          id={`view-action-btn-${user.id}`}
 
-                        >
+                        >
 
-                          <Eye className="h-3.5 w-3.5" />
+                          <Eye className="h-3.5 w-3.5" />
 
-                        </button>
+                        </button>
 
 
 
 
 
-                        {/* Edit */}
+                        {/* Edit */}
 
-                        <button
+                        <button
 
-                          type="button"
+                          type="button"
 
-                          onClick={() => openEditModal(user)}
+                          onClick={() => openEditModal(user)}
 
-                          className="
+                          className="
 
-                            p-1.5
+                            p-1.5
 
-                            rounded-lg
+                            rounded-lg
 
-                            border
+                            border
 
-                            border-slate-200
+                            border-slate-200
 
-                            bg-white
+                            bg-white
 
-                            text-blue-600
+                            text-blue-600
 
-                            hover:text-blue-800
+                            hover:text-blue-800
 
-                            hover:bg-slate-50
+                            hover:bg-slate-50
 
-                            transition-all
+                            transition-all
 
-                          "
+                          "
 
-                          title="Edit user"
+                          title="Edit user"
 
-                          id={`edit-action-btn-${user.id}`}
+                          id={`edit-action-btn-${user.id}`}
 
-                        >
+                        >
 
-                          <Edit3 className="h-3.5 w-3.5" />
+                          <Edit3 className="h-3.5 w-3.5" />
 
-                        </button>
+                        </button>
 
 
 
 
 
-                        {/* Delete */}
+                        {/* Delete */}
 
-                        <button
+                        <button
 
-                          type="button"
+                          type="button"
 
-                          onClick={() =>
+                          onClick={() =>
 
-                            handleDeleteClick(
+                            handleDeleteClick(
 
-                              user.id,
+                              user.id,
 
-                              user.fullName
+                              user.fullName
 
-                            )
+                            )
 
-                          }
+                          }
 
-                          className="
+                          className="
 
-                            p-1.5
+                            p-1.5
 
-                            rounded-lg
+                            rounded-lg
 
-                            border
+                            border
 
-                            border-slate-200
+                            border-slate-200
 
-                            bg-white
+                            bg-white
 
-                            text-rose-500
+                            text-rose-500
 
-                            hover:text-rose-700
+                            hover:text-rose-700
 
-                            hover:bg-slate-50
+                            hover:bg-slate-50
 
-                            transition-all
+                            transition-all
 
-                          "
+                          "
 
-                          title="Delete user"
+                          title="Delete user"
 
-                          id={`delete-action-btn-${user.id}`}
+                          id={`delete-action-btn-${user.id}`}
 
-                        >
+                        >
 
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-3.5 w-3.5" />
 
-                        </button>
+                        </button>
 
 
 
-                      </div>
+                      </div>
 
 
 
-                    </td>
+                    </td>
 
 
 
-                  </tr>
+                  </tr>
 
 
 
-                ))
+                ))
 
 
 
-              ) : (
+              ) : (
 
 
 
-                <tr>
+                <tr>
 
 
 
-                  <td
+                  <td
 
-                    colSpan={7}
+                    colSpan={7}
 
-                    className="
+                    className="
 
-                      p-8
+                      p-8
 
-                      text-center
+                      text-center
 
-                      text-xs
+                      text-xs
 
-                      sm:text-sm
+                      sm:text-sm
 
-                      text-slate-500
+                      text-slate-500
 
-                      font-medium
+                      font-medium
 
-                    "
+                    "
 
-                  >
+                  >
 
-                    No users found matching your search or filter.
+                    No users found matching your search or filter.
 
-                  </td>
+                  </td>
 
 
 
-                </tr>
+                </tr>
 
 
 
-              )}
+              )}
 
 
 
-            </tbody>
+            </tbody>
 
 
 
-          </table>
+          </table>
 
 
 
-        </div>
+        </div>
 
 
 
-      </Card>
+      </Card>
 
 
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          ADD USER MODAL
+          ADD USER MODAL
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <Dialog
+      <Dialog
 
-        open={isAddOpen}
+        open={isAddOpen}
 
-        onOpenChange={(open) => {
+        onOpenChange={(open) => {
           setIsAddOpen(open);
           if (!open) {
             resetAdd();
@@ -2133,169 +2133,169 @@ Please use the credentials above to access the secure portal.`
           }
         }}
 
-      >
+      >
 
 
 
-        <DialogContent
+        <DialogContent
 
-          className="
+          className="
 
-            sm:max-w-[440px]
+            sm:max-w-[440px]
 
-            border
+            border
 
-            border-[#E5E7EB]
+            border-[#E5E7EB]
 
-            bg-white
+            bg-white
 
-            p-6
+            p-6
 
-            rounded-2xl
+            rounded-2xl
 
-            shadow-xl
+            shadow-xl
 
-            text-slate-800
+            text-slate-800
 
-          "
+          "
 
-        >
+        >
 
 
 
-          <DialogHeader className="border-b border-slate-100 pb-3">
+          <DialogHeader className="border-b border-slate-100 pb-3">
 
 
 
-            <DialogTitle className="text-lg font-extrabold text-slate-900">
+            <DialogTitle className="text-lg font-extrabold text-slate-900">
 
-              Provision User Account
+              Provision User Account
 
-            </DialogTitle>
+            </DialogTitle>
 
 
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500">
 
-              Add an approved user to the registry.
+              Add an approved user to the registry.
 
-            </p>
+            </p>
 
 
 
-          </DialogHeader>
+          </DialogHeader>
 
 
 
 
 
-          <form
+          <form
 
-            onSubmit={handleAddSubmit(onAddSubmit)}
+            onSubmit={handleAddSubmit(onAddSubmit)}
 
-            className="space-y-4 pt-3"
+            className="space-y-4 pt-3"
 
-          >
+          >
 
 
 
-            {/* Full Name */}
+            {/* Full Name */}
 
-            <div className="space-y-1">
+            <div className="space-y-1">
 
 
 
-              <Label htmlFor="add-fullName">
+              <Label htmlFor="add-fullName">
 
-                Full Name
+                Full Name
 
-              </Label>
+              </Label>
 
 
 
-              <Input
+              <Input
 
-                id="add-fullName"
+                id="add-fullName"
 
-                type="text"
+                type="text"
 
-                placeholder="e.g. Dr. Arthur S. Vance"
+                placeholder="e.g. Dr. Arthur S. Vance"
 
-                {...registerAdd("fullName")}
+                {...registerAdd("fullName")}
 
-              />
+              />
 
 
 
-              {errorsAdd.fullName && (
+              {errorsAdd.fullName && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-rose-500 flex items-center gap-1">
 
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3" />
 
-                  {errorsAdd.fullName.message}
+                  {errorsAdd.fullName.message}
 
-                </p>
+                </p>
 
-              )}
+              )}
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            {/* Email */}
+            {/* Email */}
 
-            <div className="space-y-1">
+            <div className="space-y-1">
 
 
 
-              <Label htmlFor="add-email">
+              <Label htmlFor="add-email">
 
-                Email Address
+                Email Address
 
-              </Label>
+              </Label>
 
 
 
-              <Input
+              <Input
 
-                id="add-email"
+                id="add-email"
 
-                type="email"
+                type="email"
 
-                placeholder="a.vance@example.com"
+                placeholder="a.vance@example.com"
 
-                {...registerAdd("email")}
+                {...registerAdd("email")}
 
-              />
+              />
 
 
 
-              {errorsAdd.email && (
+              {errorsAdd.email && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-rose-500 flex items-center gap-1">
 
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3" />
 
-                  {errorsAdd.email.message}
+                  {errorsAdd.email.message}
 
-                </p>
+                </p>
 
-              )}
+              )}
 
 
 
-            </div>
+            </div>
 
 
 
 
 
- {/* Password */}
+ {/* Password */}
 
             <div className="space-y-1">
 
@@ -2341,63 +2341,63 @@ Please use the credentials above to access the secure portal.`
 
             </div>
 
-                       {/* Role */}
+                       {/* Role */}
 
-            <div className="space-y-1">
+            <div className="space-y-1">
 
 
 
-              <Label>
+              <Label>
 
-                Role
+                Role
 
-              </Label>
+              </Label>
 
 
 
-              <Controller
+              <Controller
 
-                name="role"
+                name="role"
 
-                control={controlAdd}
+                control={controlAdd}
 
-                render={({ field }) => (
+                render={({ field }) => (
 
-                  <Select
+                  <Select
 
-                    value={field.value}
+                    value={field.value}
 
-                    onValueChange={field.onChange}
+                    onValueChange={field.onChange}
 
-                  >
+                  >
 
 
 
-                    <SelectTrigger>
+                    <SelectTrigger>
 
-                      <SelectValue placeholder="Select role" />
+                      <SelectValue placeholder="Select role" />
 
-                    </SelectTrigger>
+                    </SelectTrigger>
 
 
 
-                    <SelectContent>
+                    <SelectContent>
 
 
 
-                      <SelectItem value="Admin">
+                      <SelectItem value="Admin">
 
-                        Admin
+                        Admin
 
-                      </SelectItem>
+                      </SelectItem>
 
 
 
-                      <SelectItem value="Author">
+                      <SelectItem value="Author">
 
-                        Author
+                        Author
 
-                      </SelectItem>
+                      </SelectItem>
 
 
 
@@ -2405,110 +2405,110 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                    </SelectContent>
+                    </SelectContent>
 
 
 
-                  </Select>
+                  </Select>
 
-                )}
+                )}
 
-              />
+              />
 
 
 
-              {errorsAdd.role && (
+              {errorsAdd.role && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-rose-500 flex items-center gap-1">
 
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3" />
 
-                  {errorsAdd.role.message}
+                  {errorsAdd.role.message}
 
-                </p>
+                </p>
 
-              )}
+              )}
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            <DialogFooter className="pt-3 border-t border-slate-100 mt-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 mt-2">
 
 
 
-              <Button
+              <Button
 
-                type="button"
+                type="button"
 
-                variant="outline"
+                variant="outline"
 
-                onClick={() => {
+                onClick={() => {
 
-                  setIsAddOpen(false);
+                  setIsAddOpen(false);
 
-                  resetAdd();
+                  resetAdd();
                   setShowAddPassword(false);
 
-                }}
+                }}
 
-              >
+              >
 
-                Cancel
+                Cancel
 
-              </Button>
-
-
-
-              <Button
-
-                type="submit"
-
-                className="bg-[#2563EB] hover:bg-blue-700 text-white"
-
-              >
-
-                Create User
-
-              </Button>
+              </Button>
 
 
 
-            </DialogFooter>
+              <Button
+
+                type="submit"
+
+                className="bg-[#2563EB] hover:bg-blue-700 text-white"
+
+              >
+
+                Create User
+
+              </Button>
 
 
 
-          </form>
+            </DialogFooter>
 
 
 
-        </DialogContent>
+          </form>
 
 
 
-      </Dialog>
+        </DialogContent>
+
+
+
+      </Dialog>
 
 
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          EDIT USER MODAL
+          EDIT USER MODAL
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <Dialog
+      <Dialog
 
-        open={isEditOpen}
+        open={isEditOpen}
 
-        onOpenChange={(open) => {
+        onOpenChange={(open) => {
           setIsEditOpen(open);
           if (!open) {
             setSelectedUser(null);
@@ -2517,163 +2517,163 @@ Please use the credentials above to access the secure portal.`
           }
         }}
 
-      >
+      >
 
 
 
-        <DialogContent
+        <DialogContent
 
-          className="
+          className="
 
-            sm:max-w-[440px]
+            sm:max-w-[440px]
 
-            border
+            border
 
-            border-[#E5E7EB]
+            border-[#E5E7EB]
 
-            bg-white
+            bg-white
 
-            p-6
+            p-6
 
-            rounded-2xl
+            rounded-2xl
 
-            shadow-xl
+            shadow-xl
 
-            text-slate-800
+            text-slate-800
 
-          "
+          "
 
-        >
+        >
 
 
 
-          <DialogHeader className="border-b border-slate-100 pb-3">
+          <DialogHeader className="border-b border-slate-100 pb-3">
 
 
 
-            <DialogTitle className="text-lg font-extrabold text-slate-900">
+            <DialogTitle className="text-lg font-extrabold text-slate-900">
 
-              Edit User
+              Edit User
 
-            </DialogTitle>
+            </DialogTitle>
 
 
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500">
 
-              Modify the workspace account details.
+              Modify the workspace account details.
 
-            </p>
+            </p>
 
 
 
-          </DialogHeader>
+          </DialogHeader>
 
 
 
 
 
-          <form
+          <form
 
-            onSubmit={handleEditSubmit(onEditSubmit)}
+            onSubmit={handleEditSubmit(onEditSubmit)}
 
-            className="space-y-4 pt-3"
+            className="space-y-4 pt-3"
 
-          >
+          >
 
 
 
-            {/* Full Name */}
+            {/* Full Name */}
 
-            <div className="space-y-1">
+            <div className="space-y-1">
 
 
 
-              <Label htmlFor="edit-fullName">
+              <Label htmlFor="edit-fullName">
 
-                Full Name
+                Full Name
 
-              </Label>
+              </Label>
 
 
 
-              <Input
+              <Input
 
-                id="edit-fullName"
+                id="edit-fullName"
 
-                type="text"
+                type="text"
 
-                placeholder="e.g. Dr. Arthur S. Vance"
+                placeholder="e.g. Dr. Arthur S. Vance"
 
-                {...registerEdit("fullName")}
+                {...registerEdit("fullName")}
 
-              />
+              />
 
 
 
-              {errorsEdit.fullName && (
+              {errorsEdit.fullName && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-rose-500 flex items-center gap-1">
 
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3" />
 
-                  {errorsEdit.fullName.message}
+                  {errorsEdit.fullName.message}
 
-                </p>
+                </p>
 
-              )}
+              )}
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            {/* Email */}
+            {/* Email */}
 
-            <div className="space-y-1">
+            <div className="space-y-1">
 
 
 
-              <Label htmlFor="edit-email">
+              <Label htmlFor="edit-email">
 
-                Email Address
+                Email Address
 
-              </Label>
+              </Label>
 
 
 
-              <Input
+              <Input
 
-                id="edit-email"
+                id="edit-email"
 
-                type="email"
+                type="email"
 
-                placeholder="a.vance@example.com"
+                placeholder="a.vance@example.com"
 
-                {...registerEdit("email")}
+                {...registerEdit("email")}
 
-              />
+              />
 
 
 
-              {errorsEdit.email && (
+              {errorsEdit.email && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-rose-500 flex items-center gap-1">
 
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3" />
 
-                  {errorsEdit.email.message}
+                  {errorsEdit.email.message}
 
-                </p>
+                </p>
 
-              )}
+              )}
 
 
 
-            </div>
+            </div>
 
             {/* Password */}
             <div className="space-y-1">
@@ -2722,810 +2722,810 @@ Please use the credentials above to access the secure portal.`
 
             {/* Role */}
 
-            <div className="space-y-1">
+            <div className="space-y-1">
 
 
 
-              <Label>
+              <Label>
 
-                Role
+                Role
 
-              </Label>
+              </Label>
 
 
 
-              <Controller
+              <Controller
 
-                name="role"
+                name="role"
 
-                control={controlEdit}
+                control={controlEdit}
 
-                render={({ field }) => (
+                render={({ field }) => (
 
-                  <Select
+                  <Select
 
-                    value={field.value}
+                    value={field.value}
 
-                    onValueChange={field.onChange}
+                    onValueChange={field.onChange}
 
-                  >
+                  >
 
 
 
-                    <SelectTrigger>
+                    <SelectTrigger>
 
-                      <SelectValue placeholder="Select role" />
+                      <SelectValue placeholder="Select role" />
 
-                    </SelectTrigger>
+                    </SelectTrigger>
 
 
 
-                    <SelectContent>
+                    <SelectContent>
 
 
 
-                      <SelectItem value="Admin">
+                      <SelectItem value="Admin">
 
-                        Admin
+                        Admin
 
-                      </SelectItem>
+                      </SelectItem>
 
 
 
-                      <SelectItem value="Author">
+                      <SelectItem value="Author">
 
-                        Author
+                        Author
 
-                      </SelectItem>
+                      </SelectItem>
 
 
 
 
 
-                    </SelectContent>
+                    </SelectContent>
 
 
 
-                  </Select>
+                  </Select>
 
-                )}
+                )}
 
-              />
+              />
 
 
 
-              {errorsEdit.role && (
+              {errorsEdit.role && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-rose-500 flex items-center gap-1">
 
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3" />
 
-                  {errorsEdit.role.message}
+                  {errorsEdit.role.message}
 
-                </p>
+                </p>
 
-              )}
+              )}
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            <DialogFooter className="pt-3 border-t border-slate-100 mt-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 mt-2">
 
 
 
-              <Button
+              <Button
 
-                type="button"
+                type="button"
 
-                variant="outline"
+                variant="outline"
 
-                onClick={() => {
+                onClick={() => {
 
-                  setIsEditOpen(false);
+                  setIsEditOpen(false);
 
-                  setSelectedUser(null);
+                  setSelectedUser(null);
 
-                  resetEdit();
+                  resetEdit();
                   setShowEditPassword(false);
 
-                }}
+                }}
 
-              >
+              >
 
-                Cancel
+                Cancel
 
-              </Button>
+              </Button>
 
 
 
-              <Button
+              <Button
 
-                type="submit"
+                type="submit"
 
-                className="bg-[#2563EB] hover:bg-blue-700 text-white"
+                className="bg-[#2563EB] hover:bg-blue-700 text-white"
 
-              >
+              >
 
-                Save Changes
+                Save Changes
 
-              </Button>
+              </Button>
 
 
 
-            </DialogFooter>
+            </DialogFooter>
 
 
 
-          </form>
+          </form>
 
 
 
-        </DialogContent>
+        </DialogContent>
 
 
 
-      </Dialog>
+      </Dialog>
 
 
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          VIEW USER MODAL
+          VIEW USER MODAL
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <Dialog
+      <Dialog
 
-        open={isViewOpen}
+        open={isViewOpen}
 
-        onOpenChange={setIsViewOpen}
+        onOpenChange={setIsViewOpen}
 
-      >
+      >
 
 
 
-        <DialogContent
+        <DialogContent
 
-          className="
+          className="
 
-            sm:max-w-[440px]
+            sm:max-w-[440px]
 
-            border
+            border
 
-            border-[#E5E7EB]
+            border-[#E5E7EB]
 
-            bg-white
+            bg-white
 
-            p-6
+            p-6
 
-            rounded-2xl
+            rounded-2xl
 
-            shadow-xl
+            shadow-xl
 
-            text-slate-800
+            text-slate-800
 
-          "
+          "
 
-        >
+        >
 
 
 
-          <DialogHeader className="border-b border-slate-100 pb-4">
+          <DialogHeader className="border-b border-slate-100 pb-4">
 
 
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
 
 
 
-              <div
+              <div
 
-                className="
+                className="
 
-                  h-10
+                  h-10
 
-                  w-10
+                  w-10
 
-                  bg-slate-100
+                  bg-slate-100
 
-                  rounded-full
+                  rounded-full
 
-                  flex
+                  flex
 
-                  items-center
+                  items-center
 
-                  justify-center
+                  justify-center
 
-                  text-slate-600
+                  text-slate-600
 
-                "
+                "
 
-              >
+              >
 
-                <UserIcon className="h-5 w-5" />
+                <UserIcon className="h-5 w-5" />
 
-              </div>
+              </div>
 
 
 
-              <div className="overflow-hidden">
+              <div className="overflow-hidden">
 
 
 
-                <DialogTitle
+                <DialogTitle
 
-                  className="
+                  className="
 
-                    text-base
+                    text-base
 
-                    font-extrabold
+                    font-extrabold
 
-                    text-slate-900
+                    text-slate-900
 
-                    truncate
+                    truncate
 
-                  "
+                  "
 
-                >
+                >
 
-                  {selectedUser?.fullName}
+                  {selectedUser?.fullName}
 
-                </DialogTitle>
+                </DialogTitle>
 
 
 
-                <span className="text-[10px] text-slate-400 font-semibold font-mono">
+                <span className="text-[10px] text-slate-400 font-semibold font-mono">
 
-                  USER ACCOUNT {selectedUser?.id}
+                  USER ACCOUNT {selectedUser?.id}
 
-                </span>
+                </span>
 
 
 
-              </div>
+              </div>
 
 
 
-            </div>
+            </div>
 
 
 
-          </DialogHeader>
+          </DialogHeader>
 
 
 
 
 
-          <div className="py-4 space-y-3.5 text-xs">
+          <div className="py-4 space-y-3.5 text-xs">
 
 
 
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
 
 
 
-              <span className="text-slate-500 font-semibold flex items-center gap-1">
+              <span className="text-slate-500 font-semibold flex items-center gap-1">
 
-                <Mail className="h-3.5 w-3.5" />
+                <Mail className="h-3.5 w-3.5" />
 
-                Email Address
+                Email Address
 
-              </span>
+              </span>
 
 
 
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-slate-800">
 
-                {selectedUser?.email}
+                {selectedUser?.email}
 
-              </span>
+              </span>
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
 
 
 
-              <span className="text-slate-500 font-semibold flex items-center gap-1">
+              <span className="text-slate-500 font-semibold flex items-center gap-1">
 
-                <Layers className="h-3.5 w-3.5" />
+                <Layers className="h-3.5 w-3.5" />
 
-                Role
+                Role
 
-              </span>
+              </span>
 
 
 
-              <span
+              <span
 
-                className="
+                className="
 
-                  inline-flex
+                  inline-flex
 
-                  items-center
+                  items-center
 
-                  px-2
+                  px-2
 
-                  py-0.5
+                  py-0.5
 
-                  rounded
+                  rounded
 
-                  text-[10px]
+                  text-[10px]
 
-                  font-bold
+                  font-bold
 
-                  bg-blue-100
+                  bg-blue-100
 
-                  text-blue-800
+                  text-blue-800
 
-                "
+                "
 
-              >
+              >
 
-                {selectedUser?.role}
+                {selectedUser?.role}
 
-              </span>
+              </span>
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
 
 
 
-              <span className="text-slate-500 font-semibold">
+              <span className="text-slate-500 font-semibold">
 
-                Status
+                Status
 
-              </span>
+              </span>
 
 
 
-              <span
+              <span
 
-                className={`
+                className={`
 
-                  inline-flex
+                  inline-flex
 
-                  items-center
+                  items-center
 
-                  gap-1.5
+                  gap-1.5
 
-                  px-2.5
+                  px-2.5
 
-                  py-0.5
+                  py-0.5
 
-                  rounded-full
+                  rounded-full
 
-                  text-[10px]
+                  text-[10px]
 
-                  font-bold
+                  font-bold
 
-                  uppercase
+                  uppercase
 
-                  ${
+                  ${
 
-                    selectedUser?.status === "Active"
+                    selectedUser?.status === "Active"
 
-                      ? "bg-emerald-50 text-emerald-700"
+                      ? "bg-emerald-50 text-emerald-700"
 
-                      : selectedUser?.status === "Inactive"
+                      : selectedUser?.status === "Inactive"
 
-                        ? "bg-slate-100 text-slate-600"
+                        ? "bg-slate-100 text-slate-600"
 
-                        : "bg-orange-50 text-orange-700"
+                        : "bg-orange-50 text-orange-700"
 
-                  }
+                  }
 
-                `}
+                `}
 
-              >
+              >
 
 
 
-                <span
+                <span
 
-                  className={`
+                  className={`
 
-                    h-1.5
+                    h-1.5
 
-                    w-1.5
+                    w-1.5
 
-                    rounded-full
+                    rounded-full
 
-                    ${
+                    ${
 
-                      selectedUser?.status === "Active"
+                      selectedUser?.status === "Active"
 
-                        ? "bg-emerald-500"
+                        ? "bg-emerald-500"
 
-                        : selectedUser?.status === "Inactive"
+                        : selectedUser?.status === "Inactive"
 
-                          ? "bg-slate-400"
+                          ? "bg-slate-400"
 
-                          : "bg-orange-500"
+                          : "bg-orange-500"
 
-                    }
+                    }
 
-                  `}
+                  `}
 
-                />
+                />
 
 
 
-                {selectedUser?.status || "Active"}
+                {selectedUser?.status || "Active"}
 
 
 
-              </span>
+              </span>
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
 
 
 
-              <span className="text-slate-500 font-semibold flex items-center gap-1">
+              <span className="text-slate-500 font-semibold flex items-center gap-1">
 
-                <Calendar className="h-3.5 w-3.5" />
+                <Calendar className="h-3.5 w-3.5" />
 
-                Created Date
+                Created Date
 
-              </span>
+              </span>
 
 
 
-              <span className="font-mono text-slate-800">
+              <span className="font-mono text-slate-800">
 
-                {selectedUser?.createdDate}
+                {selectedUser?.createdDate}
 
-              </span>
+              </span>
 
 
 
-            </div>
+            </div>
 
 
 
-          </div>
+          </div>
 
 
 
 
 
-          <DialogFooter className="pt-3 border-t border-slate-100">
+          <DialogFooter className="pt-3 border-t border-slate-100">
 
 
 
-            <Button
+            <Button
 
-              onClick={() => {
+              onClick={() => {
 
-                setIsViewOpen(false);
+                setIsViewOpen(false);
 
-                setSelectedUser(null);
+                setSelectedUser(null);
 
-              }}
+              }}
 
-              className="
+              className="
 
-                h-9
+                h-9
 
-                rounded-xl
+                rounded-xl
 
-                bg-slate-100
+                bg-slate-100
 
-                hover:bg-slate-200
+                hover:bg-slate-200
 
-                text-slate-800
+                text-slate-800
 
-              "
+              "
 
-            >
+            >
 
-              Close
+              Close
 
-            </Button>
+            </Button>
 
 
 
-          </DialogFooter>
+          </DialogFooter>
 
 
 
-        </DialogContent>
+        </DialogContent>
 
 
 
-      </Dialog>
+      </Dialog>
 
 
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          DELETE CONFIRMATION
+          DELETE CONFIRMATION
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <Dialog
+      <Dialog
 
-        open={isDeleteOpen}
+        open={isDeleteOpen}
 
-        onOpenChange={setIsDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
 
-      >
+      >
 
 
 
-        <DialogContent
+        <DialogContent
 
-          className="
+          className="
 
-            sm:max-w-[440px]
+            sm:max-w-[440px]
 
-            border
+            border
 
-            border-[#E5E7EB]
+            border-[#E5E7EB]
 
-            bg-white
+            bg-white
 
-            p-6
+            p-6
 
-            rounded-2xl
+            rounded-2xl
 
-            shadow-xl
+            shadow-xl
 
-            text-slate-800
+            text-slate-800
 
-          "
+          "
 
-        >
+        >
 
 
 
-          <DialogHeader className="border-b border-rose-50 pb-4">
+          <DialogHeader className="border-b border-rose-50 pb-4">
 
 
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
 
 
 
-              <div
+              <div
 
-                className="
+                className="
 
-                  h-10
+                  h-10
 
-                  w-10
+                  w-10
 
-                  bg-rose-50
+                  bg-rose-50
 
-                  rounded-full
+                  rounded-full
 
-                  flex
+                  flex
 
-                  items-center
+                  items-center
 
-                  justify-center
+                  justify-center
 
-                  text-rose-600
+                  text-rose-600
 
-                "
+                "
 
-              >
+              >
 
-                <Trash2 className="h-5 w-5" />
+                <Trash2 className="h-5 w-5" />
 
-              </div>
+              </div>
 
 
 
-              <div>
+              <div>
 
 
 
-                <DialogTitle className="text-base font-extrabold text-slate-900">
+                <DialogTitle className="text-base font-extrabold text-slate-900">
 
-                  Revoke & Delete Access
+                  Revoke & Delete Access
 
-                </DialogTitle>
+                </DialogTitle>
 
 
 
-                <span className="text-[10px] text-rose-500 font-semibold">
+                <span className="text-[10px] text-rose-500 font-semibold">
 
-                  ACTION CANNOT BE UNDONE
+                  ACTION CANNOT BE UNDONE
 
-                </span>
+                </span>
 
 
 
-              </div>
+              </div>
 
 
 
-            </div>
+            </div>
 
 
 
-          </DialogHeader>
+          </DialogHeader>
 
 
 
 
 
-          <div className="py-4 space-y-3.5 text-xs">
+          <div className="py-4 space-y-3.5 text-xs">
 
 
 
-            <p className="text-slate-600 font-medium leading-relaxed">
+            <p className="text-slate-600 font-medium leading-relaxed">
 
-              Are you sure you want to revoke and delete{" "}
+              Are you sure you want to revoke and delete{" "}
 
-              <strong className="text-slate-900">
+              <strong className="text-slate-900">
 
-                {userToDelete?.name}
+                {userToDelete?.name}
 
-              </strong>
+              </strong>
 
-              's system account?
+              's system account?
 
-            </p>
+            </p>
 
 
 
-            <p
+            <p
 
-              className="
+              className="
 
-                text-slate-500
+                text-slate-500
 
-                text-[11px]
+                text-[11px]
 
-                leading-relaxed
+                leading-relaxed
 
-                bg-slate-50
+                bg-slate-50
 
-                p-3
+                p-3
 
-                rounded-lg
+                rounded-lg
 
-                border
+                border
 
-                border-slate-100
+                border-slate-100
 
-              "
+              "
 
-            >
+            >
 
-              User ID{" "}
+              User ID{" "}
 
-              <strong className="font-mono text-blue-600">
+              <strong className="font-mono text-blue-600">
 
-                {userToDelete?.id}
+                {userToDelete?.id}
 
-              </strong>{" "}
+              </strong>{" "}
 
-              will lose access to the Clinical Workspace.
+              will lose access to the Clinical Workspace.
 
-            </p>
+            </p>
 
 
 
-          </div>
+          </div>
 
 
 
 
 
-          <DialogFooter className="pt-3 border-t border-slate-100">
+          <DialogFooter className="pt-3 border-t border-slate-100">
 
 
 
-            <Button
+            <Button
 
-              variant="outline"
+              variant="outline"
 
-              onClick={() => {
+              onClick={() => {
 
-                setIsDeleteOpen(false);
+                setIsDeleteOpen(false);
 
-                setUserToDelete(null);
+                setUserToDelete(null);
 
-              }}
+              }}
 
-            >
+            >
 
-              Cancel
+              Cancel
 
-            </Button>
+            </Button>
 
 
 
-            <Button
+            <Button
 
-              onClick={confirmDeleteAction}
+              onClick={confirmDeleteAction}
 
-              className="
+              className="
 
-                h-9
+                h-9
 
-                rounded-xl
+                rounded-xl
 
-                bg-rose-600
+                bg-rose-600
 
-                hover:bg-rose-700
+                hover:bg-rose-700
 
-                text-white
+                text-white
 
-              "
+              "
 
-            >
+            >
 
-              Revoke and Delete
+              Revoke and Delete
 
-            </Button>
+            </Button>
 
 
 
-          </DialogFooter>
+          </DialogFooter>
 
 
 
-        </DialogContent>
+        </DialogContent>
 
 
 
-      </Dialog>
+      </Dialog>
 
 
 
 
 
-      {/* ======================================================
+      {/* ======================================================
 
-          INVITATION MODAL
+          INVITATION MODAL
 
-          ====================================================== */}
+          ====================================================== */}
 
 
 
-      <Dialog
+      <Dialog
 
-        open={isInviteOpen}
+        open={isInviteOpen}
 
-        onOpenChange={(open) => {
+        onOpenChange={(open) => {
           setIsInviteOpen(open);
 
           if (!open) {
@@ -3535,569 +3535,569 @@ Please use the credentials above to access the secure portal.`
           }
         }}
 
-      >
+      >
 
 
 
-        <DialogContent
+        <DialogContent
 
-          className="
+          className="
 
-            sm:max-w-[440px]
+            sm:max-w-[440px]
 
-            border
+            border
 
-            border-slate-200
+            border-slate-200
 
-            bg-white
+            bg-white
 
-            p-5
+            p-5
 
-            rounded-xl
+            rounded-xl
 
-            shadow-xl
+            shadow-xl
 
-            text-slate-800
+            text-slate-800
 
-          "
+          "
 
-        >
+        >
 
 
 
-          <DialogHeader className="pb-2">
+          <DialogHeader className="pb-2">
 
 
 
-            <DialogTitle className="text-base font-bold text-slate-950 flex items-center gap-2">
+            <DialogTitle className="text-base font-bold text-slate-950 flex items-center gap-2">
 
 
 
-              <div
+              <div
 
-                className="
+                className="
 
-                  p-1
+                  p-1
 
-                  bg-blue-50
+                  bg-blue-50
 
-                  text-blue-600
+                  text-blue-600
 
-                  rounded
+                  rounded
 
-                "
+                "
 
-              >
+              >
 
-                <Mail className="h-4 w-4" />
+                <Mail className="h-4 w-4" />
 
-              </div>
+              </div>
 
 
 
-              <span>
+              <span>
 
-                Send Invitation
+                Send Invitation
 
-              </span>
+              </span>
 
 
 
-            </DialogTitle>
+            </DialogTitle>
 
 
 
-          </DialogHeader>
+          </DialogHeader>
 
 
 
 
 
-          {inviteUser && (
+          {inviteUser && (
 
 
 
-            <div className="space-y-4">
+            <div className="space-y-4">
 
 
 
-              {/* Email Preview */}
+              {/* Email Preview */}
 
-              <div
+              <div
 
-                className="
+                className="
 
-                  border
+                  border
 
-                  border-slate-200
+                  border-slate-200
 
-                  rounded-lg
+                  rounded-lg
 
-                  overflow-hidden
+                  overflow-hidden
 
-                  bg-white
+                  bg-white
 
-                  shadow-sm
+                  shadow-sm
 
-                  text-xs
+                  text-xs
 
-                "
+                "
 
-              >
+              >
 
 
 
-                {/* Invitation Header */}
+                {/* Invitation Header */}
 
-                <div
+                <div
 
-                  className="
+                  className="
 
-                    bg-slate-50/80
+                    bg-slate-50/80
 
-                    px-3
+                    px-3
 
-                    py-2
+                    py-2
 
-                    border-b
+                    border-b
 
-                    border-slate-100
+                    border-slate-100
 
-                    space-y-1.5
+                    space-y-1.5
 
-                  "
+                  "
 
-                >
+                >
 
 
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
 
 
 
-                    <span className="text-slate-400 font-medium w-12">
+                    <span className="text-slate-400 font-medium w-12">
 
-                      To:
+                      To:
 
-                    </span>
+                    </span>
 
 
 
-                    <div className="flex items-center gap-1.5 overflow-hidden">
+                    <div className="flex items-center gap-1.5 overflow-hidden">
 
 
 
-                      <span className="font-semibold text-slate-800 truncate">
+                      <span className="font-semibold text-slate-800 truncate">
 
-                        {inviteUser.fullName}
+                        {inviteUser.fullName}
 
-                      </span>
+                      </span>
 
 
 
-                      <span className="text-slate-500 font-mono truncate">
+                      <span className="text-slate-500 font-mono truncate">
 
-                        {inviteUser.email}
+                        {inviteUser.email}
 
-                      </span>
+                      </span>
 
 
 
-                    </div>
+                    </div>
 
 
 
-                  </div>
+                  </div>
 
 
 
 
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
 
 
 
-                    <span className="text-slate-400 font-medium w-12">
+                    <span className="text-slate-400 font-medium w-12">
 
-                      Role:
+                      Role:
 
-                    </span>
+                    </span>
 
 
 
-                    <span
+                    <span
 
-                      className="
+                      className="
 
-                        bg-blue-100
+                        bg-blue-100
 
-                        text-blue-800
+                        text-blue-800
 
-                        text-[10px]
+                        text-[10px]
 
-                        font-bold
+                        font-bold
 
-                        px-1.5
+                        px-1.5
 
-                        py-0.5
+                        py-0.5
 
-                        rounded
+                        rounded
 
-                        uppercase
+                        uppercase
 
-                      "
+                      "
 
-                    >
+                    >
 
-                      {inviteUser.role}
+                      {inviteUser.role}
 
-                    </span>
+                    </span>
 
 
 
-                  </div>
+                  </div>
 
 
 
 
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
 
 
 
-                    <span className="text-slate-400 font-medium w-12">
+                    <span className="text-slate-400 font-medium w-12">
 
-                      Subject:
+                      Subject:
 
-                    </span>
+                    </span>
 
 
 
-                    <span className="text-slate-700 font-semibold truncate">
+                    <span className="text-slate-700 font-semibold truncate">
 
-                      Invitation to join Clinical Workspace
+                      Invitation to join Clinical Workspace
 
-                    </span>
+                    </span>
 
 
 
-                  </div>
+                  </div>
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                {/* Invitation Body */}
+                {/* Invitation Body */}
 
-                <div
+                <div
 
-                  className="
+                  className="
 
-                    p-4
+                    p-4
 
-                    space-y-3
+                    space-y-3
 
-                    bg-white
+                    bg-white
 
-                    text-slate-600
+                    text-slate-600
 
-                    leading-relaxed
+                    leading-relaxed
 
-                  "
+                  "
 
-                >
+                >
 
 
 
-                  <p>
+                  <p>
 
-                    Dear{" "}
+                    Dear{" "}
 
-                    <strong className="text-slate-800">
+                    <strong className="text-slate-800">
 
-                      {inviteUser.fullName}
+                      {inviteUser.fullName}
 
-                    </strong>
+                    </strong>
 
-                    ,
+                    ,
 
-                  </p>
+                  </p>
 
 
 
 
 
-                  <p>
+                  <p>
 
-                    You have been provisioned as a{" "}
+                    You have been provisioned as a{" "}
 
-                    <strong className="text-slate-800">
+                    <strong className="text-slate-800">
 
-                      {inviteUser.role}
+                      {inviteUser.role}
 
-                    </strong>{" "}
+                    </strong>{" "}
 
-                    on our clinical platform.
+                    on our clinical platform.
 
-                    Please use the secure portal link below to
+                    Please use the secure portal link below to
 
-                    complete account activation and password setup.
+                    complete account activation and password setup.
 
-                  </p>
+                  </p>
 
 
 
 
 
-                  {/* Secure Invitation Details */}
+                  {/* Secure Invitation Details */}
 
-                  <div
+                  <div
 
-                    className="
+                    className="
 
-                      bg-slate-50/50
+                      bg-slate-50/50
 
-                      rounded-lg
+                      rounded-lg
 
-                      border
+                      border
 
-                      border-slate-100
+                      border-slate-100
 
-                      p-3
+                      p-3
 
-                      space-y-2
+                      space-y-2
 
-                      text-[11px]
+                      text-[11px]
 
-                    "
+                    "
 
-                  >
+                  >
 
 
 
-                    {/* Portal Link */}
+                    {/* Portal Link */}
 
-                    <div
+                    <div
 
-                      className="
+                      className="
 
-                        flex
+                        flex
 
-                        items-center
+                        items-center
 
-                        justify-between
+                        justify-between
 
-                        gap-3
+                        gap-3
 
-                        pb-1.5
+                        pb-1.5
 
-                        border-b
+                        border-b
 
-                        border-slate-100
+                        border-slate-100
 
-                      "
+                      "
 
-                    >
+                    >
 
 
 
-                      <div className="overflow-hidden min-w-0">
+                      <div className="overflow-hidden min-w-0">
 
 
 
-                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
+                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
 
-                          Secure Portal Link
+                          Secure Portal Link
 
-                        </span>
+                        </span>
 
 
 
-                        <span
+                        <span
 
-                          className="
+                          className="
 
-                            text-blue-600
+                            text-blue-600
 
-                            font-mono
+                            font-mono
 
-                            truncate
+                            truncate
 
-                            block
+                            block
 
-                          "
+                          "
 
-                          title={window.location.origin}
+                          title={window.location.origin}
 
-                        >
+                        >
 
-                          {window.location.origin}
+                          {window.location.origin}
 
-                        </span>
+                        </span>
 
 
 
-                      </div>
+                      </div>
 
 
 
 
 
-                      <Button
+                      <Button
 
-                        type="button"
+                        type="button"
 
-                        onClick={() =>
+                        onClick={() =>
 
-                          handleCopy(
+                          handleCopy(
 
-                            window.location.origin,
+                            window.location.origin,
 
-                            "link"
+                            "link"
 
-                          )
+                          )
 
-                        }
+                        }
 
-                        size="icon"
+                        size="icon"
 
-                        variant="ghost"
+                        variant="ghost"
 
-                        className="h-6 w-6"
+                        className="h-6 w-6"
 
-                        title="Copy portal link"
+                        title="Copy portal link"
 
-                      >
+                      >
 
-                        {copiedField === "link" ? (
+                        {copiedField === "link" ? (
 
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
 
-                        ) : (
+                        ) : (
 
-                          <Copy className="h-3 w-3" />
+                          <Copy className="h-3 w-3" />
 
-                        )}
+                        )}
 
-                      </Button>
+                      </Button>
 
 
 
-                    </div>
+                    </div>
 
 
 
 
 
-                    {/* Email */}
+                    {/* Email */}
 
-                    <div
+                    <div
 
-                      className="
+                      className="
 
-                        flex
+                        flex
 
-                        items-center
+                        items-center
 
-                        justify-between
+                        justify-between
 
-                        gap-3
+                        gap-3
 
-                        pb-1.5
+                        pb-1.5
 
-                        border-b
+                        border-b
 
-                        border-slate-100
+                        border-slate-100
 
-                      "
+                      "
 
-                    >
+                    >
 
 
 
-                      <div className="overflow-hidden min-w-0">
+                      <div className="overflow-hidden min-w-0">
 
 
 
-                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
+                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
 
-                          Registered Email
+                          Registered Email
 
-                        </span>
+                        </span>
 
 
 
-                        <span
+                        <span
 
-                          className="text-slate-700 font-mono truncate block"
+                          className="text-slate-700 font-mono truncate block"
 
-                          title={inviteUser.email}
+                          title={inviteUser.email}
 
-                        >
+                        >
 
-                          {inviteUser.email}
+                          {inviteUser.email}
 
-                        </span>
+                        </span>
 
 
 
-                      </div>
+                      </div>
 
 
 
 
 
-                      <Button
+                      <Button
 
-                        type="button"
+                        type="button"
 
-                        onClick={() =>
+                        onClick={() =>
 
-                          handleCopy(
+                          handleCopy(
 
-                            inviteUser.email,
+                            inviteUser.email,
 
-                            "email"
+                            "email"
 
-                          )
+                          )
 
-                        }
+                        }
 
-                        size="icon"
+                        size="icon"
 
-                        variant="ghost"
+                        variant="ghost"
 
-                        className="h-6 w-6"
+                        className="h-6 w-6"
 
-                        title="Copy email"
+                        title="Copy email"
 
-                      >
+                      >
 
-                        {copiedField === "email" ? (
+                        {copiedField === "email" ? (
 
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
 
-                        ) : (
+                        ) : (
 
-                          <Copy className="h-3 w-3" />
+                          <Copy className="h-3 w-3" />
 
-                        )}
+                        )}
 
-                      </Button>
+                      </Button>
 
 
 
-                    </div>
+                    </div>
 
 
 
 
 
-                    {/* Password */}
+                    {/* Password */}
                     <div
                       className="flex items-center justify-between gap-3 pb-1.5 border-b border-slate-100"
                     >
@@ -4142,357 +4142,357 @@ Please use the credentials above to access the secure portal.`
 
                     {/* Role */}
 
-                    <div
+                    <div
 
-                      className="
+                      className="
 
-                        flex
+                        flex
 
-                        items-center
+                        items-center
 
-                        justify-between
+                        justify-between
 
-                        gap-3
+                        gap-3
 
-                      "
+                      "
 
-                    >
-
-
-
-                      <div className="overflow-hidden min-w-0">
+                    >
 
 
 
-                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
-
-                          Role Type
-
-                        </span>
+                      <div className="overflow-hidden min-w-0">
 
 
 
-                        <span className="text-slate-700 font-semibold block">
+                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
 
-                          {inviteUser.role}
+                          Role Type
 
-                        </span>
-
-
-
-                      </div>
+                        </span>
 
 
 
+                        <span className="text-slate-700 font-semibold block">
 
+                          {inviteUser.role}
 
-                      <Button
-
-                        type="button"
-
-                        onClick={() =>
-
-                          handleCopy(
-
-                            inviteUser.role,
-
-                            "role"
-
-                          )
-
-                        }
-
-                        size="icon"
-
-                        variant="ghost"
-
-                        className="h-6 w-6"
-
-                        title="Copy role"
-
-                      >
-
-                        {copiedField === "role" ? (
-
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
-
-                        ) : (
-
-                          <Copy className="h-3 w-3" />
-
-                        )}
-
-                      </Button>
+                        </span>
 
 
 
-                    </div>
-
-
-
-                  </div>
+                      </div>
 
 
 
 
 
-                  <p className="text-[10.5px] text-slate-400 leading-normal">
+                      <Button
+
+                        type="button"
+
+                        onClick={() =>
+
+                          handleCopy(
+
+                            inviteUser.role,
+
+                            "role"
+
+                          )
+
+                        }
+
+                        size="icon"
+
+                        variant="ghost"
+
+                        className="h-6 w-6"
+
+                        title="Copy role"
+
+                      >
+
+                        {copiedField === "role" ? (
+
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+
+                        ) : (
+
+                          <Copy className="h-3 w-3" />
+
+                        )}
+
+                      </Button>
+
+
+
+                    </div>
+
+
+
+                  </div>
+
+
+
+
+
+                  <p className="text-[10.5px] text-slate-400 leading-normal">
                     Copy the password above and share these credentials with the user through a secure channel.
                   </p>
 
 
 
-                </div>
+                </div>
 
 
 
-              </div>
+              </div>
 
 
 
 
 
-              {/* Invitation Actions */}
+              {/* Invitation Actions */}
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2">
 
 
 
-                {/* Copy Invitation */}
+                {/* Copy Invitation */}
 
-                <Button
+                <Button
 
-                  type="button"
+                  type="button"
 
-                  onClick={() =>
+                  onClick={() =>
 
-                    handleCopy(
+                    handleCopy(
 
-                      invitationText,
+                      invitationText,
 
-                      "full-invite"
+                      "full-invite"
 
-                    )
+                    )
 
-                  }
+                  }
 
-                  variant="outline"
+                  variant="outline"
 
-                  className="
+                  className="
 
-                    h-9
+                    h-9
 
-                    px-3
+                    px-3
 
-                    rounded-lg
+                    rounded-lg
 
-                    border-slate-200
+                    border-slate-200
 
-                    text-slate-700
+                    text-slate-700
 
-                    text-xs
+                    text-xs
 
-                    font-semibold
+                    font-semibold
 
-                    flex
+                    flex
 
-                    items-center
+                    items-center
 
-                    justify-center
+                    justify-center
 
-                    gap-1.5
+                    gap-1.5
 
-                  "
+                  "
 
-                >
+                >
 
 
 
-                  {copiedField === "full-invite" ? (
+                  {copiedField === "full-invite" ? (
 
-                    <>
+                    <>
 
-                      <Check className="h-3.5 w-3.5 text-emerald-600" />
+                      <Check className="h-3.5 w-3.5 text-emerald-600" />
 
-                      <span>Copied!</span>
+                      <span>Copied!</span>
 
-                    </>
+                    </>
 
-                  ) : (
+                  ) : (
 
-                    <>
+                    <>
 
-                      <Share2 className="h-3.5 w-3.5 text-slate-500" />
+                      <Share2 className="h-3.5 w-3.5 text-slate-500" />
 
-                      <span>Copy Invitation</span>
+                      <span>Copy Invitation</span>
 
-                    </>
+                    </>
 
-                  )}
+                  )}
 
 
 
-                </Button>
+                </Button>
 
 
 
 
 
-                {/* Open Email Client */}
+                {/* Open Email Client */}
 
-                <Button
+                <Button
 
-                  type="button"
+                  type="button"
 
-                  onClick={() => {
+                  onClick={() => {
 
 
 
-                    const subject =
+                    const subject =
 
-                      encodeURIComponent(
+                      encodeURIComponent(
 
-                        "Invitation to join Clinical Workspace"
+                        "Invitation to join Clinical Workspace"
 
-                      );
+                      );
 
 
 
-                    const body =
+                    const body =
 
-                      encodeURIComponent(
+                      encodeURIComponent(
 
-                        invitationText
+                        invitationText
 
-                      );
+                      );
 
 
 
-                    const mailtoUrl =
+                    const mailtoUrl =
 
-                      `mailto:${inviteUser.email}` +
+                      `mailto:${inviteUser.email}` +
 
-                      `?subject=${subject}` +
+                      `?subject=${subject}` +
 
-                      `&body=${body}`;
+                      `&body=${body}`;
 
 
 
-                    window.location.href =
+                    window.location.href =
 
-                      mailtoUrl;
+                      mailtoUrl;
 
-                  }}
+                  }}
 
-                  className="
+                  className="
 
-                    h-9
+                    h-9
 
-                    px-3
+                    px-3
 
-                    rounded-lg
+                    rounded-lg
 
-                    bg-blue-600
+                    bg-blue-600
 
-                    hover:bg-blue-700
+                    hover:bg-blue-700
 
-                    text-white
+                    text-white
 
-                    text-xs
+                    text-xs
 
-                    font-bold
+                    font-bold
 
-                    flex
+                    flex
 
-                    items-center
+                    items-center
 
-                    justify-center
+                    justify-center
 
-                    gap-1.5
+                    gap-1.5
 
-                  "
+                  "
 
-                >
+                >
 
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3.5 w-3.5" />
 
-                  <span>Email</span>
+                  <span>Email</span>
 
-                </Button>
+                </Button>
 
 
 
-              </div>
+              </div>
 
 
 
 
 
-              {/* Close */}
+              {/* Close */}
 
-              <div className="flex justify-end pt-1 border-t border-slate-100">
+              <div className="flex justify-end pt-1 border-t border-slate-100">
 
 
 
-                <Button
+                <Button
 
-                  type="button"
+                  type="button"
 
-                  onClick={() => {
+                  onClick={() => {
 
-                    setIsInviteOpen(false);
+                    setIsInviteOpen(false);
                     setInvitePassword("");
 
-                    setInviteUser(null);
+                    setInviteUser(null);
 
-                    setCopiedField(null);
+                    setCopiedField(null);
 
-                  }}
+                  }}
 
-                  variant="ghost"
+                  variant="ghost"
 
-                  className="
+                  className="
 
-                    h-8
+                    h-8
 
-                    px-4
+                    px-4
 
-                    rounded-lg
+                    rounded-lg
 
-                    text-slate-500
+                    text-slate-500
 
-                  "
+                  "
 
-                >
+                >
 
-                  Close
+                  Close
 
-                </Button>
-
-
-
-              </div>
+                </Button>
 
 
 
-            </div>
+              </div>
 
 
 
-          )}
+            </div>
 
 
 
-        </DialogContent>
+          )}
 
 
 
-      </Dialog>
+        </DialogContent>
 
 
 
-    </div>
+      </Dialog>
 
-  );
+
+
+    </div>
+
+  );
 
 }

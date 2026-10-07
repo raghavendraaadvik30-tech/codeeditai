@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /*This file provides a frontend-only light/dark theme system: 
 useTheme() loads and persists the user's theme and applies the dark class to the HTML root, while ThemeToggle provides the UI button for switching modes; 
 it does not use the backend and normally requires no backend changes.*/

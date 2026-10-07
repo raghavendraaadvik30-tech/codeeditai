@@ -66,6 +66,7 @@ const STORAGE_KEY_STYLE = "parexel.references.style.v1";
 export function ReferencesProvider({ children }: { children: React.ReactNode }) {
   const { editorRef, insertHTML } = useEditor();
   const log = (_entry: { action: string; label: string }) => {
+    void _entry;
     // Audit logger placeholder
   };
   

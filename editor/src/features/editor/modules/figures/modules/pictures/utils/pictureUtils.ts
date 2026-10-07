@@ -104,7 +104,7 @@ export const extractPictureTitle = (src: string, fallback?: string): string => {
     return fallback;
   }
   if (src && !src.startsWith("data:")) {
-    const match = src.match(/\/([^\/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
+    const match = src.match(/\/([^/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
     if (match && match[1]) {
       return decodeURIComponent(match[1]).replace(/[-_]/g, " ");
     }

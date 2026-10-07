@@ -53,7 +53,7 @@ export function WordCount() {
         }
 
         const rawText = (clone.textContent || "")
-          .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+          .replace(/[\u200B\u200C\uFEFF\u00AD]/g, "").replace(/\u200D/g, "")
           .replace(/\u00A0/g, " ");
 
         const trimmed = rawText.trim();

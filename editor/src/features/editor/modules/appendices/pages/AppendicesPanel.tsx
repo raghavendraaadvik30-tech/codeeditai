@@ -26,12 +26,10 @@ export default function AppendicesPanel() {
     if (!html) return;
 
     // Find any existing appendix block of this type across ALL pages in the document
-    let selector = "";
-    if (type === "all") {
-      selector = '[data-appendix-type="all"], .appendices-block';
-    } else {
-      selector = `[data-appendix-type="${type}"], .${type}, .${type}-section, .${type}-empty-block, [data-appendix="${type}"]`;
-    }
+    const selector =
+      type === "all"
+        ? '[data-appendix-type="all"], .appendices-block'
+        : `[data-appendix-type="${type}"], .${type}, .${type}-section, .${type}-empty-block, [data-appendix="${type}"]`;
 
     let existingElements = Array.from(document.querySelectorAll<HTMLElement>(selector));
 

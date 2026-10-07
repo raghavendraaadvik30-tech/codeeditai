@@ -606,17 +606,17 @@ function shouldAutoCapitalize(container: HTMLElement): boolean {
     const textBefore = preRange.toString();
 
     // 1. At the start of the block (empty or only whitespace/quotes/brackets)
-    if (/^[\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+    if (/^[\s\u00A0"'“‘([]*$/.test(textBefore)) {
       return true;
     }
 
     // 2. Directly after a newline
-    if (/[\r\n][\s\u00A0"'“‘(\[]*$/.test(textBefore)) {
+    if (/[\r\n][\s\u00A0"'“‘([]*$/.test(textBefore)) {
       return true;
     }
 
     // 3. After sentence-ending punctuation (. ? !) followed by at least one space
-    if (/[.?!][\s\u00A0]+["'“‘(\[]*$/.test(textBefore)) {
+    if (/[.?!][\s\u00A0]+["'“‘([]*$/.test(textBefore)) {
       return true;
     }
 
@@ -753,8 +753,6 @@ function DocumentPage({
   pageIndex,
   pageNumber,
   totalPages,
-  headerText: _headerText,
-  footerText: _footerText,
   section,
   pageBorders,
   pageNumberPosition,
@@ -1332,7 +1330,7 @@ function DocumentPage({
       if (shouldAutoCapitalize(container)) {
         e.preventDefault();
         const upper = e.key.toUpperCase();
-        let inserted = false;
+        let inserted: boolean;
         try {
           inserted = document.execCommand("insertText", false, upper);
         } catch {
@@ -1767,7 +1765,7 @@ function DocumentPage({
     }
     if (src && !src.startsWith("data:")) {
       try {
-        const match = src.match(/\/([^\/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
+        const match = src.match(/\/([^/?#]+?)(?:\.[a-zA-Z0-9]+)?(?:\?|#|$)/);
         if (match && match[1]) {
           const decoded = decodeURIComponent(match[1]).replace(/[-_]/g, " ");
           if (decoded.length > 1 && !/^[0-9a-f]{20,}$/i.test(decoded)) {

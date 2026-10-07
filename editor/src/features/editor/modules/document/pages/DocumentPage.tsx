@@ -469,7 +469,7 @@ export default function DocumentPage() {
 
         // Clean out zero-width characters and normalize non-breaking spaces
         const rawText = (clone.textContent || "")
-          .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+          .replace(/[\u200B\u200C\uFEFF\u00AD]/g, "").replace(/\u200D/g, "")
           .replace(/\u00A0/g, " ");
 
         // Trim leading and trailing whitespace to determine if block has genuine content

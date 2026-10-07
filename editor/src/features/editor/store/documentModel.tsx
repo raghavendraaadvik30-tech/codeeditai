@@ -985,7 +985,8 @@ export function DocumentModelProvider({
             })),
             pages: prev.pages.map((p) => {
               if (p.pageBorders) {
-                const { pageBorders: _, ...rest } = p;
+                const rest = { ...p };
+                delete rest.pageBorders;
                 return rest;
               }
               return p;
@@ -1007,7 +1008,8 @@ export function DocumentModelProvider({
             ),
             pages: prev.pages.map((p) => {
               if (p.sectionId === sectionId && p.pageBorders) {
-                const { pageBorders: _, ...rest } = p;
+                const rest = { ...p };
+                delete rest.pageBorders;
                 return rest;
               }
               return p;

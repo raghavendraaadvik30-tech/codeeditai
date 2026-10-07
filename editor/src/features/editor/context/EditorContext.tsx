@@ -333,9 +333,9 @@ export interface EditorContextType {
   bulletChar: string,
   styleType: string
 ) => void;
-  applyNumberingStyle: (style?: any) => void;
-  applyMultilevelStyle: (style?: any) => void;
-  toggleMultilevelList: (type?: any) => void;
+  applyNumberingStyle: (style?: string) => void;
+  applyMultilevelStyle: (style?: string) => void;
+  toggleMultilevelList: (type?: string) => void;
 
   /**
    * Formats paragraph block (p, h1, h2, h3, h4, blockquote) preserving selection.
@@ -1258,7 +1258,7 @@ useEffect(() => {
   const insertPageBreak = useCallback(() => {
     // 1. Locate current contenteditable page and caret range
     restoreEditorSelection();
-    let sel = window.getSelection();
+    const sel = window.getSelection();
     let pageEl: HTMLElement | null = null;
     let range: Range | null = null;
 
@@ -1436,7 +1436,7 @@ useEffect(() => {
       const nextPage = currentIdx >= 0 && currentIdx + 1 < pages.length ? pages[currentIdx + 1] : null;
 
       let targetPageId = "";
-      let isNewPage = false;
+      let isNewPage: boolean;
       let targetHtmlBefore = "";
 
       if (nextPage) {
@@ -1849,7 +1849,7 @@ useEffect(() => {
       topBlock = topBlock.parentNode;
     }
 
-    let nextBlockToFocus: HTMLElement | null = null;
+    let nextBlockToFocus: HTMLElement | null;
 
     if (topBlock && topBlock.parentNode === pageEl) {
       // Split the current paragraph block at cursor position
@@ -1920,7 +1920,7 @@ useEffect(() => {
   const undoMultiple = useCallback((count: number) => {
     if (count <= 0) return;
     const stack = historyStackRef.current;
-    let idx = historyIndexRef.current;
+    const idx = historyIndexRef.current;
     if (idx <= 0 || stack.length === 0) {
       return;
     }
@@ -2002,7 +2002,7 @@ useEffect(() => {
   const redoMultiple = useCallback((count: number) => {
     if (count <= 0) return;
     const stack = historyStackRef.current;
-    let idx = historyIndexRef.current;
+    const idx = historyIndexRef.current;
     if (idx >= stack.length - 1 || stack.length === 0) {
       return;
     }
@@ -2398,9 +2398,9 @@ const applyBulletStyle = useCallback(
    exec: applyFormatCommand,
 
 applyBulletStyle,
-    applyNumberingStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
-    applyMultilevelStyle: (style?: any) => applyFormatCommand("insertOrderedList", style),
-    toggleMultilevelList: (type?: any) => applyFormatCommand("insertOrderedList", type),
+    applyNumberingStyle: (style?: string) => applyFormatCommand("insertOrderedList", style),
+    applyMultilevelStyle: (style?: string) => applyFormatCommand("insertOrderedList", style),
+    toggleMultilevelList: (type?: string) => applyFormatCommand("insertOrderedList", type),
 
     undo,
     redo,

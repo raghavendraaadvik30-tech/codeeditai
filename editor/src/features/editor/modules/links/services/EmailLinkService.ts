@@ -198,10 +198,10 @@ export class EmailLinkService {
       'BT',
       '/F1 16 Tf',
       '50 770 Td',
-      `(${cleanTitle.replace(/[\(\)\\]/g, '\\$&')}) Tj`,
+      `(${cleanTitle.replace(/[()\\]/g, '\\$&')}) Tj`,
       '/F1 10 Tf',
       '0 -24 Td',
-      ...lines.slice(0, 50).map((l) => `(${l.substring(0, 85).replace(/[\(\)\\]/g, '\\$&')}) '`),
+      ...lines.slice(0, 50).map((l) => `(${l.substring(0, 85).replace(/[()\\]/g, '\\$&')}) '`),
       'ET',
     ].join('\n');
 

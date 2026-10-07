@@ -14,25 +14,25 @@ import { Role } from "../config/roles";
 
 import {
 
-  ShieldAlert,
+  ShieldAlert,
 
-  Menu,
+  Menu,
 
-  UserCheck as UserIcon,
+  UserCheck as UserIcon,
 
-  LogOut,
+  LogOut,
 
-  X,
+  X,
 
-  ShieldCheck,
+  ShieldCheck,
 
-  KeyRound,
+  KeyRound,
 
-  CheckCircle2,
+  CheckCircle2,
 
-  Eye,
+  Eye,
 
-  EyeOff,
+  EyeOff,
 
 } from "lucide-react";
 
@@ -40,17 +40,17 @@ import {
 
 interface AdminProfileSecurityProps {
 
-  user: {
+  user: {
 
-    name?: string;
+    name?: string;
 
-    email?: string;
+    email?: string;
 
-    role?: string;
+    role?: string;
 
-  } | null | undefined;
+  } | null | undefined;
 
-  onClose: () => void;
+  onClose: () => void;
 
 }
 
@@ -58,357 +58,357 @@ interface AdminProfileSecurityProps {
 
 function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
-  const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
 
-  const [newPassword, setNewPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState("");
 
 
 
-  const email = user?.email || "admin@gmail.com";
+  const email = user?.email || "admin@gmail.com";
 
-  const role = user?.role || "Admin";
+  const role = user?.role || "Admin";
 
 
 
-  const openPasswordTab = () => {
+  const openPasswordTab = () => {
 
-    setActiveTab("password");
+    setActiveTab("password");
 
-    setError("");
+    setError("");
 
-    setSuccess(false);
+    setSuccess(false);
 
-  };
+  };
 
 
 
-  const handleSavePassword = () => {
+  const handleSavePassword = () => {
 
-    setError("");
+    setError("");
 
-    setSuccess(false);
+    setSuccess(false);
 
 
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 6) {
 
-      setError("Password must be at least 6 characters.");
+      setError("Password must be at least 6 characters.");
 
-      return;
+      return;
 
-    }
+    }
 
 
 
-    if (newPassword !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
 
-      setError("Passwords do not match.");
+      setError("Passwords do not match.");
 
-      return;
+      return;
 
-    }
+    }
 
 
 
-    // Connect the real authentication/password API here when available.
+    // Connect the real authentication/password API here when available.
 
-    setSuccess(true);
+    setSuccess(true);
 
-    setNewPassword("");
+    setNewPassword("");
 
-    setConfirmPassword("");
+    setConfirmPassword("");
 
-  };
+  };
 
 
 
-  return (
+  return (
 
-    <div
+    <div
 
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-[2px]"
 
-      onMouseDown={(event) => {
+      onMouseDown={(event) => {
 
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) onClose();
 
-      }}
+      }}
 
-    >
+    >
 
-      <div className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
 
-        <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
+        <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
 
-              <ShieldCheck className="h-5 w-5" />
+              <ShieldCheck className="h-5 w-5" />
 
-            </div>
+            </div>
 
-            <div>
+            <div>
 
-              <h2 className="text-base font-extrabold text-slate-900">
+              <h2 className="text-base font-extrabold text-slate-900">
 
-                Admin Profile &amp; Security
+                Admin Profile &amp; Security
 
-              </h2>
+              </h2>
 
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-slate-500">
 
-                System Administrator Settings
+                System Administrator Settings
 
-              </p>
+              </p>
 
-            </div>
+            </div>
 
-          </div>
+          </div>
 
 
 
-          <button
+          <button
 
-            type="button"
+            type="button"
 
-            onClick={onClose}
+            onClick={onClose}
 
-            aria-label="Close"
+            aria-label="Close"
 
-            className="rounded-full p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            className="rounded-full p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
 
-          >
+          >
 
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" />
 
-          </button>
+          </button>
 
-        </div>
+        </div>
 
 
 
-        <div className="flex gap-2 px-5 pt-4">
+        <div className="flex gap-2 px-5 pt-4">
 
-          <button
+          <button
 
-            type="button"
+            type="button"
 
-            onClick={() => {
+            onClick={() => {
 
-              setActiveTab("profile");
+              setActiveTab("profile");
 
-              setError("");
+              setError("");
 
-              setSuccess(false);
+              setSuccess(false);
 
-            }}
+            }}
 
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+            className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
 
-              activeTab === "profile"
+              activeTab === "profile"
 
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-blue-600 text-white shadow-sm"
 
-                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
 
-            }`}
+            }`}
 
-          >
+          >
 
-            Profile Overview
+            Profile Overview
 
-          </button>
+          </button>
 
 
 
-{/*           <button
+{/*           <button
 
-            type="button"
+            type="button"
 
-            onClick={openPasswordTab}
+            onClick={openPasswordTab}
 
-            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition ${
 
-              activeTab === "password"
+              activeTab === "password"
 
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-blue-600 text-white shadow-sm"
 
-                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
 
-            }`}
+            }`}
 
-          >
+          >
 
-            <KeyRound className="h-3.5 w-3.5" />
+            <KeyRound className="h-3.5 w-3.5" />
 
-            Change Password
+            Change Password
 
-          </button> */}
+          </button> */}
 
-        </div>
+        </div>
 
 
 
-        <div className="px-5 pb-5 pt-4">
+        <div className="px-5 pb-5 pt-4">
 
-          {activeTab === "profile" ? (
+          {activeTab === "profile" ? (
 
-            <div>
+            <div>
 
-              <div className="space-y-4">
+              <div className="space-y-4">
 
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4">
 
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-xs font-medium text-slate-500">
 
-                    Administrator Email
+                    Administrator Email
 
-                  </span>
+                  </span>
 
-                  <span className="text-xs font-bold text-slate-800">
+                  <span className="text-xs font-bold text-slate-800">
 
-                    {email}
+                    {email}
 
-                  </span>
+                  </span>
 
-                </div>
+                </div>
 
 
 
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4">
 
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-xs font-medium text-slate-500">
 
-                    Account Role
+                    Account Role
 
-                  </span>
+                  </span>
 
-                  <span className="text-xs font-bold uppercase text-blue-600">
+                  <span className="text-xs font-bold uppercase text-blue-600">
 
-                    {role}
+                    {role}
 
-                  </span>
+                  </span>
 
-                </div>
+                </div>
 
 
 
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4">
 
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-xs font-medium text-slate-500">
 
-                    Account Status
+                    Account Status
 
-                  </span>
+                  </span>
 
-                  <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
 
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
 
-                    ACTIVE SESSION
+                    ACTIVE SESSION
 
-                  </span>
+                  </span>
 
-                </div>
+                </div>
 
-              </div>
+              </div>
 
 
 
-              <button
+              <button
 
-                type="button"
+                type="button"
 
-                onClick={openPasswordTab}
+                onClick={openPasswordTab}
 
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
 
-              >
+              >
 
-                <KeyRound className="h-4 w-4" />
+                <KeyRound className="h-4 w-4" />
 
-                Change Admin Password
+                Change Admin Password
 
-              </button>
+              </button>
 
-            </div>
+            </div>
 
-          ) : (
+          ) : (
 
-            <div>
+            <div>
 
-              {success && (
+              {success && (
 
-                <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+                <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
 
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
 
-                  Admin password updated successfully!
+                  Admin password updated successfully!
 
-                </div>
+                </div>
 
-              )}
+              )}
 
 
 
-              {error && (
+              {error && (
 
-                <div className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600">
+                <div className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600">
 
-                  {error}
+                  {error}
 
-                </div>
+                </div>
 
-              )}
+              )}
 
 
 
-              <div className="space-y-4">
+              <div className="space-y-4">
 
-                <div>
+                <div>
 
-                  <label className="mb-1.5 block text-xs font-bold text-slate-800">
+                  <label className="mb-1.5 block text-xs font-bold text-slate-800">
 
-                    Account Email
+                    Account Email
 
-                  </label>
+                  </label>
 
-                  <input
+                  <input
 
-                    type="email"
+                    type="email"
 
-                    value={email}
+                    value={email}
 
-                    readOnly
+                    readOnly
 
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-500 outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-500 outline-none"
 
-                  />
+                  />
 
-                </div>
+                </div>
 
 
 
-                <div>
+                <div>
 
-                  <label className="mb-1.5 block text-xs font-bold text-slate-800">
+                  <label className="mb-1.5 block text-xs font-bold text-slate-800">
 
-                    New Password
+                    New Password
 
-                  </label>
+                  </label>
 
-                  <div className="relative">
+                  <div className="relative">
   <input
     type={showNewPassword ? "text" : "password"}
     value={newPassword}
@@ -434,11 +434,11 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
     )}
   </button>
 </div>
-                </div>
+                </div>
 
 
 
-                <div>
+                <div>
   <label className="mb-1.5 block text-xs font-bold text-slate-800">
     Confirm New Password
   </label>
@@ -473,61 +473,61 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
   </div>
 </div>
 
-              </div>
+              </div>
 
 
 
-              <div className="mt-5 flex items-center justify-end gap-3">
+              <div className="mt-5 flex items-center justify-end gap-3">
 
-                <button
+                <button
 
-                  type="button"
+                  type="button"
 
-                  onClick={() => {
+                  onClick={() => {
 
-                    setActiveTab("profile");
+                    setActiveTab("profile");
 
-                    setError("");
+                    setError("");
 
-                    setSuccess(false);
+                    setSuccess(false);
 
-                  }}
+                  }}
 
-                  className="rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                  className="rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
 
-                >
+                >
 
-                  Cancel
+                  Cancel
 
-                </button>
+                </button>
 
-                <button
+                <button
 
-                  type="button"
+                  type="button"
 
-                  onClick={handleSavePassword}
+                  onClick={handleSavePassword}
 
-                  className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                  className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
 
-                >
+                >
 
-                  Save New Password
+                  Save New Password
 
-                </button>
+                </button>
 
-              </div>
+              </div>
 
-            </div>
+            </div>
 
-          )}
+          )}
 
-        </div>
+        </div>
 
-      </div>
+      </div>
 
-    </div>
+    </div>
 
-  );
+  );
 
 }
 
@@ -535,328 +535,328 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
 export const DashboardLayout: React.FC = () => {
 
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
 
-  const location = useLocation();
+  const location = useLocation();
 
 
 
-  const [sidebarExpanded, setSidebarExpanded] = useState(() => {
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => {
 
-    return localStorage.getItem("sidebarExpanded") === "true";
+    return localStorage.getItem("sidebarExpanded") === "true";
 
-  });
+  });
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const [showAdminProfile, setShowAdminProfile] = useState(false);
+  const [showAdminProfile, setShowAdminProfile] = useState(false);
 
 
 
-  const isExpanded = sidebarExpanded || mobileMenuOpen;
+  const isExpanded = sidebarExpanded || mobileMenuOpen;
 
 
 
-  const handleToggle = () => {
+  const handleToggle = () => {
 
-    if (window.innerWidth < 1024) {
+    if (window.innerWidth < 1024) {
 
-      setMobileMenuOpen((value) => !value);
+      setMobileMenuOpen((value) => !value);
 
-      return;
+      return;
 
-    }
+    }
 
 
 
-    const nextState = !sidebarExpanded;
+    const nextState = !sidebarExpanded;
 
-    setSidebarExpanded(nextState);
+    setSidebarExpanded(nextState);
 
-    localStorage.setItem("sidebarExpanded", String(nextState));
+    localStorage.setItem("sidebarExpanded", String(nextState));
 
-  };
+  };
 
 
 
-  const userRole = (user?.role || Role.Author) as Role;
+  const userRole = (user?.role || Role.Author) as Role;
 
-  const filteredNavItems = navigationItems.filter(
+  const filteredNavItems = navigationItems.filter(
 
-    (item) => !item.roles || item.roles.includes(userRole)
+    (item) => !item.roles || item.roles.includes(userRole)
 
-  );
+  );
 
 
 
-  return (
+  return (
 
-    <div className="flex h-screen overflow-hidden bg-[#F3F4F6] font-sans text-slate-800">
+    <div className="flex h-screen overflow-hidden bg-[#F3F4F6] font-sans text-slate-800">
 
-      <aside
+      <aside
 
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#E5E7EB] bg-white transition-all duration-300 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#E5E7EB] bg-white transition-all duration-300 ${
 
-          sidebarExpanded ? "w-64" : "w-[76px]"
+          sidebarExpanded ? "w-64" : "w-[76px]"
 
-        } ${
+        } ${
 
-          mobileMenuOpen
+          mobileMenuOpen
 
-            ? "translate-x-0 w-64"
+            ? "translate-x-0 w-64"
 
-            : "-translate-x-full lg:translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
 
-        }`}
+        }`}
 
-      >
+      >
 
-        <div>
+        <div>
 
-          <div
+          <div
 
-            className={`flex h-16 shrink-0 items-center border-b border-slate-100 ${
+            className={`flex h-16 shrink-0 items-center border-b border-slate-100 ${
 
-              isExpanded ? "justify-between px-6" : "justify-center"
+              isExpanded ? "justify-between px-6" : "justify-center"
 
-            }`}
+            }`}
 
-          >
+          >
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5">
 
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 p-1.5 shadow-md">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 p-1.5 shadow-md">
 
-                <ShieldAlert className="h-5 w-5 text-white" />
+                <ShieldAlert className="h-5 w-5 text-white" />
 
-              </div>
+              </div>
 
 
 
-              {isExpanded && (
+              {isExpanded && (
 
-                <div>
+                <div>
 
-                  <span className="text-sm font-extrabold">SYSTEM</span>
+                  <span className="text-sm font-extrabold">SYSTEM</span>
 
-                  <span className="block text-[9px] font-bold uppercase tracking-wider text-blue-600">
+                  <span className="block text-[9px] font-bold uppercase tracking-wider text-blue-600">
 
-                    ADMIN PORTAL
+                    ADMIN PORTAL
 
-                  </span>
+                  </span>
 
-                </div>
+                </div>
 
-              )}
+              )}
 
-            </div>
+            </div>
 
-          </div>
+          </div>
 
 
 
-          <nav className="space-y-1.5 p-4">
+          <nav className="space-y-1.5 p-4">
 
-            {filteredNavItems.map((item) => {
+            {filteredNavItems.map((item) => {
 
-              const Icon = item.icon;
+              const Icon = item.icon;
 
-              const isActive = location.pathname === item.path;
+              const isActive = location.pathname === item.path;
 
 
 
-              return (
+              return (
 
-                <Link
+                <Link
 
-                  key={item.path}
+                  key={item.path}
 
-                  to={item.path}
+                  to={item.path}
 
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => setMobileMenuOpen(false)}
 
-                  className={`flex w-full items-center rounded-xl text-sm font-bold transition-all ${
+                  className={`flex w-full items-center rounded-xl text-sm font-bold transition-all ${
 
-                    isExpanded
+                    isExpanded
 
-                      ? "justify-between px-3.5 py-2.5"
+                      ? "justify-between px-3.5 py-2.5"
 
-                      : "justify-center py-2.5"
+                      : "justify-center py-2.5"
 
-                  } ${
+                  } ${
 
-                    isActive
+                    isActive
 
-                      ? "bg-blue-600 text-white shadow-sm"
+                      ? "bg-blue-600 text-white shadow-sm"
 
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
 
-                  }`}
+                  }`}
 
-                >
+                >
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
 
-                    <Icon className="h-5 w-5 shrink-0" />
+                    <Icon className="h-5 w-5 shrink-0" />
 
-                    {isExpanded && <span>{item.title}</span>}
+                    {isExpanded && <span>{item.title}</span>}
 
-                  </div>
+                  </div>
 
-                </Link>
+                </Link>
 
-              );
+              );
 
-            })}
+            })}
 
-          </nav>
+          </nav>
 
-        </div>
+        </div>
 
 
 
-        <div className="shrink-0 space-y-3 border-t border-slate-100 bg-slate-50/70 p-4">
+        <div className="shrink-0 space-y-3 border-t border-slate-100 bg-slate-50/70 p-4">
 
-          <button
+          <button
 
-            type="button"
+            type="button"
 
-            onClick={() => setShowAdminProfile(true)}
+            onClick={() => setShowAdminProfile(true)}
 
-            className={`w-full rounded-xl text-left transition-colors hover:bg-white ${
+            className={`w-full rounded-xl text-left transition-colors hover:bg-white ${
 
-              isExpanded ? "px-2 py-2" : "flex justify-center p-1"
+              isExpanded ? "px-2 py-2" : "flex justify-center p-1"
 
-            }`}
+            }`}
 
-          >
+          >
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
 
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600">
 
-                <UserIcon className="h-4.5 w-4.5" />
+                <UserIcon className="h-4.5 w-4.5" />
 
-              </div>
+              </div>
 
 
 
-              {isExpanded && (
+              {isExpanded && (
 
-                <div className="min-w-0 overflow-hidden">
+                <div className="min-w-0 overflow-hidden">
 
-                  <p className="truncate text-xs font-extrabold">
+                  <p className="truncate text-xs font-extrabold">
 
-                    {user?.name || "Administrator"}
+                    {user?.name || "Administrator"}
 
-                  </p>
+                  </p>
 
-                  <p className="truncate text-[10px] text-slate-500">
+                  <p className="truncate text-[10px] text-slate-500">
 
-                    {user?.email || "admin@gmail.com"}
+                    {user?.email || "admin@gmail.com"}
 
-                  </p>
+                  </p>
 
-                </div>
+                </div>
 
-              )}
+              )}
 
-            </div>
+            </div>
 
-          </button>
+          </button>
 
 
 
-          <button
+          <button
 
-            type="button"
+            type="button"
 
-            onClick={logout}
+            onClick={logout}
 
-            className="flex w-full items-center justify-center rounded-xl border border-rose-200 py-2.5 text-xs font-bold text-rose-600 transition-colors hover:bg-rose-50"
+            className="flex w-full items-center justify-center rounded-xl border border-rose-200 py-2.5 text-xs font-bold text-rose-600 transition-colors hover:bg-rose-50"
 
-          >
+          >
 
-            <LogOut className="mr-2 h-4 w-4" />
+            <LogOut className="mr-2 h-4 w-4" />
 
-            {isExpanded && <span>Logout</span>}
+            {isExpanded && <span>Logout</span>}
 
-          </button>
+          </button>
 
-        </div>
+        </div>
 
-      </aside>
+      </aside>
 
 
 
-      <div
+      <div
 
-        className={`flex h-screen min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
+        className={`flex h-screen min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
 
-          sidebarExpanded ? "lg:pl-64" : "lg:pl-[76px]"
+          sidebarExpanded ? "lg:pl-64" : "lg:pl-[76px]"
 
-        }`}
+        }`}
 
-      >
+      >
 
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-[#E5E7EB] bg-white px-6">
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-[#E5E7EB] bg-white px-6">
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6">
 
-            <button
+            <button
 
-              type="button"
+              type="button"
 
-              onClick={handleToggle}
+              onClick={handleToggle}
 
-              className="rounded-xl border border-slate-200 p-2 transition-colors hover:bg-slate-50"
+              className="rounded-xl border border-slate-200 p-2 transition-colors hover:bg-slate-50"
 
-              aria-label="Toggle sidebar"
+              aria-label="Toggle sidebar"
 
-            >
+            >
 
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5" />
 
-            </button>
+            </button>
 
 
 
-            <h1 className="text-lg font-extrabold uppercase tracking-wide">
+            <h1 className="text-lg font-extrabold uppercase tracking-wide">
 
-              SYSTEM ADMIN PORTAL
+              SYSTEM ADMIN PORTAL
 
-            </h1>
+            </h1>
 
-          </div>
+          </div>
 
-        </header>
+        </header>
 
 
 
-        <main className="flex-1 min-h-0 overflow-hidden p-4 md:p-8">
+        <main className="flex-1 min-h-0 overflow-hidden p-4 md:p-8">
 
-          <Outlet />
+          <Outlet />
 
-        </main>
+        </main>
 
-      </div>
+      </div>
 
 
 
-      {showAdminProfile && (
+      {showAdminProfile && (
 
-        <AdminProfileSecurity
+        <AdminProfileSecurity
 
-          user={user}
+          user={user}
 
-          onClose={() => setShowAdminProfile(false)}
+          onClose={() => setShowAdminProfile(false)}
 
-        />
+        />
 
-      )}
+      )}
 
-    </div>
+    </div>
 
-  );
+  );
 
 };

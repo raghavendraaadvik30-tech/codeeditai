@@ -33,7 +33,7 @@ export const ShapeHydration: React.FC = () => {
 
       if (shapeId && mountEl) {
         const shapeSelectedAttr = figEl.getAttribute("data-shape-selected");
-        let isSel = shapeSelectedAttr !== "false";
+        const isSel = shapeSelectedAttr !== "false";
 
         let config: CanvasShape = {
           id: shapeId,

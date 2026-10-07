@@ -18,6 +18,7 @@ export const pxToIn = (px: number) => Math.round((px / 96) * 1000) / 1000;
 function esc(s: string): string {
   if (!s) return "";
   return s
+    // eslint-disable-next-line no-control-regex -- intentional: strip control chars for valid XML
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -286,7 +287,7 @@ function getElementBookmarks(
   if (elName && elName.trim()) candidateNames.add(elName.trim());
 
   candidateNames.forEach((raw) => {
-    let sanitized = ctx.targetMap?.get(raw) || ctx.targetMap?.get(raw.toLowerCase()) || sanitizeBookmarkName(raw);
+    const sanitized = ctx.targetMap?.get(raw) || ctx.targetMap?.get(raw.toLowerCase()) || sanitizeBookmarkName(raw);
     if (!ctx.usedBookmarkNames.has(sanitized)) {
       ctx.usedBookmarkNames.add(sanitized);
       const bmId = ctx.bookmarkCounter.value++;
@@ -1260,9 +1261,9 @@ function buildPgBordersXml(sec: SectionModel): string {
     }
 
     if (sideBorder.art && sideBorder.art !== "none") {
-      let artVal = "double";
-      let sz = "24";
-      let color = "auto";
+      let artVal: string;
+      let sz: string;
+      let color: string;
       if (sideBorder.art === "double-red") {
         artVal = "double";
         sz = "24";

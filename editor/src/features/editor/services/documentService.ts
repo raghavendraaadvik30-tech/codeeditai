@@ -128,7 +128,7 @@ export const documentService = {
     } 
 
     const cleanText = (editor.innerText ?? "")
-      .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+      .replace(/[\u200B\u200C\uFEFF\u00AD]/g, "").replace(/\u200D/g, "")
       .replace(/\r?\n/g, " ");
 
     const trimmed = cleanText.trim();

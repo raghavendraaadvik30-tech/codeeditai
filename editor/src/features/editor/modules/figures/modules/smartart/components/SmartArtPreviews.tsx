@@ -22,7 +22,6 @@ interface SmartArtPreviewProps {
 
 export const SmartArtPreview: React.FC<SmartArtPreviewProps> = ({
   layoutId,
-  category: _category,
   colorSchemeId = 'colorful',
   size = 'thumbnail',
   className = '',

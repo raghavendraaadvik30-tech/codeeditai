@@ -48,8 +48,8 @@ export function createDefaultSmartArtModel(
   maybeLayoutId?: string
 ): SmartArtModel {
   const foundByLayout = ALL_SMARTART_LAYOUTS.find((l) => l.id === categoryOrLayoutId);
-  let category: SmartArtCategory = 'List';
-  let layout = ALL_SMARTART_LAYOUTS[0];
+  let category: SmartArtCategory;
+  let layout: (typeof ALL_SMARTART_LAYOUTS)[number];
 
   if (foundByLayout) {
     category = foundByLayout.category;

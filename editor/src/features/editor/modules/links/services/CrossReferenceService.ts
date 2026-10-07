@@ -137,7 +137,7 @@ export class CrossReferenceService {
 
           // Check if text matches heading patterns:
           // Examples: "1. Introduction", "2. System Architecture", "Section 3", "Section 3: Methods", "Chapter 1", "1.1 Overview"
-          const headingPattern = /^((\d+(\.\d+)*|[A-Z]\.|\bSection\s+\d+|\bChapter\s+\d+)\s*[\.\:\-]?\s+[^\n]+|^Section\s+\d+|^Chapter\s+\d+)/i;
+          const headingPattern = /^((\d+(\.\d+)*|[A-Z]\.|\bSection\s+\d+|\bChapter\s+\d+)\s*[.:-]?\s+[^\n]+|^Section\s+\d+|^Chapter\s+\d+)/i;
           if (headingPattern.test(rawText)) {
             // Ignore if this is actually a link (like an inserted cross reference)
             if (el.tagName === 'A' || el.closest('a')) return;
@@ -145,7 +145,7 @@ export class CrossReferenceService {
             const isBlock = el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'LI' || el.parentElement?.tagName === 'P';
             if (isBlock) {
               // Extract first line or concise title
-              let firstLine = rawText.split('\n')[0].trim().replace(/\s+/g, ' ');
+              const firstLine = rawText.split('\n')[0].trim().replace(/\s+/g, ' ');
               const cleanTitle = firstLine.length > 55 ? `${firstLine.substring(0, 52)}...` : firstLine;
               matchedHeadingElements.push({ el, title: cleanTitle });
             }
@@ -201,7 +201,7 @@ export class CrossReferenceService {
           if (el.tagName === 'A' || el.closest('a')) return;
           const text = (el.innerText || '').trim();
           if (/^Table\s+\d+/i.test(text)) {
-            let firstLine = text.split('\n')[0].trim().replace(/\s+/g, ' ');
+            const firstLine = text.split('\n')[0].trim().replace(/\s+/g, ' ');
             const cleanTitle = firstLine.length > 55 ? `${firstLine.substring(0, 52)}...` : firstLine;
             matchedTableElements.push({ el, title: cleanTitle });
           }
@@ -257,7 +257,7 @@ export class CrossReferenceService {
           if (el.tagName === 'A' || el.closest('a')) return;
           const text = (el.innerText || '').trim();
           if (/^(figure|fig\.?)\s+\d+/i.test(text)) {
-            let firstLine = text.split('\n')[0].trim().replace(/\s+/g, ' ');
+            const firstLine = text.split('\n')[0].trim().replace(/\s+/g, ' ');
             const cleanTitle = firstLine.length > 55 ? `${firstLine.substring(0, 52)}...` : firstLine;
             matchedFigureElements.push({ el, title: cleanTitle });
           }
@@ -420,7 +420,7 @@ export class CrossReferenceService {
         ? ` (Page ${target.pageNumber})`
         : '';
 
-    let label = '';
+    let label: string;
     if (customLabel && customLabel.trim()) {
       label = customLabel.trim();
       if (includePageNumber && target.pageNumber && !label.includes(`Page ${target.pageNumber}`)) {
@@ -508,11 +508,11 @@ export class CrossReferenceService {
     if (!targetId) return false;
 
     const cleanId = targetId.startsWith('#') ? targetId.substring(1) : targetId;
-    let escaped = '';
+    let escaped: string;
     try {
       escaped = CSS.escape(cleanId);
     } catch {
-      escaped = cleanId.replace(/[^a-zA-Z0-9_\-]/g, '');
+      escaped = cleanId.replace(/[^a-zA-Z0-9_-]/g, '');
     }
 
     let targetEl: HTMLElement | null = null;
