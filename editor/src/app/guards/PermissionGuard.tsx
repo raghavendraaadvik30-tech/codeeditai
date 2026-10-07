@@ -37,15 +37,15 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 
   if (!permissions.includes(requiredPermission)) {
     return (
-      <div className="flex h-screen w-full items-center justify-center p-6 bg-slate-50">
+      <div className="flex h-screen w-full items-center justify-center p-6 bg-muted">
         <div className="max-w-md text-center space-y-4">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m0-8V5m0 16a9 9 0 110-18 9 9 0 010 18z" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold text-slate-900">Access Denied</h2>
-          <p className="text-sm text-slate-500">You lack permission: {requiredPermission}</p>
+          <h2 className="text-lg font-bold text-foreground">Access Denied</h2>
+          <p className="text-sm text-muted-foreground">You lack permission: {requiredPermission}</p>
         </div>
       </div>
     );

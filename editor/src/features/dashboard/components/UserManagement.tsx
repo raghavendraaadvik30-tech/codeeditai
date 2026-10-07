@@ -1074,7 +1074,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-foreground tracking-tight">
 
             User Directory
 
@@ -1082,7 +1082,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
 
             Provision, manage, and audit user registry accounts.
 
@@ -1134,7 +1134,7 @@ Please use the credentials above to access the secure portal.`
 
               w-4
 
-              text-slate-400
+              text-muted-foreground
 
             "
 
@@ -1160,7 +1160,7 @@ Please use the credentials above to access the secure portal.`
 
               border-[#E5E7EB]
 
-              bg-white
+              bg-card
 
               rounded-xl
 
@@ -1168,7 +1168,7 @@ Please use the credentials above to access the secure portal.`
 
               sm:text-sm
 
-              focus-visible:ring-blue-500/20
+              focus-visible:ring-primary/20
 
             "
 
@@ -1196,9 +1196,9 @@ Please use the credentials above to access the secure portal.`
 
                 -translate-y-1/2
 
-                text-slate-400
+                text-muted-foreground
 
-                hover:text-slate-600
+                hover:text-secondary-foreground
 
                 transition-colors
 
@@ -1260,7 +1260,7 @@ Please use the credentials above to access the secure portal.`
 
                   border-[#E5E7EB]
 
-                  bg-white
+                  bg-card
 
                   rounded-xl
 
@@ -1268,9 +1268,9 @@ Please use the credentials above to access the secure portal.`
 
                   sm:text-sm
 
-                  text-slate-800
+                  text-foreground
 
-                  focus:ring-blue-500/20
+                  focus:ring-primary/20
 
                 "
 
@@ -1282,7 +1282,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-              <SelectContent className="bg-white border-[#E5E7EB]">
+              <SelectContent className="bg-card border-[#E5E7EB]">
 
 
 
@@ -1348,13 +1348,13 @@ Please use the credentials above to access the secure portal.`
 
               rounded-xl
 
-              text-slate-700
+              text-secondary-foreground
 
-              hover:text-slate-900
+              hover:text-foreground
 
               border-[#E5E7EB]
 
-              bg-white
+              bg-card
 
               flex
 
@@ -1370,7 +1370,7 @@ Please use the credentials above to access the secure portal.`
 
               transition-all
 
-              hover:bg-slate-50
+              hover:bg-muted
 
             "
 
@@ -1404,9 +1404,9 @@ Please use the credentials above to access the secure portal.`
 
               bg-[#2563EB]
 
-              hover:bg-blue-700
+              hover:bg-primary/90
 
-              text-white
+              text-primary-foreground
 
               font-bold
 
@@ -1418,9 +1418,9 @@ Please use the credentials above to access the secure portal.`
 
               shadow-sm
 
-              shadow-blue-600/10
+              shadow-primary/10
 
-              hover:shadow-blue-600/20
+              hover:shadow-primary/20
 
               transition-all
 
@@ -1472,7 +1472,7 @@ Please use the credentials above to access the secure portal.`
 
           border-[#E5E7EB]
 
-          bg-white
+          bg-card
 
           rounded-2xl
 
@@ -1480,7 +1480,7 @@ Please use the credentials above to access the secure portal.`
 
           shadow-sm
 
-          shadow-slate-100/50
+          shadow-muted/50
 
         "
 
@@ -1510,7 +1510,7 @@ Please use the credentials above to access the secure portal.`
 
                 className="
 
-                  bg-slate-50/70
+                  bg-muted/70
 
                   border-b
 
@@ -1522,7 +1522,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
 
                   Full Name
 
@@ -1530,7 +1530,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
 
                   Email Address
 
@@ -1538,7 +1538,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
 
                   Role
 
@@ -1546,7 +1546,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
 
                   Status
 
@@ -1554,7 +1554,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
 
                   Created Date
 
@@ -1562,7 +1562,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
 
                   Invitation
 
@@ -1570,7 +1570,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-slate-500 uppercase text-right">
+                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase text-right">
 
                   Actions
 
@@ -1606,7 +1606,7 @@ Please use the credentials above to access the secure portal.`
 
                     className="
 
-                      hover:bg-slate-50/70
+                      hover:bg-muted/70
 
                       transition-all
 
@@ -1620,7 +1620,7 @@ Please use the credentials above to access the secure portal.`
 
                     {/* Name */}
 
-                    <td className="py-4 px-6 text-xs font-bold text-slate-900">
+                    <td className="py-4 px-6 text-xs font-bold text-foreground">
 
                       {user.fullName}
 
@@ -1632,7 +1632,7 @@ Please use the credentials above to access the secure portal.`
 
                     {/* Email */}
 
-                    <td className="py-4 px-6 text-xs text-slate-600">
+                    <td className="py-4 px-6 text-xs text-secondary-foreground">
 
                       {user.email}
 
@@ -1680,7 +1680,7 @@ Please use the credentials above to access the secure portal.`
 
                               : user.role === "Author"
 
-                                ? "bg-blue-50 text-blue-700"
+                                ? "bg-primary/10 text-primary/90"
 
                                 : "bg-amber-50 text-amber-700"
 
@@ -1742,7 +1742,7 @@ Please use the credentials above to access the secure portal.`
 
                               : user.status === "Inactive"
 
-                                ? "bg-slate-100 text-slate-600"
+                                ? "bg-muted text-secondary-foreground"
 
                                 : "bg-orange-50 text-orange-700"
 
@@ -1772,7 +1772,7 @@ Please use the credentials above to access the secure portal.`
 
                                 : user.status === "Inactive"
 
-                                  ? "bg-slate-400"
+                                  ? "bg-muted-foreground"
 
                                   : "bg-orange-500"
 
@@ -1800,7 +1800,7 @@ Please use the credentials above to access the secure portal.`
 
                     {/* Created Date */}
 
-                    <td className="py-4 px-6 text-xs text-slate-500 font-mono">
+                    <td className="py-4 px-6 text-xs text-muted-foreground font-mono">
 
                       {user.createdDate}
 
@@ -1841,15 +1841,15 @@ Please use the credentials above to access the secure portal.`
 
                           rounded-lg
 
-                          border-blue-200
+                          border-primary/30
 
                           hover:border-blue-400
 
-                          bg-blue-50/50
+                          bg-primary/10
 
-                          hover:bg-blue-50
+                          hover:bg-primary/10
 
-                          text-blue-600
+                          text-primary
 
                           font-bold
 
@@ -1871,7 +1871,7 @@ Please use the credentials above to access the secure portal.`
 
                       >
 
-                        <Mail className="h-3 w-3 text-blue-500" />
+                        <Mail className="h-3 w-3 text-primary" />
 
                         <span>Invite</span>
 
@@ -1911,15 +1911,15 @@ Please use the credentials above to access the secure portal.`
 
                             border
 
-                            border-slate-200
+                            border-secondary
 
-                            bg-white
+                            bg-card
 
-                            text-slate-600
+                            text-secondary-foreground
 
-                            hover:text-slate-900
+                            hover:text-foreground
 
-                            hover:bg-slate-50
+                            hover:bg-muted
 
                             transition-all
 
@@ -1955,15 +1955,15 @@ Please use the credentials above to access the secure portal.`
 
                             border
 
-                            border-slate-200
+                            border-secondary
 
-                            bg-white
+                            bg-card
 
-                            text-blue-600
+                            text-primary
 
-                            hover:text-blue-800
+                            hover:text-primary
 
-                            hover:bg-slate-50
+                            hover:bg-muted
 
                             transition-all
 
@@ -2009,15 +2009,15 @@ Please use the credentials above to access the secure portal.`
 
                             border
 
-                            border-slate-200
+                            border-secondary
 
-                            bg-white
+                            bg-card
 
-                            text-rose-500
+                            text-destructive
 
                             hover:text-rose-700
 
-                            hover:bg-slate-50
+                            hover:bg-muted
 
                             transition-all
 
@@ -2073,7 +2073,7 @@ Please use the credentials above to access the secure portal.`
 
                       sm:text-sm
 
-                      text-slate-500
+                      text-muted-foreground
 
                       font-medium
 
@@ -2147,7 +2147,7 @@ Please use the credentials above to access the secure portal.`
 
             border-[#E5E7EB]
 
-            bg-white
+            bg-card
 
             p-6
 
@@ -2155,7 +2155,7 @@ Please use the credentials above to access the secure portal.`
 
             shadow-xl
 
-            text-slate-800
+            text-foreground
 
           "
 
@@ -2163,11 +2163,11 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <DialogHeader className="border-b border-slate-100 pb-3">
+          <DialogHeader className="border-b border-muted pb-3">
 
 
 
-            <DialogTitle className="text-lg font-extrabold text-slate-900">
+            <DialogTitle className="text-lg font-extrabold text-foreground">
 
               Provision User Account
 
@@ -2175,7 +2175,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
 
               Add an approved user to the registry.
 
@@ -2229,7 +2229,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsAdd.fullName && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2277,7 +2277,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsAdd.email && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2322,7 +2322,7 @@ Please use the credentials above to access the secure portal.`
                       ? "Hide password"
                       : "Show password"
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground transition-colors"
                 >
                   {showAddPassword ? (
                     <Eye className="h-4 w-4" />
@@ -2333,7 +2333,7 @@ Please use the credentials above to access the secure portal.`
               </div>
 
               {errorsAdd.password && (
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
                   {errorsAdd.password.message}
                 </p>
@@ -2419,7 +2419,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsAdd.role && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2437,7 +2437,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <DialogFooter className="pt-3 border-t border-slate-100 mt-2">
+            <DialogFooter className="pt-3 border-t border-muted mt-2">
 
 
 
@@ -2468,7 +2468,7 @@ Please use the credentials above to access the secure portal.`
 
                 type="submit"
 
-                className="bg-[#2563EB] hover:bg-blue-700 text-white"
+                className="bg-[#2563EB] hover:bg-primary/90 text-primary-foreground"
 
               >
 
@@ -2531,7 +2531,7 @@ Please use the credentials above to access the secure portal.`
 
             border-[#E5E7EB]
 
-            bg-white
+            bg-card
 
             p-6
 
@@ -2539,7 +2539,7 @@ Please use the credentials above to access the secure portal.`
 
             shadow-xl
 
-            text-slate-800
+            text-foreground
 
           "
 
@@ -2547,11 +2547,11 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <DialogHeader className="border-b border-slate-100 pb-3">
+          <DialogHeader className="border-b border-muted pb-3">
 
 
 
-            <DialogTitle className="text-lg font-extrabold text-slate-900">
+            <DialogTitle className="text-lg font-extrabold text-foreground">
 
               Edit User
 
@@ -2559,7 +2559,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
 
               Modify the workspace account details.
 
@@ -2613,7 +2613,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsEdit.fullName && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2661,7 +2661,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsEdit.email && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2701,7 +2701,7 @@ Please use the credentials above to access the secure portal.`
                       ? "Hide password"
                       : "Show password"
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground transition-colors"
                 >
                   {showEditPassword ? (
                     <Eye className="h-4 w-4" />
@@ -2712,7 +2712,7 @@ Please use the credentials above to access the secure portal.`
               </div>
 
               {errorsEdit.password && (
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
                   {errorsEdit.password.message}
                 </p>
@@ -2796,7 +2796,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsEdit.role && (
 
-                <p className="text-[11px] text-rose-500 flex items-center gap-1">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2814,7 +2814,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <DialogFooter className="pt-3 border-t border-slate-100 mt-2">
+            <DialogFooter className="pt-3 border-t border-muted mt-2">
 
 
 
@@ -2847,7 +2847,7 @@ Please use the credentials above to access the secure portal.`
 
                 type="submit"
 
-                className="bg-[#2563EB] hover:bg-blue-700 text-white"
+                className="bg-[#2563EB] hover:bg-primary/90 text-primary-foreground"
 
               >
 
@@ -2903,7 +2903,7 @@ Please use the credentials above to access the secure portal.`
 
             border-[#E5E7EB]
 
-            bg-white
+            bg-card
 
             p-6
 
@@ -2911,7 +2911,7 @@ Please use the credentials above to access the secure portal.`
 
             shadow-xl
 
-            text-slate-800
+            text-foreground
 
           "
 
@@ -2919,7 +2919,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <DialogHeader className="border-b border-slate-100 pb-4">
+          <DialogHeader className="border-b border-muted pb-4">
 
 
 
@@ -2935,7 +2935,7 @@ Please use the credentials above to access the secure portal.`
 
                   w-10
 
-                  bg-slate-100
+                  bg-muted
 
                   rounded-full
 
@@ -2945,7 +2945,7 @@ Please use the credentials above to access the secure portal.`
 
                   justify-center
 
-                  text-slate-600
+                  text-secondary-foreground
 
                 "
 
@@ -2969,7 +2969,7 @@ Please use the credentials above to access the secure portal.`
 
                     font-extrabold
 
-                    text-slate-900
+                    text-foreground
 
                     truncate
 
@@ -2983,7 +2983,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <span className="text-[10px] text-slate-400 font-semibold font-mono">
+                <span className="text-[10px] text-muted-foreground font-semibold font-mono">
 
                   USER ACCOUNT {selectedUser?.id}
 
@@ -3009,11 +3009,11 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center justify-between border-b border-muted pb-2">
 
 
 
-              <span className="text-slate-500 font-semibold flex items-center gap-1">
+              <span className="text-muted-foreground font-semibold flex items-center gap-1">
 
                 <Mail className="h-3.5 w-3.5" />
 
@@ -3023,7 +3023,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-foreground">
 
                 {selectedUser?.email}
 
@@ -3037,11 +3037,11 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center justify-between border-b border-muted pb-2">
 
 
 
-              <span className="text-slate-500 font-semibold flex items-center gap-1">
+              <span className="text-muted-foreground font-semibold flex items-center gap-1">
 
                 <Layers className="h-3.5 w-3.5" />
 
@@ -3069,9 +3069,9 @@ Please use the credentials above to access the secure portal.`
 
                   font-bold
 
-                  bg-blue-100
+                  bg-primary/15
 
-                  text-blue-800
+                  text-primary
 
                 "
 
@@ -3089,11 +3089,11 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center justify-between border-b border-muted pb-2">
 
 
 
-              <span className="text-slate-500 font-semibold">
+              <span className="text-muted-foreground font-semibold">
 
                 Status
 
@@ -3131,7 +3131,7 @@ Please use the credentials above to access the secure portal.`
 
                       : selectedUser?.status === "Inactive"
 
-                        ? "bg-slate-100 text-slate-600"
+                        ? "bg-muted text-secondary-foreground"
 
                         : "bg-orange-50 text-orange-700"
 
@@ -3161,7 +3161,7 @@ Please use the credentials above to access the secure portal.`
 
                         : selectedUser?.status === "Inactive"
 
-                          ? "bg-slate-400"
+                          ? "bg-muted-foreground"
 
                           : "bg-orange-500"
 
@@ -3191,7 +3191,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-              <span className="text-slate-500 font-semibold flex items-center gap-1">
+              <span className="text-muted-foreground font-semibold flex items-center gap-1">
 
                 <Calendar className="h-3.5 w-3.5" />
 
@@ -3201,7 +3201,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-              <span className="font-mono text-slate-800">
+              <span className="font-mono text-foreground">
 
                 {selectedUser?.createdDate}
 
@@ -3219,7 +3219,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <DialogFooter className="pt-3 border-t border-slate-100">
+          <DialogFooter className="pt-3 border-t border-muted">
 
 
 
@@ -3239,11 +3239,11 @@ Please use the credentials above to access the secure portal.`
 
                 rounded-xl
 
-                bg-slate-100
+                bg-muted
 
-                hover:bg-slate-200
+                hover:bg-secondary
 
-                text-slate-800
+                text-foreground
 
               "
 
@@ -3297,7 +3297,7 @@ Please use the credentials above to access the secure portal.`
 
             border-[#E5E7EB]
 
-            bg-white
+            bg-card
 
             p-6
 
@@ -3305,7 +3305,7 @@ Please use the credentials above to access the secure portal.`
 
             shadow-xl
 
-            text-slate-800
+            text-foreground
 
           "
 
@@ -3313,7 +3313,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <DialogHeader className="border-b border-rose-50 pb-4">
+          <DialogHeader className="border-b border-destructive/10 pb-4">
 
 
 
@@ -3329,7 +3329,7 @@ Please use the credentials above to access the secure portal.`
 
                   w-10
 
-                  bg-rose-50
+                  bg-destructive/10
 
                   rounded-full
 
@@ -3339,7 +3339,7 @@ Please use the credentials above to access the secure portal.`
 
                   justify-center
 
-                  text-rose-600
+                  text-destructive
 
                 "
 
@@ -3355,7 +3355,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <DialogTitle className="text-base font-extrabold text-slate-900">
+                <DialogTitle className="text-base font-extrabold text-foreground">
 
                   Revoke & Delete Access
 
@@ -3363,7 +3363,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <span className="text-[10px] text-rose-500 font-semibold">
+                <span className="text-[10px] text-destructive font-semibold">
 
                   ACTION CANNOT BE UNDONE
 
@@ -3389,11 +3389,11 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <p className="text-slate-600 font-medium leading-relaxed">
+            <p className="text-secondary-foreground font-medium leading-relaxed">
 
               Are you sure you want to revoke and delete{" "}
 
-              <strong className="text-slate-900">
+              <strong className="text-foreground">
 
                 {userToDelete?.name}
 
@@ -3409,13 +3409,13 @@ Please use the credentials above to access the secure portal.`
 
               className="
 
-                text-slate-500
+                text-muted-foreground
 
                 text-[11px]
 
                 leading-relaxed
 
-                bg-slate-50
+                bg-muted
 
                 p-3
 
@@ -3423,7 +3423,7 @@ Please use the credentials above to access the secure portal.`
 
                 border
 
-                border-slate-100
+                border-muted
 
               "
 
@@ -3431,7 +3431,7 @@ Please use the credentials above to access the secure portal.`
 
               User ID{" "}
 
-              <strong className="font-mono text-blue-600">
+              <strong className="font-mono text-primary">
 
                 {userToDelete?.id}
 
@@ -3449,7 +3449,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-          <DialogFooter className="pt-3 border-t border-slate-100">
+          <DialogFooter className="pt-3 border-t border-muted">
 
 
 
@@ -3483,11 +3483,11 @@ Please use the credentials above to access the secure portal.`
 
                 rounded-xl
 
-                bg-rose-600
+                bg-destructive
 
                 hover:bg-rose-700
 
-                text-white
+                text-primary-foreground
 
               "
 
@@ -3547,9 +3547,9 @@ Please use the credentials above to access the secure portal.`
 
             border
 
-            border-slate-200
+            border-secondary
 
-            bg-white
+            bg-card
 
             p-5
 
@@ -3557,7 +3557,7 @@ Please use the credentials above to access the secure portal.`
 
             shadow-xl
 
-            text-slate-800
+            text-foreground
 
           "
 
@@ -3579,9 +3579,9 @@ Please use the credentials above to access the secure portal.`
 
                   p-1
 
-                  bg-blue-50
+                  bg-primary/10
 
-                  text-blue-600
+                  text-primary
 
                   rounded
 
@@ -3629,13 +3629,13 @@ Please use the credentials above to access the secure portal.`
 
                   border
 
-                  border-slate-200
+                  border-secondary
 
                   rounded-lg
 
                   overflow-hidden
 
-                  bg-white
+                  bg-card
 
                   shadow-sm
 
@@ -3653,7 +3653,7 @@ Please use the credentials above to access the secure portal.`
 
                   className="
 
-                    bg-slate-50/80
+                    bg-muted/80
 
                     px-3
 
@@ -3661,7 +3661,7 @@ Please use the credentials above to access the secure portal.`
 
                     border-b
 
-                    border-slate-100
+                    border-muted
 
                     space-y-1.5
 
@@ -3675,7 +3675,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                    <span className="text-slate-400 font-medium w-12">
+                    <span className="text-muted-foreground font-medium w-12">
 
                       To:
 
@@ -3687,7 +3687,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                      <span className="font-semibold text-slate-800 truncate">
+                      <span className="font-semibold text-foreground truncate">
 
                         {inviteUser.fullName}
 
@@ -3695,7 +3695,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                      <span className="text-slate-500 font-mono truncate">
+                      <span className="text-muted-foreground font-mono truncate">
 
                         {inviteUser.email}
 
@@ -3717,7 +3717,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                    <span className="text-slate-400 font-medium w-12">
+                    <span className="text-muted-foreground font-medium w-12">
 
                       Role:
 
@@ -3729,9 +3729,9 @@ Please use the credentials above to access the secure portal.`
 
                       className="
 
-                        bg-blue-100
+                        bg-primary/15
 
-                        text-blue-800
+                        text-primary
 
                         text-[10px]
 
@@ -3765,7 +3765,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                    <span className="text-slate-400 font-medium w-12">
+                    <span className="text-muted-foreground font-medium w-12">
 
                       Subject:
 
@@ -3773,7 +3773,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                    <span className="text-slate-700 font-semibold truncate">
+                    <span className="text-secondary-foreground font-semibold truncate">
 
                       Invitation to join Clinical Workspace
 
@@ -3801,9 +3801,9 @@ Please use the credentials above to access the secure portal.`
 
                     space-y-3
 
-                    bg-white
+                    bg-card
 
-                    text-slate-600
+                    text-secondary-foreground
 
                     leading-relaxed
 
@@ -3817,7 +3817,7 @@ Please use the credentials above to access the secure portal.`
 
                     Dear{" "}
 
-                    <strong className="text-slate-800">
+                    <strong className="text-foreground">
 
                       {inviteUser.fullName}
 
@@ -3835,7 +3835,7 @@ Please use the credentials above to access the secure portal.`
 
                     You have been provisioned as a{" "}
 
-                    <strong className="text-slate-800">
+                    <strong className="text-foreground">
 
                       {inviteUser.role}
 
@@ -3859,13 +3859,13 @@ Please use the credentials above to access the secure portal.`
 
                     className="
 
-                      bg-slate-50/50
+                      bg-muted/50
 
                       rounded-lg
 
                       border
 
-                      border-slate-100
+                      border-muted
 
                       p-3
 
@@ -3897,7 +3897,7 @@ Please use the credentials above to access the secure portal.`
 
                         border-b
 
-                        border-slate-100
+                        border-muted
 
                       "
 
@@ -3909,7 +3909,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
 
                           Secure Portal Link
 
@@ -3921,7 +3921,7 @@ Please use the credentials above to access the secure portal.`
 
                           className="
 
-                            text-blue-600
+                            text-primary
 
                             font-mono
 
@@ -4011,7 +4011,7 @@ Please use the credentials above to access the secure portal.`
 
                         border-b
 
-                        border-slate-100
+                        border-muted
 
                       "
 
@@ -4023,7 +4023,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
 
                           Registered Email
 
@@ -4033,7 +4033,7 @@ Please use the credentials above to access the secure portal.`
 
                         <span
 
-                          className="text-slate-700 font-mono truncate block"
+                          className="text-secondary-foreground font-mono truncate block"
 
                           title={inviteUser.email}
 
@@ -4099,17 +4099,17 @@ Please use the credentials above to access the secure portal.`
 
                     {/* Password */}
                     <div
-                      className="flex items-center justify-between gap-3 pb-1.5 border-b border-slate-100"
+                      className="flex items-center justify-between gap-3 pb-1.5 border-b border-muted"
                     >
                       <div className="overflow-hidden min-w-0">
-                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
                           Password
                         </span>
                         <span
                           className={`font-mono truncate block ${
                             invitePassword
-                              ? "text-slate-700"
-                              : "text-slate-400 italic"
+                              ? "text-secondary-foreground"
+                              : "text-muted-foreground italic"
                           }`}
                           title={invitePassword || "Password not available"}
                         >
@@ -4164,7 +4164,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                        <span className="text-slate-400 font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
 
                           Role Type
 
@@ -4172,7 +4172,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                        <span className="text-slate-700 font-semibold block">
+                        <span className="text-secondary-foreground font-semibold block">
 
                           {inviteUser.role}
 
@@ -4236,7 +4236,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                  <p className="text-[10.5px] text-slate-400 leading-normal">
+                  <p className="text-[10.5px] text-muted-foreground leading-normal">
                     Copy the password above and share these credentials with the user through a secure channel.
                   </p>
 
@@ -4286,9 +4286,9 @@ Please use the credentials above to access the secure portal.`
 
                     rounded-lg
 
-                    border-slate-200
+                    border-secondary
 
-                    text-slate-700
+                    text-secondary-foreground
 
                     text-xs
 
@@ -4322,7 +4322,7 @@ Please use the credentials above to access the secure portal.`
 
                     <>
 
-                      <Share2 className="h-3.5 w-3.5 text-slate-500" />
+                      <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
 
                       <span>Copy Invitation</span>
 
@@ -4392,11 +4392,11 @@ Please use the credentials above to access the secure portal.`
 
                     rounded-lg
 
-                    bg-blue-600
+                    bg-primary
 
-                    hover:bg-blue-700
+                    hover:bg-primary/90
 
-                    text-white
+                    text-primary-foreground
 
                     text-xs
 
@@ -4430,7 +4430,7 @@ Please use the credentials above to access the secure portal.`
 
               {/* Close */}
 
-              <div className="flex justify-end pt-1 border-t border-slate-100">
+              <div className="flex justify-end pt-1 border-t border-muted">
 
 
 
@@ -4459,7 +4459,7 @@ Please use the credentials above to access the secure portal.`
 
                     rounded-lg
 
-                    text-slate-500
+                    text-muted-foreground
 
                   "
 

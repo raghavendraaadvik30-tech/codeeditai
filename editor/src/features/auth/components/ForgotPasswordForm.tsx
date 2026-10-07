@@ -98,7 +98,7 @@ export default function ForgotPasswordForm() {
 
       {/* Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-      <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-blue-500/5 blur-3xl" />
+      <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
@@ -106,22 +106,22 @@ export default function ForgotPasswordForm() {
         {/* Logo */}
         <div className="mb-8 text-center">
 
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-indigo-600 text-primary-foreground shadow-lg">
             <ShieldCheck className="h-7 w-7" />
           </div>
 
-          <h1 className="mt-4 text-3xl font-black tracking-wide text-slate-800">
+          <h1 className="mt-4 text-3xl font-black tracking-wide text-foreground">
             LOGIN
           </h1>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Recover access to your account
           </p>
 
         </div>
 
         {/* Card */}
-        <Card className="rounded-2xl border border-slate-200 shadow-xl">
+        <Card className="rounded-2xl border border-secondary shadow-xl">
 
           <CardHeader>
             <CardTitle className="text-center text-xl">
@@ -132,13 +132,13 @@ export default function ForgotPasswordForm() {
           <CardContent className="space-y-5">
 
             {/* Info Box */}
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <div className="rounded-lg border border-primary/30 bg-primary/10 p-4">
 
-              <h3 className="text-sm font-bold text-blue-700">
+              <h3 className="text-sm font-bold text-primary/90">
                 Password Reset Verification
               </h3>
 
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-secondary-foreground">
                 Enter your registered email address below.
                 We'll send you a password reset link if your
                 account exists.
@@ -160,7 +160,7 @@ export default function ForgotPasswordForm() {
 
                 <div className="relative">
 
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
                   <Input
                     id="email"
@@ -180,7 +180,7 @@ export default function ForgotPasswordForm() {
                 </div>
 
                 {emailError && (
-                  <p className="text-xs text-red-600">
+                  <p className="text-xs text-destructive">
                     {emailError}
                   </p>
                 )}
@@ -203,7 +203,7 @@ export default function ForgotPasswordForm() {
 
                 <Button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 bg-primary hover:bg-primary/90"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (

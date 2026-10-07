@@ -68,7 +68,7 @@ export function ThemeToggle() {
         border-transparent
         text-muted-foreground
         transition-colors
-        dark:border-slate-700
+        dark:border-border
         "        
     >
       {theme === "dark" ? (

@@ -152,7 +152,7 @@ const handleLogin = async () => {
 
       {/* Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-      <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-blue-500/5 blur-3xl" />
+      <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
@@ -160,21 +160,21 @@ const handleLogin = async () => {
         {/* Logo */}
         <div className="mb-8 text-center">
 
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-indigo-600 text-primary-foreground shadow-lg">
             <ShieldCheck className="h-7 w-7" />
           </div>
 
-          <h1 className="mt-4 text-3xl font-black tracking-wide text-slate-800">
+          <h1 className="mt-4 text-3xl font-black tracking-wide text-foreground">
             LOGIN
           </h1>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Welcome back! Please sign in to continue.
           </p>
 
         </div>
 
-        <Card className="rounded-2xl border border-slate-200 shadow-xl">
+        <Card className="rounded-2xl border border-secondary shadow-xl">
 
           <CardHeader>
             <CardTitle className="text-center text-xl">
@@ -186,7 +186,7 @@ const handleLogin = async () => {
 
             {/* Global Error */}
             {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+              <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-destructive/10 p-3 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4" />
                 <span>{error}</span>
               </div>
@@ -201,7 +201,7 @@ const handleLogin = async () => {
 
               <div className="relative">
 
-                <Server className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Server className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
                 <Input
                   id="workspace"
@@ -218,7 +218,7 @@ const handleLogin = async () => {
               </div>
 
               {workspaceError && (
-                <p className="text-xs text-red-600">
+                <p className="text-xs text-destructive">
                   {workspaceError}
                 </p>
               )}
@@ -234,7 +234,7 @@ const handleLogin = async () => {
 
               <div className="relative">
 
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
                 <Input
                   id="email"
@@ -251,7 +251,7 @@ const handleLogin = async () => {
               </div>
 
               {emailError && (
-                <p className="text-xs text-red-600">
+                <p className="text-xs text-destructive">
                   {emailError}
                 </p>
               )}
@@ -270,7 +270,7 @@ const handleLogin = async () => {
                 <button
                   type="button"
                   onClick={() => navigate(ROUTE_PATHS.FORGOT_PASSWORD)}
-                  className="text-xs font-medium text-blue-600 hover:underline"
+                  className="text-xs font-medium text-primary hover:underline"
                 >
                   Forgot Password?
                 </button>
@@ -279,7 +279,7 @@ const handleLogin = async () => {
 
               <div className="relative">
 
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
                 <Input
                   id="password"
@@ -299,16 +299,16 @@ const handleLogin = async () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   {showPassword ? (
-                    <Eye className="h-4 w-4 text-slate-400" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <EyeOff className="h-4 w-4 text-slate-400" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   )}
                 </button>
 
               </div>
 
               {passwordError && (
-                <p className="text-xs text-red-600">
+                <p className="text-xs text-destructive">
                   {passwordError}
                 </p>
               )}
@@ -320,7 +320,7 @@ const handleLogin = async () => {
               type="button"
               onClick={handleLogin}
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-primary hover:bg-primary/90"
             >
               {isLoading ? (
                 <>

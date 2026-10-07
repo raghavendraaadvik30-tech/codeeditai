@@ -136,7 +136,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
     <div
 
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-[2px]"
 
       onMouseDown={(event) => {
 
@@ -146,13 +146,13 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
     >
 
-      <div className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-secondary bg-card shadow-2xl">
 
-        <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
+        <div className="flex items-start justify-between border-b border-muted px-5 py-4">
 
           <div className="flex items-center gap-3">
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
 
               <ShieldCheck className="h-5 w-5" />
 
@@ -160,13 +160,13 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
             <div>
 
-              <h2 className="text-base font-extrabold text-slate-900">
+              <h2 className="text-base font-extrabold text-foreground">
 
                 Admin Profile &amp; Security
 
               </h2>
 
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-muted-foreground">
 
                 System Administrator Settings
 
@@ -186,7 +186,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
             aria-label="Close"
 
-            className="rounded-full p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
 
           >
 
@@ -218,9 +218,9 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
               activeTab === "profile"
 
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-primary text-primary-foreground shadow-sm"
 
-                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                : "border border-secondary bg-card text-secondary-foreground hover:bg-muted"
 
             }`}
 
@@ -242,9 +242,9 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
               activeTab === "password"
 
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-primary text-primary-foreground shadow-sm"
 
-                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                : "border border-secondary bg-card text-secondary-foreground hover:bg-muted"
 
             }`}
 
@@ -270,13 +270,13 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                 <div className="flex items-center justify-between gap-4">
 
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-xs font-medium text-muted-foreground">
 
                     Administrator Email
 
                   </span>
 
-                  <span className="text-xs font-bold text-slate-800">
+                  <span className="text-xs font-bold text-foreground">
 
                     {email}
 
@@ -288,13 +288,13 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                 <div className="flex items-center justify-between gap-4">
 
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-xs font-medium text-muted-foreground">
 
                     Account Role
 
                   </span>
 
-                  <span className="text-xs font-bold uppercase text-blue-600">
+                  <span className="text-xs font-bold uppercase text-primary">
 
                     {role}
 
@@ -306,7 +306,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                 <div className="flex items-center justify-between gap-4">
 
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-xs font-medium text-muted-foreground">
 
                     Account Status
 
@@ -332,7 +332,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                 onClick={openPasswordTab}
 
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90"
 
               >
 
@@ -364,7 +364,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
               {error && (
 
-                <div className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600">
+                <div className="mb-4 rounded-xl bg-destructive/10 px-4 py-3 text-xs font-semibold text-destructive">
 
                   {error}
 
@@ -378,7 +378,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                 <div>
 
-                  <label className="mb-1.5 block text-xs font-bold text-slate-800">
+                  <label className="mb-1.5 block text-xs font-bold text-foreground">
 
                     Account Email
 
@@ -392,7 +392,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                     readOnly
 
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-500 outline-none"
+                    className="w-full rounded-xl border border-secondary bg-muted px-4 py-2.5 text-xs text-muted-foreground outline-none"
 
                   />
 
@@ -402,7 +402,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                 <div>
 
-                  <label className="mb-1.5 block text-xs font-bold text-slate-800">
+                  <label className="mb-1.5 block text-xs font-bold text-foreground">
 
                     New Password
 
@@ -414,7 +414,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
     value={newPassword}
     onChange={(event) => setNewPassword(event.target.value)}
     placeholder="At least 6 characters"
-    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 pr-10 text-xs text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+    className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
   />
 
   <button
@@ -425,7 +425,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
         ? "Hide new password"
         : "Show new password"
     }
-    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground"
   >
     {showNewPassword ? (
       <Eye className="h-4 w-4" />
@@ -439,7 +439,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
 
                 <div>
-  <label className="mb-1.5 block text-xs font-bold text-slate-800">
+  <label className="mb-1.5 block text-xs font-bold text-foreground">
     Confirm New Password
   </label>
 
@@ -449,7 +449,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
       value={confirmPassword}
       onChange={(event) => setConfirmPassword(event.target.value)}
       placeholder="Re-enter new password"
-      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 pr-10 text-xs text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
     />
 
     <button
@@ -462,7 +462,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
           ? "Hide confirm password"
           : "Show confirm password"
       }
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground"
     >
       {showConfirmPassword ? (
         <Eye className="h-4 w-4" />
@@ -493,7 +493,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                   }}
 
-                  className="rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                  className="rounded-lg px-4 py-2 text-xs font-semibold text-secondary-foreground transition hover:bg-muted"
 
                 >
 
@@ -507,7 +507,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                   onClick={handleSavePassword}
 
-                  className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                  className="rounded-lg bg-primary px-5 py-2 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90"
 
                 >
 
@@ -591,11 +591,11 @@ export const DashboardLayout: React.FC = () => {
 
   return (
 
-    <div className="flex h-screen overflow-hidden bg-[#F3F4F6] font-sans text-slate-800">
+    <div className="flex h-screen overflow-hidden bg-[#F3F4F6] font-sans text-foreground">
 
       <aside
 
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#E5E7EB] bg-white transition-all duration-300 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#E5E7EB] bg-card transition-all duration-300 ${
 
           sidebarExpanded ? "w-64" : "w-[76px]"
 
@@ -615,7 +615,7 @@ export const DashboardLayout: React.FC = () => {
 
           <div
 
-            className={`flex h-16 shrink-0 items-center border-b border-slate-100 ${
+            className={`flex h-16 shrink-0 items-center border-b border-muted ${
 
               isExpanded ? "justify-between px-6" : "justify-center"
 
@@ -625,9 +625,9 @@ export const DashboardLayout: React.FC = () => {
 
             <div className="flex items-center gap-2.5">
 
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 p-1.5 shadow-md">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary p-1.5 shadow-md">
 
-                <ShieldAlert className="h-5 w-5 text-white" />
+                <ShieldAlert className="h-5 w-5 text-primary-foreground" />
 
               </div>
 
@@ -639,7 +639,7 @@ export const DashboardLayout: React.FC = () => {
 
                   <span className="text-sm font-extrabold">SYSTEM</span>
 
-                  <span className="block text-[9px] font-bold uppercase tracking-wider text-blue-600">
+                  <span className="block text-[9px] font-bold uppercase tracking-wider text-primary">
 
                     ADMIN PORTAL
 
@@ -687,9 +687,9 @@ export const DashboardLayout: React.FC = () => {
 
                     isActive
 
-                      ? "bg-blue-600 text-white shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-sm"
 
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
 
                   }`}
 
@@ -715,7 +715,7 @@ export const DashboardLayout: React.FC = () => {
 
 
 
-        <div className="shrink-0 space-y-3 border-t border-slate-100 bg-slate-50/70 p-4">
+        <div className="shrink-0 space-y-3 border-t border-muted bg-muted/70 p-4">
 
           <button
 
@@ -723,7 +723,7 @@ export const DashboardLayout: React.FC = () => {
 
             onClick={() => setShowAdminProfile(true)}
 
-            className={`w-full rounded-xl text-left transition-colors hover:bg-white ${
+            className={`w-full rounded-xl text-left transition-colors hover:bg-card ${
 
               isExpanded ? "px-2 py-2" : "flex justify-center p-1"
 
@@ -733,7 +733,7 @@ export const DashboardLayout: React.FC = () => {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary">
 
                 <UserIcon className="h-4.5 w-4.5" />
 
@@ -751,7 +751,7 @@ export const DashboardLayout: React.FC = () => {
 
                   </p>
 
-                  <p className="truncate text-[10px] text-slate-500">
+                  <p className="truncate text-[10px] text-muted-foreground">
 
                     {user?.email || "admin@gmail.com"}
 
@@ -773,7 +773,7 @@ export const DashboardLayout: React.FC = () => {
 
             onClick={logout}
 
-            className="flex w-full items-center justify-center rounded-xl border border-rose-200 py-2.5 text-xs font-bold text-rose-600 transition-colors hover:bg-rose-50"
+            className="flex w-full items-center justify-center rounded-xl border border-rose-200 py-2.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10"
 
           >
 
@@ -799,7 +799,7 @@ export const DashboardLayout: React.FC = () => {
 
       >
 
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-[#E5E7EB] bg-white px-6">
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-[#E5E7EB] bg-card px-6">
 
           <div className="flex items-center gap-6">
 
@@ -809,7 +809,7 @@ export const DashboardLayout: React.FC = () => {
 
               onClick={handleToggle}
 
-              className="rounded-xl border border-slate-200 p-2 transition-colors hover:bg-slate-50"
+              className="rounded-xl border border-secondary p-2 transition-colors hover:bg-muted"
 
               aria-label="Toggle sidebar"
 

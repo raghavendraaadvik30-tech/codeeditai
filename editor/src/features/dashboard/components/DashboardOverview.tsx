@@ -61,7 +61,7 @@ export default function DashboardOverview() {
       description: "Active master accounts",
       icon: Users,
       color:
-        "text-blue-600 bg-blue-50 border border-blue-100",
+        "text-primary bg-primary/10 border border-primary/15",
     },
     {
       title: "Active Workspace Access Keys",
@@ -85,11 +85,11 @@ export default function DashboardOverview() {
     <div className="space-y-8">
       {/* Heading */}
       <div>
-        <h1 className="text-3xl font-black text-slate-900">
+        <h1 className="text-3xl font-black text-foreground">
           System Administration Overview
         </h1>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Global user authority directories,
           status ledgers and trial access matrices.
         </p>
@@ -117,7 +117,7 @@ export default function DashboardOverview() {
                   {card.value}
                 </h2>
 
-                <p className="mt-2 text-sm text-slate-400">
+                <p className="mt-2 text-sm text-muted-foreground">
                   {card.description}
                 </p>
               </CardContent>
@@ -138,7 +138,7 @@ export default function DashboardOverview() {
           <div className="space-y-5">
 
             <div className="flex justify-between items-center">
-              <span className="text-slate-700">
+              <span className="text-secondary-foreground">
                 Admin
               </span>
 
@@ -148,7 +148,7 @@ export default function DashboardOverview() {
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-slate-700">
+              <span className="text-secondary-foreground">
                 Author
               </span>
 
@@ -158,7 +158,7 @@ export default function DashboardOverview() {
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-slate-700">
+              <span className="text-secondary-foreground">
                 Reviewer
               </span>
 

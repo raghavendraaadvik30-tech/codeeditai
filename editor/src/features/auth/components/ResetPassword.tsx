@@ -58,7 +58,7 @@ export default function ResetPassword() {
 
       {/* Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-      <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-blue-500/5 blur-3xl" />
+      <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
@@ -66,20 +66,20 @@ export default function ResetPassword() {
         {/* Logo */}
         <div className="mb-8 text-center">
 
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-indigo-600 text-primary-foreground shadow-lg">
             <ShieldCheck className="h-7 w-7" />
           </div>
 
           <h1 className="mt-4 text-3xl font-black tracking-wide">
             LOGIN
-            <span className="ml-1 text-lg font-bold text-blue-600">
+            <span className="ml-1 text-lg font-bold text-primary">
               PORTAL
             </span>
           </h1>
 
         </div>
 
-        <Card className="rounded-2xl border border-slate-200 shadow-xl">
+        <Card className="rounded-2xl border border-secondary shadow-xl">
 
           <CardHeader>
 
@@ -99,19 +99,19 @@ export default function ResetPassword() {
 
               </div>
 
-              <h3 className="text-xl font-bold text-slate-800">
+              <h3 className="text-xl font-bold text-foreground">
                 Recovery Link Dispatched
               </h3>
 
-              <p className="mt-3 text-sm text-slate-600">
+              <p className="mt-3 text-sm text-secondary-foreground">
                 A secure password recovery email has been sent to:
               </p>
 
-              <p className="mt-2 break-all font-bold text-blue-600">
+              <p className="mt-2 break-all font-bold text-primary">
                 {email}
               </p>
 
-              <p className="mt-5 text-sm leading-6 text-slate-500">
+              <p className="mt-5 text-sm leading-6 text-muted-foreground">
                 Please follow the instructions in the email within
                 <span className="font-semibold"> 15 minutes </span>
                 to reset your password.
@@ -120,7 +120,7 @@ export default function ResetPassword() {
             </div>
 
             <Button
-              className="w-full bg-slate-900 hover:bg-slate-800"
+              className="w-full bg-foreground hover:bg-foreground"
               onClick={() => navigate(ROUTE_PATHS.LOGIN)}
             >
               Back to Login
