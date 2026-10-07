@@ -36,9 +36,9 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
   }
 
   const getSeverityIcon = (severity: string) => {
-    if (severity === 'error') return <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />;
+    if (severity === 'error') return <AlertCircle className="h-4 w-4 text-destructive shrink-0" />;
     if (severity === 'warning') return <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />;
-    return <Info className="h-4 w-4 text-blue-500 shrink-0" />;
+    return <Info className="h-4 w-4 text-primary shrink-0" />;
   };
 
   return (
@@ -46,16 +46,16 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
       {issues.map((issue) => (
         <div
           key={issue.id}
-          className="rounded-lg border border-slate-200 bg-white p-2.5 space-y-1.5 dark:border-slate-800 dark:bg-[#091524]"
+          className="rounded-lg border border-secondary bg-card p-2.5 space-y-1.5 dark:border-muted dark:bg-[#091524]"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-2 min-w-0">
               {getSeverityIcon(issue.severity)}
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-slate-900 dark:text-white leading-tight">
+                <p className="text-xs font-semibold text-foreground dark:text-primary-foreground leading-tight">
                   {issue.message}
                 </p>
-                <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                <p className="text-[10px] text-muted-foreground truncate mt-0.5">
                   Target: {issue.target} {issue.pageNumber && `· Page ${issue.pageNumber}`}
                 </p>
               </div>
@@ -64,13 +64,13 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
           </div>
 
           {issue.fixSuggestion && (
-            <div className="rounded bg-slate-50 p-1.5 text-[10px] text-slate-600 dark:bg-slate-800/80 dark:text-slate-300 flex items-center justify-between gap-2">
+            <div className="rounded bg-muted p-1.5 text-[10px] text-secondary-foreground dark:bg-muted/80 dark:text-muted-foreground flex items-center justify-between gap-2">
               <span className="truncate">💡 {issue.fixSuggestion}</span>
               {onAutoFix && (
                 <button
                   type="button"
                   onClick={() => onAutoFix(issue)}
-                  className="flex items-center gap-1 rounded bg-[#0078d4] px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-[#005a9e] shrink-0"
+                  className="flex items-center gap-1 rounded bg-[#0078d4] px-2 py-0.5 text-[10px] font-semibold text-primary-foreground hover:bg-[#005a9e] shrink-0"
                 >
                   <Wrench className="h-2.5 w-2.5" /> Fix
                 </button>

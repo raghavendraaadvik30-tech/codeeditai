@@ -64,8 +64,8 @@ export default function RibbonToolbar() {
       className="
         border-b
         border-gray-200
-        dark:border-slate-800
-        bg-white
+        dark:border-muted
+        bg-card
         dark:bg-[#0B1620]
       "
     >
@@ -91,8 +91,8 @@ export default function RibbonToolbar() {
                 transition-colors
                 ${
                   active
-                    ? "bg-blue-50 text-blue-700 border border-b-0 border-gray-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-slate-700"
-                    : "text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    ? "bg-primary/10 text-primary/90 border border-b-0 border-gray-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-secondary-foreground"
+                    : "text-gray-600 hover:bg-gray-100 dark:text-muted-foreground dark:hover:bg-muted"
                 }
               `}
             >
@@ -120,8 +120,8 @@ export default function RibbonToolbar() {
 
               ${
                 activeTab === "Header & Footer"
-                  ? "bg-white text-emerald-700 border-t-2 border-t-emerald-600 border-x border-b-0 border-slate-200 shadow-2xs dark:bg-[#07131E] dark:text-emerald-400 dark:border-slate-700 dark:border-t-emerald-500"
-                  : "text-emerald-600 hover:bg-emerald-50/60 dark:text-emerald-400 dark:hover:bg-slate-800"
+                  ? "bg-card text-emerald-700 border-t-2 border-t-emerald-600 border-x border-b-0 border-secondary shadow-2xs dark:bg-[#07131E] dark:text-emerald-400 dark:border-secondary-foreground dark:border-t-emerald-500"
+                  : "text-emerald-600 hover:bg-emerald-50/60 dark:text-emerald-400 dark:hover:bg-muted"
               }
             `}
           >
@@ -137,11 +137,11 @@ export default function RibbonToolbar() {
       <div
         className={`
           border-t
-          border-slate-200
-          bg-white
+          border-secondary
+          bg-card
           px-2
           py-1
-          dark:border-slate-800
+          dark:border-muted
           dark:bg-[#07131E]
           ${activeTab === "Header & Footer" ? "min-h-[94px] bg-[#fbfcfd] dark:bg-[#081522]" : "min-h-[48px]"}
         `}

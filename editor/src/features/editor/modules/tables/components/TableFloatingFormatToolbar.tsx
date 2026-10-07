@@ -536,9 +536,9 @@ export function TableFloatingFormatToolbar() {
         left: `${position.left}px`,
       }}
       className="
-        fixed z-50 flex items-center gap-1 rounded-lg border border-slate-200/90 bg-white px-2 py-1
-        shadow-lg shadow-black/10 select-none text-xs text-slate-700
-        dark:border-slate-700/80 dark:bg-[#0f172a] dark:text-slate-200
+        fixed z-50 flex items-center gap-1 rounded-lg border border-secondary/90 bg-card px-2 py-1
+        shadow-lg shadow-foreground/10 select-none text-xs text-secondary-foreground
+        dark:border-secondary-foreground/80 dark:bg-[#0f172a] dark:text-muted-foreground
         animate-in fade-in zoom-in-95 duration-100 print:hidden
       "
     >
@@ -554,23 +554,23 @@ export function TableFloatingFormatToolbar() {
             closeAllSubmenus();
             setFontMenuOpen(next);
           }}
-          className="flex h-7 items-center gap-1 rounded px-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-[11px] font-medium w-24 justify-between shrink-0"
+          className="flex h-7 items-center gap-1 rounded px-1.5 hover:bg-muted dark:hover:bg-muted text-[11px] font-medium w-24 justify-between shrink-0"
           title="Font Family"
         >
           <span className="truncate">{currentFont}</span>
-          <ChevronDown className="h-3 w-3 shrink-0 text-slate-400" />
+          <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
         </button>
 
         {fontMenuOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-800 dark:bg-[#0f172a]">
+          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card py-1 shadow-lg dark:border-muted dark:bg-[#0f172a]">
             {FONT_OPTIONS.map((f) => (
               <button
                 key={f}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => applyFontFamily(f)}
-                className={`w-full text-left px-2.5 py-1 text-xs hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  currentFont === f ? "font-semibold text-blue-600 dark:text-blue-400" : ""
+                className={`w-full text-left px-2.5 py-1 text-xs hover:bg-muted dark:hover:bg-muted ${
+                  currentFont === f ? "font-semibold text-primary dark:text-primary" : ""
                 }`}
                 style={{ fontFamily: f }}
               >
@@ -593,23 +593,23 @@ export function TableFloatingFormatToolbar() {
             closeAllSubmenus();
             setSizeMenuOpen(next);
           }}
-          className="flex h-7 items-center gap-0.5 rounded px-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-[11px] font-medium w-14 justify-between shrink-0"
+          className="flex h-7 items-center gap-0.5 rounded px-1.5 hover:bg-muted dark:hover:bg-muted text-[11px] font-medium w-14 justify-between shrink-0"
           title="Font Size"
         >
           <span>{currentSize}</span>
-          <ChevronDown className="h-3 w-3 shrink-0 text-slate-400" />
+          <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
         </button>
 
         {sizeMenuOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-20 max-h-48 overflow-y-auto rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-800 dark:bg-[#0f172a]">
+          <div className="absolute left-0 top-full mt-1 z-50 w-20 max-h-48 overflow-y-auto rounded-md border border-secondary bg-card py-1 shadow-lg dark:border-muted dark:bg-[#0f172a]">
             {FONT_SIZE_OPTIONS.map((s) => (
               <button
                 key={s}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => applyFontSize(s)}
-                className={`w-full text-left px-2.5 py-1 text-xs hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                  currentSize === s ? "font-semibold text-blue-600 dark:text-blue-400" : ""
+                className={`w-full text-left px-2.5 py-1 text-xs hover:bg-muted dark:hover:bg-muted ${
+                  currentSize === s ? "font-semibold text-primary dark:text-primary" : ""
                 }`}
               >
                 {s} pt
@@ -627,7 +627,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => stepFontSize(1)}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-[11px] font-bold"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-[11px] font-bold"
         title="Increase Font Size (A+)"
       >
         A<sup>+</sup>
@@ -637,14 +637,14 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => stepFontSize(-1)}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-[11px] font-bold"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-[11px] font-bold"
         title="Decrease Font Size (A-)"
       >
         A<sup>-</sup>
       </button>
 
       {/* Vertical Divider */}
-      <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0" />
+      <div className="h-4 w-px bg-secondary dark:bg-secondary-foreground mx-0.5 shrink-0" />
 
       {/* ------------------------------------------------------------------
           4. BOLD TOGGLE
@@ -655,8 +655,8 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("bold")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isBold
-            ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-bold"
-            : "hover:bg-slate-100 dark:hover:bg-slate-800"
+            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300 font-bold"
+            : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Bold (Ctrl+B)"
       >
@@ -672,8 +672,8 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("italic")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isItalic
-            ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 italic"
-            : "hover:bg-slate-100 dark:hover:bg-slate-800"
+            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300 italic"
+            : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Italic (Ctrl+I)"
       >
@@ -689,8 +689,8 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("underline")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isUnderline
-            ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 underline"
-            : "hover:bg-slate-100 dark:hover:bg-slate-800"
+            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300 underline"
+            : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Underline (Ctrl+U)"
       >
@@ -706,8 +706,8 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("strikeThrough")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isStrike
-            ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-            : "hover:bg-slate-100 dark:hover:bg-slate-800"
+            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300"
+            : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Strikethrough"
       >
@@ -715,7 +715,7 @@ export function TableFloatingFormatToolbar() {
       </button>
 
       {/* Vertical Divider */}
-      <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0" />
+      <div className="h-4 w-px bg-secondary dark:bg-secondary-foreground mx-0.5 shrink-0" />
 
       {/* ------------------------------------------------------------------
           8. TEXT ALIGNMENT (Left, Center, Right)
@@ -724,7 +724,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => execFormat("justifyLeft")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted"
         title="Align Left"
       >
         <AlignLeft className="h-3.5 w-3.5" />
@@ -734,7 +734,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => execFormat("justifyCenter")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted"
         title="Align Center"
       >
         <AlignCenter className="h-3.5 w-3.5" />
@@ -744,7 +744,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => execFormat("justifyRight")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted"
         title="Align Right"
       >
         <AlignRight className="h-3.5 w-3.5" />
@@ -757,7 +757,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => execFormat("outdent")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted"
         title="Decrease Indent"
       >
         <Outdent className="h-3.5 w-3.5" />
@@ -767,14 +767,14 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => execFormat("indent")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted"
         title="Increase Indent"
       >
         <Indent className="h-3.5 w-3.5" />
       </button>
 
       {/* Vertical Divider */}
-      <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0" />
+      <div className="h-4 w-px bg-secondary dark:bg-secondary-foreground mx-0.5 shrink-0" />
 
       {/* ------------------------------------------------------------------
           9. TEXT FOREGROUND COLOR DROPDOWN
@@ -788,16 +788,16 @@ export function TableFloatingFormatToolbar() {
             closeAllSubmenus();
             setTextColorOpen(next);
           }}
-          className="flex h-7 items-center gap-0.5 rounded px-1 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
+          className="flex h-7 items-center gap-0.5 rounded px-1 hover:bg-muted dark:hover:bg-muted shrink-0"
           title="Text Color"
         >
-          <Baseline className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-          <ChevronDown className="h-2.5 w-2.5 text-slate-400" />
+          <Baseline className="h-3.5 w-3.5 text-primary dark:text-primary" />
+          <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
         </button>
 
         {textColorOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-800 dark:bg-[#0f172a] space-y-1">
-            <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 px-1">
+          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-[#0f172a] space-y-1">
+            <div className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-1">
               Text Color
             </div>
             {TEXT_COLORS.map((c) => (
@@ -806,10 +806,10 @@ export function TableFloatingFormatToolbar() {
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => applyTextColor(c.color)}
-                className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-xs"
+                className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-muted dark:hover:bg-muted text-xs"
               >
                 <div
-                  className="h-3 w-3 rounded-full border border-slate-300 shrink-0"
+                  className="h-3 w-3 rounded-full border border-border shrink-0"
                   style={{ backgroundColor: c.color }}
                 />
                 <span className="truncate">{c.label}</span>
@@ -831,16 +831,16 @@ export function TableFloatingFormatToolbar() {
             closeAllSubmenus();
             setHighlightOpen(next);
           }}
-          className="flex h-7 items-center gap-0.5 rounded px-1 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
+          className="flex h-7 items-center gap-0.5 rounded px-1 hover:bg-muted dark:hover:bg-muted shrink-0"
           title="Highlight Color"
         >
           <Highlighter className="h-3.5 w-3.5 text-amber-500" />
-          <ChevronDown className="h-2.5 w-2.5 text-slate-400" />
+          <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
         </button>
 
         {highlightOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-800 dark:bg-[#0f172a] space-y-1">
-            <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 px-1">
+          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-[#0f172a] space-y-1">
+            <div className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-1">
               Highlight Color
             </div>
             {HIGHLIGHT_COLORS.map((c) => (
@@ -849,10 +849,10 @@ export function TableFloatingFormatToolbar() {
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => applyHighlightColor(c.color)}
-                className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-xs"
+                className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-muted dark:hover:bg-muted text-xs"
               >
                 <div
-                  className="h-3 w-3 rounded border border-slate-300 shrink-0"
+                  className="h-3 w-3 rounded border border-border shrink-0"
                   style={{ backgroundColor: c.color }}
                 />
                 <span className="truncate">{c.label}</span>
@@ -869,7 +869,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => execFormat("removeFormat")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-muted0"
         title="Clear Formatting"
       >
         <RemoveFormatting className="h-3.5 w-3.5" />

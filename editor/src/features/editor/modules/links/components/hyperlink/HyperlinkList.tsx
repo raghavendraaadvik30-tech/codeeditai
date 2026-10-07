@@ -31,20 +31,20 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
     <div className="space-y-2.5">
       {/* Search Filter */}
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter hyperlinks..."
-          className="h-7 w-full rounded-md border border-slate-200 bg-slate-50/70 pl-8 pr-3 text-xs outline-none dark:border-slate-800 dark:bg-[#07131E] dark:text-slate-200 focus:border-[#0078d4]"
+          className="h-7 w-full rounded-md border border-secondary bg-muted/70 pl-8 pr-3 text-xs outline-none dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground focus:border-[#0078d4]"
         />
       </div>
 
       {/* Link Cards List */}
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-4 text-center dark:border-slate-800 dark:bg-[#07131E]">
-          <p className="text-xs text-slate-400">
+        <div className="rounded-xl border border-dashed border-secondary bg-muted/50 p-4 text-center dark:border-muted dark:bg-[#07131E]">
+          <p className="text-xs text-muted-foreground">
             {links.length === 0 ? 'No hyperlinks inserted yet.' : 'No matching links found.'}
           </p>
         </div>
@@ -53,20 +53,20 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
           {filtered.map((link) => (
             <div
               key={link.id}
-              className="group flex items-center justify-between rounded-lg border border-slate-200 bg-white p-2 transition-all hover:border-blue-300 dark:border-slate-800 dark:bg-[#091524] dark:hover:border-slate-700"
+              className="group flex items-center justify-between rounded-lg border border-secondary bg-card p-2 transition-all hover:border-blue-300 dark:border-muted dark:bg-[#091524] dark:hover:border-secondary-foreground"
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-blue-950/50 dark:text-primary">
                   <Globe className="h-3.5 w-3.5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="truncate text-xs font-semibold text-slate-900 dark:text-white">
+                    <span className="truncate text-xs font-semibold text-foreground dark:text-primary-foreground">
                       {link.displayText || link.target}
                     </span>
                     <LinkBadge type={link.type} />
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400 truncate">
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground truncate">
                     <span className="truncate">{link.target}</span>
                     {link.pageNumber && <span>· Page {link.pageNumber}</span>}
                   </div>
@@ -80,7 +80,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Open in new tab"
-                    className="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+                    className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-secondary-foreground dark:hover:bg-muted"
                   >
                     <ExternalLink className="h-3 w-3" />
                   </a>
@@ -90,7 +90,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
                       type="button"
                       onClick={() => onNavigate(link)}
                       title="Jump to reference"
-                      className="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-[#0078d4] dark:hover:bg-slate-800"
+                      className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-[#0078d4] dark:hover:bg-muted"
                     >
                       <ExternalLink className="h-3 w-3" />
                     </button>
@@ -102,7 +102,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
                     type="button"
                     onClick={() => onRemove(link)}
                     title="Remove hyperlink"
-                    className="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
+                    className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-red-950/40"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>

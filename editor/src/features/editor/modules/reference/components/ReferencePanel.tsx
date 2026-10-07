@@ -37,7 +37,7 @@ export function ReferencePanel() {
   });
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-4 space-y-4 text-xs select-none dark:bg-[#07131E] dark:text-slate-100">
+    <div className="flex h-full flex-col overflow-y-auto p-4 space-y-4 text-xs select-none dark:bg-[#07131E] dark:text-muted">
       {/* STATUS TOAST */}
       {insertedNotice && (
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-medium transition-all">
@@ -48,13 +48,13 @@ export function ReferencePanel() {
 
       {/* SEARCH BAR */}
       <div className="relative">
-        <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+        <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search citations & bibliography..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full h-9 pl-9 pr-3 text-xs rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-800 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-white dark:placeholder:text-slate-500 transition-colors"
+          className="w-full h-9 pl-9 pr-3 text-xs rounded-lg border border-secondary bg-card placeholder:text-muted-foreground text-foreground outline-none focus:border-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-primary-foreground dark:placeholder:text-muted-foreground transition-colors"
         />
       </div>
 
@@ -66,7 +66,7 @@ export function ReferencePanel() {
             refs.setEditingSource(null);
             refs.setIsOpenCreateSource(true);
           }}
-          className="flex items-center justify-center gap-1.5 h-9 rounded-lg bg-[#0078d4] hover:bg-[#006bbd] text-white font-medium text-xs transition shadow-sm"
+          className="flex items-center justify-center gap-1.5 h-9 rounded-lg bg-[#0078d4] hover:bg-[#006bbd] text-primary-foreground font-medium text-xs transition shadow-sm"
         >
           <Plus className="h-4 w-4" />
           Add Source
@@ -74,7 +74,7 @@ export function ReferencePanel() {
         <button
           type="button"
           onClick={() => refs.setIsOpenSourceManager(true)}
-          className="flex items-center justify-center h-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-200 dark:hover:bg-slate-800 transition"
+          className="flex items-center justify-center h-9 rounded-lg border border-secondary bg-card hover:bg-muted text-secondary-foreground font-medium text-xs dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted transition"
         >
           Manage Sources
         </button>
@@ -83,10 +83,10 @@ export function ReferencePanel() {
       {/* REGISTERED SOURCES LIST */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
             REGISTERED SOURCES
           </span>
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-muted-foreground font-medium">
             {filteredSources.length}
           </span>
         </div>
@@ -94,14 +94,14 @@ export function ReferencePanel() {
         {/* Source Cards */}
         <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-0.5 scrollbar-thin">
           {refs.sources.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-slate-400 dark:border-slate-800">
-              <p className="font-semibold text-xs text-slate-600 dark:text-slate-300">No sources registered</p>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+            <div className="rounded-xl border border-dashed border-secondary p-6 text-center text-muted-foreground dark:border-muted">
+              <p className="font-semibold text-xs text-secondary-foreground dark:text-muted-foreground">No sources registered</p>
+              <p className="text-[11px] text-muted-foreground dark:text-muted-foreground mt-1">
                 Click "+ Add Source" above to add your first citation source.
               </p>
             </div>
           ) : filteredSources.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-slate-400 dark:border-slate-800">
+            <div className="rounded-xl border border-dashed border-secondary p-4 text-center text-muted-foreground dark:border-muted">
               No matching sources found for &ldquo;{searchTerm}&rdquo;.
             </div>
           ) : (
@@ -113,18 +113,18 @@ export function ReferencePanel() {
                 <div
                   key={source.id}
                   onClick={() => handleInsertCitation(source.id, displayLabel)}
-                  className="group cursor-pointer rounded-xl border border-slate-200 bg-white p-3.5 hover:border-blue-400 hover:shadow-sm dark:border-slate-800 dark:bg-[#0E1A29] dark:hover:border-blue-500 transition-all"
+                  className="group cursor-pointer rounded-xl border border-secondary bg-card p-3.5 hover:border-primary hover:shadow-sm dark:border-muted dark:bg-[#0E1A29] dark:hover:border-primary transition-all"
                   title="Click to insert citation at cursor"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-slate-900 dark:text-white text-xs truncate">
+                      <p className="font-bold text-foreground dark:text-primary-foreground text-xs truncate">
                         {author || "Unknown Author"}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                      <p className="text-[11px] text-muted-foreground dark:text-muted-foreground truncate mt-0.5">
                         {source.title || "(Untitled)"}
                       </p>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                      <p className="text-[11px] text-muted-foreground dark:text-muted-foreground mt-1">
                         {source.year ? `${source.year} · ` : ""}click to cite
                       </p>
                     </div>
@@ -142,22 +142,22 @@ export function ReferencePanel() {
       </div>
 
       {/* QUICK INSERT BIBLIOGRAPHY */}
-      <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <div className="space-y-2 pt-2 border-t border-muted dark:border-muted/80">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
           QUICK INSERT BIBLIOGRAPHY
         </span>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => handleInsertBib("Bibliography")}
-            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-200 dark:hover:bg-slate-800 transition"
+            className="flex items-center justify-center h-9 rounded-lg border border-secondary bg-card hover:bg-muted hover:border-border text-xs font-semibold text-secondary-foreground dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted transition"
           >
             Bibliography
           </button>
           <button
             type="button"
             onClick={() => handleInsertBib("References")}
-            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-200 dark:hover:bg-slate-800 transition"
+            className="flex items-center justify-center h-9 rounded-lg border border-secondary bg-card hover:bg-muted hover:border-border text-xs font-semibold text-secondary-foreground dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted transition"
           >
             References
           </button>

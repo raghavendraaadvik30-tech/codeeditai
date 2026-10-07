@@ -666,10 +666,10 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
       ref={containerRef}
       className={`chart-editing-workspace w-full group ${
         isEditingThisChart
-          ? 'flex flex-col gap-2 p-2 bg-slate-50/60 rounded-xl border border-emerald-500/30 shadow-xs'
+          ? 'flex flex-col gap-2 p-2 bg-muted/60 rounded-xl border border-emerald-500/30 shadow-xs'
           : isSelected
-          ? 'relative ring-2 ring-blue-500 rounded-lg shadow-xs cursor-grab active:cursor-grabbing'
-          : 'relative hover:ring-1 hover:ring-slate-300 rounded-lg cursor-pointer'
+          ? 'relative ring-2 ring-primary/100 rounded-lg shadow-xs cursor-grab active:cursor-grabbing'
+          : 'relative hover:ring-1 hover:ring-secondary rounded-lg cursor-pointer'
       }`}
       onClick={handleChartClick}
       onContextMenu={handleContextMenu}
@@ -713,7 +713,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               type="text"
               value={chart.title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              className="text-base font-bold text-slate-800 bg-transparent outline-none border-b border-transparent hover:border-slate-300 focus:border-blue-500 transition-colors px-1"
+              className="text-base font-bold text-foreground bg-transparent outline-none border-b border-transparent hover:border-border focus:border-primary/100 transition-colors px-1"
               placeholder="Enter Chart Title"
             />
           </div>
@@ -728,7 +728,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
         <>
           {/* Visual selection outline overlay when selected (renders above text at z-30) */}
           <div
-            className="absolute inset-0 ring-2 ring-blue-500 rounded-lg pointer-events-none z-30"
+            className="absolute inset-0 ring-2 ring-primary/100 rounded-lg pointer-events-none z-30"
           />
 
           {/* Anchor indicator for text-wrapping modes (MS Word-style) */}
@@ -743,49 +743,49 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
           {/* Top-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'nw')}
-            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-nwse-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-nwse-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart"
           />
           {/* Top-Middle */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'n')}
-            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-ns-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-ns-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart height"
           />
           {/* Top-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'ne')}
-            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-nesw-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-nesw-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart"
           />
           {/* Middle-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'e')}
-            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-ew-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-ew-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart width"
           />
           {/* Bottom-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'se')}
-            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-nwse-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-nwse-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart"
           />
           {/* Bottom-Middle */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 's')}
-            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-ns-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-ns-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart height"
           />
           {/* Bottom-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'sw')}
-            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-nesw-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-nesw-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart"
           />
           {/* Middle-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'w')}
-            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-blue-600 rounded-xs shadow-xs cursor-ew-resize z-30 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-card border-2 border-primary rounded-xs shadow-xs cursor-ew-resize z-30 hover:scale-125 transition-transform"
             title="Resize chart width"
           />
 
@@ -808,7 +808,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               className={`w-[30px] h-[30px] rounded-xs flex items-center justify-center shadow-md border transition-all cursor-pointer ${
                 isLayoutOptionsOpen
                   ? 'bg-[#242424] border-[#38bdf8] ring-1 ring-[#38bdf8]'
-                  : 'bg-[#2b2b2b] border-[#555555] hover:border-slate-300'
+                  : 'bg-[#2b2b2b] border-[#555555] hover:border-border'
               }`}
             >
               <svg width="20" height="18" viewBox="0 0 20 18" fill="none">

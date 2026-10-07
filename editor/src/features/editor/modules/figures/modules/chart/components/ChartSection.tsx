@@ -51,18 +51,18 @@ export const ChartSection: React.FC = () => {
 
   return (
     <>
-      <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-[#111D29]">
+      <div className="rounded-xl border border-secondary bg-card p-3.5 shadow-xs dark:border-muted dark:bg-[#111D29]">
         <div className="flex items-center justify-between">
           {/* Chart Header Icon + Title & Subtitle */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-primary">
               <BarChart2 className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              <h4 className="text-sm font-semibold text-foreground dark:text-muted-foreground">
                 Chart
               </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted0 dark:text-muted-foreground">
                 Chart
               </p>
             </div>
@@ -73,7 +73,7 @@ export const ChartSection: React.FC = () => {
             <DropdownMenuTrigger render={<button
                 type="button"
                 onPointerDown={captureSelection}
-                className="flex items-center gap-1.5 rounded-md bg-[#0078d4] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#005a9e] focus:outline-none"
+                className="flex items-center gap-1.5 rounded-md bg-[#0078d4] px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-[#005a9e] focus:outline-none"
               >
                 <span>Insert</span>
                 <ChevronDown className="h-3.5 w-3.5" />
@@ -87,7 +87,7 @@ export const ChartSection: React.FC = () => {
                 }}
                 className="cursor-pointer font-medium"
               >
-                <BarChart2 className="mr-2 h-4 w-4 text-blue-600" />
+                <BarChart2 className="mr-2 h-4 w-4 text-primary" />
                 <span>Insert Chart...</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

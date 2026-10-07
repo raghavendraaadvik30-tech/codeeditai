@@ -239,8 +239,8 @@ function WordCloseIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <div className={`relative flex items-center justify-center ${className} rounded bg-gradient-to-b from-[#f87171] to-[#dc2626] border border-[#b91c1c] shadow-xs`}>
       {/* Subtle glossy top highlight */}
-      <div className="absolute top-0.5 inset-x-1 h-1.5 rounded-t bg-white/35" />
-      <X className="w-4 h-4 text-white stroke-[2.8]" />
+      <div className="absolute top-0.5 inset-x-1 h-1.5 rounded-t bg-card/35" />
+      <X className="w-4 h-4 text-primary-foreground stroke-[2.8]" />
     </div>
   );
 }
@@ -418,7 +418,7 @@ export default function HeaderFooterTab() {
   const isDifferentOddEven = activeSection?.differentOddEven ?? false;
 
   return (
-    <div className="flex items-stretch h-[88px] text-slate-700 dark:text-slate-200 select-none overflow-x-auto">
+    <div className="flex items-stretch h-[88px] text-secondary-foreground dark:text-muted-foreground select-none overflow-x-auto">
 
       {/* ============================================================
           GROUP 1: HEADER & FOOTER
@@ -430,13 +430,13 @@ export default function HeaderFooterTab() {
             customTrigger={
               <button
                 type="button"
-                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700 active:bg-slate-200/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Header: Add or change header"
               >
                 <WordHeaderIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[11px] leading-tight text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-0.5">
+                <span className="text-[11px] leading-tight text-foreground dark:text-muted mt-1 flex items-center gap-0.5">
                   Header
-                  <ChevronDown className="w-2.5 h-2.5 text-slate-500" />
+                  <ChevronDown className="w-2.5 h-2.5 text-muted-foreground" />
                 </span>
               </button>
             }
@@ -447,13 +447,13 @@ export default function HeaderFooterTab() {
             customTrigger={
               <button
                 type="button"
-                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700 active:bg-slate-200/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Footer: Add or change footer"
               >
                 <WordFooterIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[11px] leading-tight text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-0.5">
+                <span className="text-[11px] leading-tight text-foreground dark:text-muted mt-1 flex items-center gap-0.5">
                   Footer
-                  <ChevronDown className="w-2.5 h-2.5 text-slate-500" />
+                  <ChevronDown className="w-2.5 h-2.5 text-muted-foreground" />
                 </span>
               </button>
             }
@@ -463,19 +463,19 @@ export default function HeaderFooterTab() {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex flex-col items-center justify-center w-[52px] h-[60px] rounded hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700 active:bg-slate-200/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-[52px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Page Number: Insert page numbers into document"
               >
                 <WordPageNumberIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[10px] leading-3 text-slate-800 dark:text-slate-100 mt-0.5 text-center flex flex-col items-center">
+                <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
                   <span>Page</span>
                   <span className="flex items-center gap-0.5">
                     Number
-                    <ChevronDown className="w-2.5 h-2.5 text-slate-500" />
+                    <ChevronDown className="w-2.5 h-2.5 text-muted-foreground" />
                   </span>
                 </span>
               </button>} />
-            <DropdownMenuContent align="start" className="w-56 text-xs p-1 shadow-lg bg-white dark:bg-[#0B1620]">
+            <DropdownMenuContent align="start" className="w-56 text-xs p-1 shadow-lg bg-card dark:bg-[#0B1620]">
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="cursor-pointer">
                   <span>Top of Page</span>
@@ -514,7 +514,7 @@ export default function HeaderFooterTab() {
 
               <DropdownMenuItem
                 onClick={handleRemovePageNumbers}
-                className="text-rose-600 dark:text-rose-400 cursor-pointer"
+                className="text-destructive dark:text-rose-400 cursor-pointer"
               >
                 Remove Page Numbers
               </DropdownMenuItem>
@@ -523,13 +523,13 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 1 Label */}
-        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Header &amp; Footer
         </div>
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-slate-200 dark:bg-slate-800 self-stretch my-1 shrink-0" />
+      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 2: INSERT
@@ -540,11 +540,11 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={handleInsertDateTime}
-            className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700 active:bg-slate-200/70 transition-colors p-0.5 cursor-pointer group"
+            className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
             title="Date & Time: Insert current date or time"
           >
             <WordDateTimeIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-slate-800 dark:text-slate-100 mt-0.5 text-center flex flex-col items-center">
+            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
               <span>Date &amp;</span>
               <span>Time</span>
             </span>
@@ -554,19 +554,19 @@ export default function HeaderFooterTab() {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700 active:bg-slate-200/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Quick Parts: Insert reusable pieces of content"
               >
                 <WordQuickPartsIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[10px] leading-3 text-slate-800 dark:text-slate-100 mt-0.5 text-center flex flex-col items-center">
+                <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
                   <span>Quick</span>
                   <span className="flex items-center gap-0.5">
                     Parts
-                    <ChevronDown className="w-2 h-2 text-slate-500" />
+                    <ChevronDown className="w-2 h-2 text-muted-foreground" />
                   </span>
                 </span>
               </button>} />
-            <DropdownMenuContent align="start" className="w-48 text-xs p-1 shadow-lg bg-white dark:bg-[#0B1620]">
+            <DropdownMenuContent align="start" className="w-48 text-xs p-1 shadow-lg bg-card dark:bg-[#0B1620]">
               <DropdownMenuItem onClick={handleInsertDocTitle} className="cursor-pointer">
                 Document Title
               </DropdownMenuItem>
@@ -582,13 +582,13 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 2 Label */}
-        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Insert
         </div>
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-slate-200 dark:bg-slate-800 self-stretch my-1 shrink-0" />
+      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 3: NAVIGATION
@@ -601,13 +601,13 @@ export default function HeaderFooterTab() {
             onClick={goToHeader}
             className={`flex flex-col items-center justify-center w-[48px] h-[60px] rounded p-0.5 transition-colors cursor-pointer group ${
               activeHFType === "header"
-                ? "bg-blue-50 border border-blue-300 dark:bg-blue-950/60 dark:border-blue-700"
-                : "hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700"
+                ? "bg-primary/10 border border-blue-300 dark:bg-blue-950/60 dark:border-primary/90"
+                : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
             }`}
             title="Go to Header"
           >
             <WordGoToHeaderIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-slate-800 dark:text-slate-100 mt-0.5 text-center flex flex-col items-center">
+            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
               <span>Go to</span>
               <span>Header</span>
             </span>
@@ -619,13 +619,13 @@ export default function HeaderFooterTab() {
             onClick={goToFooter}
             className={`flex flex-col items-center justify-center w-[48px] h-[60px] rounded p-0.5 transition-colors cursor-pointer group ${
               activeHFType === "footer"
-                ? "bg-blue-50 border border-blue-300 dark:bg-blue-950/60 dark:border-blue-700"
-                : "hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700"
+                ? "bg-primary/10 border border-blue-300 dark:bg-blue-950/60 dark:border-primary/90"
+                : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
             }`}
             title="Go to Footer"
           >
             <WordGoToFooterIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-slate-800 dark:text-slate-100 mt-0.5 text-center flex flex-col items-center">
+            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
               <span>Go to</span>
               <span>Footer</span>
             </span>
@@ -635,20 +635,20 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 3 Label */}
-        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Navigation
         </div>
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-slate-200 dark:bg-slate-800 self-stretch my-1 shrink-0" />
+      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 4: OPTIONS (CHECKBOXES)
       ============================================================ */}
       <div className="flex flex-col justify-between items-start px-2 shrink-0">
         <div className="flex flex-col justify-center gap-1.5 flex-1 pt-1 text-[11px]">
-          <label className="flex items-center gap-1.5 select-none cursor-pointer hover:text-slate-900 dark:hover:text-white">
+          <label className="flex items-center gap-1.5 select-none cursor-pointer hover:text-foreground dark:hover:text-primary-foreground">
             <input
               type="checkbox"
               checked={isDifferentFirstPage}
@@ -659,12 +659,12 @@ export default function HeaderFooterTab() {
                   });
                 }
               }}
-              className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
+              className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-0 cursor-pointer"
             />
             <span>Different First Page</span>
           </label>
 
-          <label className="flex items-center gap-1.5 select-none cursor-pointer hover:text-slate-900 dark:hover:text-white">
+          <label className="flex items-center gap-1.5 select-none cursor-pointer hover:text-foreground dark:hover:text-primary-foreground">
             <input
               type="checkbox"
               checked={isDifferentOddEven}
@@ -675,30 +675,30 @@ export default function HeaderFooterTab() {
                   });
                 }
               }}
-              className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
+              className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-0 cursor-pointer"
             />
             <span>Different Odd &amp; Even Pages</span>
           </label>
 
-          <label className="flex items-center gap-1.5 select-none cursor-pointer hover:text-slate-900 dark:hover:text-white">
+          <label className="flex items-center gap-1.5 select-none cursor-pointer hover:text-foreground dark:hover:text-primary-foreground">
             <input
               type="checkbox"
               checked={showDocumentText}
               onChange={(e) => setShowDocumentText(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
+              className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-0 cursor-pointer"
             />
             <span>Show Document Text</span>
           </label>
         </div>
 
         {/* Group 4 Label */}
-        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal tracking-tight text-center w-full py-0.5 select-none">
+        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center w-full py-0.5 select-none">
           Options
         </div>
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-slate-200 dark:bg-slate-800 self-stretch my-1 shrink-0" />
+      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 5: POSITION (STEPPERS & ALIGNMENT TAB)
@@ -707,11 +707,11 @@ export default function HeaderFooterTab() {
         <div className="flex flex-col justify-center gap-1 flex-1 pt-0.5 text-[11px]">
           {/* Header from Top */}
           <div className="flex items-center justify-between gap-1.5 w-full">
-            <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 text-[11px]">
-              <WordHeaderTopIcon className="w-3.5 h-3.5 text-slate-500" />
+            <div className="flex items-center gap-1 text-secondary-foreground dark:text-muted-foreground text-[11px]">
+              <WordHeaderTopIcon className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Header from Top:</span>
             </div>
-            <div className="relative flex items-center border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 overflow-hidden h-[22px]">
+            <div className="relative flex items-center border border-border dark:border-secondary-foreground rounded bg-card dark:bg-secondary overflow-hidden h-[22px]">
               <input
                 type="text"
                 value={`${headerInputVal} ${unit}`}
@@ -721,20 +721,20 @@ export default function HeaderFooterTab() {
                   const num = parseFloat(raw);
                   if (!isNaN(num)) handleHeaderDistanceChange(num);
                 }}
-                className="w-16 px-1.5 text-[11px] text-slate-800 dark:text-slate-100 outline-none bg-transparent"
+                className="w-16 px-1.5 text-[11px] text-foreground dark:text-muted outline-none bg-transparent"
               />
-              <div className="flex flex-col border-l border-slate-200 dark:border-slate-800 h-full">
+              <div className="flex flex-col border-l border-secondary dark:border-muted h-full">
                 <button
                   type="button"
                   onClick={() => stepDistance("header", 1)}
-                  className="px-1 text-[8px] leading-none hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center h-1/2 cursor-pointer"
+                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 cursor-pointer"
                 >
                   ▲
                 </button>
                 <button
                   type="button"
                   onClick={() => stepDistance("header", -1)}
-                  className="px-1 text-[8px] leading-none hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center h-1/2 border-t border-slate-200 dark:border-slate-800 cursor-pointer"
+                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 border-t border-secondary dark:border-muted cursor-pointer"
                 >
                   ▼
                 </button>
@@ -744,11 +744,11 @@ export default function HeaderFooterTab() {
 
           {/* Footer from Bottom */}
           <div className="flex items-center justify-between gap-1.5 w-full">
-            <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 text-[11px]">
-              <WordFooterBottomIcon className="w-3.5 h-3.5 text-slate-500" />
+            <div className="flex items-center gap-1 text-secondary-foreground dark:text-muted-foreground text-[11px]">
+              <WordFooterBottomIcon className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Footer from Bottom:</span>
             </div>
-            <div className="relative flex items-center border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 overflow-hidden h-[22px]">
+            <div className="relative flex items-center border border-border dark:border-secondary-foreground rounded bg-card dark:bg-secondary overflow-hidden h-[22px]">
               <input
                 type="text"
                 value={`${footerInputVal} ${unit}`}
@@ -758,20 +758,20 @@ export default function HeaderFooterTab() {
                   const num = parseFloat(raw);
                   if (!isNaN(num)) handleFooterDistanceChange(num);
                 }}
-                className="w-16 px-1.5 text-[11px] text-slate-800 dark:text-slate-100 outline-none bg-transparent"
+                className="w-16 px-1.5 text-[11px] text-foreground dark:text-muted outline-none bg-transparent"
               />
-              <div className="flex flex-col border-l border-slate-200 dark:border-slate-800 h-full">
+              <div className="flex flex-col border-l border-secondary dark:border-muted h-full">
                 <button
                   type="button"
                   onClick={() => stepDistance("footer", 1)}
-                  className="px-1 text-[8px] leading-none hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center h-1/2 cursor-pointer"
+                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 cursor-pointer"
                 >
                   ▲
                 </button>
                 <button
                   type="button"
                   onClick={() => stepDistance("footer", -1)}
-                  className="px-1 text-[8px] leading-none hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center h-1/2 border-t border-slate-200 dark:border-slate-800 cursor-pointer"
+                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 border-t border-secondary dark:border-muted cursor-pointer"
                 >
                   ▼
                 </button>
@@ -783,13 +783,13 @@ export default function HeaderFooterTab() {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex items-center gap-1 px-1 py-0.5 rounded text-[11px] text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                className="flex items-center gap-1 px-1 py-0.5 rounded text-[11px] text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer transition-colors"
                 title="Insert Alignment Tab"
               >
-                <WordAlignmentTabIcon className="w-3.5 h-3.5 text-blue-600" />
+                <WordAlignmentTabIcon className="w-3.5 h-3.5 text-primary" />
                 <span>Insert Alignment Tab</span>
               </button>} />
-            <DropdownMenuContent align="start" className="w-44 text-xs p-1 shadow-lg bg-white dark:bg-[#0B1620]">
+            <DropdownMenuContent align="start" className="w-44 text-xs p-1 shadow-lg bg-card dark:bg-[#0B1620]">
               <DropdownMenuItem onClick={() => handleInsertAlignmentTab("center")} className="cursor-pointer">
                 Center Tab
               </DropdownMenuItem>
@@ -797,12 +797,12 @@ export default function HeaderFooterTab() {
                 Right Tab
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <div className="px-2 py-1 text-[10px] text-slate-500">
+              <div className="px-2 py-1 text-[10px] text-muted-foreground">
                 Unit:{" "}
                 <button
                   type="button"
                   onClick={() => setUnit(unit === "cm" ? "in" : unit === "in" ? "px" : "cm")}
-                  className="text-blue-600 font-semibold hover:underline"
+                  className="text-primary font-semibold hover:underline"
                 >
                   {unit} (click to toggle)
                 </button>
@@ -812,13 +812,13 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 5 Label */}
-        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal tracking-tight text-center w-full py-0.5 select-none">
+        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center w-full py-0.5 select-none">
           Position
         </div>
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-slate-200 dark:bg-slate-800 self-stretch my-1 shrink-0" />
+      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 6: CLOSE HEADER AND FOOTER
@@ -828,11 +828,11 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={exitHeaderFooterMode}
-            className="flex flex-col items-center justify-center w-[54px] h-[60px] rounded hover:bg-rose-50 hover:border hover:border-rose-300 dark:hover:bg-rose-950/40 dark:hover:border-rose-800 active:bg-rose-100 transition-colors p-0.5 cursor-pointer group"
+            className="flex flex-col items-center justify-center w-[54px] h-[60px] rounded hover:bg-destructive/10 hover:border hover:border-rose-300 dark:hover:bg-rose-950/40 dark:hover:border-rose-800 active:bg-rose-100 transition-colors p-0.5 cursor-pointer group"
             title="Close Header and Footer (Esc)"
           >
             <WordCloseIcon className="w-6 h-6 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-slate-800 dark:text-slate-100 mt-1 text-center flex flex-col items-center font-medium">
+            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-1 text-center flex flex-col items-center font-medium">
               <span>Close Header</span>
               <span>and Footer</span>
             </span>
@@ -840,7 +840,7 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 6 Label */}
-        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Close
         </div>
       </div>

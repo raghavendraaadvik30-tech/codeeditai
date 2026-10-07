@@ -21,7 +21,7 @@ export const IconsSection: React.FC = () => {
 
   return (
     <>
-      <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-[#111D29]">
+      <div className="rounded-xl border border-secondary bg-card p-3.5 shadow-xs dark:border-muted dark:bg-[#111D29]">
         <div className="flex items-center justify-between">
           {/* Header Icon + Title & Subtitle */}
           <div className="flex items-center gap-3">
@@ -29,10 +29,10 @@ export const IconsSection: React.FC = () => {
               <Smile className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              <h4 className="text-sm font-semibold text-foreground dark:text-muted-foreground">
                 Icons
               </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted0 dark:text-muted-foreground">
                 Icons
               </p>
             </div>
@@ -42,7 +42,7 @@ export const IconsSection: React.FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex items-center gap-1.5 rounded-md bg-[#0078d4] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#005a9e] focus:outline-none"
+                className="flex items-center gap-1.5 rounded-md bg-[#0078d4] px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-[#005a9e] focus:outline-none"
               >
                 <span>Insert</span>
                 <ChevronDown className="h-3.5 w-3.5" />
@@ -51,7 +51,7 @@ export const IconsSection: React.FC = () => {
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
                 onClick={() => setIsModalOpen(true)}
-                className="cursor-pointer font-medium text-slate-700 dark:text-slate-200"
+                className="cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground"
               >
                 <Smile className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-400" />
                 <span>Browse Icons...</span>

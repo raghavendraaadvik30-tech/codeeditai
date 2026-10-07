@@ -146,7 +146,7 @@ export default function LeftOverlay() {
     PANEL_ICONS[panelKey] ?? FileText;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white text-slate-900 dark:bg-[#07131E] dark:text-slate-100">
+    <div className="flex h-full min-h-0 flex-col bg-card text-foreground dark:bg-[#07131E] dark:text-muted">
 
       {/* HEADER */}
 
@@ -158,10 +158,10 @@ export default function LeftOverlay() {
           items-center
           justify-between
           border-b
-          border-slate-200
-          bg-white
+          border-secondary
+          bg-card
           px-5
-          dark:border-slate-800
+          dark:border-muted
           dark:bg-[#07131E]
         "
       >
@@ -177,8 +177,8 @@ export default function LeftOverlay() {
               items-center
               justify-center
               rounded-xl
-              bg-blue-600/10
-              text-blue-500
+              bg-primary/10
+              text-primary
               dark:bg-[#0078d4]/20
               dark:text-[#0078d4]
             "
@@ -191,8 +191,8 @@ export default function LeftOverlay() {
               className="
                 text-sm
                 font-semibold
-                text-slate-900
-                dark:text-white
+                text-foreground
+                dark:text-primary-foreground
               "
             >
               {title}
@@ -201,8 +201,8 @@ export default function LeftOverlay() {
             <p
               className="
                 text-xs
-                text-slate-500
-                dark:text-slate-400
+                text-muted-foreground
+                dark:text-muted-foreground
               "
             >
               {description}
@@ -223,13 +223,13 @@ export default function LeftOverlay() {
             items-center
             justify-center
             rounded-md
-            text-slate-500
+            text-muted-foreground
             transition-colors
-            hover:bg-slate-100
-            hover:text-slate-900
-            dark:text-slate-400
-            dark:hover:bg-slate-800
-            dark:hover:text-white
+            hover:bg-muted
+            hover:text-foreground
+            dark:text-muted-foreground
+            dark:hover:bg-muted
+            dark:hover:text-primary-foreground
           "
           aria-label="Close panel"
           title="Close"
@@ -262,16 +262,16 @@ export default function LeftOverlay() {
                       gap-3
                       rounded-lg
                       border
-                      border-slate-200
-                      bg-white
+                      border-secondary
+                      bg-card
                       p-3
                       text-left
                       transition-colors
-                      hover:border-blue-200
-                      hover:bg-slate-50
-                      dark:border-slate-700
+                      hover:border-primary/30
+                      hover:bg-muted
+                      dark:border-secondary-foreground
                       dark:bg-[#111D29]
-                      dark:hover:bg-slate-800
+                      dark:hover:bg-muted
                     "
                   >
                     {/* ITEM ICON */}
@@ -285,10 +285,10 @@ export default function LeftOverlay() {
                         items-center
                         justify-center
                         rounded-md
-                        bg-slate-100
-                        text-slate-600
-                        dark:bg-slate-800
-                        dark:text-slate-300
+                        bg-muted
+                        text-secondary-foreground
+                        dark:bg-muted
+                        dark:text-muted-foreground
                       "
                     >
                       <Icon className="h-4 w-4" />
@@ -301,8 +301,8 @@ export default function LeftOverlay() {
                         className="
                           text-sm
                           font-medium
-                          text-slate-800
-                          dark:text-white
+                          text-foreground
+                          dark:text-primary-foreground
                         "
                       >
                         {item.title}
@@ -313,8 +313,8 @@ export default function LeftOverlay() {
                           className="
                             mt-0.5
                             text-xs
-                            text-slate-500
-                            dark:text-slate-400
+                            text-muted-foreground
+                            dark:text-muted-foreground
                           "
                         >
                           {item.description}

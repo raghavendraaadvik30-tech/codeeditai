@@ -26,7 +26,7 @@ export default function CaseSection({
 
   return (
     <section className="mb-5">
-      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Case
       </h3>
 
@@ -66,18 +66,18 @@ export default function CaseSection({
                 ${
                   isActive
                     ? `
-                      border-blue-500
-                      bg-blue-50
+                      border-primary
+                      bg-primary/10
                       ring-2
-                      ring-blue-100
+                      ring-primary/15
                       shadow-sm
                     `
                     : `
-                      border-slate-200
-                      bg-white
+                      border-secondary
+                      bg-card
                       shadow-sm
                       hover:border-blue-300
-                      hover:bg-blue-50
+                      hover:bg-primary/10
                       hover:shadow
                     `
                 }
@@ -91,8 +91,8 @@ export default function CaseSection({
 
                   ${
                     isActive
-                      ? "text-blue-700"
-                      : "text-blue-600"
+                      ? "text-primary/90"
+                      : "text-primary"
                   }
                 `}
               >
@@ -109,8 +109,8 @@ export default function CaseSection({
 
                   ${
                     isActive
-                      ? "text-blue-700"
-                      : "text-slate-700"
+                      ? "text-primary/90"
+                      : "text-secondary-foreground"
                   }
                 `}
               >

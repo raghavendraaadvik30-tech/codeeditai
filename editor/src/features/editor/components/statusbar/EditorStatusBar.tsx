@@ -71,12 +71,12 @@ export default function EditorStatusBar() {
         justify-between
         px-3
         border-t
-        border-slate-200
+        border-secondary
         bg-[#F0F4F9]
-        text-slate-600
-        dark:border-slate-800
+        text-secondary-foreground
+        dark:border-muted
         dark:bg-[#07111C]
-        dark:text-slate-400
+        dark:text-muted-foreground
         text-[11px]
         font-sans
         select-none
@@ -87,19 +87,19 @@ export default function EditorStatusBar() {
       {/* LEFT: Document stats (Page X of Y, Word count, Track Changes) */}
       <div className="flex items-center gap-3">
         <span
-          className="hover:text-slate-900 dark:hover:text-slate-200 cursor-default"
+          className="hover:text-foreground dark:hover:text-muted-foreground cursor-default"
           title={`Page ${currentPageNumber} of ${totalPages}`}
         >
           Page {currentPageNumber} of {totalPages}
         </span>
-        <span className="h-3 w-px bg-slate-300 dark:bg-slate-700" />
+        <span className="h-3 w-px bg-secondary dark:bg-secondary-foreground" />
         <span
-          className="hover:text-slate-900 dark:hover:text-slate-200 cursor-default"
+          className="hover:text-foreground dark:hover:text-muted-foreground cursor-default"
           title={`${wordCount} words in document`}
         >
           {wordCount} {wordCount === 1 ? "word" : "words"}
         </span>
-        <span className="h-3 w-px bg-slate-300 dark:bg-slate-700" />
+        <span className="h-3 w-px bg-secondary dark:bg-secondary-foreground" />
         <button
           type="button"
           onClick={() => {
@@ -110,8 +110,8 @@ export default function EditorStatusBar() {
             flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors
             ${
               trackChanges
-                ? "bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/60 dark:text-blue-300"
-                : "text-slate-500 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:bg-slate-800"
+                ? "bg-primary/15 text-primary/90 hover:bg-primary/30 dark:bg-blue-950/60 dark:text-blue-300"
+                : "text-muted-foreground hover:bg-secondary/60 dark:text-muted-foreground dark:hover:bg-muted"
             }
           `}
           title="Click to open Track Changes panel"
@@ -119,7 +119,7 @@ export default function EditorStatusBar() {
           <GitCompare className="h-3 w-3" />
           <span>Track Changes: {trackChanges ? "ON" : "OFF"}</span>
           {pendingChanges > 0 && (
-            <span className="ml-0.5 rounded-full bg-amber-500 text-white px-1 text-[9px] font-bold">
+            <span className="ml-0.5 rounded-full bg-amber-500 text-primary-foreground px-1 text-[9px] font-bold">
               {pendingChanges}
             </span>
           )}
@@ -142,8 +142,8 @@ export default function EditorStatusBar() {
               transition-colors
               ${
                 viewMode === "read"
-                  ? "bg-slate-200/90 text-blue-600 border border-slate-300/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-slate-800 dark:text-blue-400 dark:border-slate-700"
-                  : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  ? "bg-secondary/90 text-primary border border-border/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-muted dark:text-primary dark:border-secondary-foreground"
+                  : "text-secondary-foreground hover:bg-secondary/60 hover:text-foreground border border-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-muted-foreground"
               }
             `}
           >
@@ -162,8 +162,8 @@ export default function EditorStatusBar() {
               transition-colors
               ${
                 viewMode === "print"
-                  ? "bg-slate-200/90 text-blue-600 border border-slate-300/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-slate-800 dark:text-blue-400 dark:border-slate-700"
-                  : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  ? "bg-secondary/90 text-primary border border-border/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-muted dark:text-primary dark:border-secondary-foreground"
+                  : "text-secondary-foreground hover:bg-secondary/60 hover:text-foreground border border-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-muted-foreground"
               }
             `}
           >
@@ -182,8 +182,8 @@ export default function EditorStatusBar() {
               transition-colors
               ${
                 viewMode === "web"
-                  ? "bg-slate-200/90 text-blue-600 border border-slate-300/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-slate-800 dark:text-blue-400 dark:border-slate-700"
-                  : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  ? "bg-secondary/90 text-primary border border-border/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-muted dark:text-primary dark:border-secondary-foreground"
+                  : "text-secondary-foreground hover:bg-secondary/60 hover:text-foreground border border-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-muted-foreground"
               }
             `}
           >
@@ -192,7 +192,7 @@ export default function EditorStatusBar() {
         </div>
 
         {/* VERTICAL DIVIDER 1 */}
-        <div className="mx-1 h-3.5 w-px bg-slate-300 dark:bg-slate-700" />
+        <div className="mx-1 h-3.5 w-px bg-secondary dark:bg-secondary-foreground" />
 
         {/* GROUP 2: Additional View/Layout Modes (Outline View, Draft View) */}
         <div className="flex items-center gap-0.5">
@@ -212,8 +212,8 @@ export default function EditorStatusBar() {
               transition-colors
               ${
                 viewMode === "outline"
-                  ? "bg-slate-200/90 text-blue-600 border border-slate-300/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-slate-800 dark:text-blue-400 dark:border-slate-700"
-                  : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  ? "bg-secondary/90 text-primary border border-border/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-muted dark:text-primary dark:border-secondary-foreground"
+                  : "text-secondary-foreground hover:bg-secondary/60 hover:text-foreground border border-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-muted-foreground"
               }
             `}
           >
@@ -232,8 +232,8 @@ export default function EditorStatusBar() {
               transition-colors
               ${
                 viewMode === "draft"
-                  ? "bg-slate-200/90 text-blue-600 border border-slate-300/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-slate-800 dark:text-blue-400 dark:border-slate-700"
-                  : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  ? "bg-secondary/90 text-primary border border-border/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:bg-muted dark:text-primary dark:border-secondary-foreground"
+                  : "text-secondary-foreground hover:bg-secondary/60 hover:text-foreground border border-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-muted-foreground"
               }
             `}
           >
@@ -242,7 +242,7 @@ export default function EditorStatusBar() {
         </div>
 
         {/* VERTICAL DIVIDER 2 */}
-        <div className="mx-1 h-3.5 w-px bg-slate-300 dark:bg-slate-700" />
+        <div className="mx-1 h-3.5 w-px bg-secondary dark:bg-secondary-foreground" />
 
         {/* GROUP 3: Zoom Controls (Zoom %, Zoom Out, Slider, Zoom In) */}
         <div className="flex items-center gap-1 ml-1">
@@ -259,12 +259,12 @@ export default function EditorStatusBar() {
               text-right
               font-medium
               text-[11px]
-              text-slate-700
-              hover:bg-slate-200/70
+              text-secondary-foreground
+              hover:bg-secondary/70
               rounded-[2px]
               transition-colors
-              dark:text-slate-300
-              dark:hover:bg-slate-800
+              dark:text-muted-foreground
+              dark:hover:bg-muted
             "
           >
             {Math.round(zoom)}%
@@ -280,15 +280,15 @@ export default function EditorStatusBar() {
             className="
               p-0.5
               rounded-[2px]
-              text-slate-600
-              hover:bg-slate-200/70
-              hover:text-slate-900
+              text-secondary-foreground
+              hover:bg-secondary/70
+              hover:text-foreground
               disabled:opacity-30
               disabled:cursor-not-allowed
               transition-colors
-              dark:text-slate-400
-              dark:hover:bg-slate-800
-              dark:hover:text-slate-200
+              dark:text-muted-foreground
+              dark:hover:bg-muted
+              dark:hover:text-muted-foreground
             "
           >
             <Minus className="h-3 w-3" />
@@ -298,7 +298,7 @@ export default function EditorStatusBar() {
           <div className="relative flex items-center w-24 sm:w-28 mx-0.5">
             {/* Word-style center tick at 100%: (100-25)/(200-25) = 42.86% */}
             <div
-              className="absolute left-[42.86%] h-2 w-[1px] bg-slate-400 dark:bg-slate-500 pointer-events-none -translate-x-1/2"
+              className="absolute left-[42.86%] h-2 w-[1px] bg-muted-foreground dark:bg-muted-foreground pointer-events-none -translate-x-1/2"
               title="100%"
             />
             <input
@@ -313,14 +313,14 @@ export default function EditorStatusBar() {
                 word-zoom-slider
                 w-full
                 h-1
-                bg-slate-300
-                dark:bg-slate-700
+                bg-secondary
+                dark:bg-secondary-foreground
                 rounded-full
                 appearance-none
                 cursor-pointer
                 outline-none
                 focus-visible:ring-1
-                focus-visible:ring-blue-500
+                focus-visible:ring-primary
               "
             />
           </div>
@@ -335,15 +335,15 @@ export default function EditorStatusBar() {
             className="
               p-0.5
               rounded-[2px]
-              text-slate-600
-              hover:bg-slate-200/70
-              hover:text-slate-900
+              text-secondary-foreground
+              hover:bg-secondary/70
+              hover:text-foreground
               disabled:opacity-30
               disabled:cursor-not-allowed
               transition-colors
-              dark:text-slate-400
-              dark:hover:bg-slate-800
-              dark:hover:text-slate-200
+              dark:text-muted-foreground
+              dark:hover:bg-muted
+              dark:hover:text-muted-foreground
             "
           >
             <Plus className="h-3 w-3" />

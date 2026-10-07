@@ -221,7 +221,7 @@ export function StyleModifyModal({
         flex
         items-center
         justify-center
-        bg-black/40
+        bg-foreground/40
         p-4
       "
     >

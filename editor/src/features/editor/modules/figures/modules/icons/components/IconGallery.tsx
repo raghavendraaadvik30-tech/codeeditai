@@ -40,17 +40,17 @@ export default function IconGallery({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in-0 duration-150">
-      <div className="flex flex-col w-full max-w-md rounded-2xl bg-white dark:bg-[#111D29] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-xs p-4 animate-in fade-in-0 duration-150">
+      <div className="flex flex-col w-full max-w-md rounded-2xl bg-card dark:bg-[#111D29] border border-secondary dark:border-muted shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-muted dark:border-muted">
+          <h3 className="text-sm font-bold text-foreground dark:text-muted">
             Insert Icon
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-muted-foreground hover:text-secondary-foreground dark:hover:text-muted-foreground hover:bg-muted dark:hover:bg-muted transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -74,15 +74,15 @@ export default function IconGallery({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
-          <span className="text-xs text-slate-500">
+        <div className="flex items-center justify-between px-4 py-3 bg-muted dark:bg-secondary/50 border-t border-muted dark:border-muted">
+          <span className="text-xs text-muted0">
             {selected ? `Selected: ${selected.name}` : "Select an icon to insert"}
           </span>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-secondary-foreground dark:text-muted-foreground hover:bg-secondary/60 dark:hover:bg-muted transition-colors"
             >
               Cancel
             </button>
@@ -90,7 +90,7 @@ export default function IconGallery({
               type="button"
               disabled={!selected}
               onClick={handleInsert}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0078d4] text-xs font-semibold text-white shadow-xs hover:bg-[#005a9e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0078d4] text-xs font-semibold text-primary-foreground shadow-xs hover:bg-[#005a9e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Check className="h-3.5 w-3.5" />
               <span>Insert</span>

@@ -12,7 +12,7 @@ import { TrackChangesPanel } from "../components/TrackChangesPanel";
 
 export function TrackChangesPage() {
   return (
-    <div className="flex h-full w-full flex-col select-none overflow-y-auto p-3.5 bg-white text-slate-800 dark:bg-[#0E1A29] dark:text-slate-200">
+    <div className="flex h-full w-full flex-col select-none overflow-y-auto p-3.5 bg-card text-foreground dark:bg-[#0E1A29] dark:text-muted-foreground">
       <TrackChangesPanel />
     </div>
   );

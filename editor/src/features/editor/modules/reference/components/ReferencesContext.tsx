@@ -410,8 +410,8 @@ interface ModalProps {
   onClose: () => void;
 }
 
-const MODAL_OVERLAY_CLASSES = "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200";
-const MODAL_CONTENT_CLASSES = "bg-white dark:bg-[#0E1A29] border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 text-slate-800 dark:text-slate-100 flex flex-col";
+const MODAL_OVERLAY_CLASSES = "fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200";
+const MODAL_CONTENT_CLASSES = "bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 text-foreground dark:text-muted flex flex-col";
 
 function CreateSourceDialog({ onClose }: ModalProps) {
   const refs = useReferences();
@@ -502,14 +502,14 @@ function CreateSourceDialog({ onClose }: ModalProps) {
     <div className={MODAL_OVERLAY_CLASSES}>
       <div className={MODAL_CONTENT_CLASSES}>
         {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-muted dark:border-muted">
+          <h3 className="text-sm font-bold text-foreground dark:text-primary-foreground">
             {editSource ? "Edit Source" : "Create Source"}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm transition-colors"
+            className="text-muted-foreground hover:text-secondary-foreground dark:hover:text-muted-foreground text-sm transition-colors"
           >
             ✕
           </button>
@@ -519,13 +519,13 @@ function CreateSourceDialog({ onClose }: ModalProps) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[75vh] scrollbar-thin">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                 Type of Source
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full h-9 px-2.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
+                className="w-full h-9 px-2.5 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted outline-none focus:border-primary"
               >
                 {SOURCE_TYPES.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -533,13 +533,13 @@ function CreateSourceDialog({ onClose }: ModalProps) {
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                 Language
               </label>
               <select
                 value={lang}
                 onChange={(e) => setLang(e.target.value)}
-                className="w-full h-9 px-2.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
+                className="w-full h-9 px-2.5 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted outline-none focus:border-primary"
               >
                 <option value="Default">Default</option>
                 <option value="English">English</option>
@@ -550,9 +550,9 @@ function CreateSourceDialog({ onClose }: ModalProps) {
             </div>
           </div>
 
-          <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+          <div className="border-t border-muted dark:border-muted pt-3">
             <div className="mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
                 BIBLIOGRAPHY FIELDS FOR APA
               </span>
             </div>
@@ -561,15 +561,15 @@ function CreateSourceDialog({ onClose }: ModalProps) {
               {/* Author field */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                     Author
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                  <label className="flex items-center gap-1.5 text-xs text-secondary-foreground dark:text-muted-foreground cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={isCorp}
                       onChange={(e) => setIsCorp(e.target.checked)}
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 size-3.5"
+                      className="rounded border-border text-primary focus:ring-primary size-3.5"
                     />
                     Corporate Author
                   </label>
@@ -580,7 +580,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                     value={corpAuthor}
                     onChange={(e) => setCorpAuthor(e.target.value)}
                     placeholder="e.g. Parexel International"
-                    className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500"
+                    className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted placeholder:text-muted-foreground outline-none focus:border-primary"
                     required
                   />
                 ) : (
@@ -590,7 +590,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                       value={author}
                       onChange={(e) => setAuthor(e.target.value)}
                       placeholder="Lastname, Firstname (e.g. Chen, J.)"
-                      className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500"
+                      className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted placeholder:text-muted-foreground outline-none focus:border-primary"
                       required
                     />
                     <button
@@ -599,7 +599,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                         const name = window.prompt("Enter author name (Lastname, Firstname):", author);
                         if (name !== null) setAuthor(name);
                       }}
-                      className="h-9 px-4 text-xs font-medium rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors"
+                      className="h-9 px-4 text-xs font-medium rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground transition-colors"
                     >
                       Edit
                     </button>
@@ -609,7 +609,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
 
               {/* Title field */}
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                   Title
                 </label>
                 <input
@@ -617,7 +617,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Citations and References"
-                  className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500"
+                  className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted placeholder:text-muted-foreground outline-none focus:border-primary"
                   required
                 />
               </div>
@@ -625,7 +625,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
               {/* Year, City, Publisher (3 columns) */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                     Year
                   </label>
                   <input
@@ -633,11 +633,11 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
                     placeholder="e.g. 2024"
-                    className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500"
+                    className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted placeholder:text-muted-foreground outline-none focus:border-primary"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                     City
                   </label>
                   <input
@@ -645,11 +645,11 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="e.g. New York"
-                    className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500"
+                    className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted placeholder:text-muted-foreground outline-none focus:border-primary"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                     Publisher
                   </label>
                   <input
@@ -657,7 +657,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                     value={publisher}
                     onChange={(e) => setPublisher(e.target.value)}
                     placeholder="e.g. Contoso Press"
-                    className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500"
+                    className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted placeholder:text-muted-foreground outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -669,43 +669,43 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                   id="showAll"
                   checked={showAllFields}
                   onChange={(e) => setShowAllFields(e.target.checked)}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 size-3.5"
+                  className="rounded border-border text-primary focus:ring-primary size-3.5"
                 />
-                <label htmlFor="showAll" className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                <label htmlFor="showAll" className="text-xs text-secondary-foreground dark:text-muted-foreground cursor-pointer select-none">
                   Show All Bibliography Fields
                 </label>
               </div>
 
               {showAllFields && (
-                <div className="space-y-3 p-3 bg-slate-50 dark:bg-[#111D29]/50 rounded-lg border border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-1 duration-150">
+                <div className="space-y-3 p-3 bg-muted dark:bg-[#111D29]/50 rounded-lg border border-secondary dark:border-muted animate-in slide-in-from-top-1 duration-150">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Volume</label>
+                    <label className="text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">Volume</label>
                     <input
                       type="text"
                       value={volume}
                       onChange={(e) => setVolume(e.target.value)}
                       placeholder="e.g. 2"
-                      className="w-full h-8 px-2.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
+                      className="w-full h-8 px-2.5 text-xs rounded border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted outline-none focus:border-primary"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Pages</label>
+                    <label className="text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">Pages</label>
                     <input
                       type="text"
                       value={pages}
                       onChange={(e) => setPages(e.target.value)}
                       placeholder="e.g. 12-45"
-                      className="w-full h-8 px-2.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
+                      className="w-full h-8 px-2.5 text-xs rounded border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted outline-none focus:border-primary"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Edition</label>
+                    <label className="text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">Edition</label>
                     <input
                       type="text"
                       value={edition}
                       onChange={(e) => setEdition(e.target.value)}
                       placeholder="e.g. 3rd"
-                      className="w-full h-8 px-2.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
+                      className="w-full h-8 px-2.5 text-xs rounded border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -714,9 +714,9 @@ function CreateSourceDialog({ onClose }: ModalProps) {
           </div>
 
           {/* Tag Name & Action Buttons */}
-          <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex items-end justify-between gap-4">
+          <div className="border-t border-muted dark:border-muted pt-4 flex items-end justify-between gap-4">
             <div className="space-y-1 flex-1">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                 Tag name
               </label>
               <input
@@ -724,20 +724,20 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                 value={tag}
                 onChange={(e) => setTag(e.target.value)}
                 placeholder="e.g. Chen24"
-                className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500 font-mono"
+                className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted placeholder:text-muted-foreground outline-none focus:border-primary font-mono"
               />
             </div>
             <div className="flex gap-2 self-end">
               <button
                 type="button"
                 onClick={onClose}
-                className="h-9 px-4 text-xs font-semibold rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors"
+                className="h-9 px-4 text-xs font-semibold rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="h-9 px-5 text-xs font-semibold rounded-md bg-[#0078d4] hover:bg-[#006bbd] text-white shadow-sm transition-colors"
+                className="h-9 px-5 text-xs font-semibold rounded-md bg-[#0078d4] hover:bg-[#006bbd] text-primary-foreground shadow-sm transition-colors"
               >
                 OK
               </button>
@@ -764,12 +764,12 @@ function PlaceholderDialog({ onClose }: ModalProps) {
   return (
     <div className={MODAL_OVERLAY_CLASSES}>
       <div className={`${MODAL_CONTENT_CLASSES} max-w-sm`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-white">Placeholder Name</h3>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-muted dark:border-muted">
+          <h3 className="text-sm font-bold text-foreground dark:text-primary-foreground">Placeholder Name</h3>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-secondary-foreground text-sm">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground leading-normal">
             Type the tag name of the source. You can add more information to this source later by clicking Edit in the Source Manager.
           </p>
           <div className="space-y-1.5">
@@ -777,7 +777,7 @@ function PlaceholderDialog({ onClose }: ModalProps) {
               type="text"
               value={tagName}
               onChange={(e) => setTagName(e.target.value)}
-              className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 font-medium"
+              className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted outline-none focus:border-primary font-medium"
               required
               autoFocus
             />
@@ -786,13 +786,13 @@ function PlaceholderDialog({ onClose }: ModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="h-9 px-4 text-xs font-semibold rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors"
+              className="h-9 px-4 text-xs font-semibold rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="h-9 px-4 text-xs font-semibold rounded-md bg-[#0078d4] text-white hover:bg-[#006bbd] transition-colors"
+              className="h-9 px-4 text-xs font-semibold rounded-md bg-[#0078d4] text-primary-foreground hover:bg-[#006bbd] transition-colors"
             >
               OK
             </button>
@@ -820,19 +820,19 @@ function SourceManagerDialog({ onClose }: ModalProps) {
   return (
     <div className={MODAL_OVERLAY_CLASSES}>
       <div className={`${MODAL_CONTENT_CLASSES} max-w-2xl h-[80vh]`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-white">Source Manager</h3>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-muted dark:border-muted shrink-0">
+          <h3 className="text-sm font-bold text-foreground dark:text-primary-foreground">Source Manager</h3>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-secondary-foreground text-sm">✕</button>
         </div>
         
         {/* Search Bar */}
-        <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111D29]/40 shrink-0">
+        <div className="px-6 py-3 border-b border-muted dark:border-muted bg-muted/50 dark:bg-[#111D29]/40 shrink-0">
           <input
             type="text"
             placeholder="Search sources by author, title, or tag..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 px-3 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
+            className="w-full h-9 px-3 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-foreground dark:text-muted outline-none focus:border-primary"
           />
         </div>
 
@@ -840,13 +840,13 @@ function SourceManagerDialog({ onClose }: ModalProps) {
         <div className="flex-1 overflow-hidden flex min-h-0">
           {/* Master List (All registered sources) */}
           <div className="flex-1 overflow-y-auto p-5 thin-scroll">
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-3">
+            <span className="text-[10px] font-bold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider block mb-3">
               Sources Available ({filteredSources.length})
             </span>
             
             <div className="space-y-2.5">
               {filteredSources.length === 0 ? (
-                <p className="text-xs text-slate-400 italic text-center py-8 bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed border-slate-200 dark:border-slate-800">
+                <p className="text-xs text-muted-foreground italic text-center py-8 bg-muted dark:bg-secondary rounded-lg border border-dashed border-secondary dark:border-muted">
                   No sources found.
                 </p>
               ) : (
@@ -855,13 +855,13 @@ function SourceManagerDialog({ onClose }: ModalProps) {
                   return (
                     <div
                       key={s.id}
-                      className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0E1A29] hover:border-blue-300 transition-all flex flex-col gap-1 group relative"
+                      className="p-3.5 rounded-xl border border-secondary dark:border-muted bg-card dark:bg-[#0E1A29] hover:border-blue-300 transition-all flex flex-col gap-1 group relative"
                     >
                       <div className="flex items-start justify-between gap-4">
-                        <span className="text-xs font-bold text-slate-800 dark:text-white truncate max-w-[80%]">
+                        <span className="text-xs font-bold text-foreground dark:text-primary-foreground truncate max-w-[80%]">
                           {author || "Unknown Author"}
                         </span>
-                        <span className="text-[10px] font-mono bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 px-2 py-0.5 rounded font-medium">
+                        <span className="text-[10px] font-mono bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-blue-300 px-2 py-0.5 rounded font-medium">
                           {s.tag}
                         </span>
                       </div>
@@ -870,29 +870,29 @@ function SourceManagerDialog({ onClose }: ModalProps) {
                         <span className="text-[11px] text-amber-600 dark:text-amber-400 italic font-medium">Placeholder Citation</span>
                       ) : (
                         <>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 italic">{s.title || "(Untitled)"}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          <span className="text-xs text-muted-foreground dark:text-muted-foreground line-clamp-1 italic">{s.title || "(Untitled)"}</span>
+                          <span className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-0.5">
                             {s.type} · {s.year || "n.d."} {s.publisher ? `· ${s.publisher}` : ""}
                           </span>
                         </>
                       )}
 
                       {/* Item Actions */}
-                      <div className="flex gap-3 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex gap-3 mt-2 pt-2 border-t border-muted dark:border-muted">
                         <button
                           type="button"
                           onClick={() => {
                             refs.setEditingSource(s);
                             refs.setIsOpenCreateSource(true);
                           }}
-                          className="text-[11px] font-medium text-blue-600 hover:underline"
+                          className="text-[11px] font-medium text-primary hover:underline"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => refs.deleteSource(s.id)}
-                          className="text-[11px] font-medium text-red-600 hover:underline"
+                          className="text-[11px] font-medium text-destructive hover:underline"
                         >
                           Delete
                         </button>
@@ -916,14 +916,14 @@ function SourceManagerDialog({ onClose }: ModalProps) {
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0E1A29] shrink-0 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-muted dark:border-muted bg-card dark:bg-[#0E1A29] shrink-0 flex items-center justify-between">
           <button
             type="button"
             onClick={() => {
               refs.setEditingSource(null);
               refs.setIsOpenCreateSource(true);
             }}
-            className="h-9 px-4 text-xs font-semibold bg-[#0078d4] text-white hover:bg-[#006bbd] rounded-md transition-colors shadow-sm"
+            className="h-9 px-4 text-xs font-semibold bg-[#0078d4] text-primary-foreground hover:bg-[#006bbd] rounded-md transition-colors shadow-sm"
           >
             + New Source...
           </button>
@@ -931,7 +931,7 @@ function SourceManagerDialog({ onClose }: ModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="h-9 px-4 text-xs font-semibold border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#111D29] text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors"
+            className="h-9 px-4 text-xs font-semibold border border-border dark:border-secondary-foreground bg-card dark:bg-[#111D29] text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted rounded-md transition-colors"
           >
             Close Manager
           </button>

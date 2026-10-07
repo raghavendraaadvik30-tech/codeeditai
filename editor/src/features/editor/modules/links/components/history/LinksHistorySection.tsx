@@ -57,7 +57,7 @@ export function LinksHistorySection({
       case 'Document':
         return {
           icon: FileText,
-          bg: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+          bg: 'bg-primary/10 text-primary/90 dark:bg-blue-950/60 dark:text-blue-300 border-primary/30 dark:border-primary',
         };
       case 'Cross Reference':
         return {
@@ -72,7 +72,7 @@ export function LinksHistorySection({
       default:
         return {
           icon: Globe,
-          bg: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+          bg: 'bg-muted text-secondary-foreground dark:bg-muted dark:text-muted-foreground border-secondary dark:border-secondary-foreground',
         };
     }
   };
@@ -87,15 +87,15 @@ export function LinksHistorySection({
   };
 
   return (
-    <div className="flex flex-col bg-white dark:bg-[#0B1520] border border-slate-200 dark:border-slate-800 rounded-lg shadow-xs">
+    <div className="flex flex-col bg-card dark:bg-[#0B1520] border border-secondary dark:border-muted rounded-lg shadow-xs">
       {/* Section Header */}
-      <div className="shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-[#111D29]/70">
+      <div className="shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-secondary dark:border-muted bg-muted/70 dark:bg-[#111D29]/70">
         <div className="flex items-center gap-2">
-          <History className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
-          <h3 className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+          <History className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />
+          <h3 className="text-[11px] font-bold text-foreground dark:text-muted-foreground uppercase tracking-wider">
             LINKS HISTORY
           </h3>
-          <span className="rounded-full bg-slate-200 dark:bg-slate-700 px-1.5 py-[0.8px] text-[9px] font-bold text-slate-700 dark:text-slate-300">
+          <span className="rounded-full bg-secondary dark:bg-secondary-foreground px-1.5 py-[0.8px] text-[9px] font-bold text-secondary-foreground dark:text-muted-foreground">
             {history.length}
           </span>
         </div>
@@ -106,7 +106,7 @@ export function LinksHistorySection({
               type="button"
               onClick={onRefresh}
               title="Refresh history (sync with active document links and remove deleted links)"
-              className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition cursor-pointer"
+              className="flex items-center gap-1 text-[10px] text-primary hover:text-primary dark:text-primary dark:hover:text-blue-300 font-semibold transition cursor-pointer"
             >
               <RefreshCw className={cn("h-3 w-3 shrink-0", isRefreshing && "animate-spin")} />
               <span>Refresh</span>
@@ -117,7 +117,7 @@ export function LinksHistorySection({
             <button
               type="button"
               onClick={onClearHistory}
-              className="text-[10px] text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 font-medium transition cursor-pointer"
+              className="text-[10px] text-muted-foreground hover:text-destructive dark:text-muted-foreground dark:hover:text-rose-400 font-medium transition cursor-pointer"
             >
               Clear History
             </button>
@@ -126,13 +126,13 @@ export function LinksHistorySection({
       </div>
 
       {/* History Items Table/List */}
-      <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+      <div className="divide-y divide-muted dark:divide-muted/60">
         {history.length === 0 ? (
           <div className="py-4 px-3 text-center">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               No links or references recorded in history yet.
             </p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+            <p className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-0.5">
               Insert a Web URL, Email, Document reference, or Cross Reference to view history here.
             </p>
           </div>
@@ -143,7 +143,7 @@ export function LinksHistorySection({
             return (
               <div
                 key={item.id}
-                className="flex items-center justify-between px-3 py-2 text-xs hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition group"
+                className="flex items-center justify-between px-3 py-2 text-xs hover:bg-muted/80 dark:hover:bg-muted/40 transition group"
               >
                 {/* Left metadata */}
                 <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-3">
@@ -158,10 +158,10 @@ export function LinksHistorySection({
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                    <p className="font-semibold text-foreground dark:text-muted-foreground truncate">
                       {item.displayText}
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5 truncate">
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5 truncate">
                       <span className="truncate max-w-[200px]" title={item.target}>
                         {item.target}
                       </span>
@@ -171,7 +171,7 @@ export function LinksHistorySection({
                         {formatTime(item.createdAt)}
                       </span>
                       <span>•</span>
-                      <span className="flex items-center gap-0.5 shrink-0 text-slate-500 dark:text-slate-400">
+                      <span className="flex items-center gap-0.5 shrink-0 text-muted-foreground dark:text-muted-foreground">
                         <User className="h-2.5 w-2.5" />
                         {item.createdBy}
                       </span>
@@ -184,7 +184,7 @@ export function LinksHistorySection({
                   <button
                     type="button"
                     onClick={() => onExecuteAction(item)}
-                    className="px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/80 text-[11px] font-semibold flex items-center gap-1 transition shadow-2xs"
+                    className="px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/15 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/80 text-[11px] font-semibold flex items-center gap-1 transition shadow-2xs"
                     title="Insert link into document sheet"
                   >
                     <Plus className="h-3 w-3" />
@@ -194,7 +194,7 @@ export function LinksHistorySection({
                   <button
                     type="button"
                     onClick={() => onRemoveItem(item.id)}
-                    className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition"
+                    className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition"
                     title="Remove from history"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

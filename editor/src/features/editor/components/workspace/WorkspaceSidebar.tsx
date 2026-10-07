@@ -77,9 +77,9 @@ export default function WorkspaceSidebar() {
               shrink-0
               overflow-hidden
               border-r
-              border-slate-200
-              bg-white
-              dark:border-slate-800
+              border-secondary
+              bg-card
+              dark:border-muted
               dark:bg-[#07131E]
             "
           >

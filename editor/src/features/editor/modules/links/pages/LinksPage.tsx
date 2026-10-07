@@ -151,11 +151,11 @@ function LinksPageContent() {
   ];
 
   return (
-    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-[#F8FAFC] dark:bg-[#07131E] text-slate-800 dark:text-slate-100">
+    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-[#F8FAFC] dark:bg-[#07131E] text-foreground dark:text-muted">
       {/* Top Fixed Area (Tabs + Form + Controls) - Fits neatly without scrollbar */}
       <div className="shrink-0 p-2.5 space-y-2">
         {/* Main Selectable Tabs (Side-by-Side: 1. INTERNAL REFERENCE | 2. CROSS REFERENCES) */}
-        <div className="flex gap-1 p-0.5 rounded-lg bg-slate-200/80 dark:bg-[#111D29] border border-slate-200 dark:border-slate-800">
+        <div className="flex gap-1 p-0.5 rounded-lg bg-secondary/80 dark:bg-[#111D29] border border-secondary dark:border-muted">
           {mainTabs.map((tab) => {
             const isActive = activeMainTab === tab.id;
             return (
@@ -166,8 +166,8 @@ function LinksPageContent() {
                 className={cn(
                   'flex-1 flex items-center justify-center gap-0.5 py-1 px-0.5 rounded-md text-[10px] font-bold tracking-tight transition-all select-none whitespace-nowrap',
                   isActive
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-300/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-secondary-foreground hover:text-foreground hover:bg-secondary/50 dark:text-muted-foreground dark:hover:text-primary-foreground dark:hover:bg-muted/60'
                 )}
               >
                 <span>{tab.number}.</span>
@@ -199,13 +199,13 @@ function LinksPageContent() {
               'flex items-center gap-1.5 p-1.5 rounded-md border text-[11px] font-medium transition-all',
               feedbackMsg.type === 'success'
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300'
-                : 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300'
+                : 'bg-destructive/10 border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300'
             )}
           >
             {feedbackMsg.type === 'success' ? (
               <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive dark:text-rose-400" />
             )}
             <span>{feedbackMsg.text}</span>
           </div>
@@ -217,9 +217,9 @@ function LinksPageContent() {
           <button
             type="button"
             onClick={handleConvertBareLinks}
-            className="w-full h-7.5 flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-200 dark:hover:bg-slate-800"
+            className="w-full h-7.5 flex items-center justify-center gap-1.5 rounded-md border border-secondary bg-card text-secondary-foreground text-xs font-semibold hover:bg-muted hover:text-foreground transition shadow-2xs dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted"
           >
-            <LinkIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+            <LinkIcon className="h-3.5 w-3.5 text-primary dark:text-primary" />
             <span>BARE LINKS (Convert Raw URLs)</span>
           </button>
         </div>

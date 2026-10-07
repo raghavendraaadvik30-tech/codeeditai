@@ -1387,23 +1387,23 @@ export function TableControlsOverlay({
             left: `${pos.left + 28}px`,
           }}
         >
-          <div className="flex items-center gap-0.5 rounded-md border border-slate-200/90 bg-white/95 px-1 py-0.5 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-[#0b1623]/95">
+          <div className="flex items-center gap-0.5 rounded-md border border-secondary/90 bg-card/95 px-1 py-0.5 shadow-sm backdrop-blur-sm dark:border-muted dark:bg-[#0b1623]/95">
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleAutoFitToWindow}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted transition-colors"
               title="AutoFit Table to Page Margins (100%)"
             >
-              <Maximize2 className="h-3 w-3 text-blue-500" />
+              <Maximize2 className="h-3 w-3 text-primary/100" />
               <span>Fit Page</span>
             </button>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <span className="text-muted-foreground dark:text-secondary-foreground">|</span>
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleAutoFitToContent}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted transition-colors"
               title="AutoFit Table to Content Snugly"
             >
               <Minimize2 className="h-3 w-3 text-amber-500" />
@@ -1423,8 +1423,8 @@ export function TableControlsOverlay({
         title="Click and drag to move table across blocks or pages"
         className={`absolute z-30 flex h-6 w-6 -translate-x-3 -translate-y-3 cursor-move items-center justify-center rounded-md border shadow-md select-none transition-transform hover:scale-110 active:scale-95 print:hidden ${
           isDragging
-            ? "bg-[#0078d4] text-white border-[#0078d4] ring-2 ring-blue-300"
-            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            ? "bg-[#0078d4] text-primary-foreground border-[#0078d4] ring-2 ring-blue-300"
+            : "border-border bg-card text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
         }`}
         style={{
           top: `${pos.top}px`,
@@ -1451,7 +1451,7 @@ export function TableControlsOverlay({
           }}
         >
           <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-[#0078d4]/80" />
-          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-slate-900" />
+          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
 
@@ -1483,7 +1483,7 @@ export function TableControlsOverlay({
             />
             {/* Top guide indicator pill */}
             <div
-              className={`absolute top-0 h-3 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm transition-opacity dark:border-slate-900 ${
+              className={`absolute top-0 h-3 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm transition-opacity dark:border-secondary ${
                 activeColIndex === col.colIndex ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             />
@@ -1507,7 +1507,7 @@ export function TableControlsOverlay({
           }}
         >
           <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-[#0078d4]/80" />
-          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-slate-900" />
+          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
 
@@ -1539,7 +1539,7 @@ export function TableControlsOverlay({
             />
             {/* Left guide indicator pill */}
             <div
-              className={`absolute left-0 h-2 w-3 rounded-full border border-white bg-[#0078d4] shadow-sm transition-opacity dark:border-slate-900 ${
+              className={`absolute left-0 h-2 w-3 rounded-full border border-white bg-[#0078d4] shadow-sm transition-opacity dark:border-secondary ${
                 activeRowIndex === row.rowIndex ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             />
@@ -1554,8 +1554,8 @@ export function TableControlsOverlay({
           contentEditable={false}
           onPointerDown={handleResizePointerDown}
           title="Drag to resize table (both width & height, small & large)"
-          className={`absolute z-30 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize rounded-sm border-2 border-white bg-[#0078d4] shadow-md select-none transition-transform hover:scale-125 print:hidden dark:border-slate-900 ${
-            isResizing ? "scale-125 bg-blue-600 ring-2 ring-blue-300" : ""
+          className={`absolute z-30 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize rounded-sm border-2 border-white bg-[#0078d4] shadow-md select-none transition-transform hover:scale-125 print:hidden dark:border-secondary ${
+            isResizing ? "scale-125 bg-primary ring-2 ring-blue-300" : ""
           }`}
           style={{
             top: `${pos.top + pos.height}px`,
@@ -1568,7 +1568,7 @@ export function TableControlsOverlay({
       {isResizing && resizeDimensions && (
         <div
           data-editor-ui="true"
-          className="absolute z-30 -translate-x-1/2 rounded bg-slate-900/90 px-2 py-1 text-[10px] font-semibold text-white shadow-md backdrop-blur-sm print:hidden dark:bg-slate-100 dark:text-slate-900"
+          className="absolute z-30 -translate-x-1/2 rounded bg-foreground/90 px-2 py-1 text-[10px] font-semibold text-primary-foreground shadow-md backdrop-blur-sm print:hidden dark:bg-muted dark:text-secondary"
           style={{
             top: `${pos.top + pos.height + 8}px`,
             left: `${pos.left + pos.width}px`,
@@ -1582,7 +1582,7 @@ export function TableControlsOverlay({
       {isDragging && dragPreview && createPortal(
         <div
           data-editor-ui="true"
-          className="fixed pointer-events-none z-[9999] rounded-md border-2 border-[#0078d4] bg-white/90 p-2 shadow-2xl backdrop-blur-sm print:hidden"
+          className="fixed pointer-events-none z-[9999] rounded-md border-2 border-[#0078d4] bg-card/90 p-2 shadow-2xl backdrop-blur-sm print:hidden"
           style={{
             left: `${dragPreview.x}px`,
             top: `${dragPreview.y}px`,
@@ -1609,7 +1609,7 @@ export function TableControlsOverlay({
       {isDragging && dropIndicator && createPortal(
         <div
           data-editor-ui="true"
-          className="fixed pointer-events-none z-[9998] h-1.5 rounded-full bg-[#0078d4] shadow-lg ring-2 ring-blue-400/50 print:hidden"
+          className="fixed pointer-events-none z-[9998] h-1.5 rounded-full bg-[#0078d4] shadow-lg ring-2 ring-primary/50 print:hidden"
           style={{
             top: `${dropIndicator.top}px`,
             left: `${dropIndicator.left}px`,

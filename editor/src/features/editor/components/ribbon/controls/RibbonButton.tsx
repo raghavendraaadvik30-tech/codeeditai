@@ -58,8 +58,8 @@ export default function RibbonButton({
         text-xs
         font-medium
         transition-colors
-        hover:bg-slate-100
-        active:bg-slate-200
+        hover:bg-muted
+        active:bg-secondary
         disabled:opacity-50
         disabled:pointer-events-none
         ${className}

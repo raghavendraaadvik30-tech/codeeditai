@@ -48,11 +48,11 @@ export default function WorkspacePanelHeader({
         justify-between
         gap-3
         border-b
-        border-slate-200
-        bg-white
+        border-secondary
+        bg-card
         px-4
         py-3
-        dark:border-slate-800
+        dark:border-muted
         dark:bg-[#07131E]
       "
     >
@@ -68,10 +68,10 @@ export default function WorkspacePanelHeader({
             items-center
             justify-center
             rounded-lg
-            bg-blue-50
-            text-blue-600
+            bg-primary/10
+            text-primary
             dark:bg-blue-950/50
-            dark:text-blue-400
+            dark:text-primary
           "
         >
           <Icon className="h-5 w-5" />
@@ -85,8 +85,8 @@ export default function WorkspacePanelHeader({
               truncate
               text-sm
               font-semibold
-              text-slate-900
-              dark:text-white
+              text-foreground
+              dark:text-primary-foreground
             "
           >
             {module.label}
@@ -96,8 +96,8 @@ export default function WorkspacePanelHeader({
             className="
               truncate
               text-xs
-              text-slate-500
-              dark:text-slate-400
+              text-muted-foreground
+              dark:text-muted-foreground
             "
           >
             {module.description}
@@ -120,12 +120,12 @@ export default function WorkspacePanelHeader({
           items-center
           justify-center
           rounded-md
-          text-slate-500
+          text-muted-foreground
           transition-colors
-          hover:bg-slate-100
-          hover:text-slate-900
-          dark:hover:bg-slate-800
-          dark:hover:text-white
+          hover:bg-muted
+          hover:text-foreground
+          dark:hover:bg-muted
+          dark:hover:text-primary-foreground
         "
       >
         <X className="h-4 w-4" />

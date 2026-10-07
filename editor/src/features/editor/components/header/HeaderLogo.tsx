@@ -26,8 +26,8 @@ export default function HeaderLogo() {
           items-center
           justify-center
           rounded-xl
-          bg-blue-600
-          text-white
+          bg-primary
+          text-primary-foreground
           shadow-sm
         "
       >
@@ -41,7 +41,7 @@ export default function HeaderLogo() {
             text-[17px]
             font-semibold
             text-gray-900
-            dark:text-white"
+            dark:text-primary-foreground"
         >
           Document Editor
         </h1>
@@ -50,7 +50,7 @@ export default function HeaderLogo() {
           className="
             text-xs
             text-gray-500
-            dark:text-slate-400
+            dark:text-muted-foreground
           "
         >
         

@@ -110,7 +110,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
     }
 
     const label = displayText.trim() || doc.name;
-    const html = `<a href="#doc_${doc.id}" data-doc-id="${doc.id}" data-link-type="document" class="document-reference-link text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer" title="Open Document: ${doc.name}">📄 ${label}</a>`;
+    const html = `<a href="#doc_${doc.id}" data-doc-id="${doc.id}" data-link-type="document" class="document-reference-link text-primary hover:text-primary underline font-medium cursor-pointer" title="Open Document: ${doc.name}">📄 ${label}</a>`;
 
     editor.focus();
     document.execCommand('insertHTML', false, html);
@@ -132,11 +132,11 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
     <div className="space-y-3 pt-1">
       {/* Select Document */}
       <div>
-        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+        <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
           Select Document
         </label>
         {documents.length === 0 ? (
-          <div className="p-3 text-center text-xs text-slate-400 bg-slate-50 dark:bg-[#111D29] rounded-md border border-slate-200 dark:border-slate-800">
+          <div className="p-3 text-center text-xs text-muted-foreground bg-muted dark:bg-[#111D29] rounded-md border border-secondary dark:border-muted">
             No documents available in repository.
           </div>
         ) : (
@@ -144,7 +144,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
             <select
               value={selectedDocId}
               onChange={(e) => handleDocChange(e.target.value)}
-              className="w-full h-8 px-2 text-xs rounded-md border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
+              className="w-full h-8 px-2 text-xs rounded-md border border-secondary bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
             >
               {documents.map((doc) => (
                 <option key={doc.id} value={doc.id}>
@@ -158,7 +158,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
 
       {/* Link Text */}
       <div>
-        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+        <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
           Link Text
         </label>
         <input
@@ -166,19 +166,19 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
           value={displayText}
           onChange={(e) => setDisplayText(e.target.value)}
           placeholder="Display text in document"
-          className="w-full h-8 px-2.5 text-xs rounded-md border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
+          className="w-full h-8 px-2.5 text-xs rounded-md border border-secondary bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
         />
       </div>
 
       {/* Document Info Pill */}
       {selectedDoc && (
-        <div className="flex items-center gap-2 p-2 rounded-md bg-slate-50 border border-slate-200 dark:bg-[#111D29] dark:border-slate-700">
-          <FileText className="h-4 w-4 text-blue-600 shrink-0" />
+        <div className="flex items-center gap-2 p-2 rounded-md bg-muted border border-secondary dark:bg-[#111D29] dark:border-secondary-foreground">
+          <FileText className="h-4 w-4 text-primary shrink-0" />
           <div className="min-w-0 text-[11px]">
-            <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+            <p className="font-semibold text-foreground dark:text-muted-foreground truncate">
               {selectedDoc.name}
             </p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[10px] text-muted-foreground">
               Updated: {selectedDoc.updatedAt}
             </p>
           </div>
@@ -187,7 +187,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
 
       {/* Feedback Messages */}
       {error && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
+        <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-rose-200 text-destructive text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -206,7 +206,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
         disabled={documents.length === 0}
         onMouseDown={(e) => e.preventDefault()}
         onClick={handleInsert}
-        className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-[0.99]"
+        className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-[0.99]"
       >
         <span>Insert Document Reference</span>
         <ArrowRight className="h-3.5 w-3.5" />

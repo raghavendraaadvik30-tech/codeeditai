@@ -47,9 +47,9 @@ export function InternalRefColumn({
   ];
 
   return (
-    <div className="flex flex-col bg-white dark:bg-[#0B1520] border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 shadow-xs">
+    <div className="flex flex-col bg-card dark:bg-[#0B1520] border border-secondary dark:border-muted rounded-lg p-2.5 shadow-xs">
       {/* Sub-Tabs Selector */}
-      <div className="flex gap-1 p-0.5 mb-2 rounded-md bg-slate-100 dark:bg-[#111D29]">
+      <div className="flex gap-1 p-0.5 mb-2 rounded-md bg-muted dark:bg-[#111D29]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.id;
@@ -61,8 +61,8 @@ export function InternalRefColumn({
               className={cn(
                 'flex-1 flex items-center justify-center gap-1.5 py-1 rounded text-[11px] font-semibold transition-all select-none',
                 isActive
-                  ? 'bg-white text-blue-600 shadow-xs dark:bg-[#1B2A3A] dark:text-blue-400'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'bg-card text-primary shadow-xs dark:bg-[#1B2A3A] dark:text-primary'
+                  : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground'
               )}
             >
               <Icon className="h-3.5 w-3.5" />

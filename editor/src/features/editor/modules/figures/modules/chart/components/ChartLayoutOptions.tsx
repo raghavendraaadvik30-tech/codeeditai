@@ -181,7 +181,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
         left: pos ? `${pos.left}px` : '0px',
         visibility: pos ? 'visible' : 'hidden',
       }}
-      className="fixed w-[230px] bg-[#242424] border border-[#444444] rounded-xs shadow-2xl p-3 z-50 text-white font-sans select-none animate-in fade-in zoom-in-95 duration-100"
+      className="fixed w-[230px] bg-[#242424] border border-[#444444] rounded-xs shadow-2xl p-3 z-50 text-primary-foreground font-sans select-none animate-in fade-in zoom-in-95 duration-100"
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
@@ -219,7 +219,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="text-slate-400 hover:text-white p-0.5 rounded transition-colors"
+          className="text-muted-foreground hover:text-primary-foreground p-0.5 rounded transition-colors"
           title="Close"
         >
           <X className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
 
       {/* Section 1: In Line with Text */}
       <div className="mt-2.5">
-        <p className="text-[11px] font-bold text-white mb-1.5">
+        <p className="text-[11px] font-bold text-primary-foreground mb-1.5">
           In Line with Text
         </p>
         <button
@@ -236,7 +236,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           onClick={() => handleSelectWrap('inline')}
           className={`p-1 rounded-xs border transition-all ${selectedWrap === 'inline'
             ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-            : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+            : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
             }`}
           title="In Line with Text"
         >
@@ -254,7 +254,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
 
       {/* Section 2: With Text Wrapping */}
       <div className="mt-3">
-        <p className="text-[11px] font-bold text-white mb-1.5">
+        <p className="text-[11px] font-bold text-primary-foreground mb-1.5">
           With Text Wrapping
         </p>
         <div className="grid grid-cols-3 gap-1.5">
@@ -264,7 +264,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             onClick={() => handleSelectWrap('topBottom')}
             className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'topBottom'
               ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-              : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+              : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
               }`}
             title="Top and Bottom"
           >
@@ -281,7 +281,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             onClick={() => handleSelectWrap('behind')}
             className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'behind'
               ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-              : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+              : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
               }`}
             title="Behind Text"
           >
@@ -302,7 +302,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             onClick={() => handleSelectWrap('inFront')}
             className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'inFront'
               ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
-              : 'border-[#555555] hover:border-slate-300 bg-[#1e1e1e]'
+              : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
               }`}
             title="In Front of Text"
           >
@@ -320,19 +320,19 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
       </div>
 
       {/* Section 3: Radio Options */}
-      <div className="mt-3.5 space-y-2 text-[11px] text-slate-300">
+      <div className="mt-3.5 space-y-2 text-[11px] text-muted-foreground">
         <label className="flex items-center gap-2 cursor-pointer group">
           <input
             type="radio"
             name={`layout-pos-${chart.id}`}
             checked={positionMode === 'moveWithText'}
             onChange={() => handleSelectPositionMode('moveWithText')}
-            className="accent-blue-500 w-3 h-3 cursor-pointer"
+            className="accent-primary/100 w-3 h-3 cursor-pointer"
           />
-          <span className="group-hover:text-white flex-1">
+          <span className="group-hover:text-primary-foreground flex-1">
             <span className="underline">M</span>ove with text
           </span>
-          <span className="text-[10px] text-slate-400 border border-slate-600 rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
+          <span className="text-[10px] text-muted-foreground border border-secondary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
             i
           </span>
         </label>
@@ -342,12 +342,12 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             name={`layout-pos-${chart.id}`}
             checked={positionMode === 'fixPosition'}
             onChange={() => handleSelectPositionMode('fixPosition')}
-            className="accent-blue-500 w-3 h-3 cursor-pointer"
+            className="accent-primary/100 w-3 h-3 cursor-pointer"
           />
-          <span className="group-hover:text-white flex-1">
+          <span className="group-hover:text-primary-foreground flex-1">
             Fix positio<span className="underline">n</span> on page
           </span>
-          <span className="text-[10px] text-slate-400 border border-slate-600 rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
+          <span className="text-[10px] text-muted-foreground border border-secondary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
             i
           </span>
         </label>

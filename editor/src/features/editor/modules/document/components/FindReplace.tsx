@@ -239,9 +239,9 @@ export function FindReplace() {
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-[#111D29] shadow-2xs">
+    <div className="rounded-lg border border-secondary bg-card p-3 dark:border-muted dark:bg-[#111D29] shadow-2xs">
       {/* Header Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2 dark:border-slate-800">
+      <div className="flex items-center justify-between border-b border-muted pb-2 mb-2 dark:border-muted">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -252,8 +252,8 @@ export function FindReplace() {
             className={cn(
               "px-3 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
               navTab === "find"
-                ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-blue-50/50 dark:bg-blue-950/40 dark:text-blue-400"
-                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-blue-950/40 dark:text-primary"
+                : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
             )}
           >
             Find
@@ -267,8 +267,8 @@ export function FindReplace() {
             className={cn(
               "px-3 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
               navTab === "replace"
-                ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-blue-50/50 dark:bg-blue-950/40 dark:text-blue-400"
-                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-blue-950/40 dark:text-primary"
+                : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
             )}
           >
             Replace
@@ -278,7 +278,7 @@ export function FindReplace() {
 
       <div className="space-y-2 text-xs">
         <div>
-          <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
+          <label className="block text-[11px] font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
             Find what:
           </label>
           <input
@@ -299,13 +299,13 @@ export function FindReplace() {
               }
             }}
             placeholder="Find text..."
-            className="w-full rounded border border-slate-200 bg-slate-50 px-2 py-1.5 outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="w-full rounded border border-secondary bg-muted px-2 py-1.5 outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
           />
         </div>
 
         {navTab === "replace" && (
           <div>
-            <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
+            <label className="block text-[11px] font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
               Replace with:
             </label>
             <input
@@ -319,19 +319,19 @@ export function FindReplace() {
                 }
               }}
               placeholder="Replace with..."
-              className="w-full rounded border border-slate-200 bg-slate-50 px-2 py-1.5 outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="w-full rounded border border-secondary bg-muted px-2 py-1.5 outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
         )}
 
         {searchStatus && (
-          <div className="text-[11px] text-blue-600 dark:text-blue-400 italic">
+          <div className="text-[11px] text-primary dark:text-primary italic">
             {searchStatus}
           </div>
         )}
 
         {navTab === "replace" ? (
-          <div className="grid grid-cols-4 gap-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+          <div className="grid grid-cols-4 gap-1.5 pt-1.5 border-t border-muted dark:border-muted">
             <button
               type="button"
               onClick={handleReplace}
@@ -339,8 +339,8 @@ export function FindReplace() {
               className={cn(
                 "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none",
                 !findText.trim()
-                  ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
-                  : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                  ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                  : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
               )}
             >
               Replace
@@ -352,8 +352,8 @@ export function FindReplace() {
               className={cn(
                 "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
                 !findText.trim()
-                  ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
-                  : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                  ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                  : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
               )}
             >
               Replace All
@@ -365,8 +365,8 @@ export function FindReplace() {
               className={cn(
                 "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
                 !findText.trim()
-                  ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
-                  : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                  ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                  : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
               )}
             >
               Find Next
@@ -374,13 +374,13 @@ export function FindReplace() {
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded-[3px] border border-blue-400/80 bg-white py-1 px-1 text-center text-[11px] font-medium text-slate-900 shadow-2xs hover:bg-slate-50 hover:border-blue-500 active:bg-slate-100 dark:border-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 cursor-pointer select-none"
+              className="rounded-[3px] border border-primary/80 bg-card py-1 px-1 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
             >
               Cancel
             </button>
           </div>
         ) : (
-          <div className="flex gap-2 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex gap-2 pt-1.5 border-t border-muted dark:border-muted">
             <button
               type="button"
               onClick={handleFindNext}
@@ -388,8 +388,8 @@ export function FindReplace() {
               className={cn(
                 "flex-1 rounded-[3px] border py-1 text-center text-[11px] font-normal transition-colors select-none",
                 !findText.trim()
-                  ? "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
-                  : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+                  ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                  : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
               )}
             >
               Find Next
@@ -397,7 +397,7 @@ export function FindReplace() {
             <button
               type="button"
               onClick={handleCancel}
-              className="flex-1 rounded-[3px] border border-blue-400/80 bg-white py-1 text-center text-[11px] font-medium text-slate-900 shadow-2xs hover:bg-slate-50 hover:border-blue-500 active:bg-slate-100 dark:border-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 cursor-pointer select-none"
+              className="flex-1 rounded-[3px] border border-primary/80 bg-card py-1 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
             >
               Cancel
             </button>

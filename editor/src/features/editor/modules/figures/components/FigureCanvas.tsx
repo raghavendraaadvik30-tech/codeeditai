@@ -35,7 +35,7 @@ export const FigureCanvas: React.FC<FigureCanvasProps> = ({
       onClick={onSelect}
       className={cn(
         'group relative my-4 w-full cursor-pointer rounded-xl p-4 transition-all duration-200',
-        isSelected ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50',
+        isSelected ? 'ring-2 ring-primary/100 ring-offset-2 dark:ring-offset-secondary' : 'hover:bg-muted dark:hover:bg-muted/50',
         alignmentClass
       )}
     >
@@ -60,7 +60,7 @@ export const FigureCanvas: React.FC<FigureCanvasProps> = ({
       </div>
 
       {figure.caption && (
-        <figcaption className="mt-3 max-w-lg text-xs font-medium italic text-slate-600 dark:text-slate-400">
+        <figcaption className="mt-3 max-w-lg text-xs font-medium italic text-secondary-foreground dark:text-muted-foreground">
           {figure.caption}
         </figcaption>
       )}

@@ -204,7 +204,7 @@ export default function InsertTab() {
   };
 
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 text-slate-700 dark:text-slate-200">
+    <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 text-secondary-foreground dark:text-muted-foreground">
       {/* ------------------------------------------------------------------
           1. PAGES GROUP
           ------------------------------------------------------------------ */}
@@ -216,7 +216,7 @@ export default function InsertTab() {
       </RibbonButton>
 
       <RibbonButton
-        icon={<Trash2 className="h-4 w-4 text-rose-600 dark:text-rose-400" />}
+        icon={<Trash2 className="h-4 w-4 text-destructive dark:text-rose-400" />}
         onClick={handleDeletePage}
         disabled={model.pages.length <= 1}
       >
@@ -232,12 +232,12 @@ export default function InsertTab() {
         <DropdownMenuTrigger render={<button
             type="button"
             onMouseDown={saveSelection}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 text-slate-700 dark:text-slate-200 cursor-pointer"
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted active:bg-secondary text-secondary-foreground dark:text-muted-foreground cursor-pointer"
             title="Page Number"
           >
             <Hash className="h-4 w-4 text-sky-600 dark:text-sky-400" />
             <span>Page Number</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
           </button>} />
         <DropdownMenuContent align="start" className="w-56 text-xs p-1">
           {/* 1. Top of Page Submenu */}
@@ -252,7 +252,7 @@ export default function InsertTab() {
               >
                 <span>Left</span>
                 {isTopActive("left") && (
-                  <Check className="h-3.5 w-3.5 text-blue-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -261,7 +261,7 @@ export default function InsertTab() {
               >
                 <span>Center</span>
                 {isTopActive("center") && (
-                  <Check className="h-3.5 w-3.5 text-blue-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -270,7 +270,7 @@ export default function InsertTab() {
               >
                 <span>Right</span>
                 {isTopActive("right") && (
-                  <Check className="h-3.5 w-3.5 text-blue-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                 )}
               </DropdownMenuItem>
             </DropdownMenuSubContent>
@@ -288,7 +288,7 @@ export default function InsertTab() {
               >
                 <span>Left</span>
                 {isBottomActive("left") && (
-                  <Check className="h-3.5 w-3.5 text-blue-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -297,7 +297,7 @@ export default function InsertTab() {
               >
                 <span>Center</span>
                 {isBottomActive("center") && (
-                  <Check className="h-3.5 w-3.5 text-blue-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -306,7 +306,7 @@ export default function InsertTab() {
               >
                 <span>Right</span>
                 {isBottomActive("right") && (
-                  <Check className="h-3.5 w-3.5 text-blue-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                 )}
               </DropdownMenuItem>
             </DropdownMenuSubContent>
@@ -344,7 +344,7 @@ export default function InsertTab() {
           {/* 4. Format Page Numbers */}
           <DropdownMenuItem
             onClick={handleOpenFormatModal}
-            className="cursor-pointer text-blue-600 font-medium"
+            className="cursor-pointer text-primary font-medium"
           >
             Format Page Numbers...
           </DropdownMenuItem>
@@ -352,7 +352,7 @@ export default function InsertTab() {
           {/* 5. Remove Page Numbers */}
           <DropdownMenuItem
             onClick={handleRemovePageNumbers}
-            className="cursor-pointer text-red-600"
+            className="cursor-pointer text-destructive"
           >
             Remove Page Numbers
           </DropdownMenuItem>
@@ -363,7 +363,7 @@ export default function InsertTab() {
           PAGE NUMBER FORMAT MODAL DIALOG
           ------------------------------------------------------------------ */}
       <Dialog open={formatModalOpen} onOpenChange={setFormatModalOpen}>
-        <DialogContent className="max-w-xs bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
+        <DialogContent className="max-w-xs bg-card text-foreground dark:bg-secondary dark:text-muted">
           <DialogHeader>
             <DialogTitle className="text-sm font-semibold">
               Page Number Format
@@ -381,7 +381,7 @@ export default function InsertTab() {
                 onChange={(e) =>
                   setSelectedFormat(e.target.value as "1" | "a" | "A" | "i" | "I")
                 }
-                className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                className="w-full h-8 px-2 rounded border border-border dark:border-secondary-foreground bg-card dark:bg-secondary text-xs"
               >
                 <option value="1">1, 2, 3, ...</option>
                 <option value="a">a, b, c, ...</option>
@@ -392,7 +392,7 @@ export default function InsertTab() {
             </div>
 
             {/* Page Numbering Mode */}
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+            <div className="border-t border-muted dark:border-muted pt-3">
               <Label className="text-xs font-semibold mb-2 block">
                 Page numbering:
               </Label>
@@ -403,7 +403,7 @@ export default function InsertTab() {
                     name="pageNumberingOption"
                     checked={numberingOption === "continue"}
                     onChange={() => setNumberingOption("continue")}
-                    className="text-blue-600"
+                    className="text-primary"
                   />
                   <span>Continue from previous section</span>
                 </label>
@@ -413,7 +413,7 @@ export default function InsertTab() {
                     name="pageNumberingOption"
                     checked={numberingOption === "startAt"}
                     onChange={() => setNumberingOption("startAt")}
-                    className="text-blue-600"
+                    className="text-primary"
                   />
                   <span>Start at:</span>
                   <input
@@ -424,7 +424,7 @@ export default function InsertTab() {
                       setStartAtValue(Math.max(1, parseInt(e.target.value, 10) || 1))
                     }
                     disabled={numberingOption !== "startAt"}
-                    className="w-16 h-7 px-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 disabled:opacity-50"
+                    className="w-16 h-7 px-1.5 text-xs rounded border border-border dark:border-secondary-foreground disabled:opacity-50"
                   />
                 </label>
               </div>

@@ -112,10 +112,10 @@ export default function IconSidebar() {
         flex-col
         items-center
         border-r
-        border-slate-200
-        bg-white
+        border-secondary
+        bg-card
         py-3
-        dark:border-slate-800
+        dark:border-muted
         dark:bg-[#07131E]
       "
     >
@@ -145,8 +145,8 @@ export default function IconSidebar() {
                   duration-150
                   ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-primary-foreground"
                   }
                 `}
               >
@@ -161,7 +161,7 @@ export default function IconSidebar() {
                       bottom-1
                       w-[3px]
                       rounded-r-full
-                      bg-blue-600
+                      bg-primary
                     "
                   />
                 )}
@@ -182,8 +182,8 @@ export default function IconSidebar() {
                   translate-x-1
                   rounded-xl
                   border
-                  border-slate-200
-                  bg-white
+                  border-secondary
+                  bg-card
                   px-4
                   py-2.5
                   opacity-0
@@ -192,7 +192,7 @@ export default function IconSidebar() {
                   duration-150
                   group-hover:translate-x-0
                   group-hover:opacity-100
-                  dark:border-slate-700
+                  dark:border-secondary-foreground
                   dark:bg-[#111D29]
                 "
               >
@@ -201,8 +201,8 @@ export default function IconSidebar() {
                     text-sm
                     font-semibold
                     leading-5
-                    text-slate-900
-                    dark:text-white
+                    text-foreground
+                    dark:text-primary-foreground
                   "
                 >
                   {item.label}
@@ -213,8 +213,8 @@ export default function IconSidebar() {
                     mt-0.5
                     text-xs
                     leading-4
-                    text-slate-500
-                    dark:text-slate-400
+                    text-muted-foreground
+                    dark:text-muted-foreground
                   "
                 >
                   {item.description}

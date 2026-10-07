@@ -92,7 +92,7 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
     null, // Separator
     {
       label: 'Delete',
-      icon: <Trash2 className="w-4 h-4 text-red-500" />,
+      icon: <Trash2 className="w-4 h-4 text-destructive/100" />,
       action: () => {
         onDelete();
         onClose();
@@ -104,7 +104,7 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
   return ReactDOM.createPortal(
     <div
       ref={menuRef}
-      className="fixed z-[99999] w-[230px] rounded-lg border border-slate-200 bg-white/98 backdrop-blur-md p-1 shadow-xl text-slate-800 animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-slate-800 dark:text-slate-200"
+      className="fixed z-[99999] w-[230px] rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
       style={{ top: `${clampedY}px`, left: `${clampedX}px` }}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
@@ -117,7 +117,7 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
           return (
             <div
               key={`sep-${index}`}
-              className="my-1 h-px bg-slate-100 dark:bg-slate-800"
+              className="my-1 h-px bg-muted dark:bg-muted"
             />
           );
         }
@@ -129,10 +129,10 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
             onClick={item.action}
             className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-left transition-colors ${
               item.danger
-                ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40'
+                ? 'text-destructive hover:bg-destructive/10 dark:hover:bg-red-950/40'
                 : item.active
                 ? 'bg-emerald-50 text-emerald-800 font-semibold dark:bg-emerald-950/40 dark:text-emerald-300'
-                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                : 'text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted'
             }`}
           >
             <span className="shrink-0">{item.icon}</span>

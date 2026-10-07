@@ -56,7 +56,7 @@ export default function FontColorSection({
                 hover:border-gray-400
                 ${
                   isActive
-                    ? "border-blue-600 ring-2 ring-blue-200"
+                    ? "border-primary ring-2 ring-primary/30"
                     : "border-gray-200"
                 }
               `}
@@ -78,7 +78,7 @@ export default function FontColorSection({
                     size={14}
                     strokeWidth={3}
                     className="
-                      text-white
+                      text-primary-foreground
                       drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]
                     "
                   />

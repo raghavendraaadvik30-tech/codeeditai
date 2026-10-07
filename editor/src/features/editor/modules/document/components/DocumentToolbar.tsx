@@ -31,15 +31,15 @@ export function DocumentToolbar() {
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-slate-200 p-2 dark:border-slate-800">
+      <div className="flex items-center justify-between border-b border-secondary p-2 dark:border-muted">
         <div className="flex items-center gap-1">
           {/* Save */}
           <button
             type="button"
             onClick={() => setSaveOpen(true)}
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-secondary-foreground transition-colors hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
           >
-            <Save className="h-3.5 w-3.5 text-blue-600" />
+            <Save className="h-3.5 w-3.5 text-primary" />
             Save
           </button>
 
@@ -47,9 +47,9 @@ export function DocumentToolbar() {
           <button
             type="button"
             onClick={() => setExportOpen(true)}
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-secondary-foreground transition-colors hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
           >
-            <Download className="h-3.5 w-3.5 text-blue-600" />
+            <Download className="h-3.5 w-3.5 text-primary" />
             Export
           </button>
 
@@ -57,13 +57,13 @@ export function DocumentToolbar() {
           <button
             type="button"
             onClick={printDocument}
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-secondary-foreground transition-colors hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
           >
-            <Printer className="h-3.5 w-3.5 text-blue-600" />
+            <Printer className="h-3.5 w-3.5 text-primary" />
             Print
           </button>
 
-          <div className="mx-1 h-4 w-px bg-slate-200 dark:bg-slate-800" />
+          <div className="mx-1 h-4 w-px bg-secondary dark:bg-muted" />
 
           {/* Permissions / Access Control */}
           <button
@@ -76,7 +76,7 @@ export function DocumentToolbar() {
             }
             className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
               isEditable
-                ? "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                ? "text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
                 : "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
             }`}
           >
@@ -100,9 +100,9 @@ export function DocumentToolbar() {
             type="button"
             onClick={() => setDeleteOpen(true)}
             title="Delete Document"
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 dark:text-red-400 dark:hover:bg-red-950/40"
           >
-            <Trash2 className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+            <Trash2 className="h-3.5 w-3.5 text-destructive dark:text-red-400" />
             Delete
           </button>
         </div>

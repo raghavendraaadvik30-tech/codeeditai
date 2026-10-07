@@ -29,8 +29,8 @@ export const CHANGE_TYPE_COLORS: Record<TrackChangeType, { bg: string; text: str
     border: "border-emerald-300 dark:border-emerald-800",
   },
   delete: {
-    bg: "bg-rose-50 dark:bg-rose-950/40",
-    text: "text-rose-700 dark:text-rose-400",
+    bg: "bg-destructive/10 dark:bg-rose-950/40",
+    text: "text-destructive dark:text-rose-400",
     border: "border-rose-300 dark:border-rose-800",
   },
   edit: {

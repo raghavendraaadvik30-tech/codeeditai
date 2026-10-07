@@ -117,23 +117,23 @@ export function HyperlinkDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] bg-white dark:bg-[#0E1A29] border border-slate-200 dark:border-slate-800 p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="p-4 border-b border-slate-100 dark:border-slate-800">
-          <DialogTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+      <DialogContent className="sm:max-w-[480px] bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
+        <DialogHeader className="p-4 border-b border-muted dark:border-muted">
+          <DialogTitle className="text-sm font-semibold text-foreground dark:text-primary-foreground flex items-center gap-2">
             <Globe className="h-4 w-4 text-[#0078d4]" />
             Insert Hyperlink
           </DialogTitle>
         </DialogHeader>
 
         {/* TAB BUTTONS */}
-        <div className="flex border-b border-slate-200/80 bg-slate-50/70 p-1.5 gap-1 dark:border-slate-800 dark:bg-[#07131E]">
+        <div className="flex border-b border-secondary/80 bg-muted/70 p-1.5 gap-1 dark:border-muted dark:bg-[#07131E]">
           <button
             type="button"
             onClick={() => setActiveTab('external')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
               activeTab === 'external'
-                ? 'bg-white text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-blue-400'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                ? 'bg-card text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-primary'
+                : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-primary-foreground'
             }`}
           >
             <Globe className="h-3.5 w-3.5" />
@@ -144,8 +144,8 @@ export function HyperlinkDialog({
             onClick={() => setActiveTab('internal')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
               activeTab === 'internal' || activeTab === 'bookmark'
-                ? 'bg-white text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-blue-400'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                ? 'bg-card text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-primary'
+                : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-primary-foreground'
             }`}
           >
             <Bookmark className="h-3.5 w-3.5" />
@@ -156,8 +156,8 @@ export function HyperlinkDialog({
             onClick={() => setActiveTab('email')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
               activeTab === 'email'
-                ? 'bg-white text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-blue-400'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                ? 'bg-card text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-primary'
+                : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-primary-foreground'
             }`}
           >
             <Mail className="h-3.5 w-3.5" />
@@ -169,13 +169,13 @@ export function HyperlinkDialog({
         <div className="p-4 space-y-3.5 text-xs">
           {/* DISPLAY TEXT */}
           <div className="space-y-1">
-            <label className="font-semibold text-slate-700 dark:text-slate-300">Text to Display</label>
+            <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Text to Display</label>
             <input
               type="text"
               value={displayText}
               onChange={(e) => setDisplayText(e.target.value)}
               placeholder="e.g. Clinical Study Results"
-              className="h-8 w-full rounded-md border border-slate-200 bg-white px-3 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
             />
           </div>
 
@@ -183,16 +183,16 @@ export function HyperlinkDialog({
           {activeTab === 'external' && (
             <div className="space-y-3">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Target URL</label>
+                <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Target URL</label>
                 <div className="relative">
                   <input
                     type="text"
                     value={url}
                     onChange={(e) => handleUrlChange(e.target.value)}
                     placeholder="https://example.com/report.pdf"
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-3 pr-8 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+                    className="h-8 w-full rounded-md border border-secondary bg-card px-3 pr-8 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
                   />
-                  <ExternalLink className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  <ExternalLink className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 </div>
                 {url && (
                   <div className="pt-1">
@@ -201,7 +201,7 @@ export function HyperlinkDialog({
                         <ShieldCheck className="h-3 w-3" /> Valid {urlValidation.isSecure ? 'Secure HTTPS' : 'HTTP'} link
                       </p>
                     ) : (
-                      <p className="flex items-center gap-1 text-[11px] text-red-500">
+                      <p className="flex items-center gap-1 text-[11px] text-destructive">
                         <AlertCircle className="h-3 w-3" /> {urlValidation.error}
                       </p>
                     )}
@@ -215,9 +215,9 @@ export function HyperlinkDialog({
                   id="chk-newtab"
                   checked={openInNewTab}
                   onChange={(e) => setOpenInNewTab(e.target.checked)}
-                  className="rounded border-slate-300 text-[#0078d4] focus:ring-[#0078d4]"
+                  className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
                 />
-                <label htmlFor="chk-newtab" className="text-slate-600 dark:text-slate-400 cursor-pointer">
+                <label htmlFor="chk-newtab" className="text-secondary-foreground dark:text-muted-foreground cursor-pointer">
                   Open link in new browser tab
                 </label>
               </div>
@@ -228,12 +228,12 @@ export function HyperlinkDialog({
           {(activeTab === 'internal' || activeTab === 'bookmark') && (
             <div className="space-y-3">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Select Document Target</label>
+                <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Select Document Target</label>
                 {availableBookmarks.length > 0 ? (
                   <select
                     value={url.replace(/^#/, '')}
                     onChange={(e) => setUrl(`#${e.target.value}`)}
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+                    className="h-8 w-full rounded-md border border-secondary bg-card px-2 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
                   >
                     <option value="">-- Choose a bookmark --</option>
                     {availableBookmarks.map((bm) => (
@@ -243,20 +243,20 @@ export function HyperlinkDialog({
                     ))}
                   </select>
                 ) : (
-                  <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-[#07131E]">
-                    <p className="text-slate-500 dark:text-slate-400">No bookmarks defined in document yet.</p>
+                  <div className="rounded-lg border border-dashed border-secondary bg-muted p-3 text-center dark:border-muted dark:bg-[#07131E]">
+                    <p className="text-muted-foreground dark:text-muted-foreground">No bookmarks defined in document yet.</p>
                   </div>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Or Custom Target Anchor ID</label>
+                <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Or Custom Target Anchor ID</label>
                 <input
                   type="text"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="#section-2"
-                  className="h-8 w-full rounded-md border border-slate-200 bg-white px-3 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
                 />
               </div>
             </div>
@@ -266,35 +266,35 @@ export function HyperlinkDialog({
           {activeTab === 'email' && (
             <div className="space-y-2.5">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Recipient Email Address</label>
+                <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Recipient Email Address</label>
                 <input
                   type="email"
                   value={emailTo}
                   onChange={(e) => setEmailTo(e.target.value)}
                   placeholder="author@parexel.com"
-                  className="h-8 w-full rounded-md border border-slate-200 bg-white px-3 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Subject</label>
+                <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Subject</label>
                 <input
                   type="text"
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
                   placeholder="Review CSR Document"
-                  className="h-8 w-full rounded-md border border-slate-200 bg-white px-3 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Message / Body</label>
+                <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Message / Body</label>
                 <textarea
                   rows={2}
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
                   placeholder="Please review the attached clinical study section..."
-                  className="w-full rounded-md border border-slate-200 bg-white p-2 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+                  className="w-full rounded-md border border-secondary bg-card p-2 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
                 />
               </div>
 
@@ -303,14 +303,14 @@ export function HyperlinkDialog({
                 <button
                   type="button"
                   onClick={handleDirectSendEmail}
-                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-300"
+                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-secondary bg-muted text-[11px] font-semibold text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground"
                 >
                   <Mail className="h-3 w-3" /> Open Email Client
                 </button>
                 <button
                   type="button"
                   onClick={handlePdfAndEmail}
-                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-300"
+                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-secondary bg-muted text-[11px] font-semibold text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground"
                 >
                   <FileDown className="h-3 w-3" /> PDF + Email
                 </button>
@@ -320,18 +320,18 @@ export function HyperlinkDialog({
 
           {/* TOOLTIP / SCREEN TIP */}
           <div className="space-y-1 pt-1">
-            <label className="font-semibold text-slate-700 dark:text-slate-300">Tooltip / ScreenTip (Optional)</label>
+            <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Tooltip / ScreenTip (Optional)</label>
             <input
               type="text"
               value={tooltip}
               onChange={(e) => setTooltip(e.target.value)}
               placeholder="Hint shown on hover"
-              className="h-8 w-full rounded-md border border-slate-200 bg-white px-3 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
             />
           </div>
         </div>
 
-        <DialogFooter className="p-3 border-t border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-[#07131E] flex items-center justify-end gap-2">
+        <DialogFooter className="p-3 border-t border-muted bg-muted/50 dark:border-muted dark:bg-[#07131E] flex items-center justify-end gap-2">
           <LinkButton variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </LinkButton>

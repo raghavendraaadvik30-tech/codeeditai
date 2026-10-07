@@ -39,15 +39,15 @@ function TablesPageContent() {
   return (
     <div className="flex h-full w-full flex-col select-none overflow-hidden bg-background text-foreground">
       {/* 1. TOP HEADER: TABLES MANAGER & NEW BUTTON */}
-      <div className="border-b border-slate-200/80 p-3.5 space-y-3 dark:border-slate-800/80">
+      <div className="border-b border-secondary/80 p-3.5 space-y-3 dark:border-muted/80">
         <div className="flex items-center justify-between">
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">
+          <h3 className="text-[10px] font-bold text-muted0 uppercase tracking-wider dark:text-muted-foreground">
             Tables Manager
           </h3>
           <button
             type="button"
             onClick={() => setInsertDialogOpen(true)}
-            className="flex h-7 items-center gap-1 rounded-md bg-[#0078d4] px-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#005a9e]"
+            className="flex h-7 items-center gap-1 rounded-md bg-[#0078d4] px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-[#005a9e]"
           >
             <Plus className="h-3.5 w-3.5" />
             Custom Table
@@ -56,7 +56,7 @@ function TablesPageContent() {
 
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
@@ -68,7 +68,7 @@ function TablesPageContent() {
               }
             }}
             placeholder="Search templates & tools..."
-            className="h-8 w-full rounded-md border border-slate-200 bg-slate-50/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-slate-400 focus:border-[#0078d4] dark:border-slate-800 dark:bg-[#07131E] dark:text-slate-200"
+            className="h-8 w-full rounded-md border border-secondary bg-muted/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-[#0078d4] dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
           />
         </div>
       </div>
@@ -80,7 +80,7 @@ function TablesPageContent() {
           <button
             type="button"
             onClick={() => toggleSection("quickGrid")}
-            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Table2 className="h-3.5 w-3.5 text-[#0078d4]" />
@@ -98,11 +98,11 @@ function TablesPageContent() {
         </div>
 
         {/* TABLE ACTIONS */}
-        <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800/80">
+        <div className="space-y-2 border-t border-muted pt-3 dark:border-muted/80">
           <button
             type="button"
             onClick={() => toggleSection("actions")}
-            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Sliders className="h-3.5 w-3.5 text-[#0078d4]" />
@@ -120,11 +120,11 @@ function TablesPageContent() {
         </div>
 
         {/* STANDARD TABLES (Directly below Table Tools & Rows) */}
-        <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800/80">
+        <div className="space-y-2 border-t border-muted pt-3 dark:border-muted/80">
           <button
             type="button"
             onClick={() => toggleSection("standardTables")}
-            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Table2 className="h-3.5 w-3.5 text-[#0078d4]" />

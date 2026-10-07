@@ -277,7 +277,7 @@ export default function DocumentRuler({
         bg-[#ECEFF4]
         py-1
         shadow-[0_1px_3px_rgba(0,0,0,0.05)]
-        dark:border-slate-800
+        dark:border-muted
         dark:bg-[#080E16]
         flex
         justify-center
@@ -463,12 +463,12 @@ export default function DocumentRuler({
               top-7
               z-50
               rounded
-              bg-slate-900/95
+              bg-foreground/95
               px-2.5
               py-0.5
               text-[11px]
               font-semibold
-              text-white
+              text-primary-foreground
               shadow-lg
               backdrop-blur-xs
               pointer-events-none
@@ -492,7 +492,7 @@ export default function DocumentRuler({
       {/* WORD VERTICAL DRAG GUIDELINE */}
       {isDragging && guideScreenX !== null && (
         <div
-          className="fixed top-0 bottom-0 pointer-events-none z-50 border-l border-dashed border-blue-600/80 dark:border-blue-400/80"
+          className="fixed top-0 bottom-0 pointer-events-none z-50 border-l border-dashed border-primary/80 dark:border-primary/80"
           style={{ left: `${guideScreenX}px` }}
         />
       )}

@@ -46,9 +46,9 @@ export default function WorkspaceToolbar({
         flex-col
         items-center
         border-r
-        border-slate-200
-        bg-white
-        dark:border-slate-800
+        border-secondary
+        bg-card
+        dark:border-muted
         dark:bg-[#07131E]
       "
     >
@@ -65,10 +65,10 @@ export default function WorkspaceToolbar({
           items-center
           justify-center
           rounded-lg
-          bg-blue-600
+          bg-primary
           text-sm
           font-bold
-          text-white
+          text-primary-foreground
           shadow-sm
         "
       >
@@ -119,16 +119,16 @@ export default function WorkspaceToolbar({
                 `,
                 isActive
                   ? `
-                    bg-blue-600
-                    text-white
+                    bg-primary
+                    text-primary-foreground
                     shadow-sm
                   `
                   : `
-                    text-slate-500
-                    hover:bg-blue-50
-                    hover:text-blue-600
-                    dark:text-slate-400
-                    dark:hover:bg-slate-800
+                    text-muted-foreground
+                    hover:bg-primary/10
+                    hover:text-primary
+                    dark:text-muted-foreground
+                    dark:hover:bg-muted
                   `
               )}
             >
@@ -143,7 +143,7 @@ export default function WorkspaceToolbar({
                     bottom-1
                     w-[3px]
                     rounded-r-full
-                    bg-blue-600
+                    bg-primary
                   "
                 />
               )}

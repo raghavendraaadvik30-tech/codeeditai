@@ -59,19 +59,19 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       className={cn(
         "group flex flex-col gap-2.5 rounded-xl border p-3.5 text-xs transition-all cursor-pointer shadow-xs",
         isSelected
-          ? "border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/30 dark:bg-[#162536] dark:border-blue-500"
-          : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-[#111D29]"
+          ? "border-primary bg-primary/40 ring-1 ring-primary/30 dark:bg-[#162536] dark:border-primary"
+          : "border-secondary bg-card hover:border-border dark:border-muted dark:bg-[#111D29]"
       )}
     >
       {/* 1. Header: Author & Formatted Time */}
       <div className="flex items-center justify-between">
         <span
-          className="font-semibold text-slate-800 dark:text-slate-100 truncate max-w-[150px] text-xs"
+          className="font-semibold text-foreground dark:text-muted truncate max-w-[150px] text-xs"
           title={change.author}
         >
           {change.author || "Current User"}
         </span>
-        <span className="text-[11px] text-slate-400 font-medium">
+        <span className="text-[11px] text-muted-foreground font-medium">
           {formattedTime}
         </span>
       </div>
@@ -79,7 +79,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       {/* 2. Badge & Change ID */}
       <div className="flex items-center gap-2 flex-wrap">
         {change.type === "delete" && (
-          <span className="rounded bg-rose-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/60">
+          <span className="rounded bg-destructive/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-destructive border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/60">
             DELETION
           </span>
         )}
@@ -94,7 +94,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
           </span>
         )}
 
-        <span className="text-[11px] text-slate-400 font-mono">
+        <span className="text-[11px] text-muted-foreground font-mono">
           ID: {change.id}
         </span>
       </div>
@@ -108,14 +108,14 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
             </div>
           )}
           {change.type === "delete" && change.originalText && (
-            <div className="border-l-2 border-rose-500 pl-2 text-xs font-medium text-rose-700 dark:text-rose-400 line-through break-words bg-rose-50/30 p-1 rounded-r">
+            <div className="border-l-2 border-destructive pl-2 text-xs font-medium text-destructive dark:text-rose-400 line-through break-words bg-destructive/30 p-1 rounded-r">
               {change.originalText}
             </div>
           )}
           {change.type === "edit" && (
             <div className="border-l-2 border-amber-500 pl-2 text-xs space-y-0.5 bg-amber-50/20 p-1 rounded-r">
               {change.originalText && (
-                <div className="text-rose-700 dark:text-rose-400 line-through text-[11px] break-words">
+                <div className="text-destructive dark:text-rose-400 line-through text-[11px] break-words">
                   {change.originalText}
                 </div>
               )}
@@ -145,7 +145,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
         <button
           type="button"
           onClick={() => rejectChange(change.id)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-400"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-destructive/10 py-1.5 text-xs font-medium text-destructive hover:bg-rose-100 transition-colors dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-400"
         >
           <XIcon className="h-3.5 w-3.5" />
           <span>Reject</span>
@@ -154,10 +154,10 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
 
       {/* 5. Comments Section */}
       <div
-        className="border-t border-slate-100 dark:border-slate-800 pt-2"
+        className="border-t border-muted dark:border-muted pt-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between text-xs text-muted-foreground dark:text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
             <span>Comments ({change.comments?.length || 0})</span>
@@ -165,7 +165,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
-            className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors font-medium"
+            className="text-xs text-muted-foreground hover:text-secondary-foreground dark:text-muted-foreground dark:hover:text-muted-foreground transition-colors font-medium"
           >
             {showComments ? "Hide" : "Show"}
           </button>
@@ -178,9 +178,9 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                 {change.comments.map((c: Comment) => (
                   <div
                     key={c.id}
-                    className="rounded-lg border border-slate-200 bg-slate-50/80 p-2 text-xs text-slate-700 dark:border-slate-800 dark:bg-[#07131E] dark:text-slate-300"
+                    className="rounded-lg border border-secondary bg-muted/80 p-2 text-xs text-secondary-foreground dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
                   >
-                    <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground mb-1">
                       <span>{c.author}</span>
                       <span>
                         {new Date(c.timestamp).toLocaleTimeString([], {
@@ -190,14 +190,14 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                         })}
                       </span>
                     </div>
-                    <div className="text-slate-800 dark:text-slate-200 break-words leading-relaxed">
+                    <div className="text-foreground dark:text-muted-foreground break-words leading-relaxed">
                       {c.text}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-[11px] text-slate-400 italic">No comments on this change yet.</p>
+              <p className="text-[11px] text-muted-foreground italic">No comments on this change yet.</p>
             )}
 
             <form onSubmit={handleAddComment} className="flex gap-1.5 pt-1">
@@ -206,11 +206,11 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Add a comment..."
-                className="h-8 flex-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-[#0078d4] focus:bg-white dark:border-slate-700 dark:bg-[#07131E] dark:text-white"
+                className="h-8 flex-1 rounded-md border border-secondary bg-muted px-2.5 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-[#0078d4] focus:bg-card dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground"
               />
               <button
                 type="submit"
-                className="flex h-8 w-8 items-center justify-center rounded-md bg-[#0078d4] text-white hover:bg-[#006cc1] transition-colors shrink-0"
+                className="flex h-8 w-8 items-center justify-center rounded-md bg-[#0078d4] text-primary-foreground hover:bg-[#006cc1] transition-colors shrink-0"
                 title="Add Comment"
               >
                 <Plus className="h-4 w-4" />

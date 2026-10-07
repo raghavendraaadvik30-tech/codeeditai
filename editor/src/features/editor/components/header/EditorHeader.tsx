@@ -43,10 +43,10 @@ export default function EditorHeader() {
       className="
         h-[58px]
         border-b
-        bg-white
+        bg-card
         dark:bg-[#0B1620]
         border-gray-200
-        dark:border-slate-800
+        dark:border-muted
         flex
         items-center
         px-3

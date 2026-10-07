@@ -424,9 +424,9 @@ export default function Workspace() {
             justify-center
             rounded-full
             bg-gradient-to-br
-            from-blue-500
-            to-indigo-500
-            text-white
+            from-primary
+            to-primary
+            text-primary-foreground
             shadow-lg
             transition-all
             hover:scale-105
@@ -1946,8 +1946,8 @@ function DocumentPage({
           box-border
           border
           ${isWeb || isDraft
-            ? "shadow-sm border-slate-200 dark:border-slate-800"
-            : "shadow-[0_4px_20px_rgba(0,0,0,0.12)] border-slate-200"
+            ? "shadow-sm border-secondary dark:border-muted"
+            : "shadow-[0_4px_20px_rgba(0,0,0,0.12)] border-secondary"
           }
           ${active && !isRead
             ? "border-blue-300 ring-1 ring-blue-300/40"
@@ -2059,7 +2059,7 @@ function DocumentPage({
             style={{ opacity: section.watermark.opacity ?? 0.12 }}
           >
             <span
-              className="font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100"
+              className="font-bold uppercase tracking-wider text-foreground dark:text-muted"
               style={{
                 fontSize:
                   section.watermark.fontSize === "auto" || !section.watermark.fontSize
@@ -2113,7 +2113,7 @@ function DocumentPage({
           top-2
           select-none
           text-[10px]
-          text-slate-400
+          text-muted-foreground
         "
         >
           {pageNumber}
@@ -2140,11 +2140,11 @@ function DocumentPage({
           relative
           box-border
           text-[10px]
-          text-slate-500
+          text-muted-foreground
           transition-all
           ${isHeaderFooterActive
-                ? "border-b border-dashed border-[#0078d4] bg-blue-50/20 ring-1 ring-blue-300/40 dark:border-blue-500 dark:bg-blue-950/20"
-                : "border-b border-slate-100 hover:bg-blue-50/15 cursor-pointer dark:border-slate-800"
+                ? "border-b border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-blue-300/40 dark:border-primary dark:bg-blue-950/20"
+                : "border-b border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
               }
         `}
             style={{
@@ -2160,7 +2160,7 @@ function DocumentPage({
             {isHeaderFooterActive && (
               <div
                 data-editor-ui="true"
-                className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-white text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+                className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
               >
                 <span>{headerLabel}</span>
                 {isLinked && (
@@ -2174,7 +2174,7 @@ function DocumentPage({
                 <>
                   {pageNumberAlignment === "left" ? (
                     <>
-                      <div className="font-semibold text-slate-700 dark:text-slate-300 mr-3 shrink-0">
+                      <div className="font-semibold text-secondary-foreground dark:text-muted-foreground mr-3 shrink-0">
                         {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
                       </div>
                       {isHeaderFooterActive ? (
@@ -2232,7 +2232,7 @@ function DocumentPage({
                       ) : (
                         <span>{effectiveHeaderText}</span>
                       )}
-                      <div className="font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                      <div className="font-semibold text-secondary-foreground dark:text-muted-foreground absolute left-1/2 -translate-x-1/2">
                         {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
                       </div>
                       <span />
@@ -2265,7 +2265,7 @@ function DocumentPage({
                       ) : (
                         <span>{effectiveHeaderText}</span>
                       )}
-                      <div className="font-semibold text-slate-700 dark:text-slate-300 ml-3 shrink-0">
+                      <div className="font-semibold text-secondary-foreground dark:text-muted-foreground ml-3 shrink-0">
                         {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
                       </div>
                     </>
@@ -2361,7 +2361,7 @@ function DocumentPage({
           cursor-text
           text-[14px]
           leading-7
-          text-slate-800
+          text-foreground
 
           [&_p]:my-2
           [&_>_*:first-child]:mt-0
@@ -2402,7 +2402,7 @@ function DocumentPage({
           [&_table]:max-w-full
 
           [&_td]:border
-          [&_td]:border-slate-300
+          [&_td]:border-border
           [&_td]:px-2.5
           [&_td]:py-1.5
           [&_td]:text-left
@@ -2420,7 +2420,7 @@ function DocumentPage({
           [&_td_p]:[word-break:break-word]
 
           [&_th]:border
-          [&_th]:border-slate-300
+          [&_th]:border-border
           [&_th]:px-2.5
           [&_th]:py-1.5
           [&_th]:text-left
@@ -2478,11 +2478,11 @@ function DocumentPage({
           relative
           box-border
           text-[10px]
-          text-slate-400
+          text-muted-foreground
           transition-all
           ${isHeaderFooterActive
-                ? "border-t border-dashed border-[#0078d4] bg-blue-50/20 ring-1 ring-blue-300/40 dark:border-blue-500 dark:bg-blue-950/20"
-                : "border-t border-slate-100 hover:bg-blue-50/15 cursor-pointer dark:border-slate-800"
+                ? "border-t border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-blue-300/40 dark:border-primary dark:bg-blue-950/20"
+                : "border-t border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
               }
         `}
             style={{
@@ -2498,7 +2498,7 @@ function DocumentPage({
             {isHeaderFooterActive && (
               <div
                 data-editor-ui="true"
-                className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-white text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+                className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
               >
                 <span>{footerLabel}</span>
                 {isLinked && (
@@ -2512,7 +2512,7 @@ function DocumentPage({
                 <>
                   {pageNumberAlignment === "left" ? (
                     <>
-                      <div className="font-medium text-slate-600 dark:text-slate-300 mr-3 shrink-0">
+                      <div className="font-medium text-secondary-foreground dark:text-muted-foreground mr-3 shrink-0">
                         {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
                       </div>
                       {isHeaderFooterActive ? (
@@ -2570,7 +2570,7 @@ function DocumentPage({
                       ) : (
                         <span>{effectiveFooterText}</span>
                       )}
-                      <div className="font-medium text-slate-600 dark:text-slate-300 absolute left-1/2 -translate-x-1/2">
+                      <div className="font-medium text-secondary-foreground dark:text-muted-foreground absolute left-1/2 -translate-x-1/2">
                         {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
                       </div>
                       <span />
@@ -2603,7 +2603,7 @@ function DocumentPage({
                       ) : (
                         <span>{effectiveFooterText}</span>
                       )}
-                      <div className="font-medium text-slate-600 dark:text-slate-300 ml-3 shrink-0">
+                      <div className="font-medium text-secondary-foreground dark:text-muted-foreground ml-3 shrink-0">
                         {renderPageNumberContent(pageNumber, totalPages, pageNumberFormat, pageNumberStyle || section?.pageNumberStyle)}
                       </div>
                     </>
@@ -2736,14 +2736,14 @@ function renderPageNumberContent(
 
     case "accent-bar":
       return (
-        <span className="inline-flex items-center border-b-2 border-sky-500 pb-0.5 font-bold tracking-wider text-[10px] text-slate-800 dark:text-slate-100">
+        <span className="inline-flex items-center border-b-2 border-sky-500 pb-0.5 font-bold tracking-wider text-[10px] text-foreground dark:text-muted">
           PAGE {formattedNum}
         </span>
       );
 
     case "circle":
       return (
-        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] font-bold shadow-xs">
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-primary-foreground text-[10px] font-bold shadow-xs">
           {formattedNum}
         </span>
       );
@@ -2751,11 +2751,11 @@ function renderPageNumberContent(
     case "modern":
       return (
         <span className="inline-flex items-center gap-1.5">
-          <span className="text-[9px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">
+          <span className="text-[9px] font-bold tracking-widest text-muted-foreground dark:text-muted-foreground uppercase">
             CONFIDENTIAL
           </span>
-          <span className="text-slate-300 dark:text-slate-600 font-normal">|</span>
-          <span className="font-semibold text-slate-800 dark:text-slate-100">
+          <span className="text-muted-foreground dark:text-secondary-foreground font-normal">|</span>
+          <span className="font-semibold text-foreground dark:text-muted">
             {formattedNum}
           </span>
         </span>
@@ -2764,8 +2764,8 @@ function renderPageNumberContent(
     case "bold-numbers":
       return (
         <span>
-          Page <strong className="font-bold text-slate-900 dark:text-white">{formattedNum}</strong> of{" "}
-          <strong className="font-bold text-slate-900 dark:text-white">{formattedTotal}</strong>
+          Page <strong className="font-bold text-foreground dark:text-primary-foreground">{formattedNum}</strong> of{" "}
+          <strong className="font-bold text-foreground dark:text-primary-foreground">{formattedTotal}</strong>
         </span>
       );
 

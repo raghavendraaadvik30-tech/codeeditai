@@ -125,41 +125,41 @@ export default function AppendicesPanel() {
   return (
     <div className="p-4 space-y-3 select-none">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
           INSERT APPENDICES
         </span>
-        <span className="text-xs text-slate-400 dark:text-slate-500">
+        <span className="text-xs text-muted-foreground dark:text-muted-foreground">
           Appendices
         </span>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-[#0E1A29]">
+      <div className="rounded-xl border border-secondary bg-card p-3.5 shadow-sm dark:border-muted dark:bg-[#0E1A29]">
         <div className="grid grid-cols-2 gap-2.5">
           <button
             type="button"
             onClick={() => handleInsert("toc")}
-            className="rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 py-2.5 px-3 text-xs font-semibold text-slate-700 active:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+            className="rounded-lg border border-secondary bg-muted/70 hover:bg-muted hover:border-border py-2.5 px-3 text-xs font-semibold text-secondary-foreground active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors text-center"
           >
             Insert TOC
           </button>
           <button
             type="button"
             onClick={() => handleInsert("tot")}
-            className="rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 py-2.5 px-3 text-xs font-semibold text-slate-700 active:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+            className="rounded-lg border border-secondary bg-muted/70 hover:bg-muted hover:border-border py-2.5 px-3 text-xs font-semibold text-secondary-foreground active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors text-center"
           >
             Insert TOT
           </button>
           <button
             type="button"
             onClick={() => handleInsert("tof")}
-            className="rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 py-2.5 px-3 text-xs font-semibold text-slate-700 active:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+            className="rounded-lg border border-secondary bg-muted/70 hover:bg-muted hover:border-border py-2.5 px-3 text-xs font-semibold text-secondary-foreground active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors text-center"
           >
             Insert TOF
           </button>
           <button
             type="button"
             onClick={() => handleInsert("all")}
-            className="rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 py-2.5 px-3 text-xs font-semibold text-slate-700 active:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+            className="rounded-lg border border-secondary bg-muted/70 hover:bg-muted hover:border-border py-2.5 px-3 text-xs font-semibold text-secondary-foreground active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors text-center"
           >
             Insert All
           </button>

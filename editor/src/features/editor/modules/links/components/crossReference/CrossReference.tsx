@@ -63,14 +63,14 @@ export function CrossReference() {
   return (
     <div className="space-y-3.5">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
           Cross References
         </span>
         <button
           type="button"
           onClick={handleRefresh}
           title="Scan document for targets"
-          className="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+          className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-secondary-foreground dark:hover:bg-muted"
         >
           <RefreshCw className="h-3 w-3" />
         </button>
@@ -80,7 +80,7 @@ export function CrossReference() {
       <div className="space-y-3 text-xs">
         {/* Reference Target Type Picker */}
         <div className="space-y-1">
-          <label className="font-semibold text-slate-700 dark:text-slate-300">Reference Type</label>
+          <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Reference Type</label>
           <div className="grid grid-cols-2 gap-1.5">
             {(['heading', 'figure', 'table', 'bookmark'] as CrossReferenceTarget[]).map(
               (type) => (
@@ -90,8 +90,8 @@ export function CrossReference() {
                   onClick={() => handleTypeChange(type)}
                   className={`h-7 px-2 text-[11px] font-semibold rounded-md border text-center truncate transition-all ${
                     selectedType === type
-                      ? 'border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] dark:border-blue-500'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-[#091524] dark:text-slate-300'
+                      ? 'border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] dark:border-primary'
+                      : 'border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-[#091524] dark:text-muted-foreground'
                   }`}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -103,15 +103,15 @@ export function CrossReference() {
 
         {/* Targets List */}
         <div className="space-y-1">
-          <label className="font-semibold text-slate-700 dark:text-slate-300">
+          <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">
             For which target ({availableTargets.length})
           </label>
           {availableTargets.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-[#07131E]">
-              <p className="text-slate-400">No {selectedType} targets detected in document.</p>
+            <div className="rounded-lg border border-dashed border-secondary bg-muted p-3 text-center dark:border-muted dark:bg-[#07131E]">
+              <p className="text-muted-foreground">No {selectedType} targets detected in document.</p>
             </div>
           ) : (
-            <div className="max-h-[160px] overflow-y-auto space-y-1 rounded-lg border border-slate-200 bg-white p-1.5 dark:border-slate-800 dark:bg-[#07131E]">
+            <div className="max-h-[160px] overflow-y-auto space-y-1 rounded-lg border border-secondary bg-card p-1.5 dark:border-muted dark:bg-[#07131E]">
               {availableTargets.map((target) => {
                 const isSelected = selectedTarget?.id === target.id;
                 return (
@@ -120,8 +120,8 @@ export function CrossReference() {
                     onClick={() => setSelectedTarget(target)}
                     className={`flex cursor-pointer items-center justify-between rounded-md p-1.5 text-xs transition-all ${
                       isSelected
-                        ? 'bg-[#0078d4] text-white font-semibold'
-                        : 'hover:bg-slate-100 text-slate-800 dark:text-slate-200 dark:hover:bg-slate-800'
+                        ? 'bg-[#0078d4] text-primary-foreground font-semibold'
+                        : 'hover:bg-muted text-foreground dark:text-muted-foreground dark:hover:bg-muted'
                     }`}
                   >
                     <span className="truncate">{target.title}</span>
@@ -129,7 +129,7 @@ export function CrossReference() {
                       <Check className="h-3.5 w-3.5 shrink-0" />
                     ) : (
                       target.pageNumber && (
-                        <span className="text-[10px] text-slate-400 shrink-0">
+                        <span className="text-[10px] text-muted-foreground shrink-0">
                           Pg {target.pageNumber}
                         </span>
                       )
@@ -143,15 +143,15 @@ export function CrossReference() {
 
         {/* Custom Label & Options */}
         {selectedTarget && (
-          <div className="space-y-2.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+          <div className="space-y-2.5 pt-1 border-t border-muted dark:border-muted">
             <div className="space-y-1">
-              <label className="font-semibold text-slate-700 dark:text-slate-300">Custom Label (Optional)</label>
+              <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Custom Label (Optional)</label>
               <input
                 type="text"
                 value={customLabel}
                 onChange={(e) => setCustomLabel(e.target.value)}
                 placeholder={`See ${selectedTarget.title}...`}
-                className="h-7 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-[#0078d4]"
+                className="h-7 w-full rounded-md border border-secondary bg-card px-2 text-xs outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
               />
             </div>
 
@@ -161,9 +161,9 @@ export function CrossReference() {
                 id="chk-pagenum"
                 checked={includePageNumber}
                 onChange={(e) => setIncludePageNumber(e.target.checked)}
-                className="rounded border-slate-300 text-[#0078d4] focus:ring-[#0078d4]"
+                className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
               />
-              <label htmlFor="chk-pagenum" className="text-slate-600 dark:text-slate-400 cursor-pointer">
+              <label htmlFor="chk-pagenum" className="text-secondary-foreground dark:text-muted-foreground cursor-pointer">
                 Include page number suffix
               </label>
             </div>
@@ -171,7 +171,7 @@ export function CrossReference() {
             <button
               type="button"
               onClick={handleInsert}
-              className="w-full flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#0078d4] text-xs font-semibold text-white hover:bg-[#005a9e] transition-colors shadow-sm"
+              className="w-full flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#0078d4] text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors shadow-sm"
             >
               <Plus className="h-3.5 w-3.5" /> Insert Cross-Reference
             </button>

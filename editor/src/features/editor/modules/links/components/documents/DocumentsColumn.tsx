@@ -109,7 +109,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
     const editor = editorRef.current;
     if (!editor) return;
 
-    const html = `<a href="#doc_${doc.id}" data-doc-id="${doc.id}" data-link-type="document" class="document-reference-link text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer" title="Open Document: ${doc.name}">📄 ${doc.name}</a>`;
+    const html = `<a href="#doc_${doc.id}" data-doc-id="${doc.id}" data-link-type="document" class="document-reference-link text-primary hover:text-primary underline font-medium cursor-pointer" title="Open Document: ${doc.name}">📄 ${doc.name}</a>`;
 
     editor.focus();
     document.execCommand('insertHTML', false, html);
@@ -134,23 +134,23 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
   };
 
   return (
-    <div className="flex flex-col bg-white dark:bg-[#0B1520] border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-xs">
+    <div className="flex flex-col bg-card dark:bg-[#0B1520] border border-secondary dark:border-muted rounded-lg p-3 shadow-xs">
       {/* Search Input */}
       <div className="relative mb-2.5">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search documents..."
-          className="w-full h-8 pl-8 pr-2.5 text-xs rounded-md border border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
+          className="w-full h-8 pl-8 pr-2.5 text-xs rounded-md border border-secondary bg-muted text-foreground placeholder:text-muted-foreground focus:bg-card focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
         />
       </div>
 
       {/* Documents List */}
       <div className="overflow-y-auto max-h-[200px] space-y-1.5 pr-0.5">
         {filteredDocs.length === 0 ? (
-          <div className="p-6 text-center text-xs text-slate-400">
+          <div className="p-6 text-center text-xs text-muted-foreground">
             No documents found in repository.
           </div>
         ) : (
@@ -163,8 +163,8 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                 className={cn(
                   'group flex flex-col p-2 rounded-lg border text-left transition-all cursor-pointer select-none',
                   isSelected
-                    ? 'border-blue-500 bg-blue-50/60 dark:border-blue-500 dark:bg-blue-950/30 ring-1 ring-blue-400/40'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 dark:border-slate-800 dark:bg-[#111D29] dark:hover:border-slate-700'
+                    ? 'border-primary bg-primary/60 dark:border-primary dark:bg-blue-950/30 ring-1 ring-primary/40'
+                    : 'border-secondary bg-card hover:border-border hover:bg-muted/70 dark:border-muted dark:bg-[#111D29] dark:hover:border-secondary-foreground'
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -173,8 +173,8 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                       className={cn(
                         'flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-bold',
                         isSelected
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-primary'
                       )}
                     >
                       <FileText className="h-4 w-4" />
@@ -184,13 +184,13 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                         className={cn(
                           'text-xs font-semibold truncate',
                           isSelected
-                            ? 'text-blue-900 dark:text-blue-200'
-                            : 'text-slate-800 dark:text-slate-200'
+                            ? 'text-blue-900 dark:text-primary/30'
+                            : 'text-foreground dark:text-muted-foreground'
                         )}
                       >
                         {doc.name}
                       </p>
-                      <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted-foreground dark:text-muted-foreground">
                         <span>{doc.category}</span>
                         <span>•</span>
                         <span>{doc.size}</span>
@@ -199,19 +199,19 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                   </div>
 
                   {isSelected && (
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white shrink-0">
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground shrink-0">
                       <Check className="h-2.5 w-2.5" />
                     </span>
                   )}
                 </div>
 
                 {/* Updated date */}
-                <div className="mt-1.5 pt-1 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400">
+                <div className="mt-1.5 pt-1 border-t border-secondary/60 dark:border-muted/60 flex items-center justify-between text-[10px] text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {doc.updatedAt}
                   </span>
-                  <span className="uppercase text-[9px] font-bold tracking-wider px-1 py-[0.8px] rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  <span className="uppercase text-[9px] font-bold tracking-wider px-1 py-[0.8px] rounded bg-muted dark:bg-muted text-secondary-foreground dark:text-muted-foreground">
                     {doc.extension}
                   </span>
                 </div>
@@ -230,12 +230,12 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
 
       {/* Action Footer for Selected Document */}
       {selectedDoc && (
-        <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+        <div className="mt-2.5 pt-2 border-t border-secondary dark:border-muted space-y-1.5">
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleInsertDocRef(selectedDoc)}
-            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition shadow-sm active:scale-[0.99]"
+            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition shadow-sm active:scale-[0.99]"
           >
             <span>Insert Selected Document</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -245,9 +245,9 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleOpenDoc(selectedDoc)}
-            className="w-full h-7 flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 text-slate-700 text-[11px] font-medium hover:bg-slate-100 transition dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-300 dark:hover:bg-slate-800"
+            className="w-full h-7 flex items-center justify-center gap-1.5 rounded-md border border-secondary bg-muted text-secondary-foreground text-[11px] font-medium hover:bg-muted transition dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted"
           >
-            <ExternalLink className="h-3 w-3 text-slate-500" />
+            <ExternalLink className="h-3 w-3 text-muted-foreground" />
             <span>Open Document</span>
           </button>
         </div>

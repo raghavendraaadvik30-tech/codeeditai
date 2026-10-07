@@ -13,13 +13,13 @@ export default function IconSearch({
 }: IconSearchProps) {
   return (
     <div className="relative flex items-center w-full">
-      <Search className="absolute left-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+      <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-9 pl-8 pr-3 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+        className="w-full h-9 pl-8 pr-3 text-xs bg-card dark:bg-secondary border border-secondary dark:border-muted rounded-lg outline-none focus:ring-1 focus:ring-primary/100 text-foreground dark:text-muted placeholder:text-muted-foreground"
       />
     </div>
   );

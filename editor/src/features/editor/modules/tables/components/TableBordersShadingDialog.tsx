@@ -171,22 +171,22 @@ export function TableBordersShadingDialog({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="max-w-[540px] p-0 overflow-hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl">
-        <DialogHeader className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between">
-          <DialogTitle className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+      <DialogContent className="max-w-[540px] p-0 overflow-hidden bg-card dark:bg-secondary rounded-xl border border-secondary dark:border-muted shadow-2xl">
+        <DialogHeader className="px-5 py-3.5 border-b border-muted dark:border-muted flex flex-row items-center justify-between">
+          <DialogTitle className="text-sm font-semibold text-foreground dark:text-muted">
             Table Borders and Shading
           </DialogTitle>
         </DialogHeader>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 px-5 pt-2">
+        <div className="flex border-b border-secondary dark:border-muted bg-muted/60 dark:bg-secondary/40 px-5 pt-2">
           <button
             type="button"
             onClick={() => setActiveTab("borders")}
             className={`px-4 py-1.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
               activeTab === "borders"
-                ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400"
+                ? "border-primary text-primary dark:border-primary dark:text-primary"
+                : "border-transparent text-muted0 hover:text-foreground dark:text-muted-foreground"
             }`}
           >
             Borders
@@ -196,8 +196,8 @@ export function TableBordersShadingDialog({
             onClick={() => setActiveTab("shading")}
             className={`px-4 py-1.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
               activeTab === "shading"
-                ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400"
+                ? "border-primary text-primary dark:border-primary dark:text-primary"
+                : "border-transparent text-muted0 hover:text-foreground dark:text-muted-foreground"
             }`}
           >
             Shading
@@ -209,7 +209,7 @@ export function TableBordersShadingDialog({
             <div className="space-y-4">
               {/* Border Setting Options */}
               <div>
-                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5 block">
                   Setting
                 </Label>
                 <div className="grid grid-cols-5 gap-1.5">
@@ -228,8 +228,8 @@ export function TableBordersShadingDialog({
                       onClick={() => setBorderSetting(id)}
                       className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                         borderSetting === id
-                          ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/50 dark:border-blue-400 dark:text-blue-200"
-                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                          ? "bg-primary/10 border-primary/100 text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                          : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                       }`}
                     >
                       {label}
@@ -241,7 +241,7 @@ export function TableBordersShadingDialog({
               {/* Style, Width, and Color */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                  <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
                     Style
                   </Label>
                   <select
@@ -249,7 +249,7 @@ export function TableBordersShadingDialog({
                     onChange={(e) =>
                       setBorderStyle(e.target.value as "solid" | "dashed" | "dotted" | "double")
                     }
-                    className="w-full h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 outline-none"
+                    className="w-full h-8 px-2.5 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-muted text-xs text-foreground dark:text-muted-foreground outline-none"
                   >
                     <option value="solid">───── Solid</option>
                     <option value="dashed">- - - - - Dashed</option>
@@ -259,13 +259,13 @@ export function TableBordersShadingDialog({
                 </div>
 
                 <div>
-                  <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                  <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
                     Width
                   </Label>
                   <select
                     value={borderWidth}
                     onChange={(e) => setBorderWidth(parseInt(e.target.value, 10))}
-                    className="w-full h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 outline-none"
+                    className="w-full h-8 px-2.5 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-muted text-xs text-foreground dark:text-muted-foreground outline-none"
                   >
                     <option value={1}>1/2 pt (1px)</option>
                     <option value={2}>1 pt (2px)</option>
@@ -277,7 +277,7 @@ export function TableBordersShadingDialog({
 
               {/* Border Color */}
               <div>
-                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5 block">
                   Color
                 </Label>
                 <div className="flex flex-wrap items-center gap-1.5 mb-2">
@@ -289,8 +289,8 @@ export function TableBordersShadingDialog({
                       onClick={() => setBorderColor(c.hex)}
                       className={`h-5 w-5 rounded-full border transition-transform hover:scale-110 cursor-pointer ${
                         borderColor.toLowerCase() === c.hex.toLowerCase()
-                          ? "ring-2 ring-blue-500 scale-110"
-                          : "border-slate-300 dark:border-slate-700"
+                          ? "ring-2 ring-primary/100 scale-110"
+                          : "border-border dark:border-secondary-foreground"
                       }`}
                       style={{ backgroundColor: c.hex }}
                     />
@@ -301,13 +301,13 @@ export function TableBordersShadingDialog({
                     type="color"
                     value={borderColor}
                     onChange={(e) => setBorderColor(e.target.value)}
-                    className="h-7 w-9 rounded border border-slate-200 cursor-pointer"
+                    className="h-7 w-9 rounded border border-secondary cursor-pointer"
                   />
                   <input
                     type="text"
                     value={borderColor}
                     onChange={(e) => setBorderColor(e.target.value)}
-                    className="h-7 w-28 px-2 rounded border border-slate-200 dark:border-slate-700 text-xs font-mono bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                    className="h-7 w-28 px-2 rounded border border-secondary dark:border-secondary-foreground text-xs font-mono bg-card dark:bg-muted text-foreground dark:text-muted-foreground"
                   />
                 </div>
               </div>
@@ -316,7 +316,7 @@ export function TableBordersShadingDialog({
             <div className="space-y-4">
               {/* Shading / Fill Color */}
               <div>
-                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5 block">
                   Fill Shading
                 </Label>
                 <div className="grid grid-cols-4 gap-2 mb-3">
@@ -327,15 +327,15 @@ export function TableBordersShadingDialog({
                       onClick={() => setShadingColor(c.hex)}
                       className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all cursor-pointer ${
                         shadingColor.toLowerCase() === c.hex.toLowerCase()
-                          ? "ring-2 ring-blue-500 border-blue-500 bg-blue-50/40 dark:bg-blue-950/40"
-                          : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-800"
+                          ? "ring-2 ring-primary/100 border-primary/100 bg-primary/40 dark:bg-blue-950/40"
+                          : "border-secondary bg-card dark:border-muted dark:bg-muted"
                       }`}
                     >
                       <span
-                        className="h-4 w-4 rounded-xs border border-slate-300 dark:border-slate-600 shrink-0"
+                        className="h-4 w-4 rounded-xs border border-border dark:border-secondary-foreground shrink-0"
                         style={{ backgroundColor: c.hex }}
                       />
-                      <span className="text-[11px] truncate text-slate-700 dark:text-slate-300">
+                      <span className="text-[11px] truncate text-secondary-foreground dark:text-muted-foreground">
                         {c.name}
                       </span>
                     </button>
@@ -343,17 +343,17 @@ export function TableBordersShadingDialog({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Label className="text-[11px] text-slate-500">Custom Color:</Label>
+                  <Label className="text-[11px] text-muted0">Custom Color:</Label>
                   <input
                     type="color"
                     value={shadingColor === "transparent" ? "#ffffff" : shadingColor}
                     onChange={(e) => setShadingColor(e.target.value)}
-                    className="h-7 w-9 rounded border border-slate-200 cursor-pointer"
+                    className="h-7 w-9 rounded border border-secondary cursor-pointer"
                   />
                   <button
                     type="button"
                     onClick={() => setShadingColor("transparent")}
-                    className="h-7 px-2.5 rounded border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="h-7 px-2.5 rounded border border-secondary dark:border-secondary-foreground text-[11px] text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                   >
                     Clear Fill
                   </button>
@@ -363,14 +363,14 @@ export function TableBordersShadingDialog({
           )}
 
           {/* Apply To Scope */}
-          <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+          <div className="border-t border-muted dark:border-muted pt-3">
+            <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
               Apply To
             </Label>
             <select
               value={applyTo}
               onChange={(e) => setApplyTo(e.target.value as "cell" | "table")}
-              className="w-full h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 outline-none"
+              className="w-full h-8 px-2.5 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-muted text-xs text-foreground dark:text-muted-foreground outline-none"
             >
               <option value="cell">Selected Cell</option>
               <option value="table">Whole Table</option>
@@ -378,7 +378,7 @@ export function TableBordersShadingDialog({
           </div>
         </div>
 
-        <DialogFooter className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex justify-end gap-2">
+        <DialogFooter className="px-5 py-3 border-t border-muted dark:border-muted bg-muted/70 dark:bg-secondary/50 flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>
             Cancel
           </Button>

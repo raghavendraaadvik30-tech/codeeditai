@@ -119,7 +119,7 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
     <div className="space-y-3 pt-1">
       {/* Link Text */}
       <div>
-        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+        <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
           Link Text
         </label>
         <input
@@ -127,17 +127,17 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
           value={displayText}
           onChange={(e) => setDisplayText(e.target.value)}
           placeholder="Enter display text (or select text in document)"
-          className="w-full h-8 px-2.5 text-xs rounded-md border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
+          className="w-full h-8 px-2.5 text-xs rounded-md border border-secondary bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
         />
       </div>
 
       {/* Web Address */}
       <div>
-        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+        <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
           Web Address
         </label>
         <div className="relative">
-          <Globe className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Globe className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <input
             type="text"
             value={url}
@@ -146,7 +146,7 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
               if (error) setError(null);
             }}
             placeholder="https://example.com"
-            className="w-full h-8 pl-8 pr-2.5 text-xs rounded-md border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-100"
+            className="w-full h-8 pl-8 pr-2.5 text-xs rounded-md border border-secondary bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleInsert();
             }}
@@ -161,16 +161,16 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
           id="web-new-tab"
           checked={openInNewTab}
           onChange={(e) => setOpenInNewTab(e.target.checked)}
-          className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary cursor-pointer"
         />
-        <label htmlFor="web-new-tab" className="text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+        <label htmlFor="web-new-tab" className="text-[11px] text-secondary-foreground dark:text-muted-foreground cursor-pointer select-none">
           Open link in new browser tab
         </label>
       </div>
 
       {/* Feedback Messages */}
       {error && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
+        <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-rose-200 text-destructive text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -191,7 +191,7 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
           e.preventDefault();
         }}
         onClick={handleInsert}
-        className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition shadow-sm active:scale-[0.99]"
+        className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition shadow-sm active:scale-[0.99]"
       >
         <span>Insert Link</span>
         <ArrowRight className="h-3.5 w-3.5" />

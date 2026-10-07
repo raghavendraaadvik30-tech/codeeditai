@@ -43,19 +43,19 @@ export const FigureGallery: React.FC<FigureGalleryProps> = ({
       {/* Search & Category Filter */}
       <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search figures..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="w-full rounded-xl border border-secondary bg-muted pl-9 pr-3 py-2 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
           />
         </div>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          className="rounded-xl border border-secondary bg-muted px-3 py-2 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
         >
           <option value="ALL">All Categories</option>
           {FIGURE_CATEGORIES.map((cat) => (
@@ -68,9 +68,9 @@ export const FigureGallery: React.FC<FigureGalleryProps> = ({
 
       {/* Grid */}
       {filteredFigures.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-800">
-          <ImageIcon className="h-8 w-8 text-slate-400" />
-          <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-8 text-center dark:border-muted">
+          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+          <p className="mt-2 text-xs font-medium text-secondary-foreground dark:text-muted-foreground">
             No figures match your query.
           </p>
         </div>
@@ -84,27 +84,27 @@ export const FigureGallery: React.FC<FigureGalleryProps> = ({
                 onClick={() => onSelectFigure(fig)}
                 className={`group relative cursor-pointer overflow-hidden rounded-xl border p-2 transition-all duration-200 ${
                   isSelected
-                    ? 'border-blue-500 bg-blue-50/40 ring-2 ring-blue-500/20 dark:bg-blue-950/30'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-[#111D29]'
+                    ? 'border-primary/100 bg-primary/40 ring-2 ring-primary/100/20 dark:bg-blue-950/30'
+                    : 'border-secondary bg-card hover:border-border hover:shadow-md dark:border-muted dark:bg-[#111D29]'
                 }`}
               >
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900">
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted dark:bg-secondary">
                   <img
                     src={fig.src}
                     alt={fig.altText || fig.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   {isSelected && (
-                    <div className="absolute right-2 top-2 rounded-full bg-blue-600 p-0.5 text-white shadow">
+                    <div className="absolute right-2 top-2 rounded-full bg-primary p-0.5 text-primary-foreground shadow">
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
                   )}
                 </div>
                 <div className="mt-2">
-                  <p className="truncate text-xs font-semibold text-slate-900 dark:text-white">
+                  <p className="truncate text-xs font-semibold text-foreground dark:text-primary-foreground">
                     {fig.title}
                   </p>
-                  <p className="truncate text-[10px] text-slate-500">
+                  <p className="truncate text-[10px] text-muted0">
                     {fig.category} • {fig.width}px
                   </p>
                 </div>

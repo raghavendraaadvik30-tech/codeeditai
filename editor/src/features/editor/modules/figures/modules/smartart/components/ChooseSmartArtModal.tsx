@@ -166,7 +166,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/40 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -177,20 +177,20 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
       aria-labelledby="smartart-modal-title"
     >
       <div
-        className="relative flex flex-col w-full max-w-5xl h-[600px] bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 dark:bg-[#111D29] dark:border-slate-800 dark:text-slate-100 animate-in zoom-in-95 duration-150"
+        className="relative flex flex-col w-full max-w-5xl h-[600px] bg-card rounded-xl shadow-2xl border border-secondary overflow-hidden text-foreground dark:bg-[#111D29] dark:border-muted dark:text-muted animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL TOP BAR */}
-        <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-secondary dark:border-muted bg-muted/60 dark:bg-secondary/40">
           <div className="flex items-center gap-2">
-            <span id="smartart-modal-title" className="font-bold text-sm text-slate-700 dark:text-slate-200">
+            <span id="smartart-modal-title" className="font-bold text-sm text-secondary-foreground dark:text-muted-foreground">
               Choose a SmartArt Graphic
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-md text-muted-foreground hover:text-secondary-foreground hover:bg-muted dark:hover:text-muted-foreground dark:hover:bg-muted transition-colors"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
@@ -200,16 +200,16 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
         {/* 3-COLUMN BODY */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* COLUMN 1: CATEGORIES SIDEBAR */}
-          <div className="w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111D29] flex flex-col min-h-0 overflow-hidden">
+          <div className="w-64 shrink-0 border-r border-secondary dark:border-muted bg-card dark:bg-[#111D29] flex flex-col min-h-0 overflow-hidden">
             {/* Category Header */}
-            <div className="p-4 border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111D29]">
+            <div className="p-4 border-b border-secondary/80 dark:border-muted bg-card dark:bg-[#111D29]">
               <div className="flex items-center gap-3">
                 <SmartArtCategoryIcon category="header" />
                 <div>
-                  <h2 className="text-[20px] font-bold text-[#0f2744] dark:text-white leading-tight">
+                  <h2 className="text-[20px] font-bold text-[#0f2744] dark:text-primary-foreground leading-tight">
                     SmartArt
                   </h2>
-                  <p className="text-[14px] text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                  <p className="text-[14px] text-muted0 dark:text-muted-foreground font-normal mt-0.5">
                     Choose a SmartArt graphic
                   </p>
                 </div>
@@ -229,7 +229,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     className={`flex items-center justify-between w-full h-[54px] px-3.5 rounded-[10px] transition-colors duration-150 text-left outline-none cursor-pointer ${
                       isSelected
                         ? 'bg-[#EEF5FF] dark:bg-blue-950/70'
-                        : 'bg-transparent hover:bg-[#F5F8FC] dark:hover:bg-slate-800/60'
+                        : 'bg-transparent hover:bg-[#F5F8FC] dark:hover:bg-muted/60'
                     }`}
                     aria-label={`Select ${cat.label} SmartArt category`}
                   >
@@ -238,8 +238,8 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                       <span
                         className={`text-[16px] leading-tight truncate ${
                           isSelected
-                            ? 'font-bold text-[#0078d4] dark:text-blue-400'
-                            : 'font-semibold text-[#1f2937] dark:text-slate-200'
+                            ? 'font-bold text-[#0078d4] dark:text-primary'
+                            : 'font-semibold text-[#1f2937] dark:text-muted-foreground'
                         }`}
                       >
                         {cat.label}
@@ -249,8 +249,8 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     <span
                       className={`text-[18px] font-bold shrink-0 transition-colors ${
                         isSelected
-                          ? 'text-[#0078d4] dark:text-blue-400'
-                          : 'text-slate-400'
+                          ? 'text-[#0078d4] dark:text-primary'
+                          : 'text-muted-foreground'
                       }`}
                     >
                       ›
@@ -262,9 +262,9 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
           </div>
 
           {/* COLUMN 2: LAYOUT THUMBNAILS GRID */}
-          <div className="flex-1 min-w-0 border-r border-slate-200 dark:border-slate-800 p-4 overflow-y-auto bg-white dark:bg-[#111D29]">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800/80">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <div className="flex-1 min-w-0 border-r border-secondary dark:border-muted p-4 overflow-y-auto bg-card dark:bg-[#111D29]">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-muted dark:border-muted/80">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted0 dark:text-muted-foreground">
                 {selectedCategory} Layouts ({categoryLayouts.length})
               </span>
             </div>
@@ -285,8 +285,8 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     }}
                     className={`group flex flex-col items-center justify-between p-2 rounded-lg border transition-all text-center aspect-[4/3] ${
                       isSelected
-                        ? 'border-blue-600 bg-blue-50/60 ring-2 ring-blue-500/20 shadow-xs dark:border-blue-500 dark:bg-blue-950/30'
-                        : 'border-slate-200 bg-slate-50/30 hover:border-slate-300 hover:bg-slate-100/50 dark:border-slate-800 dark:bg-slate-900/30 dark:hover:border-slate-700'
+                        ? 'border-primary bg-primary/60 ring-2 ring-primary/100/20 shadow-xs dark:border-primary/100 dark:bg-blue-950/30'
+                        : 'border-secondary bg-muted/30 hover:border-border hover:bg-muted/50 dark:border-muted dark:bg-secondary/30 dark:hover:border-secondary-foreground'
                     }`}
                     title={layout.name}
                   >
@@ -301,8 +301,8 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     <span
                       className={`mt-1 text-[11px] leading-tight line-clamp-2 w-full font-medium ${
                         isSelected
-                          ? 'text-blue-700 dark:text-blue-300 font-semibold'
-                          : 'text-slate-600 dark:text-slate-300'
+                          ? 'text-primary/90 dark:text-blue-300 font-semibold'
+                          : 'text-secondary-foreground dark:text-muted-foreground'
                       }`}
                     >
                       {layout.name}
@@ -314,14 +314,14 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
           </div>
 
           {/* COLUMN 3: LARGE PREVIEW & DESCRIPTION */}
-          <div className="w-72 shrink-0 p-4 flex flex-col justify-between bg-slate-50/20 dark:bg-slate-950/10 overflow-y-auto">
+          <div className="w-72 shrink-0 p-4 flex flex-col justify-between bg-muted/20 dark:bg-foreground/10 overflow-y-auto">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 block">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted0 dark:text-muted-foreground mb-3 block">
                 Preview
               </span>
 
               {/* Large graphic preview */}
-              <div className="w-full h-44 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1620] p-3 flex items-center justify-center shadow-inner">
+              <div className="w-full h-44 rounded-lg border border-secondary dark:border-muted bg-card dark:bg-[#0d1620] p-3 flex items-center justify-center shadow-inner">
                 {activeLayout && (
                   <SmartArtPreview
                     layoutId={activeLayout.id}
@@ -334,34 +334,34 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
 
               {/* Layout Name & Description */}
               <div className="mt-4">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h4 className="text-sm font-bold text-foreground dark:text-primary-foreground">
                   {activeLayout?.name}
                 </h4>
-                <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="mt-2 text-xs text-secondary-foreground dark:text-muted-foreground leading-relaxed">
                   {activeLayout?.description}
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800/80 text-[11px] text-slate-400">
+            <div className="mt-4 pt-3 border-t border-secondary/80 dark:border-muted/80 text-[11px] text-muted-foreground">
               Double-click any layout to insert directly.
             </div>
           </div>
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="flex items-center justify-end gap-2.5 px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+        <div className="flex items-center justify-end gap-2.5 px-6 py-3 border-t border-secondary dark:border-muted bg-muted/50 dark:bg-secondary/40">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="px-4 py-1.5 text-xs font-semibold rounded-md border border-border bg-card text-secondary-foreground hover:bg-muted hover:text-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleConfirm}
-            className="px-5 py-1.5 text-xs font-semibold rounded-md bg-[#0078d4] text-white hover:bg-[#005a9e] shadow-xs transition-colors"
+            className="px-5 py-1.5 text-xs font-semibold rounded-md bg-[#0078d4] text-primary-foreground hover:bg-[#005a9e] shadow-xs transition-colors"
           >
             OK
           </button>

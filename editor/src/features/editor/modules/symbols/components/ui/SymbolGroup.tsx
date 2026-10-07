@@ -22,13 +22,13 @@ export default function SymbolGroup({
             font-medium
             uppercase
             tracking-wide
-            text-slate-500
+            text-muted-foreground
           "
         >
           {group.name}
         </h3>
 
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-muted-foreground">
           {group.symbols.length}
         </span>
       </div>

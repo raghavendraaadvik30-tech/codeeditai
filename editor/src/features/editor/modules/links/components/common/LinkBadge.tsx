@@ -20,23 +20,23 @@ export interface LinkBadgeProps {
 }
 
 export function LinkBadge({ type, severity, label, className, icon }: LinkBadgeProps) {
-  let badgeStyles = 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+  let badgeStyles = 'bg-muted text-secondary-foreground dark:bg-muted dark:text-muted-foreground';
   let defaultLabel = label;
 
   if (severity === 'error') {
-    badgeStyles = 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400 border border-red-200 dark:border-red-900/50';
+    badgeStyles = 'bg-destructive/10 text-red-700 dark:bg-red-950/60 dark:text-red-400 border border-destructive/20 dark:border-red-900/50';
     defaultLabel = defaultLabel || 'Error';
   } else if (severity === 'warning') {
     badgeStyles = 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50';
     defaultLabel = defaultLabel || 'Warning';
   } else if (severity === 'info') {
-    badgeStyles = 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50';
+    badgeStyles = 'bg-primary/15 text-primary/90 dark:bg-blue-950/60 dark:text-primary border border-primary/30 dark:border-blue-900/50';
     defaultLabel = defaultLabel || 'Info';
   } else if (type === 'external') {
     badgeStyles = 'bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-400 border border-sky-200/60';
     defaultLabel = defaultLabel || 'Web Link';
   } else if (type === 'internal') {
-    badgeStyles = 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400 border border-indigo-200/60';
+    badgeStyles = 'bg-primary/10 text-primary/90 dark:bg-indigo-950/50 dark:text-indigo-400 border border-indigo-200/60';
     defaultLabel = defaultLabel || 'Internal Ref';
   } else if (type === 'bookmark') {
     badgeStyles = 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/60';

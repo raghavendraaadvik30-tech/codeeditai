@@ -66,7 +66,7 @@ export default function ResetPassword() {
         {/* Logo */}
         <div className="mb-8 text-center">
 
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-indigo-600 text-primary-foreground shadow-lg">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg">
             <ShieldCheck className="h-7 w-7" />
           </div>
 

@@ -28,19 +28,19 @@ export default function SymbolButton({
         overflow-hidden
         rounded-lg
         border
-        border-slate-200
-        bg-white
+        border-secondary
+        bg-card
         px-2
-        text-slate-900
+        text-foreground
         transition
         hover:border-blue-300
-        hover:bg-blue-50
-        hover:text-blue-600
+        hover:bg-primary/10
+        hover:text-primary
         active:scale-95
-        dark:border-slate-700
+        dark:border-secondary-foreground
         dark:bg-[#111D29]
-        dark:text-white
-        dark:hover:border-blue-500
+        dark:text-primary-foreground
+        dark:hover:border-primary
         dark:hover:bg-blue-950
       "
     >

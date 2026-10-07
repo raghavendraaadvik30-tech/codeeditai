@@ -16,7 +16,7 @@ export default function IconPicker({
 }: IconPickerProps) {
   if (icons.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center text-slate-400">
+      <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
         <p className="text-xs">No icons found</p>
       </div>
     );
@@ -35,8 +35,8 @@ export default function IconPicker({
             onDoubleClick={() => onDoubleClickInsert?.(item)}
             className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all ${
               isSelected
-                ? "bg-blue-50 dark:bg-blue-950/60 border-blue-500 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-blue-500/30"
-                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:border-slate-300"
+                ? "bg-primary/10 dark:bg-blue-950/60 border-primary/100 text-primary dark:text-primary shadow-sm ring-1 ring-primary/100/30"
+                : "bg-card dark:bg-secondary border-secondary dark:border-muted text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted/60 hover:border-border"
             }`}
           >
             <Icon icon={item.svg} className="h-6 w-6 shrink-0" />

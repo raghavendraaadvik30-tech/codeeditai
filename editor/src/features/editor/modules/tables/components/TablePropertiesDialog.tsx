@@ -130,9 +130,9 @@ export function TablePropertiesDialog({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="max-w-[460px] p-0 overflow-hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl">
-        <DialogHeader className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between">
-          <DialogTitle className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+      <DialogContent className="max-w-[460px] p-0 overflow-hidden bg-card dark:bg-secondary rounded-xl border border-secondary dark:border-muted shadow-2xl">
+        <DialogHeader className="px-5 py-3.5 border-b border-muted dark:border-muted flex flex-row items-center justify-between">
+          <DialogTitle className="text-sm font-semibold text-foreground dark:text-muted">
             Table Properties
           </DialogTitle>
         </DialogHeader>
@@ -140,7 +140,7 @@ export function TablePropertiesDialog({
         <div className="p-5 space-y-4 text-xs">
           {/* Alignment */}
           <div>
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+            <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5 block">
               Alignment
             </Label>
             <div className="grid grid-cols-3 gap-2">
@@ -157,8 +157,8 @@ export function TablePropertiesDialog({
                   onClick={() => setAlignment(id)}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     alignment === id
-                      ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/50 dark:border-blue-400 dark:text-blue-200"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                      ? "bg-primary/10 border-primary/100 text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >
                   {label}
@@ -169,7 +169,7 @@ export function TablePropertiesDialog({
 
           {/* Preferred Width */}
           <div>
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+            <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5 block">
               Preferred Width
             </Label>
             <div className="space-y-2">
@@ -179,8 +179,8 @@ export function TablePropertiesDialog({
                   onClick={() => setWidthMode("100%")}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     widthMode === "100%"
-                      ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/50 dark:border-blue-400 dark:text-blue-200"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                      ? "bg-primary/10 border-primary/100 text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >
                   100% (Page)
@@ -190,8 +190,8 @@ export function TablePropertiesDialog({
                   onClick={() => setWidthMode("auto")}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     widthMode === "auto"
-                      ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/50 dark:border-blue-400 dark:text-blue-200"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                      ? "bg-primary/10 border-primary/100 text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >
                   Auto Fit
@@ -201,8 +201,8 @@ export function TablePropertiesDialog({
                   onClick={() => setWidthMode("custom")}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     widthMode === "custom"
-                      ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/50 dark:border-blue-400 dark:text-blue-200"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                      ? "bg-primary/10 border-primary/100 text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >
                   Custom
@@ -211,14 +211,14 @@ export function TablePropertiesDialog({
 
               {widthMode === "custom" && (
                 <div className="flex items-center gap-2 pt-1">
-                  <span className="text-[11px] text-slate-500">Width (px):</span>
+                  <span className="text-[11px] text-muted0">Width (px):</span>
                   <input
                     type="number"
                     min={100}
                     max={1200}
                     value={customWidthPx}
                     onChange={(e) => setCustomWidthPx(Math.max(100, parseInt(e.target.value, 10) || 600))}
-                    className="w-24 h-7 px-2 rounded border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                    className="w-24 h-7 px-2 rounded border border-secondary dark:border-secondary-foreground text-xs bg-card dark:bg-muted text-foreground dark:text-muted-foreground"
                   />
                 </div>
               )}
@@ -227,7 +227,7 @@ export function TablePropertiesDialog({
 
           {/* Cell Padding */}
           <div>
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+            <Label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5 block">
               Cell Padding (Margins)
             </Label>
             <div className="flex items-center gap-2">
@@ -237,23 +237,23 @@ export function TablePropertiesDialog({
                 max={20}
                 value={cellPadding}
                 onChange={(e) => setCellPadding(parseInt(e.target.value, 10))}
-                className="flex-1 accent-blue-600 cursor-pointer"
+                className="flex-1 accent-primary cursor-pointer"
               />
-              <span className="w-12 text-right font-mono text-[11px] text-slate-600 dark:text-slate-300">
+              <span className="w-12 text-right font-mono text-[11px] text-secondary-foreground dark:text-muted-foreground">
                 {cellPadding} px
               </span>
             </div>
           </div>
 
           {/* Table Summary Info */}
-          <div className="rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-2.5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-            <span>Rows: <strong className="text-slate-700 dark:text-slate-200">{rowCount}</strong></span>
-            <span>Columns: <strong className="text-slate-700 dark:text-slate-200">{colCount}</strong></span>
-            <span>Layout: <strong className="text-slate-700 dark:text-slate-200">{table?.style.tableLayout || "fixed"}</strong></span>
+          <div className="rounded-lg border border-muted dark:border-muted bg-muted/70 dark:bg-secondary/50 p-2.5 flex items-center justify-between text-[11px] text-muted0 dark:text-muted-foreground">
+            <span>Rows: <strong className="text-secondary-foreground dark:text-muted-foreground">{rowCount}</strong></span>
+            <span>Columns: <strong className="text-secondary-foreground dark:text-muted-foreground">{colCount}</strong></span>
+            <span>Layout: <strong className="text-secondary-foreground dark:text-muted-foreground">{table?.style.tableLayout || "fixed"}</strong></span>
           </div>
         </div>
 
-        <DialogFooter className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex justify-end gap-2">
+        <DialogFooter className="px-5 py-3 border-t border-muted dark:border-muted bg-muted/70 dark:bg-secondary/50 flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>
             Cancel
           </Button>
