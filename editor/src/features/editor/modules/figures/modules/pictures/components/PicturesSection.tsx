@@ -126,15 +126,13 @@ export const PicturesSection: React.FC = () => {
 
         {/* Insert Dropdown Button */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
               className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-blue-700 active:bg-blue-800 focus:outline-none"
             >
               <span>Insert</span>
               <ChevronDown className="h-3.5 w-3.5" />
-            </button>
-          </DropdownMenuTrigger>
+            </button>} />
 
           <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
             <DropdownMenuSub>

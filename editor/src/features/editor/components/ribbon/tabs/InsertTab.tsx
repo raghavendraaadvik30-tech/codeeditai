@@ -229,8 +229,7 @@ export default function InsertTab() {
           2. PAGE NUMBER DROPDOWN MENU (Matches Exact Structure and Styling)
           ------------------------------------------------------------------ */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
+        <DropdownMenuTrigger render={<button
             type="button"
             onMouseDown={saveSelection}
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 text-slate-700 dark:text-slate-200 cursor-pointer"
@@ -239,8 +238,7 @@ export default function InsertTab() {
             <Hash className="h-4 w-4 text-sky-600 dark:text-sky-400" />
             <span>Page Number</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
         <DropdownMenuContent align="start" className="w-56 text-xs p-1">
           {/* 1. Top of Page Submenu */}
           <DropdownMenuSub>

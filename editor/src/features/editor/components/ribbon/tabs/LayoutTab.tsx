@@ -455,8 +455,7 @@ export default function LayoutTab() {
 
       {/* MARGINS */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Margins">
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Margins">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -469,8 +468,7 @@ export default function LayoutTab() {
             </svg>
             <span>Margins</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
         <DropdownMenuContent align="start" className="w-64 text-xs">
           <DropdownMenuItem
             onClick={handleApplyNormalMargins}
@@ -554,8 +552,7 @@ export default function LayoutTab() {
 
       {/* ORIENTATION */}
       <Popover open={orientationOpen} onOpenChange={handleOpenOrientationChange}>
-        <PopoverTrigger asChild>
-          <button type="button" className={triggerClass} title="Orientation">
+        <PopoverTrigger render={<button type="button" className={triggerClass} title="Orientation">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -568,8 +565,7 @@ export default function LayoutTab() {
             </svg>
             <span>Orientation</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </PopoverTrigger>
+          </button>} />
         <PopoverContent
           align="start"
           className="w-[260px] p-3 rounded-xl border border-slate-200/90 bg-white shadow-xl dark:border-slate-800 dark:bg-[#0c1827] text-slate-900 dark:text-slate-100"
@@ -749,13 +745,11 @@ export default function LayoutTab() {
 
       {/* SIZE */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Paper Size">
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Paper Size">
             <FileText className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
             <span>Size</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
         <DropdownMenuContent align="start" className="w-64 text-xs">
           {/* Search Filter Box */}
           <div className="p-1.5 border-b border-slate-100 dark:border-slate-800">
@@ -812,13 +806,11 @@ export default function LayoutTab() {
 
       {/* COLUMNS */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Columns">
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Columns">
             <Columns2 className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
             <span>Columns</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
         <DropdownMenuContent align="start" className="w-48 text-xs">
           <DropdownMenuItem
             onClick={() => applyToAllSections({ columns: { type: "one", count: 1 } })}
@@ -896,8 +888,7 @@ export default function LayoutTab() {
 
       {/* WATERMARK */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Watermark">
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Watermark">
             <svg
               className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
               viewBox="0 0 24 24"
@@ -910,8 +901,7 @@ export default function LayoutTab() {
             </svg>
             <span>Watermark</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
         <DropdownMenuContent align="start" className="w-52 text-xs">
           <DropdownMenuItem
             onClick={() =>
@@ -1004,13 +994,11 @@ export default function LayoutTab() {
 
       {/* PAGE COLOR */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Page Color">
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Page Color">
             <Palette className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
             <span>Page Color</span>
             <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
         <DropdownMenuContent align="start" className="w-56 p-2 text-xs">
           <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold mb-2">
             Page Background Color

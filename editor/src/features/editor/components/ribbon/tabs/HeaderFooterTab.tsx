@@ -461,8 +461,7 @@ export default function HeaderFooterTab() {
 
           {/* 3. Page Number Dropdown Button */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
+            <DropdownMenuTrigger render={<button
                 type="button"
                 className="flex flex-col items-center justify-center w-[52px] h-[60px] rounded hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700 active:bg-slate-200/70 transition-colors p-0.5 cursor-pointer group"
                 title="Page Number: Insert page numbers into document"
@@ -475,8 +474,7 @@ export default function HeaderFooterTab() {
                     <ChevronDown className="w-2.5 h-2.5 text-slate-500" />
                   </span>
                 </span>
-              </button>
-            </DropdownMenuTrigger>
+              </button>} />
             <DropdownMenuContent align="start" className="w-56 text-xs p-1 shadow-lg bg-white dark:bg-[#0B1620]">
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="cursor-pointer">
@@ -554,8 +552,7 @@ export default function HeaderFooterTab() {
 
           {/* Quick Parts Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
+            <DropdownMenuTrigger render={<button
                 type="button"
                 className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-slate-100 hover:border hover:border-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-700 active:bg-slate-200/70 transition-colors p-0.5 cursor-pointer group"
                 title="Quick Parts: Insert reusable pieces of content"
@@ -568,8 +565,7 @@ export default function HeaderFooterTab() {
                     <ChevronDown className="w-2 h-2 text-slate-500" />
                   </span>
                 </span>
-              </button>
-            </DropdownMenuTrigger>
+              </button>} />
             <DropdownMenuContent align="start" className="w-48 text-xs p-1 shadow-lg bg-white dark:bg-[#0B1620]">
               <DropdownMenuItem onClick={handleInsertDocTitle} className="cursor-pointer">
                 Document Title
@@ -785,16 +781,14 @@ export default function HeaderFooterTab() {
 
           {/* Insert Alignment Tab Button / Menu */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
+            <DropdownMenuTrigger render={<button
                 type="button"
                 className="flex items-center gap-1 px-1 py-0.5 rounded text-[11px] text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                 title="Insert Alignment Tab"
               >
                 <WordAlignmentTabIcon className="w-3.5 h-3.5 text-blue-600" />
                 <span>Insert Alignment Tab</span>
-              </button>
-            </DropdownMenuTrigger>
+              </button>} />
             <DropdownMenuContent align="start" className="w-44 text-xs p-1 shadow-lg bg-white dark:bg-[#0B1620]">
               <DropdownMenuItem onClick={() => handleInsertAlignmentTab("center")} className="cursor-pointer">
                 Center Tab

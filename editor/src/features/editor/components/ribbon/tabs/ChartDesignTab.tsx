@@ -64,16 +64,14 @@ export default function ChartDesignTab() {
       <div className="flex items-center gap-1">
         {/* ADD CHART ELEMENT DROPDOWN */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
               className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
               <PlusCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <span>Add Element</span>
               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-          </DropdownMenuTrigger>
+            </button>} />
 
           <DropdownMenuContent align="start" className="w-52">
             {/* Chart Title Submenu */}
@@ -223,16 +221,14 @@ export default function ChartDesignTab() {
 
         {/* QUICK LAYOUT DROPDOWN */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
               className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
               <LayoutGrid className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               <span>Quick Layout</span>
               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-          </DropdownMenuTrigger>
+            </button>} />
 
           <DropdownMenuContent align="start" className="w-60">
             {QUICK_LAYOUTS.map((layout: { id: string; name: string; description: string }) => (
@@ -257,16 +253,14 @@ export default function ChartDesignTab() {
       <div className="flex items-center gap-1">
         {/* CHANGE COLORS DROPDOWN */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
               className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
               <Palette className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <span>Change Colors</span>
               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-          </DropdownMenuTrigger>
+            </button>} />
 
           <DropdownMenuContent align="start" className="w-56 p-1.5 space-y-1">
             {COLOR_SCHEMES.map((scheme: { id: string; name: string; colors: string[] }) => (

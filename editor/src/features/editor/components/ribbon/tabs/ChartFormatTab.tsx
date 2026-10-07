@@ -44,16 +44,14 @@ export default function ChartFormatTab() {
           1. SHAPE FILL (BACKGROUND)
           -------------------------------------------------------- */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
+        <DropdownMenuTrigger render={<button
             type="button"
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
           >
             <Paintbrush className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             <span>Shape Fill</span>
             <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
 
         <DropdownMenuContent align="start" className="w-48 p-2">
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
@@ -84,16 +82,14 @@ export default function ChartFormatTab() {
           2. SHAPE OUTLINE (BORDER)
           -------------------------------------------------------- */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
+        <DropdownMenuTrigger render={<button
             type="button"
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
           >
             <Square className="h-4 w-4 text-slate-600 dark:text-slate-400" />
             <span>Outline</span>
             <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+          </button>} />
 
         <DropdownMenuContent align="start" className="w-44">
           <DropdownMenuItem

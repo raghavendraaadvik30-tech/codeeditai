@@ -40,15 +40,13 @@ export const ShapesSection: React.FC = () => {
 
           {/* Insert Dropdown Button */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
+            <DropdownMenuTrigger render={<button
                 type="button"
                 className="flex items-center gap-1.5 rounded-md bg-[#0078d4] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#005a9e] focus:outline-none cursor-pointer"
               >
                 <span>Insert</span>
                 <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            </DropdownMenuTrigger>
+              </button>} />
 
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
