@@ -228,7 +228,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`flex items-center justify-between w-full h-[54px] px-3.5 rounded-[10px] transition-colors duration-150 text-left outline-none cursor-pointer ${
                       isSelected
-                        ? 'bg-[#EEF5FF] dark:bg-blue-950/70'
+                        ? 'bg-[#EEF5FF] dark:bg-navy-950/70'
                         : 'bg-transparent hover:bg-[#F5F8FC] dark:hover:bg-muted/60'
                     }`}
                     aria-label={`Select ${cat.label} SmartArt category`}
@@ -285,7 +285,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     }}
                     className={`group flex flex-col items-center justify-between p-2 rounded-lg border transition-all text-center aspect-[4/3] ${
                       isSelected
-                        ? 'border-primary bg-primary/60 ring-2 ring-primary/20 shadow-xs dark:border-primary dark:bg-blue-950/30'
+                        ? 'border-primary bg-primary/60 ring-2 ring-primary/20 shadow-xs dark:border-primary dark:bg-navy-950/30'
                         : 'border-secondary bg-muted/30 hover:border-border hover:bg-muted/50 dark:border-muted dark:bg-secondary/30 dark:hover:border-secondary-foreground'
                     }`}
                     title={layout.name}
@@ -301,7 +301,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     <span
                       className={`mt-1 text-[11px] leading-tight line-clamp-2 w-full font-medium ${
                         isSelected
-                          ? 'text-primary/90 dark:text-blue-300 font-semibold'
+                          ? 'text-primary/90 dark:text-navy-300 font-semibold'
                           : 'text-secondary-foreground dark:text-muted-foreground'
                       }`}
                     >

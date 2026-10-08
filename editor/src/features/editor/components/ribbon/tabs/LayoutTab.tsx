@@ -579,7 +579,7 @@ export default function LayoutTab() {
               className={cn(
                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors border",
                 tempOrientation === "portrait"
-                  ? "border-blue-300 bg-[#edf5fc] dark:border-primary dark:bg-blue-950/50"
+                  ? "border-navy-300 bg-[#edf5fc] dark:border-primary dark:bg-navy-950/50"
                   : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-muted/80"
               )}
             >
@@ -615,7 +615,7 @@ export default function LayoutTab() {
               className={cn(
                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors border",
                 tempOrientation === "landscape"
-                  ? "border-blue-300 bg-[#edf5fc] dark:border-primary dark:bg-blue-950/50"
+                  ? "border-navy-300 bg-[#edf5fc] dark:border-primary dark:bg-navy-950/50"
                   : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-muted/80"
               )}
             >
@@ -1895,7 +1895,7 @@ export default function LayoutTab() {
                         }}
                         className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-[#E1F0FF] border border-[#0078D4] text-foreground font-semibold shadow-xs dark:bg-blue-950/60 dark:text-primary/30 dark:border-primary"
+                            ? "bg-[#E1F0FF] border border-[#0078D4] text-foreground font-semibold shadow-xs dark:bg-navy-950/60 dark:text-primary/30 dark:border-primary"
                             : "text-secondary-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-primary-foreground hover:bg-muted dark:hover:bg-muted/60"
                         }`}
                       >

@@ -25,7 +25,7 @@ export const IconsSection: React.FC = () => {
         <div className="flex items-center justify-between">
           {/* Header Icon + Title & Subtitle */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-50 text-warning-600 dark:bg-warning-950/60 dark:text-warning-400">
               <Smile className="h-5 w-5" />
             </div>
             <div>
@@ -53,7 +53,7 @@ export const IconsSection: React.FC = () => {
                 onClick={() => setIsModalOpen(true)}
                 className="cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground"
               >
-                <Smile className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <Smile className="mr-2 h-4 w-4 text-warning-600 dark:text-warning-400" />
                 <span>Browse Icons...</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

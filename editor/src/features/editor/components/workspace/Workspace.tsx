@@ -445,7 +445,7 @@ export default function Workspace() {
               rounded-full
               border-2
               border-background
-              bg-green-500
+              bg-leaf-500
             "
           />
         </button>
@@ -1950,7 +1950,7 @@ function DocumentPage({
             : "shadow-[0_4px_20px_rgba(0,0,0,0.12)] border-secondary"
           }
           ${active && !isRead
-            ? "border-blue-300 ring-1 ring-blue-300/40"
+            ? "border-navy-300 ring-1 ring-navy-300/40"
             : ""
           }
         `}
@@ -2143,7 +2143,7 @@ function DocumentPage({
           text-muted-foreground
           transition-all
           ${isHeaderFooterActive
-                ? "border-b border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-blue-300/40 dark:border-primary dark:bg-blue-950/20"
+                ? "border-b border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
                 : "border-b border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
               }
         `}
@@ -2481,7 +2481,7 @@ function DocumentPage({
           text-muted-foreground
           transition-all
           ${isHeaderFooterActive
-                ? "border-t border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-blue-300/40 dark:border-primary dark:bg-blue-950/20"
+                ? "border-t border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
                 : "border-t border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
               }
         `}

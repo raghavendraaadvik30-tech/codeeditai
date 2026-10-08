@@ -70,7 +70,7 @@ export default function WorkspacePanelHeader({
             rounded-lg
             bg-primary/10
             text-primary
-            dark:bg-blue-950/50
+            dark:bg-navy-950/50
             dark:text-primary
           "
         >

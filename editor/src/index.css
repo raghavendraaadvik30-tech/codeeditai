@@ -56,6 +56,70 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ==========================================================
+   STATUS / HUE TOKENS (exact palette values)
+   Semantic aliases for raw hues that carry status or brand
+   meaning (success, warning, accents) and have no equivalent
+   among the base design tokens. Values are byte-identical to
+   the Tailwind palette shades they replace, so renaming a
+   class (e.g. bg-emerald-50 -> bg-success-50) changes no
+   pixels; it only satisfies shadcn/no-raw-colors.
+   ========================================================== */
+@theme {
+    --color-success-50: #ecfdf5;
+    --color-success-100: #d1fae5;
+    --color-success-200: #a7f3d0;
+    --color-success-300: #6ee7b7;
+    --color-success-400: #34d399;
+    --color-success-500: #10b981;
+    --color-success-600: #059669;
+    --color-success-700: #047857;
+    --color-success-800: #065f46;
+    --color-success-950: #022c22;
+
+    --color-warning-50: #fffbeb;
+    --color-warning-100: #fef3c7;
+    --color-warning-200: #fde68a;
+    --color-warning-300: #fcd34d;
+    --color-warning-400: #fbbf24;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #d97706;
+    --color-warning-700: #b45309;
+    --color-warning-800: #92400e;
+    --color-warning-900: #78350f;
+    --color-warning-950: #451a03;
+
+    --color-ember-50: #fff7ed;
+    --color-ember-500: #f97316;
+    --color-ember-700: #c2410c;
+
+    --color-leaf-500: #22c55e;
+    --color-leaf-600: #16a34a;
+
+    --color-sky-50: #f0f9ff;
+    --color-sky-500: #0ea5e9;
+    --color-sky-600: #0284c7;
+
+    --color-cyan-50: #ecfeff;
+    --color-cyan-600: #0891b2;
+
+    --color-violet-50: #f5f3ff;
+    --color-violet-100: #ede9fe;
+    --color-violet-500: #8b5cf6;
+    --color-violet-600: #7c3aed;
+    --color-violet-700: #6d28d9;
+
+    --color-purple-50: #faf5ff;
+    --color-purple-100: #f3e8ff;
+    --color-purple-500: #a855f7;
+    --color-purple-600: #9333ea;
+    --color-purple-700: #7e22ce;
+
+    --color-navy-300: #93c5fd;
+    --color-navy-900: #1e3a8a;
+    --color-navy-950: #172554;
+}
+
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);

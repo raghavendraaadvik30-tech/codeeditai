@@ -56,9 +56,9 @@ export function ChangeHistory() {
               className="flex items-center justify-between rounded-lg border border-muted bg-muted/70 p-2 dark:border-muted dark:bg-[#07131E]"
             >
               <div className="flex items-center gap-2 min-w-0">
-                {item.status === "accepted" && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
+                {item.status === "accepted" && <CheckCircle2 className="h-3.5 w-3.5 text-success-500 shrink-0" />}
                 {item.status === "rejected" && <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />}
-                {item.status === "pending" && <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
+                {item.status === "pending" && <Clock className="h-3.5 w-3.5 text-warning-500 shrink-0" />}
                 <div className="min-w-0">
                   <div className="font-semibold text-foreground dark:text-muted-foreground truncate max-w-[150px]">
                     {item.label || `${item.type.toUpperCase()}`}
@@ -71,10 +71,10 @@ export function ChangeHistory() {
               <span
                 className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
                   item.status === "accepted"
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                    ? "bg-success-50 text-success-700 dark:bg-success-950/40 dark:text-success-400"
                     : item.status === "rejected"
-                    ? "bg-destructive/10 text-destructive dark:bg-rose-950/40 dark:text-rose-400"
-                    : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                    ? "bg-destructive/10 text-destructive dark:bg-destructive/40 dark:text-destructive"
+                    : "bg-warning-50 text-warning-700 dark:bg-warning-950/40 dark:text-warning-400"
                 }`}
               >
                 {item.status}

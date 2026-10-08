@@ -53,10 +53,10 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
           {filtered.map((link) => (
             <div
               key={link.id}
-              className="group flex items-center justify-between rounded-lg border border-secondary bg-card p-2 transition-all hover:border-blue-300 dark:border-muted dark:bg-[#091524] dark:hover:border-secondary-foreground"
+              className="group flex items-center justify-between rounded-lg border border-secondary bg-card p-2 transition-all hover:border-navy-300 dark:border-muted dark:bg-[#091524] dark:hover:border-secondary-foreground"
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-blue-950/50 dark:text-primary">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-navy-950/50 dark:text-primary">
                   <Globe className="h-3.5 w-3.5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -102,7 +102,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
                     type="button"
                     onClick={() => onRemove(link)}
                     title="Remove hyperlink"
-                    className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-red-950/40"
+                    className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/40"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>

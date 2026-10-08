@@ -45,7 +45,7 @@ export default function EditorHeader() {
         border-b
         bg-card
         dark:bg-[#0B1620]
-        border-gray-200
+        border-secondary
         dark:border-muted
         flex
         items-center

@@ -52,12 +52,12 @@ export function LinksHistorySection({
       case 'Email':
         return {
           icon: Mail,
-          bg: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+          bg: 'bg-success-50 text-success-700 dark:bg-success-950/60 dark:text-success-300 border-success-200 dark:border-success-800',
         };
       case 'Document':
         return {
           icon: FileText,
-          bg: 'bg-primary/10 text-primary/90 dark:bg-blue-950/60 dark:text-blue-300 border-primary/30 dark:border-primary',
+          bg: 'bg-primary/10 text-primary/90 dark:bg-navy-950/60 dark:text-navy-300 border-primary/30 dark:border-primary',
         };
       case 'Cross Reference':
         return {
@@ -67,7 +67,7 @@ export function LinksHistorySection({
       case 'Bookmark':
         return {
           icon: BookmarkIcon,
-          bg: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+          bg: 'bg-warning-50 text-warning-700 dark:bg-warning-950/60 dark:text-warning-300 border-warning-200 dark:border-warning-800',
         };
       default:
         return {
@@ -106,7 +106,7 @@ export function LinksHistorySection({
               type="button"
               onClick={onRefresh}
               title="Refresh history (sync with active document links and remove deleted links)"
-              className="flex items-center gap-1 text-[10px] text-primary hover:text-primary dark:text-primary dark:hover:text-blue-300 font-semibold transition cursor-pointer"
+              className="flex items-center gap-1 text-[10px] text-primary hover:text-primary dark:text-primary dark:hover:text-navy-300 font-semibold transition cursor-pointer"
             >
               <RefreshCw className={cn("h-3 w-3 shrink-0", isRefreshing && "animate-spin")} />
               <span>Refresh</span>
@@ -117,7 +117,7 @@ export function LinksHistorySection({
             <button
               type="button"
               onClick={onClearHistory}
-              className="text-[10px] text-muted-foreground hover:text-destructive dark:text-muted-foreground dark:hover:text-rose-400 font-medium transition cursor-pointer"
+              className="text-[10px] text-muted-foreground hover:text-destructive dark:text-muted-foreground dark:hover:text-destructive font-medium transition cursor-pointer"
             >
               Clear History
             </button>
@@ -184,7 +184,7 @@ export function LinksHistorySection({
                   <button
                     type="button"
                     onClick={() => onExecuteAction(item)}
-                    className="px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/15 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/80 text-[11px] font-semibold flex items-center gap-1 transition shadow-2xs"
+                    className="px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/15 dark:bg-navy-950/60 dark:text-navy-300 dark:hover:bg-navy-900/80 text-[11px] font-semibold flex items-center gap-1 transition shadow-2xs"
                     title="Insert link into document sheet"
                   >
                     <Plus className="h-3 w-3" />
@@ -194,7 +194,7 @@ export function LinksHistorySection({
                   <button
                     type="button"
                     onClick={() => onRemoveItem(item.id)}
-                    className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition"
+                    className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/40 dark:hover:text-destructive transition"
                     title="Remove from history"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

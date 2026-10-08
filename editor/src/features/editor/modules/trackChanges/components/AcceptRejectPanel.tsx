@@ -53,15 +53,15 @@ export function AcceptRejectPanel() {
       </div>
 
       {activeChange && (
-        <div className="rounded-lg border border-primary/30 bg-primary/40 p-2 text-xs space-y-2 dark:border-blue-900/60 dark:bg-blue-950/20">
-          <div className="text-[11px] font-semibold text-blue-900 dark:text-blue-300 truncate">
+        <div className="rounded-lg border border-primary/30 bg-primary/40 p-2 text-xs space-y-2 dark:border-navy-900/60 dark:bg-navy-950/20">
+          <div className="text-[11px] font-semibold text-navy-900 dark:text-navy-300 truncate">
             Active: {activeChange.label || activeChange.type} by {activeChange.author}
           </div>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => acceptChange(activeChange.id)}
-              className="flex flex-1 items-center justify-center gap-1 rounded-md bg-emerald-600 py-1 text-[11px] font-semibold text-primary-foreground hover:bg-emerald-700 transition-colors"
+              className="flex flex-1 items-center justify-center gap-1 rounded-md bg-success-600 py-1 text-[11px] font-semibold text-primary-foreground hover:bg-success-700 transition-colors"
             >
               <Check className="h-3 w-3" />
               <span>Accept</span>
@@ -84,7 +84,7 @@ export function AcceptRejectPanel() {
           type="button"
           onClick={acceptAll}
           disabled={pendingChanges === 0}
-          className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-emerald-600 py-1.5 text-[11px] font-semibold text-primary-foreground hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-success-600 py-1.5 text-[11px] font-semibold text-primary-foreground hover:bg-success-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <CheckCheck className="h-3.5 w-3.5" />
           <span>Accept All</span>
@@ -93,7 +93,7 @@ export function AcceptRejectPanel() {
           type="button"
           onClick={rejectAll}
           disabled={pendingChanges === 0}
-          className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-rose-200 bg-destructive/50 py-1.5 text-[11px] font-semibold text-destructive hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-destructive/20 bg-destructive/50 py-1.5 text-[11px] font-semibold text-destructive hover:bg-destructive/10 dark:border-destructive/60 dark:bg-destructive/20 dark:text-destructive disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <Ban className="h-3.5 w-3.5" />
           <span>Reject All</span>

@@ -40,8 +40,8 @@ export function ReferencePanel() {
     <div className="flex h-full flex-col overflow-y-auto p-4 space-y-4 text-xs select-none dark:bg-[#07131E] dark:text-muted">
       {/* STATUS TOAST */}
       {insertedNotice && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-medium transition-all">
-          <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success-50 text-success-700 dark:bg-success-950/50 dark:text-success-300 border border-success-200 dark:border-success-800 text-[11px] font-medium transition-all">
+          <Check className="h-3.5 w-3.5 text-success-600 dark:text-success-400" />
           {insertedNotice}
         </div>
       )}
@@ -129,7 +129,7 @@ export function ReferencePanel() {
                       </p>
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-emerald-400">
+                    <div className="shrink-0 flex items-center gap-1 rounded-full border border-success-200/80 bg-success-50 px-2 py-0.5 text-[10px] font-medium text-success-600 dark:border-success-900/60 dark:bg-success-950/60 dark:text-success-400">
                       <Check className="h-3 w-3 stroke-[2.5]" />
                       Valid
                     </div>

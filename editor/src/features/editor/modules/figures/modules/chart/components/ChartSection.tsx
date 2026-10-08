@@ -55,7 +55,7 @@ export const ChartSection: React.FC = () => {
         <div className="flex items-center justify-between">
           {/* Chart Header Icon + Title & Subtitle */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-primary">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-primary">
               <BarChart2 className="h-5 w-5" />
             </div>
             <div>

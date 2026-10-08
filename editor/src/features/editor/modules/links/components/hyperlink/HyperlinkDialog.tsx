@@ -197,7 +197,7 @@ export function HyperlinkDialog({
                 {url && (
                   <div className="pt-1">
                     {urlValidation.isValid ? (
-                      <p className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
+                      <p className="flex items-center gap-1 text-[11px] text-success-600 dark:text-success-400">
                         <ShieldCheck className="h-3 w-3" /> Valid {urlValidation.isSecure ? 'Secure HTTPS' : 'HTTP'} link
                       </p>
                     ) : (

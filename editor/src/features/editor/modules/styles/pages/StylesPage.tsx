@@ -22,7 +22,7 @@
 //   if (error) {
 //     return (
 //       <div className="flex h-full w-full items-center justify-center p-4">
-//         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+//         <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
 //           Failed to load styles.
 //         </div>
 //       </div>

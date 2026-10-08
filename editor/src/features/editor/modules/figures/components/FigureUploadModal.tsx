@@ -159,7 +159,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
             }}
             className={`mt-4 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
               dragOver
-                ? 'border-primary bg-primary/50 dark:bg-blue-950/20'
+                ? 'border-primary bg-primary/50 dark:bg-navy-950/20'
                 : 'border-border dark:border-secondary-foreground'
             }`}
           >

@@ -110,7 +110,7 @@ export default function EditorStatusBar() {
             flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors
             ${
               trackChanges
-                ? "bg-primary/15 text-primary/90 hover:bg-primary/30 dark:bg-blue-950/60 dark:text-blue-300"
+                ? "bg-primary/15 text-primary/90 hover:bg-primary/30 dark:bg-navy-950/60 dark:text-navy-300"
                 : "text-muted-foreground hover:bg-secondary/60 dark:text-muted-foreground dark:hover:bg-muted"
             }
           `}
@@ -119,7 +119,7 @@ export default function EditorStatusBar() {
           <GitCompare className="h-3 w-3" />
           <span>Track Changes: {trackChanges ? "ON" : "OFF"}</span>
           {pendingChanges > 0 && (
-            <span className="ml-0.5 rounded-full bg-amber-500 text-primary-foreground px-1 text-[9px] font-bold">
+            <span className="ml-0.5 rounded-full bg-warning-500 text-primary-foreground px-1 text-[9px] font-bold">
               {pendingChanges}
             </span>
           )}

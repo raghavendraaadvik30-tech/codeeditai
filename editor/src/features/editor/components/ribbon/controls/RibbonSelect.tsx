@@ -87,7 +87,7 @@ export default function RibbonSelect({
           dark:bg-[#111D29]
           px-2
           text-xs
-          text-gray-800
+          text-foreground
           dark:text-muted-foreground
           hover:bg-muted
           dark:hover:bg-muted

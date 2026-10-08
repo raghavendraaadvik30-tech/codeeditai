@@ -21,14 +21,14 @@ export interface BrokenLinksReportProps {
 export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinksReportProps) {
   if (issues.length === 0) {
     return (
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 text-center dark:border-emerald-950/60 dark:bg-emerald-950/20">
-        <div className="flex h-8 w-8 mx-auto items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mb-2">
+      <div className="rounded-xl border border-success-200 bg-success-50/50 p-4 text-center dark:border-success-950/60 dark:bg-success-950/20">
+        <div className="flex h-8 w-8 mx-auto items-center justify-center rounded-full bg-success-100 text-success-600 dark:bg-success-900/50 dark:text-success-400 mb-2">
           ✓
         </div>
-        <h4 className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+        <h4 className="text-xs font-semibold text-success-800 dark:text-success-300">
           All References Valid
         </h4>
-        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+        <p className="text-[11px] text-success-600 dark:text-success-400 mt-0.5">
           No broken links, invalid targets, or protocol security issues found.
         </p>
       </div>
@@ -37,7 +37,7 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
 
   const getSeverityIcon = (severity: string) => {
     if (severity === 'error') return <AlertCircle className="h-4 w-4 text-destructive shrink-0" />;
-    if (severity === 'warning') return <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />;
+    if (severity === 'warning') return <AlertTriangle className="h-4 w-4 text-warning-500 shrink-0" />;
     return <Info className="h-4 w-4 text-primary shrink-0" />;
   };
 

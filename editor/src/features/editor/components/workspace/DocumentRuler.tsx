@@ -144,7 +144,7 @@ export default function DocumentRuler({
               x={x}
               y={11.5}
               textAnchor="middle"
-              className="fill-slate-700 dark:fill-slate-200 select-none font-sans"
+              className="fill-secondary-foreground dark:fill-muted-foreground select-none font-sans"
               style={{ fontSize: "9.5px", fontWeight: 600 }}
             >
               {cmVal}
@@ -189,7 +189,7 @@ export default function DocumentRuler({
               x={x}
               y={11.5}
               textAnchor="middle"
-              className="fill-slate-900 dark:fill-slate-100 select-none font-sans"
+              className="fill-foreground dark:fill-muted-foreground select-none font-sans"
               style={{ fontSize: "9.5px", fontWeight: 600 }}
             >
               {cmVal}
@@ -234,7 +234,7 @@ export default function DocumentRuler({
               x={x}
               y={11.5}
               textAnchor="middle"
-              className="fill-slate-700 dark:fill-slate-200 select-none font-sans"
+              className="fill-secondary-foreground dark:fill-muted-foreground select-none font-sans"
               style={{ fontSize: "9.5px", fontWeight: 600 }}
             >
               {cmVal}
@@ -351,7 +351,7 @@ export default function DocumentRuler({
             y2={17}
             stroke="#7B8798"
             strokeWidth={1}
-            className="dark:stroke-slate-500"
+            className="dark:stroke-muted-foreground"
           />
           <line
             x1={effectiveScaledContentEnd}
@@ -360,7 +360,7 @@ export default function DocumentRuler({
             y2={17}
             stroke="#7B8798"
             strokeWidth={1}
-            className="dark:stroke-slate-500"
+            className="dark:stroke-muted-foreground"
           />
 
           {/* TICK MARKS & NUMBERS */}
@@ -375,7 +375,7 @@ export default function DocumentRuler({
             fill="none"
             stroke="#7B8798"
             strokeWidth={1}
-            className="dark:stroke-slate-600"
+            className="dark:stroke-muted-foreground"
           />
 
           {/* FIRST LINE INDENT MARKER (Top Left Downward Triangle ▼) */}

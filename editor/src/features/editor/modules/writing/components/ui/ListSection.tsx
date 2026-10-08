@@ -36,7 +36,7 @@ export default function ListSection({
 
   return (
     <section className="mb-6">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Lists
       </h3>
 
@@ -64,14 +64,14 @@ export default function ListSection({
                     justify-between
                     rounded-md
                     border
-                    border-gray-200
+                    border-secondary
                     px-3
                     py-2
                     text-left
                     text-sm
-                    text-gray-700
+                    text-secondary-foreground
                     transition
-                    hover:bg-gray-100
+                    hover:bg-muted
                   "
                 >
                   <span className="flex items-center">
@@ -82,7 +82,7 @@ export default function ListSection({
                     <span>{tool.name}</span>
                   </span>
 
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     ▾
                   </span>
                 </button>
@@ -127,14 +127,14 @@ export default function ListSection({
                     justify-between
                     rounded-md
                     border
-                    border-gray-200
+                    border-secondary
                     px-3
                     py-2
                     text-left
                     text-sm
-                    text-gray-700
+                    text-secondary-foreground
                     transition
-                    hover:bg-gray-100
+                    hover:bg-muted
                   "
                 >
                   <span className="flex items-center">
@@ -145,7 +145,7 @@ export default function ListSection({
                     <span>{tool.name}</span>
                   </span>
 
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     ▾
                   </span>
                 </button>

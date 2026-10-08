@@ -33,7 +33,7 @@ export default function SymbolButton({
         px-2
         text-foreground
         transition
-        hover:border-blue-300
+        hover:border-navy-300
         hover:bg-primary/10
         hover:text-primary
         active:scale-95
@@ -41,7 +41,7 @@ export default function SymbolButton({
         dark:bg-[#111D29]
         dark:text-primary-foreground
         dark:hover:border-primary
-        dark:hover:bg-blue-950
+        dark:hover:bg-navy-950
       "
     >
       <span

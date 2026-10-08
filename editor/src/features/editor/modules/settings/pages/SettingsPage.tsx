@@ -114,7 +114,7 @@ function SettingsPageContent() {
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-foreground px-4 py-3 text-xs font-semibold text-primary-foreground shadow-2xl dark:bg-muted dark:text-secondary animate-in fade-in slide-in-from-bottom-4">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 dark:text-emerald-600" />
+          <CheckCircle2 className="h-4 w-4 text-success-400 dark:text-success-600" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -179,8 +179,8 @@ function SettingsPageContent() {
           <div className="rounded-2xl border border-secondary/90 bg-card p-5 shadow-sm dark:border-muted dark:bg-[#111D29]">
             {/* Top-Right Status Badge */}
             <div className="flex justify-end">
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[11px] font-semibold text-success-700 dark:bg-success-950/60 dark:text-success-400 border border-success-200/60 dark:border-success-800/60">
+                <span className="h-1.5 w-1.5 rounded-full bg-success-600" />
                 Active
               </span>
             </div>
@@ -292,7 +292,7 @@ function SettingsPageContent() {
 
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground dark:text-muted-foreground">Role</span>
-                <span className="inline-flex items-center rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-[11px] font-semibold text-[#0078d4] dark:bg-blue-950/80 dark:text-blue-300">
+                <span className="inline-flex items-center rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-[11px] font-semibold text-[#0078d4] dark:bg-navy-950/80 dark:text-navy-300">
                   {userRole}
                 </span>
               </div>
@@ -316,7 +316,7 @@ function SettingsPageContent() {
                 onClick={handleLogout}
                 title="Logout"
                 aria-label="Logout"
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-destructive/20 bg-destructive/60 text-destructive hover:bg-destructive/10 hover:border-red-300 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/60 transition-colors shrink-0"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-destructive/20 bg-destructive/60 text-destructive hover:bg-destructive/10 hover:border-destructive/30 dark:border-destructive/50 dark:bg-destructive/30 dark:text-destructive dark:hover:bg-destructive/60 transition-colors shrink-0"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -707,10 +707,10 @@ function SettingsPageContent() {
 
               {/* Green Success Information Box */}
               {settings.twoFactorEnabled && (
-                <div className="flex items-start gap-2.5 rounded-xl bg-[#ecfdf5] p-3.5 border border-[#a7f3d0] dark:bg-emerald-950/30 dark:border-emerald-800/50">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5 rounded-xl bg-[#ecfdf5] p-3.5 border border-[#a7f3d0] dark:bg-success-950/30 dark:border-success-800/50">
+                  <ShieldCheck className="h-4 w-4 text-success-600 dark:text-success-400 shrink-0 mt-0.5" />
                   <div className="text-xs">
-                    <span className="font-bold text-emerald-800 dark:text-emerald-300">
+                    <span className="font-bold text-success-800 dark:text-success-300">
                       2FA Status: Enabled & Active
                     </span>
                     <p className="mt-0.5 text-[11px] text-secondary-foreground dark:text-muted-foreground leading-relaxed">
@@ -1055,7 +1055,7 @@ function SettingsPageContent() {
                       setIsViewPhotoModalOpen(false);
                       showToast("Profile photo removed");
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-destructive/20 bg-destructive/60 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400 transition-colors shadow-sm"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-destructive/20 bg-destructive/60 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10 dark:border-destructive/50 dark:bg-destructive/30 dark:text-destructive transition-colors shadow-sm"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     <span>Remove</span>

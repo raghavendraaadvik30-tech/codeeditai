@@ -130,8 +130,8 @@
 //             p-3
 //             text-left
 //             transition
-//             hover:border-blue-300
-//             hover:bg-blue-50/40
+//             hover:border-navy-300
+//             hover:bg-primary/40
 //             dark:border-slate-700
 //             dark:bg-[#111D29]
 //           "
@@ -145,11 +145,11 @@
 //               items-center
 //               justify-center
 //               rounded-xl
-//               bg-blue-50
+//               bg-primary/10
 //               text-xl
 //               font-semibold
-//               text-blue-600
-//               dark:bg-blue-950/50
+//               text-primary
+//               dark:bg-navy-950/50
 //             "
 //           >
 //             {tool.icon}
@@ -161,7 +161,7 @@
 //                 block
 //                 text-sm
 //                 font-semibold
-//                 text-slate-900
+//                 text-foreground
 //                 dark:text-white
 //               "
 //             >
@@ -172,7 +172,7 @@
 //               className="
 //                 block
 //                 text-xs
-//                 text-slate-500
+//                 text-muted-foreground
 //                 dark:text-slate-400
 //               "
 //             >
@@ -195,20 +195,20 @@
 //         className="
 //           w-full
 //           rounded-lg
-//           bg-blue-600
+//           bg-primary
 //           px-4
 //           py-2.5
 //           text-sm
 //           font-medium
 //           text-white
-//           hover:bg-blue-700
+//           hover:bg-primary/90
 //         "
 //       >
 //         + Register Reference Link
 //       </button>
 
 //       <div>
-//         <p className="mb-2 text-xs font-medium text-slate-500">
+//         <p className="mb-2 text-xs font-medium text-muted-foreground">
 //           QUICK INSERT
 //         </p>
 
@@ -232,7 +232,7 @@
 //                 text-left
 //                 text-xs
 //                 font-medium
-//                 hover:bg-blue-50
+//                 hover:bg-primary/10
 //                 dark:border-slate-700
 //                 dark:bg-[#111D29]
 //               "
@@ -252,7 +252,7 @@
 //   return (
 //     <div className="space-y-3">
 //       <div className="rounded-lg border p-4">
-//         <p className="text-xs text-slate-500">
+//         <p className="text-xs text-muted-foreground">
 //           Size
 //         </p>
 
@@ -262,7 +262,7 @@
 //       </div>
 
 //       <div className="rounded-lg border p-4">
-//         <p className="text-xs text-slate-500">
+//         <p className="text-xs text-muted-foreground">
 //           Orientation
 //         </p>
 
@@ -272,7 +272,7 @@
 //       </div>
 
 //       <div className="rounded-lg border p-4">
-//         <p className="text-xs text-slate-500">
+//         <p className="text-xs text-muted-foreground">
 //           Margins
 //         </p>
 
@@ -306,7 +306,7 @@
 //         {title}
 //       </p>
 
-//       <p className="mt-1 text-xs text-slate-500">
+//       <p className="mt-1 text-xs text-muted-foreground">
 //         Tools for this section will appear here.
 //       </p>
 //     </div>

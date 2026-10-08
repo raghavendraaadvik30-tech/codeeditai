@@ -70,7 +70,7 @@ export function ChangeComparison({
               return (
                 <ins
                   key={i}
-                  className="bg-emerald-100/70 text-emerald-800 underline dark:bg-emerald-950/60 dark:text-emerald-300"
+                  className="bg-success-100/70 text-success-800 underline dark:bg-success-950/60 dark:text-success-300"
                 >
                   {token.value}
                 </ins>
@@ -80,7 +80,7 @@ export function ChangeComparison({
               return (
                 <del
                   key={i}
-                  className="bg-rose-100/70 text-rose-800 line-through dark:bg-rose-950/60 dark:text-rose-300"
+                  className="bg-destructive/70 text-destructive/60 line-through dark:bg-destructive/60 dark:text-destructive/30"
                 >
                   {token.value}
                 </del>
@@ -91,12 +91,12 @@ export function ChangeComparison({
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto thin-scroll">
-          <div className="rounded-lg border border-rose-200 bg-destructive/30 p-2 text-xs dark:border-rose-900/40 dark:bg-rose-950/10">
+          <div className="rounded-lg border border-destructive/20 bg-destructive/30 p-2 text-xs dark:border-destructive/40 dark:bg-destructive/10">
             <span className="text-[10px] font-bold text-destructive uppercase block mb-1">Original</span>
             <div className="text-secondary-foreground dark:text-muted-foreground whitespace-pre-wrap">{oldText || "No original content"}</div>
           </div>
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50/30 p-2 text-xs dark:border-emerald-900/40 dark:bg-emerald-950/10">
-            <span className="text-[10px] font-bold text-emerald-600 uppercase block mb-1">Modified</span>
+          <div className="rounded-lg border border-success-200 bg-success-50/30 p-2 text-xs dark:border-success-900/40 dark:bg-success-950/10">
+            <span className="text-[10px] font-bold text-success-600 uppercase block mb-1">Modified</span>
             <div className="text-secondary-foreground dark:text-muted-foreground whitespace-pre-wrap">{newText || "No modified content"}</div>
           </div>
         </div>

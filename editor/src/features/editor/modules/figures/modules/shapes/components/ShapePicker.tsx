@@ -118,8 +118,8 @@ export default function ShapePicker({
                       onDoubleClick={() => handleCardDoubleClick(shape)}
                       className={`relative flex flex-col items-center justify-center p-2 h-9 rounded-lg border transition-all cursor-pointer ${
                         isSelected
-                          ? "border-primary bg-primary/80 dark:bg-blue-950/60 ring-2 ring-primary/20 text-primary dark:text-primary"
-                          : "border-secondary dark:border-muted bg-card dark:bg-secondary text-secondary-foreground dark:text-muted-foreground hover:border-primary hover:bg-primary/60 dark:hover:bg-blue-950/40 hover:text-primary dark:hover:text-primary"
+                          ? "border-primary bg-primary/80 dark:bg-navy-950/60 ring-2 ring-primary/20 text-primary dark:text-primary"
+                          : "border-secondary dark:border-muted bg-card dark:bg-secondary text-secondary-foreground dark:text-muted-foreground hover:border-primary hover:bg-primary/60 dark:hover:bg-navy-950/40 hover:text-primary dark:hover:text-primary"
                       }`}
                     >
                       {isSelected && (

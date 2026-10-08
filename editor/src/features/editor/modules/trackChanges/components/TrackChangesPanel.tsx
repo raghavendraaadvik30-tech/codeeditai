@@ -36,7 +36,7 @@ export function TrackChangesPanel() {
         className={cn(
           "flex h-9 w-full items-center justify-center gap-2 rounded-lg text-xs font-semibold transition-all shadow-xs",
           trackChanges
-            ? "border border-primary/30 bg-primary/10 text-[#0078d4] hover:bg-primary/15 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-primary"
+            ? "border border-primary/30 bg-primary/10 text-[#0078d4] hover:bg-primary/15 dark:border-navy-900/60 dark:bg-navy-950/40 dark:text-primary"
             : "bg-[#0078d4] text-primary-foreground hover:bg-[#006cc1]"
         )}
       >
@@ -50,7 +50,7 @@ export function TrackChangesPanel() {
           type="button"
           onClick={acceptAll}
           disabled={pendingChanges === 0}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-success-600 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-success-700 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Accept all pending changes across all pages"
         >
           <Check className="h-3.5 w-3.5" />
@@ -60,7 +60,7 @@ export function TrackChangesPanel() {
           type="button"
           onClick={rejectAll}
           disabled={pendingChanges === 0}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-destructive/10 py-2 text-xs font-semibold text-destructive shadow-xs transition-colors hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-400 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-destructive/20 bg-destructive/10 py-2 text-xs font-semibold text-destructive shadow-xs transition-colors hover:bg-destructive/10 dark:border-destructive/60 dark:bg-destructive/20 dark:text-destructive disabled:opacity-40 disabled:cursor-not-allowed"
           title="Reject all pending changes across all pages"
         >
           <XIcon className="h-3.5 w-3.5" />

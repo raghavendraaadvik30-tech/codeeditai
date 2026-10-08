@@ -549,7 +549,7 @@ export function TableContextMenu({
         >
           <button
             type="button"
-            className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors text-destructive dark:text-red-400"
+            className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors text-destructive dark:text-destructive"
           >
             <div className="flex items-center gap-2.5">
               <Trash2 className="h-3.5 w-3.5" />
@@ -578,7 +578,7 @@ export function TableContextMenu({
               <button
                 type="button"
                 onClick={() => runTableAction(deleteCurrentCol)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer text-destructive dark:text-red-400"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer text-destructive dark:text-destructive"
               >
                 <Columns className="h-3.5 w-3.5" />
                 <span>Delete Columns</span>
@@ -586,7 +586,7 @@ export function TableContextMenu({
               <button
                 type="button"
                 onClick={() => runTableAction(deleteCurrentRow)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer text-destructive dark:text-red-400"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer text-destructive dark:text-destructive"
               >
                 <Rows className="h-3.5 w-3.5" />
                 <span>Delete Rows</span>
@@ -595,7 +595,7 @@ export function TableContextMenu({
               <button
                 type="button"
                 onClick={() => runTableAction(deleteCurrentTable)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-destructive/10 dark:hover:bg-red-950/40 cursor-pointer text-red-700 dark:text-red-300 font-medium"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-destructive/10 dark:hover:bg-destructive/40 cursor-pointer text-destructive dark:text-destructive/30 font-medium"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Delete Entire Table</span>
@@ -617,7 +617,7 @@ export function TableContextMenu({
             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <CheckSquare className="h-3.5 w-3.5 text-emerald-500" />
+              <CheckSquare className="h-3.5 w-3.5 text-success-500" />
               <span>Select</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -668,7 +668,7 @@ export function TableContextMenu({
           className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           onMouseEnter={() => setActiveSubmenu(null)}
         >
-          <Split className="h-3.5 w-3.5 text-amber-500" />
+          <Split className="h-3.5 w-3.5 text-warning-500" />
           <span>Split Cells...</span>
         </button>
 
@@ -679,7 +679,7 @@ export function TableContextMenu({
           className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 disabled:opacity-40 disabled:pointer-events-none cursor-pointer transition-colors"
           onMouseEnter={() => setActiveSubmenu(null)}
         >
-          <Merge className="h-3.5 w-3.5 text-emerald-500" />
+          <Merge className="h-3.5 w-3.5 text-success-500" />
           <span>Merge Cells</span>
         </button>
 
@@ -748,7 +748,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("left");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <ArrowUp className="h-3 w-3 -rotate-45" />
                 </button>
@@ -760,7 +760,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("center");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <ArrowUp className="h-3 w-3" />
                 </button>
@@ -772,7 +772,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("right");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <ArrowUp className="h-3 w-3 rotate-45" />
                 </button>
@@ -786,7 +786,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("left");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <AlignLeft className="h-3 w-3" />
                 </button>
@@ -798,7 +798,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("center");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <AlignCenter className="h-3 w-3" />
                 </button>
@@ -810,7 +810,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("right");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <AlignRight className="h-3 w-3" />
                 </button>
@@ -824,7 +824,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("left");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <ArrowDown className="h-3 w-3 rotate-45" />
                 </button>
@@ -836,7 +836,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("center");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <ArrowDown className="h-3 w-3" />
                 </button>
@@ -848,7 +848,7 @@ export function TableContextMenu({
                     setCellHorizontalAlign("right");
                     onClose();
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-blue-950 cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded hover:bg-primary/15 hover:text-primary dark:hover:bg-navy-950 cursor-pointer"
                 >
                   <ArrowDown className="h-3 w-3 -rotate-45" />
                 </button>
@@ -1075,7 +1075,7 @@ export function TableContextMenu({
                 onClick={() => runTableAction(distributeRows)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer"
               >
-                <MoveVertical className="h-3.5 w-3.5 text-emerald-500" />
+                <MoveVertical className="h-3.5 w-3.5 text-success-500" />
                 <span>Distribute Rows Evenly</span>
               </button>
               <button
@@ -1098,7 +1098,7 @@ export function TableContextMenu({
               <button
                 type="button"
                 onClick={() => runTableAction(mergeWithNextTable)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer text-primary dark:text-indigo-400"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer text-primary dark:text-primary"
               >
                 <Combine className="h-3.5 w-3.5 text-primary" />
                 <span>Merge with Next Table</span>

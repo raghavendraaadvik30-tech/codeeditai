@@ -855,19 +855,19 @@ function SourceManagerDialog({ onClose }: ModalProps) {
                   return (
                     <div
                       key={s.id}
-                      className="p-3.5 rounded-xl border border-secondary dark:border-muted bg-card dark:bg-[#0E1A29] hover:border-blue-300 transition-all flex flex-col gap-1 group relative"
+                      className="p-3.5 rounded-xl border border-secondary dark:border-muted bg-card dark:bg-[#0E1A29] hover:border-navy-300 transition-all flex flex-col gap-1 group relative"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <span className="text-xs font-bold text-foreground dark:text-primary-foreground truncate max-w-[80%]">
                           {author || "Unknown Author"}
                         </span>
-                        <span className="text-[10px] font-mono bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-blue-300 px-2 py-0.5 rounded font-medium">
+                        <span className="text-[10px] font-mono bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-navy-300 px-2 py-0.5 rounded font-medium">
                           {s.tag}
                         </span>
                       </div>
                       
                       {s.isPlaceholder ? (
-                        <span className="text-[11px] text-amber-600 dark:text-amber-400 italic font-medium">Placeholder Citation</span>
+                        <span className="text-[11px] text-warning-600 dark:text-warning-400 italic font-medium">Placeholder Citation</span>
                       ) : (
                         <>
                           <span className="text-xs text-muted-foreground dark:text-muted-foreground line-clamp-1 italic">{s.title || "(Untitled)"}</span>
@@ -902,7 +902,7 @@ function SourceManagerDialog({ onClose }: ModalProps) {
                             refs.insertCitation(s.id);
                             onClose();
                           }}
-                          className="text-[11px] font-medium text-emerald-600 hover:underline ml-auto"
+                          className="text-[11px] font-medium text-success-600 hover:underline ml-auto"
                         >
                           Insert Citation
                         </button>

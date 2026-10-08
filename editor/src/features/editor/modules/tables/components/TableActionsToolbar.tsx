@@ -105,7 +105,7 @@ export function TableActionsToolbar() {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={deleteCurrentRow}
-          className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10 dark:border-muted dark:bg-secondary/60 dark:text-red-400 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10 dark:border-muted dark:bg-secondary/60 dark:text-destructive transition-colors"
         >
           <Rows className="h-3.5 w-3.5" />
           <span>Delete Row</span>
@@ -115,7 +115,7 @@ export function TableActionsToolbar() {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={deleteCurrentCol}
-          className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10 dark:border-muted dark:bg-secondary/60 dark:text-red-400 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10 dark:border-muted dark:bg-secondary/60 dark:text-destructive transition-colors"
         >
           <Columns className="h-3.5 w-3.5" />
           <span>Delete Col</span>
@@ -127,7 +127,7 @@ export function TableActionsToolbar() {
           onClick={mergeCells}
           className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary/60 dark:text-muted-foreground transition-colors"
         >
-          <Merge className="h-3.5 w-3.5 text-emerald-500" />
+          <Merge className="h-3.5 w-3.5 text-success-500" />
           <span>Merge Cells</span>
         </button>
 
@@ -137,7 +137,7 @@ export function TableActionsToolbar() {
           onClick={splitCell}
           className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary/60 dark:text-muted-foreground transition-colors"
         >
-          <Split className="h-3.5 w-3.5 text-amber-500" />
+          <Split className="h-3.5 w-3.5 text-warning-500" />
           <span>Split Cell</span>
         </button>
 
@@ -155,7 +155,7 @@ export function TableActionsToolbar() {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={mergeWithNextTable}
-          className="flex items-center gap-2 rounded-lg border border-indigo-200/70 bg-primary/50 px-2.5 py-1.5 text-xs text-primary/90 hover:bg-primary/15 dark:border-indigo-900/60 dark:bg-indigo-950/30 dark:text-indigo-300 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-primary/70 bg-primary/50 px-2.5 py-1.5 text-xs text-primary/90 hover:bg-primary/15 dark:border-primary/60 dark:bg-primary/30 dark:text-primary transition-colors"
         >
           <Combine className="h-3.5 w-3.5 text-primary" />
           <span>Merge Table</span>
@@ -181,7 +181,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.horizontalAlign === "left"
-                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-navy-950/60 dark:text-navy-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Left"
@@ -196,7 +196,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.horizontalAlign === "center"
-                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-navy-950/60 dark:text-navy-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Center"
@@ -211,7 +211,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.horizontalAlign === "right"
-                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-navy-950/60 dark:text-navy-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Right"
@@ -233,7 +233,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.verticalAlign === "top"
-                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-navy-950/60 dark:text-navy-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Top"
@@ -248,7 +248,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.verticalAlign === "middle"
-                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-navy-950/60 dark:text-navy-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Middle (Center)"
@@ -263,7 +263,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.verticalAlign === "bottom"
-                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-navy-950/60 dark:text-navy-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Bottom"
@@ -282,7 +282,7 @@ export function TableActionsToolbar() {
           className={cn(
             "flex h-8 w-full items-center justify-center gap-2 rounded-md border text-xs font-medium transition-colors",
             activeCellFormat?.isVerticalText
-              ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+              ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-navy-950/60 dark:text-navy-300 shadow-xs"
               : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
           )}
           title={
@@ -328,7 +328,7 @@ export function TableActionsToolbar() {
             className="flex items-center gap-1.5 rounded-lg border border-secondary bg-muted px-2.5 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground transition-colors"
             title="Fit Table to Content snuggly"
           >
-            <Minimize2 className="h-3.5 w-3.5 text-amber-500" />
+            <Minimize2 className="h-3.5 w-3.5 text-warning-500" />
             <span>Fit Content</span>
           </button>
 
@@ -339,7 +339,7 @@ export function TableActionsToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={deleteCurrentTable}
-        className="w-full flex items-center justify-center gap-2 rounded-lg border border-destructive/80 bg-destructive/60 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 dark:border-red-950 dark:bg-red-950/40 dark:text-red-400 transition-colors"
+        className="w-full flex items-center justify-center gap-2 rounded-lg border border-destructive/80 bg-destructive/60 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 dark:border-destructive/40 dark:bg-destructive/40 dark:text-destructive transition-colors"
       >
         <Trash2 className="h-3.5 w-3.5" />
         <span>Delete Selected Table</span>

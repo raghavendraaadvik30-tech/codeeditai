@@ -35,7 +35,7 @@ export function BookmarkList({ bookmarks, onNavigate, onDelete }: BookmarkListPr
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter bookmarks..."
-          className="h-7 w-full rounded-md border border-secondary bg-muted/70 pl-8 pr-3 text-xs outline-none dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground focus:border-amber-500"
+          className="h-7 w-full rounded-md border border-secondary bg-muted/70 pl-8 pr-3 text-xs outline-none dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground focus:border-warning-500"
         />
       </div>
 
@@ -51,10 +51,10 @@ export function BookmarkList({ bookmarks, onNavigate, onDelete }: BookmarkListPr
             <div
               key={bm.id}
               onClick={() => onNavigate(bm)}
-              className="group flex cursor-pointer items-center justify-between rounded-lg border border-secondary bg-card p-2 transition-all hover:border-amber-300 hover:bg-amber-50/20 dark:border-muted dark:bg-[#091524] dark:hover:border-amber-700/50"
+              className="group flex cursor-pointer items-center justify-between rounded-lg border border-secondary bg-card p-2 transition-all hover:border-warning-300 hover:bg-warning-50/20 dark:border-muted dark:bg-[#091524] dark:hover:border-warning-700/50"
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-warning-100 text-warning-600 dark:bg-warning-950/50 dark:text-warning-400">
                   <Bookmark className="h-3.5 w-3.5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -84,7 +84,7 @@ export function BookmarkList({ bookmarks, onNavigate, onDelete }: BookmarkListPr
                     onNavigate(bm);
                   }}
                   title="Jump to bookmark"
-                  className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-amber-100 hover:text-amber-700 dark:hover:bg-amber-950/50"
+                  className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-warning-100 hover:text-warning-700 dark:hover:bg-warning-950/50"
                 >
                   <ArrowUpRight className="h-3.5 w-3.5" />
                 </button>
@@ -96,7 +96,7 @@ export function BookmarkList({ bookmarks, onNavigate, onDelete }: BookmarkListPr
                     onDelete(bm);
                   }}
                   title="Delete bookmark"
-                  className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-red-950/40"
+                  className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/40"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>

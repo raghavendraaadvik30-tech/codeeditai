@@ -77,17 +77,17 @@ export function DocumentToolbar() {
             className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
               isEditable
                 ? "text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
-                : "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
+                : "bg-warning-50 text-warning-700 hover:bg-warning-100 dark:bg-warning-950/40 dark:text-warning-300 dark:hover:bg-warning-950/60"
             }`}
           >
             {isEditable ? (
               <>
-                <Shield className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                <Shield className="h-3.5 w-3.5 text-success-600 dark:text-success-400" />
                 <span>Permissions</span>
               </>
             ) : (
               <>
-                <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                <Lock className="h-3.5 w-3.5 text-warning-600 dark:text-warning-400" />
                 <span>Read-Only</span>
               </>
             )}
@@ -100,9 +100,9 @@ export function DocumentToolbar() {
             type="button"
             onClick={() => setDeleteOpen(true)}
             title="Delete Document"
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 dark:text-red-400 dark:hover:bg-red-950/40"
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 dark:text-destructive dark:hover:bg-destructive/40"
           >
-            <Trash2 className="h-3.5 w-3.5 text-destructive dark:text-red-400" />
+            <Trash2 className="h-3.5 w-3.5 text-destructive dark:text-destructive" />
             Delete
           </button>
         </div>

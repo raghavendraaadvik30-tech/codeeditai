@@ -40,7 +40,7 @@ export default function HeaderLogo() {
           className="
             text-[17px]
             font-semibold
-            text-gray-900
+            text-foreground
             dark:text-primary-foreground"
         >
           Document Editor
@@ -49,7 +49,7 @@ export default function HeaderLogo() {
         <p
           className="
             text-xs
-            text-gray-500
+            text-muted-foreground
             dark:text-muted-foreground
           "
         >

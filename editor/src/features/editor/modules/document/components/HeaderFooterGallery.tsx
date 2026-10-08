@@ -80,7 +80,7 @@ export function HeaderGallery({
             <button
               type="button"
               className={`${buttonClassName} ${
-                isHeaderFooterActive ? "bg-primary/10 text-[#0078d4] font-semibold dark:bg-blue-950/50" : ""
+                isHeaderFooterActive ? "bg-primary/10 text-[#0078d4] font-semibold dark:bg-navy-950/50" : ""
               }`}
               title="Built-in Header Gallery"
             >
@@ -141,7 +141,7 @@ export function HeaderGallery({
 
           <DropdownMenuItem
             onClick={handleRemoveHeader}
-            className="flex items-center gap-2 cursor-pointer font-medium text-destructive dark:text-rose-400 hover:text-destructive"
+            className="flex items-center gap-2 cursor-pointer font-medium text-destructive dark:text-destructive hover:text-destructive"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>Remove Header</span>
@@ -210,7 +210,7 @@ export function FooterGallery({
             <button
               type="button"
               className={`${buttonClassName} ${
-                isHeaderFooterActive ? "bg-primary/10 text-[#0078d4] font-semibold dark:bg-blue-950/50" : ""
+                isHeaderFooterActive ? "bg-primary/10 text-[#0078d4] font-semibold dark:bg-navy-950/50" : ""
               }`}
               title="Built-in Footer Gallery"
             >
@@ -271,7 +271,7 @@ export function FooterGallery({
 
           <DropdownMenuItem
             onClick={handleRemoveFooter}
-            className="flex items-center gap-2 cursor-pointer font-medium text-destructive dark:text-rose-400 hover:text-destructive"
+            className="flex items-center gap-2 cursor-pointer font-medium text-destructive dark:text-destructive hover:text-destructive"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>Remove Footer</span>

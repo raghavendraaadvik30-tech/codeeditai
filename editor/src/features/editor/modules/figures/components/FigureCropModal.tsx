@@ -92,7 +92,7 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
                   onClick={() => setAspectRatio(ratio)}
                   className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition ${
                     aspectRatio === ratio
-                      ? 'border-primary bg-primary/10 text-primary dark:bg-blue-950/50 dark:text-primary'
+                      ? 'border-primary bg-primary/10 text-primary dark:bg-navy-950/50 dark:text-primary'
                       : 'border-secondary text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:text-muted-foreground dark:hover:bg-muted'
                   }`}
                 >

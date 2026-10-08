@@ -655,7 +655,7 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("bold")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isBold
-            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300 font-bold"
+            ? "bg-primary/15 text-primary/90 dark:bg-navy-950 dark:text-navy-300 font-bold"
             : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Bold (Ctrl+B)"
@@ -672,7 +672,7 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("italic")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isItalic
-            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300 italic"
+            ? "bg-primary/15 text-primary/90 dark:bg-navy-950 dark:text-navy-300 italic"
             : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Italic (Ctrl+I)"
@@ -689,7 +689,7 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("underline")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isUnderline
-            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300 underline"
+            ? "bg-primary/15 text-primary/90 dark:bg-navy-950 dark:text-navy-300 underline"
             : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Underline (Ctrl+U)"
@@ -706,7 +706,7 @@ export function TableFloatingFormatToolbar() {
         onClick={() => execFormat("strikeThrough")}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors ${
           isStrike
-            ? "bg-primary/15 text-primary/90 dark:bg-blue-950 dark:text-blue-300"
+            ? "bg-primary/15 text-primary/90 dark:bg-navy-950 dark:text-navy-300"
             : "hover:bg-muted dark:hover:bg-muted"
         }`}
         title="Strikethrough"
@@ -834,7 +834,7 @@ export function TableFloatingFormatToolbar() {
           className="flex h-7 items-center gap-0.5 rounded px-1 hover:bg-muted dark:hover:bg-muted shrink-0"
           title="Highlight Color"
         >
-          <Highlighter className="h-3.5 w-3.5 text-amber-500" />
+          <Highlighter className="h-3.5 w-3.5 text-warning-500" />
           <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
         </button>
 

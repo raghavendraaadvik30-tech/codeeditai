@@ -76,14 +76,14 @@ export default function UserProfile() {
           gap-2
           rounded-lg
           border
-          border-gray-200
+          border-secondary
           dark:border-secondary-foreground
           bg-card
           dark:bg-[#111D29]
           px-2.5
           py-1
           shadow-xs
-          hover:bg-gray-50
+          hover:bg-muted
           dark:hover:bg-muted
           transition-colors
           cursor-pointer
@@ -94,8 +94,8 @@ export default function UserProfile() {
             className="
               bg-primary/15
               text-primary/90
-              dark:bg-blue-900/40
-              dark:text-blue-300
+              dark:bg-navy-900/40
+              dark:text-navy-300
               font-semibold
             "
           >
@@ -104,7 +104,7 @@ export default function UserProfile() {
         </Avatar>
 
         <div className="hidden md:flex flex-col leading-tight text-left">
-          <span className="text-xs font-medium text-gray-900 dark:text-primary-foreground">
+          <span className="text-xs font-medium text-foreground dark:text-primary-foreground">
             {userName}
           </span>
 
@@ -136,7 +136,7 @@ export default function UserProfile() {
             w-48
             rounded-lg
             border
-            border-gray-200
+            border-secondary
             dark:border-secondary-foreground
             bg-card
             dark:bg-[#111D29]
@@ -157,9 +157,9 @@ export default function UserProfile() {
               py-2
               text-sm
               text-destructive
-              dark:text-red-400
+              dark:text-destructive
               hover:bg-destructive/10
-              dark:hover:bg-red-950/30
+              dark:hover:bg-destructive/30
               transition-colors
               cursor-pointer
             "

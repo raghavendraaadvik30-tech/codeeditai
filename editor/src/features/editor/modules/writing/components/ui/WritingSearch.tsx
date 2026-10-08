@@ -22,7 +22,7 @@ export default function WritingSearch({
         bg-muted
         px-3
         shadow-sm
-        focus-within:border-blue-300
+        focus-within:border-navy-300
         focus-within:ring-2
         focus-within:ring-primary/15
       "

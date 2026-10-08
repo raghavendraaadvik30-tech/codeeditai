@@ -666,7 +666,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
       ref={containerRef}
       className={`chart-editing-workspace w-full group ${
         isEditingThisChart
-          ? 'flex flex-col gap-2 p-2 bg-muted/60 rounded-xl border border-emerald-500/30 shadow-xs'
+          ? 'flex flex-col gap-2 p-2 bg-muted/60 rounded-xl border border-success-500/30 shadow-xs'
           : isSelected
           ? 'relative ring-2 ring-primary rounded-lg shadow-xs cursor-grab active:cursor-grabbing'
           : 'relative hover:ring-1 hover:ring-secondary rounded-lg cursor-pointer'

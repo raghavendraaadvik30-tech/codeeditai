@@ -178,12 +178,12 @@ export function StandardTablesDropdown() {
         onClick={() => setIsOpen((prev) => !prev)}
         className={`inline-flex items-center gap-2 rounded-md px-2.5 py-1 text-left transition-colors cursor-pointer border ${
           isOpen
-            ? "bg-primary/80 border-blue-300 text-blue-900 dark:bg-blue-950/60 dark:border-primary/90 dark:text-primary/30"
+            ? "bg-primary/80 border-navy-300 text-navy-900 dark:bg-navy-950/60 dark:border-primary/90 dark:text-primary/30"
             : "border-transparent hover:bg-muted hover:border-secondary dark:hover:bg-muted dark:hover:border-secondary-foreground text-secondary-foreground dark:text-muted-foreground"
         }`}
         title="Standard Tables"
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded bg-primary/10 dark:bg-blue-950/60 text-primary dark:text-primary shrink-0">
+        <div className="flex h-7 w-7 items-center justify-center rounded bg-primary/10 dark:bg-navy-950/60 text-primary dark:text-primary shrink-0">
           <Table2 className="h-4 w-4" />
         </div>
 
@@ -221,7 +221,7 @@ export function StandardTablesDropdown() {
               onClick={() => handleSelectOption(1)}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-blue-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
@@ -241,7 +241,7 @@ export function StandardTablesDropdown() {
               onClick={() => handleSelectOption(2)}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-blue-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
@@ -261,7 +261,7 @@ export function StandardTablesDropdown() {
               onClick={() => handleSelectOption(3)}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-blue-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
@@ -281,7 +281,7 @@ export function StandardTablesDropdown() {
               onClick={() => handleSelectOption(4)}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-blue-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">

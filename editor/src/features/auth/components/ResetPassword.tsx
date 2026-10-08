@@ -59,7 +59,7 @@ export default function ResetPassword() {
       {/* Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />
       <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
+      <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
 
@@ -91,11 +91,11 @@ export default function ResetPassword() {
 
           <CardContent className="space-y-5">
 
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-center">
+            <div className="rounded-xl border border-success-200 bg-success-50 p-6 text-center">
 
-              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-success-100">
 
-                <ShieldCheck className="h-7 w-7 text-emerald-600" />
+                <ShieldCheck className="h-7 w-7 text-success-600" />
 
               </div>
 

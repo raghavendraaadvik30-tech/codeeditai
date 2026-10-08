@@ -28,7 +28,7 @@ export function LinkButton({
     primary: 'bg-[#0078d4] text-primary-foreground hover:bg-[#005a9e] dark:bg-[#0078d4] dark:hover:bg-[#005a9e]',
     secondary: 'bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground',
     outline: 'border border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted',
-    danger: 'bg-destructive/10 text-destructive hover:bg-destructive/10 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60',
+    danger: 'bg-destructive/10 text-destructive hover:bg-destructive/10 dark:bg-destructive/40 dark:text-destructive dark:hover:bg-destructive/60',
     ghost: 'text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted',
   };
 

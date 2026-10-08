@@ -66,7 +66,7 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
   const items = [
     {
       label: 'Edit Data',
-      icon: <FileSpreadsheet className="w-4 h-4 text-emerald-600" />,
+      icon: <FileSpreadsheet className="w-4 h-4 text-success-600" />,
       action: () => {
         onToggleEditData();
         onClose();
@@ -83,7 +83,7 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
     },
     {
       label: 'Change Colors',
-      icon: <Palette className="w-4 h-4 text-emerald-600" />,
+      icon: <Palette className="w-4 h-4 text-success-600" />,
       action: () => {
         onChangeColors();
         onClose();
@@ -129,9 +129,9 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
             onClick={item.action}
             className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-left transition-colors ${
               item.danger
-                ? 'text-destructive hover:bg-destructive/10 dark:hover:bg-red-950/40'
+                ? 'text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/40'
                 : item.active
-                ? 'bg-emerald-50 text-emerald-800 font-semibold dark:bg-emerald-950/40 dark:text-emerald-300'
+                ? 'bg-success-50 text-success-800 font-semibold dark:bg-success-950/40 dark:text-success-300'
                 : 'text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted'
             }`}
           >

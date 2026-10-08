@@ -1380,7 +1380,7 @@ Please use the credentials above to access the secure portal.`
 
           >
 
-            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+            <FileSpreadsheet className="h-4 w-4 text-success-600" />
 
             <span>Export to Excel</span>
 
@@ -1682,7 +1682,7 @@ Please use the credentials above to access the secure portal.`
 
                                 ? "bg-primary/10 text-primary/90"
 
-                                : "bg-amber-50 text-amber-700"
+                                : "bg-warning-50 text-warning-700"
 
                           }
 
@@ -1738,13 +1738,13 @@ Please use the credentials above to access the secure portal.`
 
                             user.status === "Active"
 
-                              ? "bg-emerald-50 text-emerald-700"
+                              ? "bg-success-50 text-success-700"
 
                               : user.status === "Inactive"
 
                                 ? "bg-muted text-secondary-foreground"
 
-                                : "bg-orange-50 text-orange-700"
+                                : "bg-ember-50 text-ember-700"
 
                           }
 
@@ -1768,13 +1768,13 @@ Please use the credentials above to access the secure portal.`
 
                               user.status === "Active"
 
-                                ? "bg-emerald-500 animate-pulse"
+                                ? "bg-success-500 animate-pulse"
 
                                 : user.status === "Inactive"
 
                                   ? "bg-muted-foreground"
 
-                                  : "bg-orange-500"
+                                  : "bg-ember-500"
 
                             }
 
@@ -3127,13 +3127,13 @@ Please use the credentials above to access the secure portal.`
 
                     selectedUser?.status === "Active"
 
-                      ? "bg-emerald-50 text-emerald-700"
+                      ? "bg-success-50 text-success-700"
 
                       : selectedUser?.status === "Inactive"
 
                         ? "bg-muted text-secondary-foreground"
 
-                        : "bg-orange-50 text-orange-700"
+                        : "bg-ember-50 text-ember-700"
 
                   }
 
@@ -3157,13 +3157,13 @@ Please use the credentials above to access the secure portal.`
 
                       selectedUser?.status === "Active"
 
-                        ? "bg-emerald-500"
+                        ? "bg-success-500"
 
                         : selectedUser?.status === "Inactive"
 
                           ? "bg-muted-foreground"
 
-                          : "bg-orange-500"
+                          : "bg-ember-500"
 
                     }
 
@@ -3975,7 +3975,7 @@ Please use the credentials above to access the secure portal.`
 
                         {copiedField === "link" ? (
 
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          <Check className="h-3.5 w-3.5 text-success-600" />
 
                         ) : (
 
@@ -4079,7 +4079,7 @@ Please use the credentials above to access the secure portal.`
 
                         {copiedField === "email" ? (
 
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          <Check className="h-3.5 w-3.5 text-success-600" />
 
                         ) : (
 
@@ -4133,7 +4133,7 @@ Please use the credentials above to access the secure portal.`
                         title={invitePassword ? "Copy password" : "Password not available"}
                       >
                         {copiedField === "password" ? (
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          <Check className="h-3.5 w-3.5 text-success-600" />
                         ) : (
                           <Copy className="h-3 w-3" />
                         )}
@@ -4214,7 +4214,7 @@ Please use the credentials above to access the secure portal.`
 
                         {copiedField === "role" ? (
 
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          <Check className="h-3.5 w-3.5 text-success-600" />
 
                         ) : (
 
@@ -4312,7 +4312,7 @@ Please use the credentials above to access the secure portal.`
 
                     <>
 
-                      <Check className="h-3.5 w-3.5 text-emerald-600" />
+                      <Check className="h-3.5 w-3.5 text-success-600" />
 
                       <span>Copied!</span>
 

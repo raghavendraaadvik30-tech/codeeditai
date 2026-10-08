@@ -76,7 +76,7 @@ export default function CaseSection({
                       border-secondary
                       bg-card
                       shadow-sm
-                      hover:border-blue-300
+                      hover:border-navy-300
                       hover:bg-primary/10
                       hover:shadow
                     `

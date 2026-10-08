@@ -81,10 +81,10 @@ export function ReferenceValidation() {
         </div>
 
         <div className="rounded-lg border border-secondary bg-card p-2 text-center dark:border-muted dark:bg-[#091524]">
-          <p className="text-[10px] text-emerald-500 font-medium flex items-center justify-center gap-0.5">
+          <p className="text-[10px] text-success-500 font-medium flex items-center justify-center gap-0.5">
             <CheckCircle2 className="h-3 w-3" /> Valid
           </p>
-          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+          <p className="text-sm font-bold text-success-600 dark:text-success-400 mt-0.5">
             {report.validLinks}
           </p>
         </div>
@@ -93,7 +93,7 @@ export function ReferenceValidation() {
           <p className="text-[10px] text-destructive font-medium flex items-center justify-center gap-0.5">
             <AlertOctagon className="h-3 w-3" /> Issues
           </p>
-          <p className="text-sm font-bold text-destructive dark:text-red-400 mt-0.5">
+          <p className="text-sm font-bold text-destructive dark:text-destructive mt-0.5">
             {errorCount + warningCount}
           </p>
         </div>

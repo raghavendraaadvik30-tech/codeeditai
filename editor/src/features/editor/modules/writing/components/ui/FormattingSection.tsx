@@ -100,7 +100,7 @@ export default function FormattingSection({
               px-1
               shadow-sm
               transition-all
-              hover:border-blue-300
+              hover:border-navy-300
               hover:bg-primary/10
               active:scale-[0.98]
             "

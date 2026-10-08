@@ -143,7 +143,7 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-rose-200 text-destructive text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
+        <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-[11px] dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -151,7 +151,7 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
 
       {/* Success */}
       {success && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+        <div className="flex items-center gap-1.5 p-2 rounded-md bg-success-50 border border-success-200 text-success-700 text-[11px] dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
           <span>{success}</span>
         </div>

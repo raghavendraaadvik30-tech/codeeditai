@@ -257,7 +257,7 @@ export default function ChartDesignTab() {
               type="button"
               className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground"
             >
-              <Palette className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <Palette className="h-4 w-4 text-success-600 dark:text-success-400" />
               <span>Change Colors</span>
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             </button>} />
@@ -353,8 +353,8 @@ export default function ChartDesignTab() {
             inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-semibold transition-all
             ${
               isSpreadsheetOpen
-                ? 'bg-emerald-700 text-primary-foreground shadow-xs'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-primary-foreground shadow-2xs'
+                ? 'bg-success-700 text-primary-foreground shadow-xs'
+                : 'bg-success-600 hover:bg-success-700 text-primary-foreground shadow-2xs'
             }
           `}
           title="Toggle live spreadsheet editor above chart"
@@ -377,7 +377,7 @@ export default function ChartDesignTab() {
           4. TYPE GROUP
           -------------------------------------------------------- */}
       <RibbonButton
-        icon={<BarChart3 className="h-4 w-4 text-primary dark:text-indigo-400" />}
+        icon={<BarChart3 className="h-4 w-4 text-primary dark:text-primary" />}
         onClick={() => setIsChangeTypeModalOpen(true)}
       >
         Change Type

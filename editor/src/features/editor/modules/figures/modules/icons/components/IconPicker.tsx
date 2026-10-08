@@ -35,7 +35,7 @@ export default function IconPicker({
             onDoubleClick={() => onDoubleClickInsert?.(item)}
             className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all ${
               isSelected
-                ? "bg-primary/10 dark:bg-blue-950/60 border-primary text-primary dark:text-primary shadow-sm ring-1 ring-primary/30"
+                ? "bg-primary/10 dark:bg-navy-950/60 border-primary text-primary dark:text-primary shadow-sm ring-1 ring-primary/30"
                 : "bg-card dark:bg-secondary border-secondary dark:border-muted text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted/60 hover:border-border"
             }`}
           >

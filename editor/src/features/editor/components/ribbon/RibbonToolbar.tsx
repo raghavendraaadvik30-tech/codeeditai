@@ -63,7 +63,7 @@ export default function RibbonToolbar() {
     <div
       className="
         border-b
-        border-gray-200
+        border-secondary
         dark:border-muted
         bg-card
         dark:bg-[#0B1620]
@@ -91,8 +91,8 @@ export default function RibbonToolbar() {
                 transition-colors
                 ${
                   active
-                    ? "bg-primary/10 text-primary/90 border border-b-0 border-gray-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-secondary-foreground"
-                    : "text-gray-600 hover:bg-gray-100 dark:text-muted-foreground dark:hover:bg-muted"
+                    ? "bg-primary/10 text-primary/90 border border-b-0 border-secondary dark:bg-navy-950/60 dark:text-navy-300 dark:border-secondary-foreground"
+                    : "text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
                 }
               `}
             >
@@ -120,12 +120,12 @@ export default function RibbonToolbar() {
 
               ${
                 activeTab === "Header & Footer"
-                  ? "bg-card text-emerald-700 border-t-2 border-t-emerald-600 border-x border-b-0 border-secondary shadow-2xs dark:bg-[#07131E] dark:text-emerald-400 dark:border-secondary-foreground dark:border-t-emerald-500"
-                  : "text-emerald-600 hover:bg-emerald-50/60 dark:text-emerald-400 dark:hover:bg-muted"
+                  ? "bg-card text-success-700 border-t-2 border-t-success-600 border-x border-b-0 border-secondary shadow-2xs dark:bg-[#07131E] dark:text-success-400 dark:border-secondary-foreground dark:border-t-success-500"
+                  : "text-success-600 hover:bg-success-50/60 dark:text-success-400 dark:hover:bg-muted"
               }
             `}
           >
-            <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-success-600 animate-pulse" />
             <span>Header &amp; Footer</span>
           </button>
         )}

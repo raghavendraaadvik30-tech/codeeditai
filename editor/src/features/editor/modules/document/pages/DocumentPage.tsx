@@ -602,11 +602,11 @@ export default function DocumentPage() {
                           </span>
                           <span>·</span>
                           {doc.savedTime ? (
-                            <span className="text-emerald-500 font-medium">
+                            <span className="text-success-500 font-medium">
                               Saved {doc.savedTime}
                             </span>
                           ) : (
-                            <span className="text-amber-500 font-medium">
+                            <span className="text-warning-500 font-medium">
                               Unsaved
                             </span>
                           )}
@@ -619,7 +619,7 @@ export default function DocumentPage() {
                       type="button"
                       onClick={(e) => handleDeleteDoc(e, doc)}
                       title="Delete Document"
-                      className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/80 text-destructive hover:bg-destructive/20 hover:text-red-700 dark:bg-red-950/60 dark:text-red-400 dark:hover:bg-red-900/80 transition-colors"
+                      className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/80 text-destructive hover:bg-destructive/20 hover:text-destructive dark:bg-destructive/60 dark:text-destructive dark:hover:bg-destructive/80 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -720,7 +720,7 @@ export default function DocumentPage() {
                         className={cn(
                           "px-2.5 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
                           navTab === "find"
-                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-blue-950/40 dark:text-primary"
+                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
                             : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
                         )}
                       >
@@ -735,7 +735,7 @@ export default function DocumentPage() {
                         className={cn(
                           "px-2.5 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
                           navTab === "replace"
-                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-blue-950/40 dark:text-primary"
+                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
                             : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
                         )}
                       >
@@ -958,9 +958,9 @@ export default function DocumentPage() {
       ============================================================ */}
       {docToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-sm rounded-2xl border border-destructive/20 bg-card p-5 shadow-2xl dark:border-red-950/60 dark:bg-[#0c1929]">
+          <div className="w-full max-w-sm rounded-2xl border border-destructive/20 bg-card p-5 shadow-2xl dark:border-destructive/60 dark:bg-[#0c1929]">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive dark:bg-red-950/60 dark:text-red-400">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive dark:bg-destructive/60 dark:text-destructive">
                 <Trash2 className="h-5 w-5" />
               </div>
               <div>
@@ -973,9 +973,9 @@ export default function DocumentPage() {
               </div>
             </div>
 
-            <div className="mb-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/40">
+            <div className="mb-4 rounded-xl bg-warning-50 p-3 text-xs text-warning-900 dark:bg-warning-950/40 dark:text-warning-300 border border-warning-200/80 dark:border-warning-900/40">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <AlertTriangle className="h-4 w-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5" />
                 <span>
                   Are you sure you want to delete <strong>"{docToDelete.title}"</strong>? This will permanently remove this document.
                 </span>
@@ -996,7 +996,7 @@ export default function DocumentPage() {
                   deleteDocument(docToDelete.id);
                   setDocToDelete(null);
                 }}
-                className="flex items-center gap-1.5 rounded-xl bg-destructive px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-red-700 transition-colors shadow-sm"
+                className="flex items-center gap-1.5 rounded-xl bg-destructive px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-destructive transition-colors shadow-sm"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Delete</span>
@@ -1016,9 +1016,9 @@ export default function DocumentPage() {
           aria-labelledby="limit-dialog-title"
           className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-md rounded-2xl border border-amber-200 bg-card p-5 shadow-2xl dark:border-amber-900/60 dark:bg-[#0c1929]">
+          <div className="w-full max-w-md rounded-2xl border border-warning-200 bg-card p-5 shadow-2xl dark:border-warning-900/60 dark:bg-[#0c1929]">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-100 text-warning-600 dark:bg-warning-950/60 dark:text-warning-400">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
@@ -1031,9 +1031,9 @@ export default function DocumentPage() {
               </div>
             </div>
 
-            <div className="mb-4 rounded-xl bg-amber-50/80 p-3.5 text-xs leading-relaxed text-amber-950 dark:bg-amber-950/30 dark:text-amber-200 border border-amber-200/80 dark:border-amber-900/40">
+            <div className="mb-4 rounded-xl bg-warning-50/80 p-3.5 text-xs leading-relaxed text-warning-950 dark:bg-warning-950/30 dark:text-warning-200 border border-warning-200/80 dark:border-warning-900/40">
               <div className="flex items-start gap-2.5">
-                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <AlertTriangle className="h-4 w-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5" />
                 <span>
                   You have reached the maximum limit of 10 documents. To insert a new document, the oldest document will be removed. If you want to keep any existing document, please save it in the File Manager before continuing.
                 </span>

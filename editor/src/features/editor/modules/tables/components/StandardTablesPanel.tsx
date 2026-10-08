@@ -133,7 +133,7 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
           className="group flex items-center justify-between rounded-xl border border-secondary/80 bg-card p-2.5 transition-all hover:border-[#0078d4]/60 hover:bg-primary/20 dark:border-muted/80 dark:bg-[#091524] dark:hover:border-secondary-foreground dark:hover:bg-muted/40 cursor-pointer"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[#0078d4] dark:bg-blue-950/50 dark:text-primary group-hover:scale-105 transition-transform">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[#0078d4] dark:bg-navy-950/50 dark:text-primary group-hover:scale-105 transition-transform">
               <Table2 className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0">

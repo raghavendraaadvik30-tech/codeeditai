@@ -99,7 +99,7 @@ export default function ReviewTab() {
       >
         <span>{trackChanges ? "Tracking ON" : "Track Changes"}</span>
         {pendingChanges > 0 && (
-          <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-[0.8px] text-[10px] font-bold text-amber-800 border border-amber-300">
+          <span className="ml-1 rounded-full bg-warning-100 px-1.5 py-[0.8px] text-[10px] font-bold text-warning-800 border border-warning-300">
             {pendingChanges}
           </span>
         )}
@@ -130,7 +130,7 @@ export default function ReviewTab() {
 
       {/* 3. INDIVIDUAL ACCEPT & REJECT */}
       <RibbonButton
-        icon={<Check className="h-4 w-4 text-emerald-600" />}
+        icon={<Check className="h-4 w-4 text-success-600" />}
         onClick={handleAcceptActive}
         disabled={pendingChanges === 0}
         title="Accept Selected Change"
@@ -151,7 +151,7 @@ export default function ReviewTab() {
 
       {/* 4. MASS ACCEPT ALL & REJECT ALL */}
       <RibbonButton
-        icon={<CheckCheck className="h-4 w-4 text-emerald-600" />}
+        icon={<CheckCheck className="h-4 w-4 text-success-600" />}
         onClick={acceptAll}
         disabled={pendingChanges === 0}
         title="Accept All Pending Changes in Document"

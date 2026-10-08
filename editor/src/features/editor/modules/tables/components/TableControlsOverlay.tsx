@@ -1406,7 +1406,7 @@ export function TableControlsOverlay({
               className="flex items-center gap-1 rounded px-1.5 py-0.5 text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted transition-colors"
               title="AutoFit Table to Content Snugly"
             >
-              <Minimize2 className="h-3 w-3 text-amber-500" />
+              <Minimize2 className="h-3 w-3 text-warning-500" />
               <span>Fit Content</span>
             </button>
 
@@ -1423,7 +1423,7 @@ export function TableControlsOverlay({
         title="Click and drag to move table across blocks or pages"
         className={`absolute z-30 flex h-6 w-6 -translate-x-3 -translate-y-3 cursor-move items-center justify-center rounded-md border shadow-md select-none transition-transform hover:scale-110 active:scale-95 print:hidden ${
           isDragging
-            ? "bg-[#0078d4] text-primary-foreground border-[#0078d4] ring-2 ring-blue-300"
+            ? "bg-[#0078d4] text-primary-foreground border-[#0078d4] ring-2 ring-navy-300"
             : "border-border bg-card text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
         }`}
         style={{
@@ -1555,7 +1555,7 @@ export function TableControlsOverlay({
           onPointerDown={handleResizePointerDown}
           title="Drag to resize table (both width & height, small & large)"
           className={`absolute z-30 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize rounded-sm border-2 border-white bg-[#0078d4] shadow-md select-none transition-transform hover:scale-125 print:hidden dark:border-secondary ${
-            isResizing ? "scale-125 bg-primary ring-2 ring-blue-300" : ""
+            isResizing ? "scale-125 bg-primary ring-2 ring-navy-300" : ""
           }`}
           style={{
             top: `${pos.top + pos.height}px`,

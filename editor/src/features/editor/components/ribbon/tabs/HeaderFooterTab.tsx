@@ -514,7 +514,7 @@ export default function HeaderFooterTab() {
 
               <DropdownMenuItem
                 onClick={handleRemovePageNumbers}
-                className="text-destructive dark:text-rose-400 cursor-pointer"
+                className="text-destructive dark:text-destructive cursor-pointer"
               >
                 Remove Page Numbers
               </DropdownMenuItem>
@@ -601,7 +601,7 @@ export default function HeaderFooterTab() {
             onClick={goToHeader}
             className={`flex flex-col items-center justify-center w-[48px] h-[60px] rounded p-0.5 transition-colors cursor-pointer group ${
               activeHFType === "header"
-                ? "bg-primary/10 border border-blue-300 dark:bg-blue-950/60 dark:border-primary/90"
+                ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
                 : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
             }`}
             title="Go to Header"
@@ -619,7 +619,7 @@ export default function HeaderFooterTab() {
             onClick={goToFooter}
             className={`flex flex-col items-center justify-center w-[48px] h-[60px] rounded p-0.5 transition-colors cursor-pointer group ${
               activeHFType === "footer"
-                ? "bg-primary/10 border border-blue-300 dark:bg-blue-950/60 dark:border-primary/90"
+                ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
                 : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
             }`}
             title="Go to Footer"
@@ -828,7 +828,7 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={exitHeaderFooterMode}
-            className="flex flex-col items-center justify-center w-[54px] h-[60px] rounded hover:bg-destructive/10 hover:border hover:border-rose-300 dark:hover:bg-rose-950/40 dark:hover:border-rose-800 active:bg-rose-100 transition-colors p-0.5 cursor-pointer group"
+            className="flex flex-col items-center justify-center w-[54px] h-[60px] rounded hover:bg-destructive/10 hover:border hover:border-destructive/30 dark:hover:bg-destructive/40 dark:hover:border-destructive/60 active:bg-destructive/10 transition-colors p-0.5 cursor-pointer group"
             title="Close Header and Footer (Esc)"
           >
             <WordCloseIcon className="w-6 h-6 group-hover:scale-105 transition-transform" />

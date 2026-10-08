@@ -72,11 +72,11 @@ export default function RibbonIconButton({
               bg-primary/15
               text-primary/90
 
-              dark:bg-blue-900/50
-              dark:text-blue-300
+              dark:bg-navy-900/50
+              dark:text-navy-300
             `
             : `
-              text-gray-600 dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted hover:text-gray-900 dark:hover:text-primary-foreground
+              text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted hover:text-foreground dark:hover:text-primary-foreground
             `
         }
 

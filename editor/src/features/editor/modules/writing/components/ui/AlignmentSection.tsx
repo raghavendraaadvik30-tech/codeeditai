@@ -15,7 +15,7 @@ export default function AlignmentSection({
 
   return (
     <section className="mb-6">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Paragraph Alignment
       </h3>
 
@@ -27,7 +27,7 @@ export default function AlignmentSection({
             onClick={() => onApply(tool)}
             title={tool.name}
             aria-label={tool.name}
-            className="rounded-md border border-gray-200 px-2 py-2 text-xs text-gray-700 transition hover:bg-gray-100"
+            className="rounded-md border border-secondary px-2 py-2 text-xs text-secondary-foreground transition hover:bg-muted"
           >
             {tool.name.replace("Align ", "")}
           </button>

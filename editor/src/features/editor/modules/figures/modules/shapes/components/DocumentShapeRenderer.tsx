@@ -638,7 +638,7 @@ export default function DocumentShapeRenderer({
             title="Delete Shape"
             onClick={handleDelete}
             onPointerDown={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-red-400 hover:bg-destructive/20 hover:text-red-300 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-destructive hover:bg-destructive/20 hover:text-destructive/30 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Delete</span>
@@ -677,7 +677,7 @@ export default function DocumentShapeRenderer({
           <button
             type="button"
             onClick={handleDelete}
-            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-destructive/10 text-destructive dark:hover:bg-red-950/50 font-medium transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-destructive/10 text-destructive dark:hover:bg-destructive/50 font-medium transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5 text-destructive" />
             <span>Delete</span>

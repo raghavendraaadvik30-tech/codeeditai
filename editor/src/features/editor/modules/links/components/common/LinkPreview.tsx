@@ -24,8 +24,8 @@ export function LinkPreview({ link, onNavigate, onEdit, onRemove }: LinkPreviewP
   const isInternal = link.target.startsWith('#');
 
   const getIcon = () => {
-    if (isEmail) return <Mail className="h-4 w-4 text-emerald-500" />;
-    if (link.type === 'bookmark') return <Bookmark className="h-4 w-4 text-amber-500" />;
+    if (isEmail) return <Mail className="h-4 w-4 text-success-500" />;
+    if (link.type === 'bookmark') return <Bookmark className="h-4 w-4 text-warning-500" />;
     if (link.type === 'cross_ref') return <BookOpen className="h-4 w-4 text-purple-500" />;
     if (isInternal) return <Bookmark className="h-4 w-4 text-primary" />;
     return <Globe className="h-4 w-4 text-sky-500" />;
@@ -56,11 +56,11 @@ export function LinkPreview({ link, onNavigate, onEdit, onRemove }: LinkPreviewP
         <div className="flex items-center gap-1.5">
           {link.type === 'external' && (
             isSecure ? (
-              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+              <span className="flex items-center gap-1 text-success-600 dark:text-success-400 font-medium">
                 <Lock className="h-3 w-3" /> Secure HTTPS
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+              <span className="flex items-center gap-1 text-warning-600 dark:text-warning-400 font-medium">
                 <Unlock className="h-3 w-3" /> Insecure HTTP
               </span>
             )
@@ -101,7 +101,7 @@ export function LinkPreview({ link, onNavigate, onEdit, onRemove }: LinkPreviewP
             <button
               type="button"
               onClick={onRemove}
-              className="text-xs text-destructive hover:text-red-700"
+              className="text-xs text-destructive hover:text-destructive"
             >
               Remove
             </button>

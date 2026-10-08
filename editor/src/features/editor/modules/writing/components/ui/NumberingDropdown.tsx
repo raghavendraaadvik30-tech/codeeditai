@@ -34,7 +34,7 @@ export default function NumberingDropdown({
   onSelect,
 }: NumberingDropdownProps) {
   return (
-    <div className="absolute left-0 top-full z-20 mt-1 w-48 rounded-md border border-gray-200 bg-card p-1 shadow-lg">
+    <div className="absolute left-0 top-full z-20 mt-1 w-48 rounded-md border border-secondary bg-card p-1 shadow-lg">
       {NUMBERING_STYLES.map((item) => (
         <button
           key={item.value}

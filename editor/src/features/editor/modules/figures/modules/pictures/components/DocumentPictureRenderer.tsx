@@ -575,7 +575,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
             type="button"
             title="Delete Picture"
             onClick={handleDelete}
-            className="p-1 rounded text-destructive hover:bg-destructive/10 dark:hover:bg-red-950/50 hover:text-destructive transition-colors"
+            className="p-1 rounded text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/50 hover:text-destructive transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>

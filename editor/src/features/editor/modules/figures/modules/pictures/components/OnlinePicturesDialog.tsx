@@ -142,7 +142,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
       <DialogContent className="max-w-md bg-card p-5 text-foreground shadow-2xl dark:border-muted dark:bg-[#111D29] dark:text-muted rounded-xl">
         <DialogHeader className="border-b border-muted pb-3 dark:border-muted">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-primary">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-primary">
               <Globe className="h-4 w-4" />
             </div>
             <div>
@@ -159,8 +159,8 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
         <div className="mt-3 space-y-3">
           {/* Popup Blocker Alert */}
           {popupBlocked ? (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">
-              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+            <div className="flex items-start gap-2 rounded-lg border border-warning-200 bg-warning-50 p-2.5 text-xs text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/40 dark:text-warning-300">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-warning-600 dark:text-warning-400" />
               <div className="flex-1">
                 <p className="font-medium">Please allow pop-ups to open Google Images.</p>
                 <button
@@ -174,7 +174,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/60 p-2.5 text-xs text-secondary-foreground dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-muted-foreground">
+            <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/60 p-2.5 text-xs text-secondary-foreground dark:border-navy-900/40 dark:bg-navy-950/30 dark:text-muted-foreground">
               <ExternalLink className="h-4 w-4 shrink-0 mt-0.5 text-primary dark:text-primary" />
               <div>
                 <p className="font-medium text-foreground dark:text-muted-foreground">
@@ -248,8 +248,8 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
 
               {/* Error Message */}
               {imageState.status === 'error' && (
-                <div className="mt-2 flex items-start gap-1.5 rounded-md bg-destructive/10 p-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-destructive/20 dark:border-red-900/50">
-                  <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-destructive dark:text-red-400" />
+                <div className="mt-2 flex items-start gap-1.5 rounded-md bg-destructive/10 p-2 text-xs text-destructive dark:bg-destructive/40 dark:text-destructive/30 border border-destructive/20 dark:border-destructive/50">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-destructive dark:text-destructive" />
                   <span>{imageState.error || 'Unable to load this image. Please copy the direct image address.'}</span>
                 </div>
               )}
@@ -274,7 +274,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
                     />
                   </div>
                   <div className="mt-1.5 flex items-center justify-between w-full px-1 text-[11px] text-muted0 dark:text-muted-foreground">
-                    <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span className="flex items-center gap-1 text-success-600 dark:text-success-400 font-medium">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Ready to insert</span>
                     </span>

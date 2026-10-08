@@ -266,7 +266,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                 className={cn(
                   'flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-[11px] font-semibold transition border select-none',
                   isSelected
-                    ? 'border-primary bg-primary/10 text-primary/90 dark:border-primary dark:bg-blue-950/40 dark:text-blue-300 shadow-xs'
+                    ? 'border-primary bg-primary/10 text-primary/90 dark:border-primary dark:bg-navy-950/40 dark:text-navy-300 shadow-xs'
                     : 'border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-[#111D29] dark:text-muted-foreground'
                 )}
               >
@@ -280,8 +280,8 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
 
       {/* Bookmark creation tool when Bookmark is selected */}
       {selectedType === 'bookmark' && (
-        <div className="p-2 rounded-md border border-amber-200 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20 space-y-1.5">
-          <label className="block text-[10px] font-bold text-amber-800 dark:text-amber-300">
+        <div className="p-2 rounded-md border border-warning-200 bg-warning-50/50 dark:border-warning-900/50 dark:bg-warning-950/20 space-y-1.5">
+          <label className="block text-[10px] font-bold text-warning-800 dark:text-warning-300">
             + Create Bookmark at Selection / Cursor
           </label>
           <div className="flex gap-1.5">
@@ -290,7 +290,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
               value={newBookmarkName}
               onChange={(e) => setNewBookmarkName(e.target.value)}
               placeholder="e.g. SafetySummary"
-              className="flex-1 h-7 px-2 text-xs rounded border border-amber-200 bg-card dark:bg-[#111D29] text-foreground dark:text-muted-foreground focus:outline-none placeholder:text-muted-foreground"
+              className="flex-1 h-7 px-2 text-xs rounded border border-warning-200 bg-card dark:bg-[#111D29] text-foreground dark:text-muted-foreground focus:outline-none placeholder:text-muted-foreground"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreateBookmark();
               }}
@@ -299,14 +299,14 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleCreateBookmark}
-              className="h-7 px-2.5 rounded bg-amber-600 hover:bg-amber-700 text-primary-foreground text-[11px] font-semibold flex items-center gap-1 shrink-0 shadow-2xs"
+              className="h-7 px-2.5 rounded bg-warning-600 hover:bg-warning-700 text-primary-foreground text-[11px] font-semibold flex items-center gap-1 shrink-0 shadow-2xs"
             >
               <Plus className="h-3 w-3" />
               Add
             </button>
           </div>
           {bookmarkSuccess && (
-            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+            <p className="text-[10px] text-success-600 dark:text-success-400 font-medium">
               {bookmarkSuccess}
             </p>
           )}
@@ -384,7 +384,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                         }}
                         className={cn(
                           "w-full text-left px-3 py-1.5 text-[11px] hover:bg-muted dark:hover:bg-muted transition-colors truncate",
-                          selectedTargetId === t.id && "bg-primary/50 text-primary dark:bg-blue-900/20 dark:text-primary font-medium"
+                          selectedTargetId === t.id && "bg-primary/50 text-primary dark:bg-navy-900/20 dark:text-primary font-medium"
                         )}
                         title={t.title}
                       >
@@ -404,14 +404,14 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
         <>
           {/* Error / Success Feedback */}
           {error && (
-            <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-rose-200 text-destructive text-[11px] dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
+            <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-[11px] dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-1.5 p-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+            <div className="flex items-center gap-1.5 p-2 rounded-md bg-success-50 border border-success-200 text-success-700 text-[11px] dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
               <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
               <span>{successMsg}</span>
             </div>

@@ -153,7 +153,7 @@ const handleLogin = async () => {
       {/* Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />
       <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
+      <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
 

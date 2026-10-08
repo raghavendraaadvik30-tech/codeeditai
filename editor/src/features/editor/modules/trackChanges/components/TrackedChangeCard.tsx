@@ -79,17 +79,17 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       {/* 2. Badge & Change ID */}
       <div className="flex items-center gap-2 flex-wrap">
         {change.type === "delete" && (
-          <span className="rounded bg-destructive/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-destructive border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/60">
+          <span className="rounded bg-destructive/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-destructive border border-destructive/20 dark:bg-destructive/40 dark:text-destructive dark:border-destructive/60">
             DELETION
           </span>
         )}
         {change.type === "insert" && (
-          <span className="rounded bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/60">
+          <span className="rounded bg-success-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-success-700 border border-success-200 dark:bg-success-950/40 dark:text-success-400 dark:border-success-900/60">
             INSERTION
           </span>
         )}
         {change.type === "edit" && (
-          <span className="rounded bg-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/60">
+          <span className="rounded bg-warning-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-warning-700 border border-warning-200 dark:bg-warning-950/40 dark:text-warning-400 dark:border-warning-900/60">
             EDIT
           </span>
         )}
@@ -103,24 +103,24 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       {(change.newText || change.originalText) && (
         <div className="my-0.5">
           {change.type === "insert" && change.newText && (
-            <div className="border-l-2 border-emerald-500 pl-2 text-xs font-medium text-emerald-700 dark:text-emerald-400 break-words bg-emerald-50/30 p-1 rounded-r">
+            <div className="border-l-2 border-success-500 pl-2 text-xs font-medium text-success-700 dark:text-success-400 break-words bg-success-50/30 p-1 rounded-r">
               {change.newText}
             </div>
           )}
           {change.type === "delete" && change.originalText && (
-            <div className="border-l-2 border-destructive pl-2 text-xs font-medium text-destructive dark:text-rose-400 line-through break-words bg-destructive/30 p-1 rounded-r">
+            <div className="border-l-2 border-destructive pl-2 text-xs font-medium text-destructive dark:text-destructive line-through break-words bg-destructive/30 p-1 rounded-r">
               {change.originalText}
             </div>
           )}
           {change.type === "edit" && (
-            <div className="border-l-2 border-amber-500 pl-2 text-xs space-y-0.5 bg-amber-50/20 p-1 rounded-r">
+            <div className="border-l-2 border-warning-500 pl-2 text-xs space-y-0.5 bg-warning-50/20 p-1 rounded-r">
               {change.originalText && (
-                <div className="text-destructive dark:text-rose-400 line-through text-[11px] break-words">
+                <div className="text-destructive dark:text-destructive line-through text-[11px] break-words">
                   {change.originalText}
                 </div>
               )}
               {change.newText && (
-                <div className="text-emerald-700 dark:text-emerald-400 font-medium underline text-xs break-words">
+                <div className="text-success-700 dark:text-success-400 font-medium underline text-xs break-words">
                   {change.newText}
                 </div>
               )}
@@ -137,7 +137,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
         <button
           type="button"
           onClick={() => acceptChange(change.id)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-400"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-success-200 bg-success-50 py-1.5 text-xs font-medium text-success-700 hover:bg-success-100 transition-colors dark:border-success-900/60 dark:bg-success-950/30 dark:text-success-400"
         >
           <Check className="h-3.5 w-3.5" />
           <span>Accept</span>
@@ -145,7 +145,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
         <button
           type="button"
           onClick={() => rejectChange(change.id)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-destructive/10 py-1.5 text-xs font-medium text-destructive hover:bg-rose-100 transition-colors dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-400"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-destructive/20 bg-destructive/10 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors dark:border-destructive/60 dark:bg-destructive/30 dark:text-destructive"
         >
           <XIcon className="h-3.5 w-3.5" />
           <span>Reject</span>

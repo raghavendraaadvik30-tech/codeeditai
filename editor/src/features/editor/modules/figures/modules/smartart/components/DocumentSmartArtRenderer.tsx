@@ -2476,7 +2476,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
             onClick={() => setShowTextPane((prev) => !prev)}
             className={`flex items-center gap-1 px-2 py-1 rounded font-medium transition-colors ${
               showTextPane
-                ? 'bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-primary'
+                ? 'bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-primary'
                 : 'hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground'
             }`}
             title="Toggle Text Pane"
@@ -2531,7 +2531,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
             onClick={handleToggleDirection}
             className={`p-1 rounded font-medium transition-colors ${
               isRtl
-                ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400'
+                ? 'bg-warning-50 text-warning-600 dark:bg-warning-950/60 dark:text-warning-400'
                 : 'hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground'
             }`}
             title="Toggle Right to Left Direction (RTL / LTR)"
@@ -2554,7 +2554,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               className="flex items-center gap-1 px-2 py-1 rounded hover:bg-muted dark:hover:bg-muted font-medium transition-colors"
               title="Change Color Palette"
             >
-              <Palette className="w-3.5 h-3.5 text-amber-500" />
+              <Palette className="w-3.5 h-3.5 text-warning-500" />
               <span>Colors</span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
@@ -2625,7 +2625,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     onClick={() => handleSelectStyle(st)}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs capitalize text-left transition-colors ${
                       smartArt.style === st
-                        ? 'font-bold text-primary bg-primary/10 dark:bg-blue-950/50 dark:text-primary'
+                        ? 'font-bold text-primary bg-primary/10 dark:bg-navy-950/50 dark:text-primary'
                         : 'text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted'
                     }`}
                   >
@@ -2652,7 +2652,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               className="flex items-center gap-1 px-2 py-1 rounded hover:bg-muted dark:hover:bg-muted font-medium transition-colors"
               title="Change SmartArt Layout"
             >
-              <Layout className="w-3.5 h-3.5 text-emerald-500" />
+              <Layout className="w-3.5 h-3.5 text-success-500" />
               <span>Layout</span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
@@ -2668,7 +2668,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     type="button"
                     onClick={() => handleSelectLayout(l.id)}
                     className={`w-full flex items-center justify-between p-1.5 rounded hover:bg-muted dark:hover:bg-muted text-left transition-colors ${
-                      (smartArt.layoutId || smartArt.layout) === l.id ? 'bg-primary/10 dark:bg-blue-950/50 text-primary font-semibold' : ''
+                      (smartArt.layoutId || smartArt.layout) === l.id ? 'bg-primary/10 dark:bg-navy-950/50 text-primary font-semibold' : ''
                     }`}
                   >
                     <span className="text-xs">{l.name}</span>
@@ -2720,7 +2720,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
           <button
             type="button"
             onClick={onDeleteSmartArt}
-            className="p-1 rounded hover:bg-destructive/10 text-destructive dark:hover:bg-red-950/50 transition-colors"
+            className="p-1 rounded hover:bg-destructive/10 text-destructive dark:hover:bg-destructive/50 transition-colors"
             title="Delete SmartArt Graphic"
           >
             <Trash2 className="w-3.5 h-3.5" />

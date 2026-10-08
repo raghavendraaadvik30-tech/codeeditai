@@ -84,7 +84,7 @@ export const FigureGallery: React.FC<FigureGalleryProps> = ({
                 onClick={() => onSelectFigure(fig)}
                 className={`group relative cursor-pointer overflow-hidden rounded-xl border p-2 transition-all duration-200 ${
                   isSelected
-                    ? 'border-primary bg-primary/40 ring-2 ring-primary/20 dark:bg-blue-950/30'
+                    ? 'border-primary bg-primary/40 ring-2 ring-primary/20 dark:bg-navy-950/30'
                     : 'border-secondary bg-card hover:border-border hover:shadow-md dark:border-muted dark:bg-[#111D29]'
                 }`}
               >

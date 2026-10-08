@@ -155,7 +155,7 @@ export function EmailComposeModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-secondary dark:border-muted bg-card dark:bg-[#0D1A26]">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-primary/10 dark:bg-blue-950 text-primary dark:text-primary">
+            <div className="p-1.5 rounded-lg bg-primary/10 dark:bg-navy-950 text-primary dark:text-primary">
               <Mail className="h-4 w-4" />
             </div>
             <h3 className="text-sm font-bold text-foreground dark:text-muted">
@@ -175,7 +175,7 @@ export function EmailComposeModal({
         {/* Content Body */}
         <div className="p-5 space-y-4 text-xs bg-card dark:bg-[#0D1A26]">
           {/* Blue Info Callout Box */}
-          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-primary/10 dark:bg-[#112233] border border-primary/30 dark:border-primary text-blue-900 dark:text-blue-300">
+          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-primary/10 dark:bg-[#112233] border border-primary/30 dark:border-primary text-navy-900 dark:text-navy-300">
             <Info className="h-4 w-4 text-primary dark:text-primary shrink-0 mt-0.5" />
             <p className="text-[11px] leading-relaxed font-medium">
               The current document will be converted to PDF and attached to the email.
@@ -201,12 +201,12 @@ export function EmailComposeModal({
           {/* Success Banner */}
           {sendSuccess && (
             <div className="space-y-2">
-              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-300 text-xs font-semibold">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-success-50 border border-success-200 text-success-800 dark:bg-success-950 dark:border-success-800 dark:text-success-300 text-xs font-semibold">
+                <CheckCircle2 className="h-4 w-4 text-success-600 shrink-0" />
                 <span>Email sent with PDF attached — PDF also downloaded to your browser.</span>
               </div>
               {previewUrl && isEthereal && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-primary/10 border border-primary/30 text-primary dark:bg-[#112233] dark:border-primary dark:text-blue-300 text-[11px]">
+                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-primary/10 border border-primary/30 text-primary dark:bg-[#112233] dark:border-primary dark:text-navy-300 text-[11px]">
                   <Mail className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
                   <span>
                     <span className="font-semibold">Test mode (no Gmail configured):</span>{' '}
@@ -226,7 +226,7 @@ export function EmailComposeModal({
 
           {/* PDF Generation Error Banner */}
           {pdfError && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-rose-200 text-rose-800 dark:bg-rose-950 dark:border-rose-800 dark:text-rose-300 text-xs font-medium">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive/60 dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30 text-xs font-medium">
               <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <span>PDF Generation Error: {pdfError}</span>
             </div>
@@ -234,7 +234,7 @@ export function EmailComposeModal({
 
           {/* Email Send Error Banner */}
           {sendError && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-rose-200 text-rose-800 dark:bg-rose-950 dark:border-rose-800 dark:text-rose-300 text-xs font-medium">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive/60 dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30 text-xs font-medium">
               <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <span>Email Sending Error: {sendError}</span>
             </div>

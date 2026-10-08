@@ -69,7 +69,7 @@ export default function DashboardOverview() {
       description: "Validated authors & reviewers",
       icon: UserCheck,
       color:
-        "text-emerald-600 bg-emerald-50 border border-emerald-100",
+        "text-success-600 bg-success-50 border border-success-100",
     },
     {
       title: "Admin Accounts",

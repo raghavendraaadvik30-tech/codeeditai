@@ -163,7 +163,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                 className={cn(
                   'group flex flex-col p-2 rounded-lg border text-left transition-all cursor-pointer select-none',
                   isSelected
-                    ? 'border-primary bg-primary/60 dark:border-primary dark:bg-blue-950/30 ring-1 ring-primary/40'
+                    ? 'border-primary bg-primary/60 dark:border-primary dark:bg-navy-950/30 ring-1 ring-primary/40'
                     : 'border-secondary bg-card hover:border-border hover:bg-muted/70 dark:border-muted dark:bg-[#111D29] dark:hover:border-secondary-foreground'
                 )}
               >
@@ -174,7 +174,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                         'flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-bold',
                         isSelected
                           ? 'bg-primary text-primary-foreground'
-                          : 'bg-primary/10 text-primary dark:bg-blue-950/60 dark:text-primary'
+                          : 'bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-primary'
                       )}
                     >
                       <FileText className="h-4 w-4" />
@@ -184,7 +184,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                         className={cn(
                           'text-xs font-semibold truncate',
                           isSelected
-                            ? 'text-blue-900 dark:text-primary/30'
+                            ? 'text-navy-900 dark:text-primary/30'
                             : 'text-foreground dark:text-muted-foreground'
                         )}
                       >
@@ -223,7 +223,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
 
       {/* Success Notification */}
       {successMsg && (
-        <div className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium text-center">
+        <div className="mt-2 text-[11px] text-success-600 dark:text-success-400 font-medium text-center">
           {successMsg}
         </div>
       )}

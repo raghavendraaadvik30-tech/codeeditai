@@ -157,7 +157,7 @@ export function TablePropertiesDialog({
                   onClick={() => setAlignment(id)}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     alignment === id
-                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-navy-950/50 dark:border-primary dark:text-primary/30"
                       : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >
@@ -179,7 +179,7 @@ export function TablePropertiesDialog({
                   onClick={() => setWidthMode("100%")}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     widthMode === "100%"
-                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-navy-950/50 dark:border-primary dark:text-primary/30"
                       : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >
@@ -190,7 +190,7 @@ export function TablePropertiesDialog({
                   onClick={() => setWidthMode("auto")}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     widthMode === "auto"
-                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-navy-950/50 dark:border-primary dark:text-primary/30"
                       : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >
@@ -201,7 +201,7 @@ export function TablePropertiesDialog({
                   onClick={() => setWidthMode("custom")}
                   className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     widthMode === "custom"
-                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                      ? "bg-primary/10 border-primary text-primary/90 dark:bg-navy-950/50 dark:border-primary dark:text-primary/30"
                       : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                   }`}
                 >

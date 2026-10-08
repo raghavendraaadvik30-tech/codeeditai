@@ -220,7 +220,7 @@ export default function ChartFormatTab() {
       <button
         type="button"
         onClick={deleteActiveChart}
-        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium text-destructive hover:bg-destructive/10 dark:hover:bg-red-950/40 transition-colors"
+        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/40 transition-colors"
         title="Delete chart from document"
       >
         <Trash2 className="h-4 w-4" />

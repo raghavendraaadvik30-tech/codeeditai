@@ -149,7 +149,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
                     className={`
                       group relative flex flex-col justify-between items-center rounded-xl p-3 min-h-[140px] max-h-[155px] border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#0078d4]
                       ${isSelected
-                        ? 'border-2 border-[#0078d4] bg-primary/50 shadow-xs dark:border-[#0078d4] dark:bg-blue-950/30'
+                        ? 'border-2 border-[#0078d4] bg-primary/50 shadow-xs dark:border-[#0078d4] dark:bg-navy-950/30'
                         : 'border-secondary bg-card hover:border-border hover:shadow-xs dark:border-muted dark:bg-[#111D29] dark:hover:border-secondary-foreground'
                       }
                     `}

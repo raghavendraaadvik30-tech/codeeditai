@@ -131,7 +131,7 @@ export const FigureToolbar: React.FC<FigureToolbarProps> = ({
         <button
           type="button"
           onClick={onDelete}
-          className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10 dark:hover:bg-red-950/40"
+          className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/40"
           title="Delete Figure"
         >
           <Trash2 className="h-4 w-4" />

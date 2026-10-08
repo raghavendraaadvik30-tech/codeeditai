@@ -216,7 +216,7 @@ export default function InsertTab() {
       </RibbonButton>
 
       <RibbonButton
-        icon={<Trash2 className="h-4 w-4 text-destructive dark:text-rose-400" />}
+        icon={<Trash2 className="h-4 w-4 text-destructive dark:text-destructive" />}
         onClick={handleDeletePage}
         disabled={model.pages.length <= 1}
       >

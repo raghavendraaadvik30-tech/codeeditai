@@ -312,9 +312,9 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                   </span>
 
-                  <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-success-600">
 
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="h-2 w-2 rounded-full bg-success-500" />
 
                     ACTIVE SESSION
 
@@ -350,7 +350,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
               {success && (
 
-                <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+                <div className="mb-4 flex items-center gap-2 rounded-xl bg-success-50 px-4 py-3 text-xs font-semibold text-success-700">
 
                   <CheckCircle2 className="h-4 w-4 shrink-0" />
 
@@ -773,7 +773,7 @@ export const DashboardLayout: React.FC = () => {
 
             onClick={logout}
 
-            className="flex w-full items-center justify-center rounded-xl border border-rose-200 py-2.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10"
+            className="flex w-full items-center justify-center rounded-xl border border-destructive/20 py-2.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10"
 
           >
 

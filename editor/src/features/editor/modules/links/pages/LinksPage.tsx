@@ -198,14 +198,14 @@ function LinksPageContent() {
             className={cn(
               'flex items-center gap-1.5 p-1.5 rounded-md border text-[11px] font-medium transition-all',
               feedbackMsg.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300'
-                : 'bg-destructive/10 border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300'
+                ? 'bg-success-50 border-success-200 text-success-800 dark:bg-success-950/40 dark:border-success-800 dark:text-success-300'
+                : 'bg-destructive/10 border-destructive/20 text-destructive/60 dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30'
             )}
           >
             {feedbackMsg.type === 'success' ? (
-              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success-600 dark:text-success-400" />
             ) : (
-              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive dark:text-rose-400" />
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive dark:text-destructive" />
             )}
             <span>{feedbackMsg.text}</span>
           </div>

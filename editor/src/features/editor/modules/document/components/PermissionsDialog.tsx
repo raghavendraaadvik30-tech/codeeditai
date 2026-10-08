@@ -61,7 +61,7 @@ export function PermissionsDialog({
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-muted dark:border-muted">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary dark:bg-blue-950/60 dark:text-primary">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary dark:bg-navy-950/60 dark:text-primary">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
@@ -76,8 +76,8 @@ export function PermissionsDialog({
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
               editableState
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400"
-                : "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400"
+                ? "bg-success-100 text-success-700 dark:bg-success-950/50 dark:text-success-400"
+                : "bg-warning-100 text-warning-700 dark:bg-warning-950/50 dark:text-warning-400"
             }`}
           >
             {editableState ? (
@@ -135,7 +135,7 @@ export function PermissionsDialog({
                 onClick={() => handleRoleChange("Editor")}
                 className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all ${
                   permissionRole === "Editor"
-                    ? "border-primary bg-primary/50 text-primary/90 dark:border-primary dark:bg-blue-950/30 dark:text-blue-300 ring-1 ring-primary"
+                    ? "border-primary bg-primary/50 text-primary/90 dark:border-primary dark:bg-navy-950/30 dark:text-navy-300 ring-1 ring-primary"
                     : "border-secondary hover:bg-muted dark:border-muted dark:hover:bg-muted/60 text-secondary-foreground dark:text-muted-foreground"
                 }`}
               >
@@ -149,7 +149,7 @@ export function PermissionsDialog({
                 onClick={() => handleRoleChange("Reviewer")}
                 className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all ${
                   permissionRole === "Reviewer"
-                    ? "border-primary bg-primary/50 text-primary/90 dark:border-primary dark:bg-blue-950/30 dark:text-blue-300 ring-1 ring-primary"
+                    ? "border-primary bg-primary/50 text-primary/90 dark:border-primary dark:bg-navy-950/30 dark:text-navy-300 ring-1 ring-primary"
                     : "border-secondary hover:bg-muted dark:border-muted dark:hover:bg-muted/60 text-secondary-foreground dark:text-muted-foreground"
                 }`}
               >
@@ -163,7 +163,7 @@ export function PermissionsDialog({
                 onClick={() => handleRoleChange("Viewer")}
                 className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all ${
                   permissionRole === "Viewer"
-                    ? "border-primary bg-primary/50 text-primary/90 dark:border-primary dark:bg-blue-950/30 dark:text-blue-300 ring-1 ring-primary"
+                    ? "border-primary bg-primary/50 text-primary/90 dark:border-primary dark:bg-navy-950/30 dark:text-navy-300 ring-1 ring-primary"
                     : "border-secondary hover:bg-muted dark:border-muted dark:hover:bg-muted/60 text-secondary-foreground dark:text-muted-foreground"
                 }`}
               >
@@ -178,7 +178,7 @@ export function PermissionsDialog({
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between text-[11px] text-secondary-foreground dark:text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-success-500" />
                 Prevent accidental layout resets
               </span>
               <input
@@ -191,8 +191,8 @@ export function PermissionsDialog({
           </div>
 
           {!editableState && (
-            <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-2.5 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/30">
-              <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-lg bg-warning-50 p-2.5 text-xs text-warning-800 dark:bg-warning-950/30 dark:text-warning-300 border border-warning-200/60 dark:border-warning-900/30">
+              <AlertCircle className="h-4 w-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5" />
               <span>
                 Document is currently in <strong>Read-Only</strong> mode. You can switch back to Edit mode anytime using this permissions panel.
               </span>

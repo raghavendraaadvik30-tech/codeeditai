@@ -60,7 +60,7 @@ export function BookmarkDialog({ open, onOpenChange, onSuccess }: BookmarkDialog
       <DialogContent className="sm:max-w-[420px] bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
         <DialogHeader className="p-4 border-b border-muted dark:border-muted">
           <DialogTitle className="text-sm font-semibold text-foreground dark:text-primary-foreground flex items-center gap-2">
-            <Bookmark className="h-4 w-4 text-amber-500" />
+            <Bookmark className="h-4 w-4 text-warning-500" />
             Add Bookmark
           </DialogTitle>
         </DialogHeader>
@@ -79,7 +79,7 @@ export function BookmarkDialog({ open, onOpenChange, onSuccess }: BookmarkDialog
                 if (e.key === 'Enter') handleCreate();
               }}
               placeholder="e.g. Protocol_Objectives_Sec2"
-              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-amber-500"
+              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-warning-500"
               autoFocus
             />
           </div>
@@ -103,7 +103,7 @@ export function BookmarkDialog({ open, onOpenChange, onSuccess }: BookmarkDialog
           <button
             type="button"
             onClick={handleCreate}
-            className="flex h-7 items-center justify-center rounded-md bg-amber-500 px-3 text-xs font-semibold text-primary-foreground hover:bg-amber-600 transition-colors"
+            className="flex h-7 items-center justify-center rounded-md bg-warning-500 px-3 text-xs font-semibold text-primary-foreground hover:bg-warning-600 transition-colors"
           >
             Create Bookmark
           </button>
