@@ -124,7 +124,7 @@ export function StylesPanel() {
       "mousedown",
       onOutside,
     );
-
+ 
     return () => {
       document.removeEventListener(
         "keydown",
