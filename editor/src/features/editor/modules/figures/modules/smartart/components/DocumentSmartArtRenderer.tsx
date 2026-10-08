@@ -2259,7 +2259,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
       }}
       className={`relative group select-none rounded-xl flex transition-all duration-150 ${
         isSelected
-          ? 'ring-2 ring-[#0078d4] shadow-xl'
+          ? 'ring-2 ring-brand shadow-xl'
           : 'hover:ring-1 hover:ring-secondary'
       }`}
       style={{
@@ -2386,42 +2386,42 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
           {/* NW */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'nw')}
-            className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-nwse-resize z-30 shadow-xs"
+            className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-nwse-resize z-30 shadow-xs"
           />
           {/* N */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'n')}
-            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-ns-resize z-30 shadow-xs"
+            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-ns-resize z-30 shadow-xs"
           />
           {/* NE */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'ne')}
-            className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-nesw-resize z-30 shadow-xs"
+            className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-nesw-resize z-30 shadow-xs"
           />
           {/* E */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'e')}
-            className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-ew-resize z-30 shadow-xs"
+            className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-ew-resize z-30 shadow-xs"
           />
           {/* SE */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'se')}
-            className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-nwse-resize z-30 shadow-xs"
+            className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-nwse-resize z-30 shadow-xs"
           />
           {/* S */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 's')}
-            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-ns-resize z-30 shadow-xs"
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-ns-resize z-30 shadow-xs"
           />
           {/* SW */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'sw')}
-            className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-nesw-resize z-30 shadow-xs"
+            className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-nesw-resize z-30 shadow-xs"
           />
           {/* W */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, 'w')}
-            className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-card border-2 border-[#0078d4] rounded-xs cursor-ew-resize z-30 shadow-xs"
+            className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-card border-2 border-brand rounded-xs cursor-ew-resize z-30 shadow-xs"
           />
         </>
       )}

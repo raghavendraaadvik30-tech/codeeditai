@@ -66,7 +66,7 @@ export function ReferencePanel() {
             refs.setEditingSource(null);
             refs.setIsOpenCreateSource(true);
           }}
-          className="flex items-center justify-center gap-1.5 h-9 rounded-lg bg-[#0078d4] hover:bg-[#006bbd] text-primary-foreground font-medium text-xs transition shadow-sm"
+          className="flex items-center justify-center gap-1.5 h-9 rounded-lg bg-brand hover:bg-brand text-primary-foreground font-medium text-xs transition shadow-sm"
         >
           <Plus className="h-4 w-4" />
           Add Source

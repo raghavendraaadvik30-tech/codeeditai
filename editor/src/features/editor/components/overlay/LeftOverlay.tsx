@@ -179,8 +179,8 @@ export default function LeftOverlay() {
               rounded-xl
               bg-primary/10
               text-primary
-              dark:bg-[#0078d4]/20
-              dark:text-[#0078d4]
+              dark:bg-brand/20
+              dark:text-brand
             "
           >
             <HeaderIcon className="h-5 w-5" />

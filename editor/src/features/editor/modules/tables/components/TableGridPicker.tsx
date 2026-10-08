@@ -32,7 +32,7 @@ export function TableGridPicker() {
         <span className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
           Quick Grid
         </span>
-        <span className="text-[11px] font-medium text-[#0078d4]">
+        <span className="text-[11px] font-medium text-brand">
           {hoveredRow > 0 && hoveredCol > 0
             ? `${hoveredRow} × ${hoveredCol} Table`
             : "Hover to select"}
@@ -64,7 +64,7 @@ export function TableGridPicker() {
                 className={cn(
                   "h-5 w-5 rounded-sm border transition-all duration-75",
                   isHighlighted
-                    ? "border-[#0078d4] bg-[#0078d4]/30 dark:border-[#0078d4] dark:bg-[#0078d4]/40"
+                    ? "border-brand bg-brand/30 dark:border-brand dark:bg-brand/40"
                     : "border-secondary bg-card hover:border-border dark:border-muted dark:bg-secondary"
                 )}
                 title={`${rowNum} × ${colNum}`}

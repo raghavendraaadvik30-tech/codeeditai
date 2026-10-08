@@ -143,7 +143,7 @@ export default function RibbonToolbar() {
           py-1
           dark:border-muted
           dark:bg-[#07131E]
-          ${activeTab === "Header & Footer" ? "min-h-[94px] bg-[#fbfcfd] dark:bg-[#081522]" : "min-h-[48px]"}
+          ${activeTab === "Header & Footer" ? "min-h-[94px] bg-card dark:bg-[#081522]" : "min-h-[48px]"}
         `}
       >
         {renderRibbon()}

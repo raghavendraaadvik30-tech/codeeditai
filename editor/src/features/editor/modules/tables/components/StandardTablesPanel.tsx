@@ -130,10 +130,10 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
           key={item.id}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => handleSelect(item.id)}
-          className="group flex items-center justify-between rounded-xl border border-secondary/80 bg-card p-2.5 transition-all hover:border-[#0078d4]/60 hover:bg-primary/20 dark:border-muted/80 dark:bg-[#091524] dark:hover:border-secondary-foreground dark:hover:bg-muted/40 cursor-pointer"
+          className="group flex items-center justify-between rounded-xl border border-secondary/80 bg-card p-2.5 transition-all hover:border-brand/60 hover:bg-primary/20 dark:border-muted/80 dark:bg-[#091524] dark:hover:border-secondary-foreground dark:hover:bg-muted/40 cursor-pointer"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[#0078d4] dark:bg-navy-950/50 dark:text-primary group-hover:scale-105 transition-transform">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-brand dark:bg-navy-950/50 dark:text-primary group-hover:scale-105 transition-transform">
               <Table2 className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0">
@@ -153,7 +153,7 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
               e.stopPropagation();
               handleSelect(item.id);
             }}
-            className="flex h-6 shrink-0 items-center gap-1 rounded-md bg-[#0078d4]/10 px-2 text-[11px] font-medium text-[#0078d4] hover:bg-[#0078d4] hover:text-primary-foreground transition-colors cursor-pointer"
+            className="flex h-6 shrink-0 items-center gap-1 rounded-md bg-brand/10 px-2 text-[11px] font-medium text-brand hover:bg-brand hover:text-primary-foreground transition-colors cursor-pointer"
           >
             <Plus className="h-3 w-3" />
             <span>Insert</span>

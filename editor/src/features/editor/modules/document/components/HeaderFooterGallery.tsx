@@ -80,7 +80,7 @@ export function HeaderGallery({
             <button
               type="button"
               className={`${buttonClassName} ${
-                isHeaderFooterActive ? "bg-primary/10 text-[#0078d4] font-semibold dark:bg-navy-950/50" : ""
+                isHeaderFooterActive ? "bg-primary/10 text-brand font-semibold dark:bg-navy-950/50" : ""
               }`}
               title="Built-in Header Gallery"
             >
@@ -102,7 +102,7 @@ export function HeaderGallery({
         }
       />
 
-      <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-[#0f172a]">
+      <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-foreground">
         <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground pb-1">
           Built-In Headers
         </DropdownMenuLabel>
@@ -114,9 +114,9 @@ export function HeaderGallery({
               key={tmpl.id}
               type="button"
               onClick={() => handleSelectTemplate(tmpl)}
-              className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-[#0078d4] hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
+              className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
             >
-              <div className="text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-[#0078d4] dark:group-hover:text-primary">
+              <div className="text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
                 {tmpl.name}
               </div>
               <div
@@ -133,7 +133,7 @@ export function HeaderGallery({
         <div className="pt-1 space-y-0.5">
           <DropdownMenuItem
             onClick={handleEditHeader}
-            className="flex items-center gap-2 cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground hover:text-[#0078d4]"
+            className="flex items-center gap-2 cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground hover:text-brand"
           >
             <Edit3 className="h-3.5 w-3.5 text-primary" />
             <span>Edit Header</span>
@@ -210,7 +210,7 @@ export function FooterGallery({
             <button
               type="button"
               className={`${buttonClassName} ${
-                isHeaderFooterActive ? "bg-primary/10 text-[#0078d4] font-semibold dark:bg-navy-950/50" : ""
+                isHeaderFooterActive ? "bg-primary/10 text-brand font-semibold dark:bg-navy-950/50" : ""
               }`}
               title="Built-in Footer Gallery"
             >
@@ -232,7 +232,7 @@ export function FooterGallery({
         }
       />
 
-      <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-[#0f172a]">
+      <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-foreground">
         <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground pb-1">
           Built-In Footers
         </DropdownMenuLabel>
@@ -244,9 +244,9 @@ export function FooterGallery({
               key={tmpl.id}
               type="button"
               onClick={() => handleSelectTemplate(tmpl)}
-              className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-[#0078d4] hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
+              className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
             >
-              <div className="text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-[#0078d4] dark:group-hover:text-primary">
+              <div className="text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
                 {tmpl.name}
               </div>
               <div
@@ -263,7 +263,7 @@ export function FooterGallery({
         <div className="pt-1 space-y-0.5">
           <DropdownMenuItem
             onClick={handleEditFooter}
-            className="flex items-center gap-2 cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground hover:text-[#0078d4]"
+            className="flex items-center gap-2 cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground hover:text-brand"
           >
             <Edit3 className="h-3.5 w-3.5 text-primary" />
             <span>Edit Footer</span>

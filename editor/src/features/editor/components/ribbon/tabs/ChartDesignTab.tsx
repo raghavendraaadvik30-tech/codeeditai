@@ -312,9 +312,9 @@ export default function ChartDesignTab() {
                 title={`${style.name}: ${style.description}`}
               >
                 <div className="flex items-end gap-0.5 h-3.5 w-8 justify-center">
-                  <div className="w-1.5 h-2.5 bg-primary rounded-[2px]" />
-                  <div className="w-1.5 h-3.5 bg-primary rounded-[2px]" />
-                  <div className="w-1.5 h-1.5 bg-primary rounded-[2px]" />
+                  <div className="w-1.5 h-2.5 bg-primary rounded-xs" />
+                  <div className="w-1.5 h-3.5 bg-primary rounded-xs" />
+                  <div className="w-1.5 h-1.5 bg-primary rounded-xs" />
                 </div>
                 <span className="text-[9px] font-medium text-secondary-foreground leading-none mt-0.5">
                   {style.name}

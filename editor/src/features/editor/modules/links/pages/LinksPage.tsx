@@ -151,7 +151,7 @@ function LinksPageContent() {
   ];
 
   return (
-    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-[#F8FAFC] dark:bg-[#07131E] text-foreground dark:text-muted">
+    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-muted dark:bg-[#07131E] text-foreground dark:text-muted">
       {/* Top Fixed Area (Tabs + Form + Controls) - Fits neatly without scrollbar */}
       <div className="shrink-0 p-2.5 space-y-2">
         {/* Main Selectable Tabs (Side-by-Side: 1. INTERNAL REFERENCE | 2. CROSS REFERENCES) */}

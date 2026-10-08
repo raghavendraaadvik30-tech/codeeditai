@@ -111,7 +111,7 @@ export const ChangeChartTypeModal: React.FC<ChangeChartTypeModalProps> = ({
               onSelectType(selectedType);
               onClose();
             }}
-            className="px-5 py-2 text-xs font-semibold text-primary-foreground bg-[#0078d4] rounded-lg shadow-sm hover:bg-[#005a9e]"
+            className="px-5 py-2 text-xs font-semibold text-primary-foreground bg-brand rounded-lg shadow-sm hover:bg-brand-deep"
           >
             Change Type
           </button>

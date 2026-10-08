@@ -73,7 +73,7 @@ export function LinkPreview({ link, onNavigate, onEdit, onRemove }: LinkPreviewP
             <button
               type="button"
               onClick={onNavigate}
-              className="text-xs font-semibold text-[#0078d4] hover:underline"
+              className="text-xs font-semibold text-brand hover:underline"
             >
               Jump
             </button>

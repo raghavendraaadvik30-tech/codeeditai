@@ -1423,7 +1423,7 @@ export function TableControlsOverlay({
         title="Click and drag to move table across blocks or pages"
         className={`absolute z-30 flex h-6 w-6 -translate-x-3 -translate-y-3 cursor-move items-center justify-center rounded-md border shadow-md select-none transition-transform hover:scale-110 active:scale-95 print:hidden ${
           isDragging
-            ? "bg-[#0078d4] text-primary-foreground border-[#0078d4] ring-2 ring-navy-300"
+            ? "bg-brand text-primary-foreground border-brand ring-2 ring-navy-300"
             : "border-border bg-card text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
         }`}
         style={{
@@ -1450,8 +1450,8 @@ export function TableControlsOverlay({
             height: `${pos.height}px`,
           }}
         >
-          <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-[#0078d4]/80" />
-          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
+          <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-brand/80" />
+          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
 
@@ -1477,13 +1477,13 @@ export function TableControlsOverlay({
             <div
               className={`h-full w-[2px] transition-colors ${
                 activeColIndex === col.colIndex
-                  ? "bg-[#0078d4] shadow-[0_0_8px_rgba(0,120,212,0.8)]"
-                  : "bg-transparent group-hover:bg-[#0078d4]/80"
+                  ? "bg-brand shadow-[0_0_8px_rgba(0,120,212,0.8)]"
+                  : "bg-transparent group-hover:bg-brand/80"
               }`}
             />
             {/* Top guide indicator pill */}
             <div
-              className={`absolute top-0 h-3 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm transition-opacity dark:border-secondary ${
+              className={`absolute top-0 h-3 w-2 rounded-full border border-white bg-brand shadow-sm transition-opacity dark:border-secondary ${
                 activeColIndex === col.colIndex ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             />
@@ -1506,8 +1506,8 @@ export function TableControlsOverlay({
             height: `${pos.height}px`,
           }}
         >
-          <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-[#0078d4]/80" />
-          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-[#0078d4] shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
+          <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-brand/80" />
+          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
 
@@ -1533,13 +1533,13 @@ export function TableControlsOverlay({
             <div
               className={`w-full h-[2px] transition-colors ${
                 activeRowIndex === row.rowIndex
-                  ? "bg-[#0078d4] shadow-[0_0_8px_rgba(0,120,212,0.8)]"
-                  : "bg-transparent group-hover:bg-[#0078d4]/80"
+                  ? "bg-brand shadow-[0_0_8px_rgba(0,120,212,0.8)]"
+                  : "bg-transparent group-hover:bg-brand/80"
               }`}
             />
             {/* Left guide indicator pill */}
             <div
-              className={`absolute left-0 h-2 w-3 rounded-full border border-white bg-[#0078d4] shadow-sm transition-opacity dark:border-secondary ${
+              className={`absolute left-0 h-2 w-3 rounded-full border border-white bg-brand shadow-sm transition-opacity dark:border-secondary ${
                 activeRowIndex === row.rowIndex ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             />
@@ -1554,7 +1554,7 @@ export function TableControlsOverlay({
           contentEditable={false}
           onPointerDown={handleResizePointerDown}
           title="Drag to resize table (both width & height, small & large)"
-          className={`absolute z-30 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize rounded-sm border-2 border-white bg-[#0078d4] shadow-md select-none transition-transform hover:scale-125 print:hidden dark:border-secondary ${
+          className={`absolute z-30 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize rounded-sm border-2 border-white bg-brand shadow-md select-none transition-transform hover:scale-125 print:hidden dark:border-secondary ${
             isResizing ? "scale-125 bg-primary ring-2 ring-navy-300" : ""
           }`}
           style={{
@@ -1582,7 +1582,7 @@ export function TableControlsOverlay({
       {isDragging && dragPreview && createPortal(
         <div
           data-editor-ui="true"
-          className="fixed pointer-events-none z-[9999] rounded-md border-2 border-[#0078d4] bg-card/90 p-2 shadow-2xl backdrop-blur-sm print:hidden"
+          className="fixed pointer-events-none z-[9999] rounded-md border-2 border-brand bg-card/90 p-2 shadow-2xl backdrop-blur-sm print:hidden"
           style={{
             left: `${dragPreview.x}px`,
             top: `${dragPreview.y}px`,
@@ -1593,7 +1593,7 @@ export function TableControlsOverlay({
             boxShadow: "0 12px 36px rgba(0, 120, 212, 0.25)",
           }}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#0078d4] mb-1">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-brand mb-1">
             <Move className="h-3.5 w-3.5" />
             <span>Moving Table (Drop to place)</span>
           </div>
@@ -1609,7 +1609,7 @@ export function TableControlsOverlay({
       {isDragging && dropIndicator && createPortal(
         <div
           data-editor-ui="true"
-          className="fixed pointer-events-none z-[9998] h-1.5 rounded-full bg-[#0078d4] shadow-lg ring-2 ring-primary/50 print:hidden"
+          className="fixed pointer-events-none z-[9998] h-1.5 rounded-full bg-brand shadow-lg ring-2 ring-primary/50 print:hidden"
           style={{
             top: `${dropIndicator.top}px`,
             left: `${dropIndicator.left}px`,

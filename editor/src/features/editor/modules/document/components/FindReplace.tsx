@@ -252,7 +252,7 @@ export function FindReplace() {
             className={cn(
               "px-3 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
               navTab === "find"
-                ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
+                ? "border-b-2 border-brand text-brand bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
                 : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
             )}
           >
@@ -267,7 +267,7 @@ export function FindReplace() {
             className={cn(
               "px-3 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
               navTab === "replace"
-                ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
+                ? "border-b-2 border-brand text-brand bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
                 : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
             )}
           >

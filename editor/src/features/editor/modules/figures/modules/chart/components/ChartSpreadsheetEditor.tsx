@@ -444,7 +444,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
       `}</style>
 
       {/* 1. COMPACT EXCEL WINDOW HEADER */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#107c41] text-primary-foreground">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-success-700 text-primary-foreground">
         <div className="flex items-center gap-2">
           <FileSpreadsheet className="w-4 h-4 text-success-100 shrink-0" />
           <span className="text-xs font-semibold tracking-wide">

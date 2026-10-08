@@ -148,7 +148,7 @@ const handleLogin = async () => {
   }
 };
     return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#F8FAFC] px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-muted px-4">
 
       {/* Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />

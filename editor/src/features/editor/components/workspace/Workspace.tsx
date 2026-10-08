@@ -2143,7 +2143,7 @@ function DocumentPage({
           text-muted-foreground
           transition-all
           ${isHeaderFooterActive
-                ? "border-b border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
+                ? "border-b border-dashed border-brand bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
                 : "border-b border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
               }
         `}
@@ -2160,7 +2160,7 @@ function DocumentPage({
             {isHeaderFooterActive && (
               <div
                 data-editor-ui="true"
-                className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+                className="absolute -top-3 left-4 px-2 py-0.5 bg-brand text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
               >
                 <span>{headerLabel}</span>
                 {isLinked && (
@@ -2481,7 +2481,7 @@ function DocumentPage({
           text-muted-foreground
           transition-all
           ${isHeaderFooterActive
-                ? "border-t border-dashed border-[#0078d4] bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
+                ? "border-t border-dashed border-brand bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
                 : "border-t border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
               }
         `}
@@ -2498,7 +2498,7 @@ function DocumentPage({
             {isHeaderFooterActive && (
               <div
                 data-editor-ui="true"
-                className="absolute -top-3 left-4 px-2 py-0.5 bg-[#0078d4] text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+                className="absolute -top-3 left-4 px-2 py-0.5 bg-brand text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
               >
                 <span>{footerLabel}</span>
                 {isLinked && (

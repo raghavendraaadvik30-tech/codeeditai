@@ -1158,7 +1158,7 @@ Please use the credentials above to access the secure portal.`
 
               pl-10
 
-              border-[#E5E7EB]
+              border-secondary
 
               bg-card
 
@@ -1258,7 +1258,7 @@ Please use the credentials above to access the secure portal.`
 
                   h-10
 
-                  border-[#E5E7EB]
+                  border-secondary
 
                   bg-card
 
@@ -1282,7 +1282,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-              <SelectContent className="bg-card border-[#E5E7EB]">
+              <SelectContent className="bg-card border-secondary">
 
 
 
@@ -1352,7 +1352,7 @@ Please use the credentials above to access the secure portal.`
 
               hover:text-foreground
 
-              border-[#E5E7EB]
+              border-secondary
 
               bg-card
 
@@ -1402,7 +1402,7 @@ Please use the credentials above to access the secure portal.`
 
               sm:w-auto
 
-              bg-[#2563EB]
+              bg-primary
 
               hover:bg-primary/90
 
@@ -1470,7 +1470,7 @@ Please use the credentials above to access the secure portal.`
 
           border
 
-          border-[#E5E7EB]
+          border-secondary
 
           bg-card
 
@@ -1514,7 +1514,7 @@ Please use the credentials above to access the secure portal.`
 
                   border-b
 
-                  border-[#E5E7EB]
+                  border-secondary
 
                 "
 
@@ -1588,7 +1588,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <tbody className="divide-y divide-[#E5E7EB]">
+            <tbody className="divide-y divide-secondary">
 
 
 
@@ -2145,7 +2145,7 @@ Please use the credentials above to access the secure portal.`
 
             border
 
-            border-[#E5E7EB]
+            border-secondary
 
             bg-card
 
@@ -2468,7 +2468,7 @@ Please use the credentials above to access the secure portal.`
 
                 type="submit"
 
-                className="bg-[#2563EB] hover:bg-primary/90 text-primary-foreground"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
 
               >
 
@@ -2529,7 +2529,7 @@ Please use the credentials above to access the secure portal.`
 
             border
 
-            border-[#E5E7EB]
+            border-secondary
 
             bg-card
 
@@ -2847,7 +2847,7 @@ Please use the credentials above to access the secure portal.`
 
                 type="submit"
 
-                className="bg-[#2563EB] hover:bg-primary/90 text-primary-foreground"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
 
               >
 
@@ -2901,7 +2901,7 @@ Please use the credentials above to access the secure portal.`
 
             border
 
-            border-[#E5E7EB]
+            border-secondary
 
             bg-card
 
@@ -3295,7 +3295,7 @@ Please use the credentials above to access the secure portal.`
 
             border
 
-            border-[#E5E7EB]
+            border-secondary
 
             bg-card
 

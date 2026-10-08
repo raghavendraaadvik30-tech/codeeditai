@@ -538,7 +538,7 @@ export function TableFloatingFormatToolbar() {
       className="
         fixed z-50 flex items-center gap-1 rounded-lg border border-secondary/90 bg-card px-2 py-1
         shadow-lg shadow-foreground/10 select-none text-xs text-secondary-foreground
-        dark:border-secondary-foreground/80 dark:bg-[#0f172a] dark:text-muted-foreground
+        dark:border-secondary-foreground/80 dark:bg-foreground dark:text-muted-foreground
         animate-in fade-in zoom-in-95 duration-100 print:hidden
       "
     >
@@ -562,7 +562,7 @@ export function TableFloatingFormatToolbar() {
         </button>
 
         {fontMenuOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card py-1 shadow-lg dark:border-muted dark:bg-[#0f172a]">
+          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card py-1 shadow-lg dark:border-muted dark:bg-foreground">
             {FONT_OPTIONS.map((f) => (
               <button
                 key={f}
@@ -601,7 +601,7 @@ export function TableFloatingFormatToolbar() {
         </button>
 
         {sizeMenuOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-20 max-h-48 overflow-y-auto rounded-md border border-secondary bg-card py-1 shadow-lg dark:border-muted dark:bg-[#0f172a]">
+          <div className="absolute left-0 top-full mt-1 z-50 w-20 max-h-48 overflow-y-auto rounded-md border border-secondary bg-card py-1 shadow-lg dark:border-muted dark:bg-foreground">
             {FONT_SIZE_OPTIONS.map((s) => (
               <button
                 key={s}
@@ -796,7 +796,7 @@ export function TableFloatingFormatToolbar() {
         </button>
 
         {textColorOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-[#0f172a] space-y-1">
+          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-foreground space-y-1">
             <div className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-1">
               Text Color
             </div>
@@ -839,7 +839,7 @@ export function TableFloatingFormatToolbar() {
         </button>
 
         {highlightOpen && (
-          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-[#0f172a] space-y-1">
+          <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-foreground space-y-1">
             <div className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-1">
               Highlight Color
             </div>

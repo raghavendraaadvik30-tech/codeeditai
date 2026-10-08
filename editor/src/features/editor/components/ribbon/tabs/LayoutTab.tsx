@@ -586,9 +586,9 @@ export default function LayoutTab() {
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "h-6 w-4.5 rounded-[2px] border-2 transition-colors",
+                    "h-6 w-4.5 rounded-xs border-2 transition-colors",
                     tempOrientation === "portrait"
-                      ? "border-[#0078d4]"
+                      ? "border-brand"
                       : "border-foreground dark:border-border"
                   )}
                 />
@@ -596,7 +596,7 @@ export default function LayoutTab() {
                   className={cn(
                     "text-xs font-semibold",
                     tempOrientation === "portrait"
-                      ? "text-[#0078d4]"
+                      ? "text-brand"
                       : "text-foreground dark:text-muted-foreground"
                   )}
                 >
@@ -604,7 +604,7 @@ export default function LayoutTab() {
                 </span>
               </div>
               {tempOrientation === "portrait" && (
-                <Check className="h-4 w-4 text-[#0078d4] stroke-[2.5]" />
+                <Check className="h-4 w-4 text-brand stroke-[2.5]" />
               )}
             </button>
 
@@ -622,9 +622,9 @@ export default function LayoutTab() {
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "h-4.5 w-6 rounded-[2px] border-2 transition-colors",
+                    "h-4.5 w-6 rounded-xs border-2 transition-colors",
                     tempOrientation === "landscape"
-                      ? "border-[#0078d4]"
+                      ? "border-brand"
                       : "border-foreground dark:border-border"
                   )}
                 />
@@ -632,7 +632,7 @@ export default function LayoutTab() {
                   className={cn(
                     "text-xs font-semibold",
                     tempOrientation === "landscape"
-                      ? "text-[#0078d4]"
+                      ? "text-brand"
                       : "text-foreground dark:text-muted-foreground"
                   )}
                 >
@@ -640,7 +640,7 @@ export default function LayoutTab() {
                 </span>
               </div>
               {tempOrientation === "landscape" && (
-                <Check className="h-4 w-4 text-[#0078d4] stroke-[2.5]" />
+                <Check className="h-4 w-4 text-brand stroke-[2.5]" />
               )}
             </button>
           </div>
@@ -662,12 +662,12 @@ export default function LayoutTab() {
                   className={cn(
                     "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
                     applyTarget === "all"
-                      ? "border-[#0078d4] bg-card dark:bg-secondary border-2"
+                      ? "border-brand bg-card dark:bg-secondary border-2"
                       : "border-muted-foreground group-hover:border-secondary-foreground dark:border-muted-foreground"
                   )}
                 >
                   {applyTarget === "all" && (
-                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                    <div className="h-2 w-2 rounded-full bg-brand" />
                   )}
                 </div>
                 <span className="text-xs font-medium text-foreground dark:text-muted-foreground">
@@ -684,12 +684,12 @@ export default function LayoutTab() {
                   className={cn(
                     "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
                     applyTarget === "page"
-                      ? "border-[#0078d4] bg-card dark:bg-secondary border-2"
+                      ? "border-brand bg-card dark:bg-secondary border-2"
                       : "border-muted-foreground group-hover:border-secondary-foreground dark:border-muted-foreground"
                   )}
                 >
                   {applyTarget === "page" && (
-                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                    <div className="h-2 w-2 rounded-full bg-brand" />
                   )}
                 </div>
                 <span className="text-xs font-medium text-foreground dark:text-muted-foreground">
@@ -706,12 +706,12 @@ export default function LayoutTab() {
                   className={cn(
                     "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
                     applyTarget === "section"
-                      ? "border-[#0078d4] bg-card dark:bg-secondary border-2"
+                      ? "border-brand bg-card dark:bg-secondary border-2"
                       : "border-muted-foreground group-hover:border-secondary-foreground dark:border-muted-foreground"
                   )}
                 >
                   {applyTarget === "section" && (
-                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                    <div className="h-2 w-2 rounded-full bg-brand" />
                   )}
                 </div>
                 <span className="text-xs font-medium text-foreground dark:text-muted-foreground">
@@ -735,7 +735,7 @@ export default function LayoutTab() {
             <button
               type="button"
               onClick={handleApplyOrientation}
-              className="h-7 px-4 rounded-md bg-[#0078d4] text-xs font-semibold text-primary-foreground hover:bg-[#006abc] shadow-xs transition-colors"
+              className="h-7 px-4 rounded-md bg-brand text-xs font-semibold text-primary-foreground hover:bg-brand shadow-xs transition-colors"
             >
               Apply
             </button>
@@ -1637,7 +1637,7 @@ export default function LayoutTab() {
                         type="button"
                         size="sm"
                         onClick={() => fileInputRef.current?.click()}
-                        className="h-8 px-3.5 text-xs font-medium bg-[#1d8cd7] hover:bg-[#157bbd] text-primary-foreground cursor-pointer rounded shadow-xs"
+                        className="h-8 px-3.5 text-xs font-medium bg-brand hover:bg-brand-deep text-primary-foreground cursor-pointer rounded shadow-xs"
                       >
                         Choose File
                       </Button>
@@ -1895,7 +1895,7 @@ export default function LayoutTab() {
                         }}
                         className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-[#E1F0FF] border border-[#0078D4] text-foreground font-semibold shadow-xs dark:bg-navy-950/60 dark:text-primary/30 dark:border-primary"
+                            ? "bg-[#E1F0FF] border border-brand text-foreground font-semibold shadow-xs dark:bg-navy-950/60 dark:text-primary/30 dark:border-primary"
                             : "text-secondary-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-primary-foreground hover:bg-muted dark:hover:bg-muted/60"
                         }`}
                       >
@@ -1927,7 +1927,7 @@ export default function LayoutTab() {
                           setBorderRight(true);
                         }
                       }}
-                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                     >
                       <option value="solid">───── Solid</option>
                       <option value="dashed">- - - - - - Dashed</option>
@@ -1986,7 +1986,7 @@ export default function LayoutTab() {
                       type="text"
                       value={borderColor}
                       onChange={(e) => setBorderColor(e.target.value)}
-                      className="w-full h-8 px-2 rounded-lg border border-secondary dark:border-secondary-foreground text-xs font-mono uppercase bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-[#0078D4]"
+                      className="w-full h-8 px-2 rounded-lg border border-secondary dark:border-secondary-foreground text-xs font-mono uppercase bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-brand"
                     />
                   </div>
                 </div>
@@ -2001,7 +2001,7 @@ export default function LayoutTab() {
                       <select
                         value={borderWidth}
                         onChange={(e) => setBorderWidth(parseFloat(e.target.value))}
-                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                       >
                         <option value={1}>0.5 pt</option>
                         <option value={1.5}>0.75 pt</option>
@@ -2024,7 +2024,7 @@ export default function LayoutTab() {
                       <select
                         value={artBorder}
                         onChange={(e) => setArtBorder(e.target.value)}
-                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                       >
                         <option value="none">None</option>
                       </select>
@@ -2104,7 +2104,7 @@ export default function LayoutTab() {
                             | "exceptFirstPage"
                         )
                       }
-                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                     >
                       <option value="document">Whole Document</option>
                       <option value="section">Current Section</option>
@@ -2141,7 +2141,7 @@ export default function LayoutTab() {
                     }}
                     className={`absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderTop && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-primary-foreground hover:bg-[#006CBD]"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
                         : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
@@ -2165,7 +2165,7 @@ export default function LayoutTab() {
                     }}
                     className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderBottom && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-primary-foreground hover:bg-[#006CBD]"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
                         : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
@@ -2189,7 +2189,7 @@ export default function LayoutTab() {
                     }}
                     className={`absolute top-1/2 -left-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderLeft && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-primary-foreground hover:bg-[#006CBD]"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
                         : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
@@ -2213,7 +2213,7 @@ export default function LayoutTab() {
                     }}
                     className={`absolute top-1/2 -right-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderRight && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-primary-foreground hover:bg-[#006CBD]"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
                         : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
@@ -2298,7 +2298,7 @@ export default function LayoutTab() {
             <button
               type="button"
               onClick={handleApplyBorders}
-              className="px-6 py-2 rounded-lg bg-[#0078D4] hover:bg-[#006CBD] active:bg-[#005A9E] text-primary-foreground text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+              className="px-6 py-2 rounded-lg bg-brand hover:bg-brand active:bg-brand-deep text-primary-foreground text-xs font-semibold shadow-sm transition-colors cursor-pointer"
             >
               OK
             </button>

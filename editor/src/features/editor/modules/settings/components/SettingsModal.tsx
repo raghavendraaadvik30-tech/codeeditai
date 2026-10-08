@@ -31,7 +31,7 @@ export function SettingsModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-muted pb-3 dark:border-muted">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0078d4]/10 text-[#0078d4]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">
               <Settings className="h-4 w-4" />
             </div>
             <div>
@@ -61,7 +61,7 @@ export function SettingsModal({
               onClick={() => setActiveTab(tab)}
               className={`border-b-2 pb-2 px-3 font-medium capitalize transition-colors ${
                 activeTab === tab
-                  ? "border-[#0078d4] text-[#0078d4]"
+                  ? "border-brand text-brand"
                   : "border-transparent text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
               }`}
             >
@@ -90,7 +90,7 @@ export function SettingsModal({
                       onClick={() => updateSettings({ theme: value })}
                       className={`flex items-center justify-center gap-1.5 rounded-lg border p-2 text-xs transition-colors ${
                         settings.theme === value
-                          ? "border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] font-semibold"
+                          ? "border-brand bg-brand/10 text-brand font-semibold"
                           : "border-secondary hover:bg-muted dark:border-muted dark:hover:bg-secondary"
                       }`}
                     >
@@ -110,7 +110,7 @@ export function SettingsModal({
                   type="checkbox"
                   checked={settings.autoSave}
                   onChange={(e) => updateSettings({ autoSave: e.target.checked })}
-                  className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+                  className="rounded border-border text-brand focus:ring-brand"
                 />
               </div>
 
@@ -123,7 +123,7 @@ export function SettingsModal({
                   type="checkbox"
                   checked={settings.enableAiSuggestions}
                   onChange={(e) => updateSettings({ enableAiSuggestions: e.target.checked })}
-                  className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+                  className="rounded border-border text-brand focus:ring-brand"
                 />
               </div>
             </div>
@@ -138,7 +138,7 @@ export function SettingsModal({
                 <select
                   value={settings.defaultFontFamily}
                   onChange={(e) => updateSettings({ defaultFontFamily: e.target.value as DefaultFontFamily })}
-                  className="mt-1 h-8 w-full rounded-md border border-secondary px-2 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+                  className="mt-1 h-8 w-full rounded-md border border-secondary px-2 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
                 >
                   {AVAILABLE_FONT_FAMILIES.map((font) => (
                     <option key={font.value} value={font.value}>
@@ -159,7 +159,7 @@ export function SettingsModal({
                     max={36}
                     value={settings.defaultFontSize}
                     onChange={(e) => updateSettings({ defaultFontSize: Number(e.target.value) })}
-                    className="mt-1 h-8 w-full rounded-md border border-secondary px-3 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+                    className="mt-1 h-8 w-full rounded-md border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
                   />
                 </div>
                 <div>
@@ -172,7 +172,7 @@ export function SettingsModal({
                     step={100}
                     value={settings.wordCountTarget}
                     onChange={(e) => updateSettings({ wordCountTarget: Number(e.target.value) })}
-                    className="mt-1 h-8 w-full rounded-md border border-secondary px-3 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+                    className="mt-1 h-8 w-full rounded-md border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
                   />
                 </div>
               </div>
@@ -183,7 +183,7 @@ export function SettingsModal({
                   type="checkbox"
                   checked={settings.spellCheck}
                   onChange={(e) => updateSettings({ spellCheck: e.target.checked })}
-                  className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+                  className="rounded border-border text-brand focus:ring-brand"
                 />
               </div>
             </div>
@@ -198,7 +198,7 @@ export function SettingsModal({
                 <select
                   value={settings.pageSize}
                   onChange={(e) => updateSettings({ pageSize: e.target.value as PageSize })}
-                  className="mt-1 h-8 w-full rounded-md border border-secondary px-2 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+                  className="mt-1 h-8 w-full rounded-md border border-secondary px-2 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
                 >
                   {AVAILABLE_PAGE_SIZES.map((size) => (
                     <option key={size.value} value={size.value}>
@@ -214,7 +214,7 @@ export function SettingsModal({
                   type="checkbox"
                   checked={settings.showWordCount}
                   onChange={(e) => updateSettings({ showWordCount: e.target.checked })}
-                  className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+                  className="rounded border-border text-brand focus:ring-brand"
                 />
               </div>
 
@@ -224,7 +224,7 @@ export function SettingsModal({
                   type="checkbox"
                   checked={settings.showPageNumbers}
                   onChange={(e) => updateSettings({ showPageNumbers: e.target.checked })}
-                  className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+                  className="rounded border-border text-brand focus:ring-brand"
                 />
               </div>
             </div>
@@ -244,7 +244,7 @@ export function SettingsModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-1.5 rounded-lg bg-[#0078d4] px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors"
           >
             <Save className="h-3.5 w-3.5" />
             <span>Save & Close</span>

@@ -519,7 +519,7 @@ export default function DocumentPage() {
             <button
               type="button"
               onClick={handleCreateDoc}
-              className="flex h-7 items-center gap-1 rounded-md bg-[#0078d4] px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-[#005a9e]"
+              className="flex h-7 items-center gap-1 rounded-md bg-brand px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-brand-deep"
             >
               <Plus className="h-3.5 w-3.5" />
               New
@@ -535,7 +535,7 @@ export default function DocumentPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search documents..."
-            className="h-8 w-full rounded-md border border-secondary bg-muted/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-[#0078d4] dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
+            className="h-8 w-full rounded-md border border-secondary bg-muted/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-brand dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
           />
         </div>
       </div>
@@ -569,7 +569,7 @@ export default function DocumentPage() {
                     className={cn(
                       "group flex cursor-pointer items-center justify-between rounded-xl border p-2.5 transition-all",
                       isActive
-                        ? "border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4]"
+                        ? "border-brand bg-brand/10 text-brand"
                         : "border-secondary bg-card hover:border-border dark:border-muted/80 dark:bg-[#091524] dark:hover:border-secondary-foreground"
                     )}
                   >
@@ -578,7 +578,7 @@ export default function DocumentPage() {
                         className={cn(
                           "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
                           isActive
-                            ? "bg-[#0078d4]/20 text-[#0078d4]"
+                            ? "bg-brand/20 text-brand"
                             : "bg-muted text-muted-foreground dark:bg-muted/80 dark:text-muted-foreground"
                         )}
                       >
@@ -589,7 +589,7 @@ export default function DocumentPage() {
                           className={cn(
                             "truncate text-xs font-semibold leading-tight",
                             isActive
-                              ? "text-[#0078d4]"
+                              ? "text-brand"
                               : "text-foreground dark:text-muted"
                           )}
                         >
@@ -720,7 +720,7 @@ export default function DocumentPage() {
                         className={cn(
                           "px-2.5 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
                           navTab === "find"
-                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
+                            ? "border-b-2 border-brand text-brand bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
                             : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
                         )}
                       >
@@ -735,7 +735,7 @@ export default function DocumentPage() {
                         className={cn(
                           "px-2.5 py-1 text-xs font-semibold rounded-t transition-colors cursor-pointer",
                           navTab === "replace"
-                            ? "border-b-2 border-[#0078d4] text-[#0078d4] bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
+                            ? "border-b-2 border-brand text-brand bg-primary/50 dark:bg-navy-950/40 dark:text-primary"
                             : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
                         )}
                       >
@@ -1051,7 +1051,7 @@ export default function DocumentPage() {
               <button
                 type="button"
                 onClick={handleConfirmCreateDoc}
-                className="flex items-center gap-1.5 rounded-xl bg-[#0078d4] px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors shadow-sm"
+                className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors shadow-sm"
               >
                 <span>Continue</span>
               </button>
@@ -1065,7 +1065,7 @@ export default function DocumentPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-[0.5px]">
           <div className="w-[500px] rounded-lg border border-border bg-card shadow-2xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden animate-in fade-in zoom-in-95 duration-100">
             {/* Window Title Bar */}
-            <div className="flex items-center justify-between border-b border-secondary bg-[#f3f4f6] px-3.5 py-1.5 dark:border-muted dark:bg-[#07131E]">
+            <div className="flex items-center justify-between border-b border-secondary bg-muted px-3.5 py-1.5 dark:border-muted dark:bg-[#07131E]">
               <span className="text-xs font-semibold text-foreground dark:text-muted-foreground select-none">
                 Find and Replace
               </span>
@@ -1079,7 +1079,7 @@ export default function DocumentPage() {
             </div>
 
             {/* Dialog Tabs */}
-            <div className="flex border-b border-secondary bg-[#f8fafc] px-3.5 pt-1.5 dark:border-muted dark:bg-[#0d1824]">
+            <div className="flex border-b border-secondary bg-muted px-3.5 pt-1.5 dark:border-muted dark:bg-[#0d1824]">
               <button
                 type="button"
                 onClick={() => {
@@ -1168,7 +1168,7 @@ export default function DocumentPage() {
             </div>
 
             {/* Dialog Bottom Button Bar matching user screenshot exactly */}
-            <div className="flex items-center justify-end gap-2 border-t border-secondary bg-[#f3f4f6] px-4 py-2.5 dark:border-muted dark:bg-[#07131E]">
+            <div className="flex items-center justify-end gap-2 border-t border-secondary bg-muted px-4 py-2.5 dark:border-muted dark:bg-[#07131E]">
               {navTab === "replace" ? (
                 <>
                   <button
@@ -1176,10 +1176,10 @@ export default function DocumentPage() {
                     onClick={handleReplace}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[76px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-[76px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
-                        ? "border-[#d1d5db] bg-card text-[#9ca3af] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                        : "border-[#d1d5db] bg-card text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                        ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                        : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
                     )}
                   >
                     Replace
@@ -1189,10 +1189,10 @@ export default function DocumentPage() {
                     onClick={handleReplaceAll}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[86px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-[86px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
-                        ? "border-[#d1d5db] bg-card text-[#9ca3af] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                        : "border-[#d1d5db] bg-card text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                        ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                        : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
                     )}
                   >
                     Replace All
@@ -1202,10 +1202,10 @@ export default function DocumentPage() {
                     onClick={handleFindNext}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[76px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-[76px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
-                        ? "border-[#d1d5db] bg-card text-[#9ca3af] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                        : "border-[#d1d5db] bg-card text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                        ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                        : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
                     )}
                   >
                     Find Next
@@ -1213,7 +1213,7 @@ export default function DocumentPage() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="min-w-[76px] rounded-[2px] border border-[#0078d4] bg-card px-3 py-1 text-center text-xs font-normal text-[#1e293b] shadow-2xs hover:bg-[#f3f4f6] active:bg-[#e5e7eb] dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
+                    className="min-w-[76px] rounded-xs border border-brand bg-card px-3 py-1 text-center text-xs font-normal text-foreground shadow-2xs hover:bg-muted active:bg-secondary dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
                   >
                     Cancel
                   </button>
@@ -1225,10 +1225,10 @@ export default function DocumentPage() {
                     onClick={handleFindNext}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[80px] rounded-[2px] border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-[80px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
-                        ? "border-[#d1d5db] bg-card text-[#9ca3af] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                        : "border-[#d1d5db] bg-card text-[#1e293b] hover:bg-[#f3f4f6] hover:border-[#94a3b8] active:bg-[#e5e7eb] dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                        ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
+                        : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
                     )}
                   >
                     Find Next
@@ -1236,7 +1236,7 @@ export default function DocumentPage() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="min-w-[80px] rounded-[2px] border border-[#0078d4] bg-card px-3 py-1 text-center text-xs font-normal text-[#1e293b] shadow-2xs hover:bg-[#f3f4f6] active:bg-[#e5e7eb] dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
+                    className="min-w-[80px] rounded-xs border border-brand bg-card px-3 py-1 text-center text-xs font-normal text-foreground shadow-2xs hover:bg-muted active:bg-secondary dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
                   >
                     Cancel
                   </button>

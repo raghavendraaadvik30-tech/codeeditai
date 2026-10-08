@@ -64,7 +64,7 @@ export function ReferenceValidation() {
           onClick={handleScan}
           disabled={isValidating}
           title="Run health check"
-          className="flex h-6 items-center gap-1 rounded bg-[#0078d4] px-2 text-[11px] font-semibold text-primary-foreground hover:bg-[#005a9e] disabled:opacity-50 transition-colors"
+          className="flex h-6 items-center gap-1 rounded bg-brand px-2 text-[11px] font-semibold text-primary-foreground hover:bg-brand-deep disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`h-3 w-3 ${isValidating ? 'animate-spin' : ''}`} />
           {isValidating ? 'Scanning...' : 'Scan Now'}

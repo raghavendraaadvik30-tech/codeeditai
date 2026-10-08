@@ -90,7 +90,7 @@ export function CrossReference() {
                   onClick={() => handleTypeChange(type)}
                   className={`h-7 px-2 text-[11px] font-semibold rounded-md border text-center truncate transition-all ${
                     selectedType === type
-                      ? 'border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] dark:border-primary'
+                      ? 'border-brand bg-brand/10 text-brand dark:border-primary'
                       : 'border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-[#091524] dark:text-muted-foreground'
                   }`}
                 >
@@ -120,7 +120,7 @@ export function CrossReference() {
                     onClick={() => setSelectedTarget(target)}
                     className={`flex cursor-pointer items-center justify-between rounded-md p-1.5 text-xs transition-all ${
                       isSelected
-                        ? 'bg-[#0078d4] text-primary-foreground font-semibold'
+                        ? 'bg-brand text-primary-foreground font-semibold'
                         : 'hover:bg-muted text-foreground dark:text-muted-foreground dark:hover:bg-muted'
                     }`}
                   >
@@ -151,7 +151,7 @@ export function CrossReference() {
                 value={customLabel}
                 onChange={(e) => setCustomLabel(e.target.value)}
                 placeholder={`See ${selectedTarget.title}...`}
-                className="h-7 w-full rounded-md border border-secondary bg-card px-2 text-xs outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+                className="h-7 w-full rounded-md border border-secondary bg-card px-2 text-xs outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
               />
             </div>
 
@@ -161,7 +161,7 @@ export function CrossReference() {
                 id="chk-pagenum"
                 checked={includePageNumber}
                 onChange={(e) => setIncludePageNumber(e.target.checked)}
-                className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+                className="rounded border-border text-brand focus:ring-brand"
               />
               <label htmlFor="chk-pagenum" className="text-secondary-foreground dark:text-muted-foreground cursor-pointer">
                 Include page number suffix
@@ -171,7 +171,7 @@ export function CrossReference() {
             <button
               type="button"
               onClick={handleInsert}
-              className="w-full flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#0078d4] text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors shadow-sm"
+              className="w-full flex h-8 items-center justify-center gap-1.5 rounded-lg bg-brand text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors shadow-sm"
             >
               <Plus className="h-3.5 w-3.5" /> Insert Cross-Reference
             </button>

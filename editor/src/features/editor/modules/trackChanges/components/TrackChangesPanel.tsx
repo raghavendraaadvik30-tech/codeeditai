@@ -36,8 +36,8 @@ export function TrackChangesPanel() {
         className={cn(
           "flex h-9 w-full items-center justify-center gap-2 rounded-lg text-xs font-semibold transition-all shadow-xs",
           trackChanges
-            ? "border border-primary/30 bg-primary/10 text-[#0078d4] hover:bg-primary/15 dark:border-navy-900/60 dark:bg-navy-950/40 dark:text-primary"
-            : "bg-[#0078d4] text-primary-foreground hover:bg-[#006cc1]"
+            ? "border border-primary/30 bg-primary/10 text-brand hover:bg-primary/15 dark:border-navy-900/60 dark:bg-navy-950/40 dark:text-primary"
+            : "bg-brand text-primary-foreground hover:bg-brand"
         )}
       >
         <GitCompare className="h-4 w-4" />

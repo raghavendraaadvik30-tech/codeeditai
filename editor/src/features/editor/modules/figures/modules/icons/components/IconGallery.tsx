@@ -90,7 +90,7 @@ export default function IconGallery({
               type="button"
               disabled={!selected}
               onClick={handleInsert}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0078d4] text-xs font-semibold text-primary-foreground shadow-xs hover:bg-[#005a9e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand text-xs font-semibold text-primary-foreground shadow-xs hover:bg-brand-deep disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Check className="h-3.5 w-3.5" />
               <span>Insert</span>

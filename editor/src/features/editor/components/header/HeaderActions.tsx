@@ -632,7 +632,7 @@ export default function HeaderActions() {
               <button
                 type="button"
                 onClick={() => setUploadError(null)}
-                className="flex items-center gap-1.5 rounded-xl bg-[#0078d4] px-4 py-2 text-xs font-semibold text-white hover:bg-[#005a9e] transition-colors shadow-sm"
+                className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-white hover:bg-brand-deep transition-colors shadow-sm"
               >
                 <span>OK</span>
               </button>
@@ -722,7 +722,7 @@ export default function HeaderActions() {
               <button
                 type="button"
                 onClick={handleConfirmUpload}
-                className="flex items-center gap-1.5 rounded-xl bg-[#0078d4] px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors shadow-sm"
+                className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors shadow-sm"
               >
                 <span>Continue</span>
               </button>

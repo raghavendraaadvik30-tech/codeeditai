@@ -92,7 +92,7 @@ export default function ReviewTab() {
         onClick={toggleTrackChanges}
         className={
           trackChanges
-            ? "bg-primary/10 text-[#0078d4] font-semibold border border-primary/30 hover:bg-primary/15"
+            ? "bg-primary/10 text-brand font-semibold border border-primary/30 hover:bg-primary/15"
             : ""
         }
         title={trackChanges ? "Track Changes is ON (Ctrl+Shift+E)" : "Track Changes is OFF (Ctrl+Shift+E)"}
@@ -174,7 +174,7 @@ export default function ReviewTab() {
       <RibbonButton
         icon={<Eye className="h-4 w-4" />}
         onClick={() => setShowMarkup(true)}
-        className={showMarkup ? "bg-primary/10 text-[#0078d4] font-semibold" : ""}
+        className={showMarkup ? "bg-primary/10 text-brand font-semibold" : ""}
         title="Show visual track changes markup tags"
       >
         Show Markup
@@ -183,7 +183,7 @@ export default function ReviewTab() {
       <RibbonButton
         icon={<EyeOff className="h-4 w-4" />}
         onClick={() => setShowMarkup(false)}
-        className={!showMarkup ? "bg-primary/10 text-[#0078d4] font-semibold" : ""}
+        className={!showMarkup ? "bg-primary/10 text-brand font-semibold" : ""}
         title="Hide visual track changes markup (clean document preview)"
       >
         Hide Markup

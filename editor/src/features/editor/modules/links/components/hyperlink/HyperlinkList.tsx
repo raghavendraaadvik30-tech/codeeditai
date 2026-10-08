@@ -37,7 +37,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter hyperlinks..."
-          className="h-7 w-full rounded-md border border-secondary bg-muted/70 pl-8 pr-3 text-xs outline-none dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground focus:border-[#0078d4]"
+          className="h-7 w-full rounded-md border border-secondary bg-muted/70 pl-8 pr-3 text-xs outline-none dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground focus:border-brand"
         />
       </div>
 
@@ -90,7 +90,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
                       type="button"
                       onClick={() => onNavigate(link)}
                       title="Jump to reference"
-                      className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-[#0078d4] dark:hover:bg-muted"
+                      className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-brand dark:hover:bg-muted"
                     >
                       <ExternalLink className="h-3 w-3" />
                     </button>

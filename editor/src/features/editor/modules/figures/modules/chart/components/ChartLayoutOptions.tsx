@@ -213,7 +213,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
 
       {/* Header */}
       <div className="flex items-center justify-between pb-1 border-b border-[#383838]">
-        <h4 className="text-[13px] font-medium text-[#5fa5f9] tracking-wide">
+        <h4 className="text-[13px] font-medium text-primary tracking-wide">
           Layout Options
         </h4>
         <button
@@ -235,7 +235,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           type="button"
           onClick={() => handleSelectWrap('inline')}
           className={`p-1 rounded-xs border transition-all ${selectedWrap === 'inline'
-            ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+            ? 'border-primary bg-[#1a1a1a] ring-1 ring-primary'
             : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
             }`}
           title="In Line with Text"
@@ -263,7 +263,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             type="button"
             onClick={() => handleSelectWrap('topBottom')}
             className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'topBottom'
-              ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+              ? 'border-primary bg-[#1a1a1a] ring-1 ring-primary'
               : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
               }`}
             title="Top and Bottom"
@@ -280,7 +280,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             type="button"
             onClick={() => handleSelectWrap('behind')}
             className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'behind'
-              ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+              ? 'border-primary bg-[#1a1a1a] ring-1 ring-primary'
               : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
               }`}
             title="Behind Text"
@@ -301,7 +301,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             type="button"
             onClick={() => handleSelectWrap('inFront')}
             className={`p-1 rounded-xs border transition-all flex items-center justify-center ${selectedWrap === 'inFront'
-              ? 'border-[#5fa5f9] bg-[#1a1a1a] ring-1 ring-[#5fa5f9]'
+              ? 'border-primary bg-[#1a1a1a] ring-1 ring-primary'
               : 'border-[#555555] hover:border-border bg-[#1e1e1e]'
               }`}
             title="In Front of Text"
@@ -362,7 +362,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
               onSeeMore();
             }
           }}
-          className="text-[11px] text-[#5fa5f9] hover:underline cursor-pointer"
+          className="text-[11px] text-primary hover:underline cursor-pointer"
         >
           See more...
         </button>

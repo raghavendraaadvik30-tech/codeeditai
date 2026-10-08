@@ -47,7 +47,7 @@ function TablesPageContent() {
           <button
             type="button"
             onClick={() => setInsertDialogOpen(true)}
-            className="flex h-7 items-center gap-1 rounded-md bg-[#0078d4] px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-[#005a9e]"
+            className="flex h-7 items-center gap-1 rounded-md bg-brand px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-brand-deep"
           >
             <Plus className="h-3.5 w-3.5" />
             Custom Table
@@ -68,7 +68,7 @@ function TablesPageContent() {
               }
             }}
             placeholder="Search templates & tools..."
-            className="h-8 w-full rounded-md border border-secondary bg-muted/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-[#0078d4] dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
+            className="h-8 w-full rounded-md border border-secondary bg-muted/60 pl-8 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-brand dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
           />
         </div>
       </div>
@@ -83,7 +83,7 @@ function TablesPageContent() {
             className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
-              <Table2 className="h-3.5 w-3.5 text-[#0078d4]" />
+              <Table2 className="h-3.5 w-3.5 text-brand" />
               <span>Interactive Grid</span>
             </div>
             <ChevronRight
@@ -105,7 +105,7 @@ function TablesPageContent() {
             className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
-              <Sliders className="h-3.5 w-3.5 text-[#0078d4]" />
+              <Sliders className="h-3.5 w-3.5 text-brand" />
               <span>Table Tools & Rows</span>
             </div>
             <ChevronRight
@@ -127,7 +127,7 @@ function TablesPageContent() {
             className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
-              <Table2 className="h-3.5 w-3.5 text-[#0078d4]" />
+              <Table2 className="h-3.5 w-3.5 text-brand" />
               <span>Standard Tables</span>
             </div>
             <ChevronRight

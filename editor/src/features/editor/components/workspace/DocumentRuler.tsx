@@ -138,8 +138,8 @@ export default function DocumentRuler({
       if (isCm) {
         ticks.push(
           <g key={`left-cm-${cmVal}`}>
-            <line x1={x} y1={0} x2={x} y2={4} stroke="#334155" strokeWidth={1} className="dark:stroke-slate-300" />
-            <line x1={x} y1={12} x2={x} y2={16} stroke="#334155" strokeWidth={1} className="dark:stroke-slate-300" />
+            <line x1={x} y1={0} x2={x} y2={4} stroke="#334155" strokeWidth={1} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={12} x2={x} y2={16} stroke="#334155" strokeWidth={1} className="dark:stroke-muted-foreground" />
             <text
               x={x}
               y={11.5}
@@ -154,15 +154,15 @@ export default function DocumentRuler({
       } else if (isHalf) {
         ticks.push(
           <g key={`left-half-${leftK}`}>
-            <line x1={x} y1={0} x2={x} y2={3.5} stroke="#475569" strokeWidth={0.9} className="dark:stroke-slate-400" />
-            <line x1={x} y1={12.5} x2={x} y2={16} stroke="#475569" strokeWidth={0.9} className="dark:stroke-slate-400" />
+            <line x1={x} y1={0} x2={x} y2={3.5} stroke="#475569" strokeWidth={0.9} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={12.5} x2={x} y2={16} stroke="#475569" strokeWidth={0.9} className="dark:stroke-muted-foreground" />
           </g>
         );
       } else {
         ticks.push(
           <g key={`left-quarter-${leftK}`}>
-            <line x1={x} y1={0} x2={x} y2={2} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-slate-500" />
-            <line x1={x} y1={14} x2={x} y2={16} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-slate-500" />
+            <line x1={x} y1={0} x2={x} y2={2} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={14} x2={x} y2={16} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-muted-foreground" />
           </g>
         );
       }
@@ -183,8 +183,8 @@ export default function DocumentRuler({
       if (isCm) {
         ticks.push(
           <g key={`body-cm-${cmVal}`}>
-            <line x1={x} y1={0} x2={x} y2={4} stroke="#1E293B" strokeWidth={1} className="dark:stroke-slate-200" />
-            <line x1={x} y1={12} x2={x} y2={16} stroke="#1E293B" strokeWidth={1} className="dark:stroke-slate-200" />
+            <line x1={x} y1={0} x2={x} y2={4} stroke="#1E293B" strokeWidth={1} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={12} x2={x} y2={16} stroke="#1E293B" strokeWidth={1} className="dark:stroke-muted-foreground" />
             <text
               x={x}
               y={11.5}
@@ -199,15 +199,15 @@ export default function DocumentRuler({
       } else if (isHalf) {
         ticks.push(
           <g key={`body-half-${contentK}`}>
-            <line x1={x} y1={0} x2={x} y2={3.5} stroke="#475569" strokeWidth={0.9} className="dark:stroke-slate-400" />
-            <line x1={x} y1={12.5} x2={x} y2={16} stroke="#475569" strokeWidth={0.9} className="dark:stroke-slate-400" />
+            <line x1={x} y1={0} x2={x} y2={3.5} stroke="#475569" strokeWidth={0.9} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={12.5} x2={x} y2={16} stroke="#475569" strokeWidth={0.9} className="dark:stroke-muted-foreground" />
           </g>
         );
       } else {
         ticks.push(
           <g key={`body-quarter-${contentK}`}>
-            <line x1={x} y1={0} x2={x} y2={2} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-slate-500" />
-            <line x1={x} y1={14} x2={x} y2={16} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-slate-500" />
+            <line x1={x} y1={0} x2={x} y2={2} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={14} x2={x} y2={16} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-muted-foreground" />
           </g>
         );
       }
@@ -228,8 +228,8 @@ export default function DocumentRuler({
       if (isCm) {
         ticks.push(
           <g key={`right-cm-${cmVal}`}>
-            <line x1={x} y1={0} x2={x} y2={4} stroke="#334155" strokeWidth={1} className="dark:stroke-slate-300" />
-            <line x1={x} y1={12} x2={x} y2={16} stroke="#334155" strokeWidth={1} className="dark:stroke-slate-300" />
+            <line x1={x} y1={0} x2={x} y2={4} stroke="#334155" strokeWidth={1} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={12} x2={x} y2={16} stroke="#334155" strokeWidth={1} className="dark:stroke-muted-foreground" />
             <text
               x={x}
               y={11.5}
@@ -244,15 +244,15 @@ export default function DocumentRuler({
       } else if (isHalf) {
         ticks.push(
           <g key={`right-half-${rightK}`}>
-            <line x1={x} y1={0} x2={x} y2={3.5} stroke="#475569" strokeWidth={0.9} className="dark:stroke-slate-400" />
-            <line x1={x} y1={12.5} x2={x} y2={16} stroke="#475569" strokeWidth={0.9} className="dark:stroke-slate-400" />
+            <line x1={x} y1={0} x2={x} y2={3.5} stroke="#475569" strokeWidth={0.9} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={12.5} x2={x} y2={16} stroke="#475569" strokeWidth={0.9} className="dark:stroke-muted-foreground" />
           </g>
         );
       } else {
         ticks.push(
           <g key={`right-quarter-${rightK}`}>
-            <line x1={x} y1={0} x2={x} y2={2} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-slate-500" />
-            <line x1={x} y1={14} x2={x} y2={16} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-slate-500" />
+            <line x1={x} y1={0} x2={x} y2={2} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-muted-foreground" />
+            <line x1={x} y1={14} x2={x} y2={16} stroke="#64748B" strokeWidth={0.7} className="dark:stroke-muted-foreground" />
           </g>
         );
       }

@@ -135,7 +135,7 @@ function SettingsPageContent() {
           onClick={() => setActiveTab("profile")}
           className={`flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors ${
             activeTab === "profile"
-              ? "border-[#0078d4] text-[#0078d4]"
+              ? "border-brand text-brand"
               : "border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
           }`}
         >
@@ -148,7 +148,7 @@ function SettingsPageContent() {
           onClick={() => setActiveTab("preferences")}
           className={`flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors ${
             activeTab === "preferences"
-              ? "border-[#0078d4] text-[#0078d4]"
+              ? "border-brand text-brand"
               : "border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
           }`}
         >
@@ -161,7 +161,7 @@ function SettingsPageContent() {
           onClick={() => setActiveTab("security")}
           className={`flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors ${
             activeTab === "security"
-              ? "border-[#0078d4] text-[#0078d4]"
+              ? "border-brand text-brand"
               : "border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
           }`}
         >
@@ -227,7 +227,7 @@ function SettingsPageContent() {
                     <button
                       type="button"
                       onClick={() => setIsViewPhotoModalOpen(true)}
-                      className="font-semibold text-[#0078d4] hover:underline flex items-center gap-1"
+                      className="font-semibold text-brand hover:underline flex items-center gap-1"
                     >
                       <Eye className="h-3 w-3" />
                       <span>View Photo</span>
@@ -246,7 +246,7 @@ function SettingsPageContent() {
                   <button
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
-                    className="font-semibold text-[#0078d4] hover:underline flex items-center gap-1"
+                    className="font-semibold text-brand hover:underline flex items-center gap-1"
                   >
                     <Camera className="h-3 w-3" />
                     <span>Upload Photo</span>
@@ -292,7 +292,7 @@ function SettingsPageContent() {
 
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground dark:text-muted-foreground">Role</span>
-                <span className="inline-flex items-center rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-[11px] font-semibold text-[#0078d4] dark:bg-navy-950/80 dark:text-navy-300">
+                <span className="inline-flex items-center rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-[11px] font-semibold text-brand dark:bg-navy-950/80 dark:text-navy-300">
                   {userRole}
                 </span>
               </div>
@@ -305,7 +305,7 @@ function SettingsPageContent() {
               <button
                 type="button"
                 onClick={() => setIsEditInfoOpen(true)}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-secondary bg-card py-2 text-xs font-semibold text-[#0078d4] hover:bg-primary/50 dark:border-secondary-foreground dark:bg-secondary dark:text-primary dark:hover:bg-muted transition-colors shadow-sm"
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-secondary bg-card py-2 text-xs font-semibold text-brand hover:bg-primary/50 dark:border-secondary-foreground dark:bg-secondary dark:text-primary dark:hover:bg-muted transition-colors shadow-sm"
               >
                 <Pencil className="h-3.5 w-3.5" />
                 <span>Edit Info</span>
@@ -355,18 +355,18 @@ function SettingsPageContent() {
                   }}
                   className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 transition-all ${
                     settings.theme === "light"
-                      ? "border-[#0078d4] bg-primary/20"
+                      ? "border-brand bg-primary/20"
                       : "border-secondary bg-card hover:border-border dark:border-muted dark:bg-secondary"
                   }`}
                 >
                   <div className="relative h-12 w-full rounded-lg border border-secondary bg-card p-1 shadow-sm overflow-hidden flex">
                     <div className="w-2 bg-muted rounded-l h-full shrink-0" />
                     <div className="flex-1 flex flex-col pl-1">
-                      <div className="h-1.5 w-full bg-[#0078d4] rounded-t" />
+                      <div className="h-1.5 w-full bg-brand rounded-t" />
                       <div className="flex-1 bg-card mt-0.5 rounded-b border border-muted" />
                     </div>
                     {settings.theme === "light" && (
-                      <div className="absolute bottom-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#0078d4] text-primary-foreground">
+                      <div className="absolute bottom-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand text-primary-foreground">
                         <Check className="h-2 w-2 stroke-[3]" />
                       </div>
                     )}
@@ -374,7 +374,7 @@ function SettingsPageContent() {
                   <span
                     className={`flex items-center gap-1 text-[11px] font-semibold ${
                       settings.theme === "light"
-                        ? "text-[#0078d4]"
+                        ? "text-brand"
                         : "text-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
@@ -392,18 +392,18 @@ function SettingsPageContent() {
                   }}
                   className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 transition-all ${
                     settings.theme === "dark"
-                      ? "border-[#0078d4] bg-primary/20"
+                      ? "border-brand bg-primary/20"
                       : "border-secondary bg-card hover:border-border dark:border-muted dark:bg-secondary"
                   }`}
                 >
-                  <div className="relative h-12 w-full rounded-lg border border-foreground bg-[#1e293b] p-1 shadow-sm overflow-hidden flex">
-                    <div className="w-2 bg-[#0f172a] rounded-l h-full shrink-0" />
+                  <div className="relative h-12 w-full rounded-lg border border-foreground bg-foreground p-1 shadow-sm overflow-hidden flex">
+                    <div className="w-2 bg-foreground rounded-l h-full shrink-0" />
                     <div className="flex-1 flex flex-col pl-1">
-                      <div className="h-1.5 w-full bg-[#0078d4] rounded-t" />
-                      <div className="flex-1 bg-[#334155] mt-0.5 rounded-b" />
+                      <div className="h-1.5 w-full bg-brand rounded-t" />
+                      <div className="flex-1 bg-secondary-foreground mt-0.5 rounded-b" />
                     </div>
                     {settings.theme === "dark" && (
-                      <div className="absolute bottom-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#0078d4] text-primary-foreground">
+                      <div className="absolute bottom-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand text-primary-foreground">
                         <Check className="h-2 w-2 stroke-[3]" />
                       </div>
                     )}
@@ -411,7 +411,7 @@ function SettingsPageContent() {
                   <span
                     className={`flex items-center gap-1 text-[11px] font-semibold ${
                       settings.theme === "dark"
-                        ? "text-[#0078d4]"
+                        ? "text-brand"
                         : "text-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
@@ -429,18 +429,18 @@ function SettingsPageContent() {
                   }}
                   className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 transition-all ${
                     settings.theme === "system"
-                      ? "border-[#0078d4] bg-primary/20"
+                      ? "border-brand bg-primary/20"
                       : "border-secondary bg-card hover:border-border dark:border-muted dark:bg-secondary"
                   }`}
                 >
-                  <div className="relative h-12 w-full rounded-lg border border-border bg-gradient-to-r from-secondary to-[#1e293b] p-1 shadow-sm overflow-hidden flex">
+                  <div className="relative h-12 w-full rounded-lg border border-border bg-gradient-to-r from-secondary to-foreground p-1 shadow-sm overflow-hidden flex">
                     <div className="w-2 bg-secondary rounded-l h-full shrink-0" />
                     <div className="flex-1 flex flex-col pl-1">
-                      <div className="h-1.5 w-full bg-[#0078d4] rounded-t" />
-                      <div className="flex-1 bg-gradient-to-r from-white to-[#334155] mt-0.5 rounded-b" />
+                      <div className="h-1.5 w-full bg-brand rounded-t" />
+                      <div className="flex-1 bg-gradient-to-r from-white to-secondary-foreground mt-0.5 rounded-b" />
                     </div>
                     {settings.theme === "system" && (
-                      <div className="absolute bottom-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#0078d4] text-primary-foreground">
+                      <div className="absolute bottom-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand text-primary-foreground">
                         <Check className="h-2 w-2 stroke-[3]" />
                       </div>
                     )}
@@ -448,7 +448,7 @@ function SettingsPageContent() {
                   <span
                     className={`flex items-center gap-1 text-[11px] font-semibold ${
                       settings.theme === "system"
-                        ? "text-[#0078d4]"
+                        ? "text-brand"
                         : "text-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
@@ -484,7 +484,7 @@ function SettingsPageContent() {
                   }}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     settings.autoSave
-                      ? "bg-[#0078d4]"
+                      ? "bg-brand"
                       : "bg-secondary dark:bg-secondary-foreground"
                   }`}
                 >
@@ -523,7 +523,7 @@ function SettingsPageContent() {
                   }}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     settings.enableNotifications
-                      ? "bg-[#0078d4]"
+                      ? "bg-brand"
                       : "bg-secondary dark:bg-secondary-foreground"
                   }`}
                 >
@@ -564,7 +564,7 @@ function SettingsPageContent() {
                   }}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     settings.trackChangesByDefault
-                      ? "bg-[#0078d4]"
+                      ? "bg-brand"
                       : "bg-secondary dark:bg-secondary-foreground"
                   }`}
                 >
@@ -605,7 +605,7 @@ function SettingsPageContent() {
                   }}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     settings.enableAiSuggestions
-                      ? "bg-[#0078d4]"
+                      ? "bg-brand"
                       : "bg-secondary dark:bg-secondary-foreground"
                   }`}
                 >
@@ -691,7 +691,7 @@ function SettingsPageContent() {
                   }}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     settings.twoFactorEnabled
-                      ? "bg-[#10b981]"
+                      ? "bg-success-500"
                       : "bg-secondary dark:bg-secondary-foreground"
                   }`}
                 >
@@ -707,7 +707,7 @@ function SettingsPageContent() {
 
               {/* Green Success Information Box */}
               {settings.twoFactorEnabled && (
-                <div className="flex items-start gap-2.5 rounded-xl bg-[#ecfdf5] p-3.5 border border-[#a7f3d0] dark:bg-success-950/30 dark:border-success-800/50">
+                <div className="flex items-start gap-2.5 rounded-xl bg-success-50 p-3.5 border border-success-200 dark:bg-success-950/30 dark:border-success-800/50">
                   <ShieldCheck className="h-4 w-4 text-success-600 dark:text-success-400 shrink-0 mt-0.5" />
                   <div className="text-xs">
                     <span className="font-bold text-success-800 dark:text-success-300">
@@ -733,7 +733,7 @@ function SettingsPageContent() {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-muted pb-3.5 dark:border-muted">
               <div className="flex items-center gap-2">
-                <Pencil className="h-4 w-4 text-[#0078d4]" />
+                <Pencil className="h-4 w-4 text-brand" />
                 <h3 className="text-sm font-bold text-foreground dark:text-primary-foreground">Edit Profile</h3>
               </div>
               <button
@@ -801,7 +801,7 @@ function SettingsPageContent() {
                     <button
                       type="button"
                       onClick={() => avatarInputRef.current?.click()}
-                      className="text-[11px] font-semibold text-[#0078d4] hover:underline"
+                      className="text-[11px] font-semibold text-brand hover:underline"
                     >
                       Upload New
                     </button>
@@ -862,7 +862,7 @@ function SettingsPageContent() {
                     name="employeeId"
                     defaultValue={employeeId}
                     required
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
                 <div>
@@ -873,7 +873,7 @@ function SettingsPageContent() {
                     name="role"
                     defaultValue={userRole}
                     required
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
               </div>
@@ -888,7 +888,7 @@ function SettingsPageContent() {
                     name="designation"
                     defaultValue={userDesignation}
                     required
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
                 <div>
@@ -899,7 +899,7 @@ function SettingsPageContent() {
                     name="department"
                     defaultValue={userDepartment}
                     required
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
               </div>
@@ -928,7 +928,7 @@ function SettingsPageContent() {
                   <input
                     name="phoneNumber"
                     defaultValue={settings.phoneNumber || "+1 (555) 382-9012"}
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
                 <div>
@@ -938,7 +938,7 @@ function SettingsPageContent() {
                   <input
                     name="location"
                     defaultValue={settings.location || "Boston, MA, USA"}
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
               </div>
@@ -952,7 +952,7 @@ function SettingsPageContent() {
                   <input
                     name="timeZone"
                     defaultValue={settings.timeZone || "America/New_York (EST)"}
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
                 <div>
@@ -962,7 +962,7 @@ function SettingsPageContent() {
                   <input
                     name="language"
                     defaultValue={settings.language || "English (US)"}
-                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
+                    className="h-9 w-full rounded-xl border border-secondary bg-card px-3 text-xs text-foreground outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground shadow-sm"
                   />
                 </div>
               </div>
@@ -978,7 +978,7 @@ function SettingsPageContent() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#0078d4] px-5 py-2 text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors shadow-sm"
+                  className="rounded-xl bg-brand px-5 py-2 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors shadow-sm"
                 >
                   Save Changes
                 </button>
@@ -997,7 +997,7 @@ function SettingsPageContent() {
             {/* Modal Header */}
             <div className="w-full flex items-center justify-between border-b border-muted pb-3 dark:border-muted">
               <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-[#0078d4]" />
+                <Eye className="h-4 w-4 text-brand" />
                 <h3 className="text-sm font-bold text-foreground dark:text-primary-foreground">Profile Photo</h3>
               </div>
               <button
@@ -1041,7 +1041,7 @@ function SettingsPageContent() {
                     setIsViewPhotoModalOpen(false);
                     avatarInputRef.current?.click();
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#0078d4] py-2 text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors shadow-sm"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-brand py-2 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors shadow-sm"
                 >
                   <Upload className="h-3.5 w-3.5" />
                   <span>Upload New</span>
@@ -1083,7 +1083,7 @@ function SettingsPageContent() {
           <div className="w-full max-w-md rounded-2xl border border-secondary bg-card p-6 shadow-2xl dark:border-muted dark:bg-[#0c1929]">
             <div className="flex items-center justify-between border-b border-muted pb-3 dark:border-muted">
               <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-[#0078d4]" />
+                <Lock className="h-4 w-4 text-brand" />
                 <h3 className="text-sm font-bold text-foreground dark:text-primary-foreground">Change Account Password</h3>
               </div>
               <button
@@ -1111,7 +1111,7 @@ function SettingsPageContent() {
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
                 />
               </div>
 
@@ -1123,7 +1123,7 @@ function SettingsPageContent() {
                   type="password"
                   required
                   placeholder="At least 8 characters"
-                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
                 />
               </div>
 
@@ -1135,7 +1135,7 @@ function SettingsPageContent() {
                   type="password"
                   required
                   placeholder="Re-type new password"
-                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
                 />
               </div>
 
@@ -1149,7 +1149,7 @@ function SettingsPageContent() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-[#0078d4] px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-[#005a9e] transition-colors"
+                  className="rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors"
                 >
                   Update Password
                 </button>

@@ -120,7 +120,7 @@ export function HyperlinkDialog({
       <DialogContent className="sm:max-w-[480px] bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
         <DialogHeader className="p-4 border-b border-muted dark:border-muted">
           <DialogTitle className="text-sm font-semibold text-foreground dark:text-primary-foreground flex items-center gap-2">
-            <Globe className="h-4 w-4 text-[#0078d4]" />
+            <Globe className="h-4 w-4 text-brand" />
             Insert Hyperlink
           </DialogTitle>
         </DialogHeader>
@@ -132,7 +132,7 @@ export function HyperlinkDialog({
             onClick={() => setActiveTab('external')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
               activeTab === 'external'
-                ? 'bg-card text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-primary'
+                ? 'bg-card text-brand shadow-sm dark:bg-[#0E1A29] dark:text-primary'
                 : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-primary-foreground'
             }`}
           >
@@ -144,7 +144,7 @@ export function HyperlinkDialog({
             onClick={() => setActiveTab('internal')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
               activeTab === 'internal' || activeTab === 'bookmark'
-                ? 'bg-card text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-primary'
+                ? 'bg-card text-brand shadow-sm dark:bg-[#0E1A29] dark:text-primary'
                 : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-primary-foreground'
             }`}
           >
@@ -156,7 +156,7 @@ export function HyperlinkDialog({
             onClick={() => setActiveTab('email')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
               activeTab === 'email'
-                ? 'bg-card text-[#0078d4] shadow-sm dark:bg-[#0E1A29] dark:text-primary'
+                ? 'bg-card text-brand shadow-sm dark:bg-[#0E1A29] dark:text-primary'
                 : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-primary-foreground'
             }`}
           >
@@ -175,7 +175,7 @@ export function HyperlinkDialog({
               value={displayText}
               onChange={(e) => setDisplayText(e.target.value)}
               placeholder="e.g. Clinical Study Results"
-              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
             />
           </div>
 
@@ -190,7 +190,7 @@ export function HyperlinkDialog({
                     value={url}
                     onChange={(e) => handleUrlChange(e.target.value)}
                     placeholder="https://example.com/report.pdf"
-                    className="h-8 w-full rounded-md border border-secondary bg-card px-3 pr-8 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+                    className="h-8 w-full rounded-md border border-secondary bg-card px-3 pr-8 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
                   />
                   <ExternalLink className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 </div>
@@ -215,7 +215,7 @@ export function HyperlinkDialog({
                   id="chk-newtab"
                   checked={openInNewTab}
                   onChange={(e) => setOpenInNewTab(e.target.checked)}
-                  className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+                  className="rounded border-border text-brand focus:ring-brand"
                 />
                 <label htmlFor="chk-newtab" className="text-secondary-foreground dark:text-muted-foreground cursor-pointer">
                   Open link in new browser tab
@@ -233,7 +233,7 @@ export function HyperlinkDialog({
                   <select
                     value={url.replace(/^#/, '')}
                     onChange={(e) => setUrl(`#${e.target.value}`)}
-                    className="h-8 w-full rounded-md border border-secondary bg-card px-2 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+                    className="h-8 w-full rounded-md border border-secondary bg-card px-2 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
                   >
                     <option value="">-- Choose a bookmark --</option>
                     {availableBookmarks.map((bm) => (
@@ -256,7 +256,7 @@ export function HyperlinkDialog({
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="#section-2"
-                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
                 />
               </div>
             </div>
@@ -272,7 +272,7 @@ export function HyperlinkDialog({
                   value={emailTo}
                   onChange={(e) => setEmailTo(e.target.value)}
                   placeholder="author@parexel.com"
-                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
                 />
               </div>
 
@@ -283,7 +283,7 @@ export function HyperlinkDialog({
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
                   placeholder="Review CSR Document"
-                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+                  className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
                 />
               </div>
 
@@ -294,7 +294,7 @@ export function HyperlinkDialog({
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
                   placeholder="Please review the attached clinical study section..."
-                  className="w-full rounded-md border border-secondary bg-card p-2 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+                  className="w-full rounded-md border border-secondary bg-card p-2 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
                 />
               </div>
 
@@ -326,7 +326,7 @@ export function HyperlinkDialog({
               value={tooltip}
               onChange={(e) => setTooltip(e.target.value)}
               placeholder="Hint shown on hover"
-              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-[#0078d4]"
+              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-brand"
             />
           </div>
         </div>

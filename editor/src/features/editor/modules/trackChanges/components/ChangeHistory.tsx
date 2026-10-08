@@ -23,7 +23,7 @@ export function ChangeHistory() {
     <div className="flex flex-col gap-3 rounded-xl border border-secondary bg-card p-3.5 text-xs dark:border-muted dark:bg-[#0E1A29]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <History className="h-4 w-4 text-[#0078d4]" />
+          <History className="h-4 w-4 text-brand" />
           <h4 className="font-bold text-foreground dark:text-primary-foreground">Revision History</h4>
         </div>
         <div className="flex items-center gap-1">
@@ -34,7 +34,7 @@ export function ChangeHistory() {
               onClick={() => setFilter(s)}
               className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider transition-colors ${
                 filter === s
-                  ? "bg-[#0078d4] text-primary-foreground"
+                  ? "bg-brand text-primary-foreground"
                   : "bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground"
               }`}
             >

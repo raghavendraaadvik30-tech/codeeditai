@@ -237,7 +237,7 @@ function WordAlignmentTabIcon({ className = "w-4 h-4" }: { className?: string })
 /** 16. Word Close Header & Footer Icon: Iconic Red Square with Bold White 'X' */
 function WordCloseIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
-    <div className={`relative flex items-center justify-center ${className} rounded bg-gradient-to-b from-[#f87171] to-[#dc2626] border border-[#b91c1c] shadow-xs`}>
+    <div className={`relative flex items-center justify-center ${className} rounded bg-gradient-to-b from-destructive to-destructive border border-destructive shadow-xs`}>
       {/* Subtle glossy top highlight */}
       <div className="absolute top-0.5 inset-x-1 h-1.5 rounded-t bg-card/35" />
       <X className="w-4 h-4 text-primary-foreground stroke-[2.8]" />

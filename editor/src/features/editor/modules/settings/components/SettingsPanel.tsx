@@ -38,7 +38,7 @@ export function SettingsPanel() {
               onClick={() => updateSettings({ theme: value })}
               className={`flex items-center justify-center gap-1.5 rounded-lg border p-1.5 text-xs transition-colors ${
                 settings.theme === value
-                  ? "border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] font-semibold"
+                  ? "border-brand bg-brand/10 text-brand font-semibold"
                   : "border-secondary bg-card hover:bg-muted dark:border-muted dark:bg-secondary"
               }`}
             >
@@ -58,7 +58,7 @@ export function SettingsPanel() {
         <select
           value={settings.defaultFontFamily}
           onChange={(e) => updateSettings({ defaultFontFamily: e.target.value as DefaultFontFamily })}
-          className="h-8 w-full rounded-md border border-secondary bg-card px-2 outline-none focus:border-[#0078d4] dark:border-secondary-foreground dark:bg-secondary"
+          className="h-8 w-full rounded-md border border-secondary bg-card px-2 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
         >
           {AVAILABLE_FONT_FAMILIES.map((f) => (
             <option key={f.value} value={f.value}>
@@ -81,7 +81,7 @@ export function SettingsPanel() {
             type="checkbox"
             checked={settings.showRuler}
             onChange={(e) => updateSettings({ showRuler: e.target.checked })}
-            className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
 
@@ -91,7 +91,7 @@ export function SettingsPanel() {
             type="checkbox"
             checked={settings.showWordCount}
             onChange={(e) => updateSettings({ showWordCount: e.target.checked })}
-            className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
 
@@ -101,7 +101,7 @@ export function SettingsPanel() {
             type="checkbox"
             checked={settings.showPageNumbers}
             onChange={(e) => updateSettings({ showPageNumbers: e.target.checked })}
-            className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
 
@@ -111,7 +111,7 @@ export function SettingsPanel() {
             type="checkbox"
             checked={settings.spellCheck}
             onChange={(e) => updateSettings({ spellCheck: e.target.checked })}
-            className="rounded border-border text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
       </div>

@@ -70,7 +70,7 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
                 <button
                   type="button"
                   onClick={() => onAutoFix(issue)}
-                  className="flex items-center gap-1 rounded bg-[#0078d4] px-2 py-0.5 text-[10px] font-semibold text-primary-foreground hover:bg-[#005a9e] shrink-0"
+                  className="flex items-center gap-1 rounded bg-brand px-2 py-0.5 text-[10px] font-semibold text-primary-foreground hover:bg-brand-deep shrink-0"
                 >
                   <Wrench className="h-2.5 w-2.5" /> Fix
                 </button>
@@ -83,7 +83,7 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
               <button
                 type="button"
                 onClick={() => onNavigate(issue)}
-                className="flex items-center gap-1 text-[10px] font-semibold text-[#0078d4] hover:underline"
+                className="flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline"
               >
                 <ExternalLink className="h-2.5 w-2.5" /> Locate in document
               </button>

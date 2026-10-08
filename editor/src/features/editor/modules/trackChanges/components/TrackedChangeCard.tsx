@@ -206,11 +206,11 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Add a comment..."
-                className="h-8 flex-1 rounded-md border border-secondary bg-muted px-2.5 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-[#0078d4] focus:bg-card dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground"
+                className="h-8 flex-1 rounded-md border border-secondary bg-muted px-2.5 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-brand focus:bg-card dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground"
               />
               <button
                 type="submit"
-                className="flex h-8 w-8 items-center justify-center rounded-md bg-[#0078d4] text-primary-foreground hover:bg-[#006cc1] transition-colors shrink-0"
+                className="flex h-8 w-8 items-center justify-center rounded-md bg-brand text-primary-foreground hover:bg-brand transition-colors shrink-0"
                 title="Add Comment"
               >
                 <Plus className="h-4 w-4" />

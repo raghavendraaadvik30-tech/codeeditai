@@ -32,7 +32,7 @@ export function ChangeComparison({
     <div className="flex flex-col gap-3 rounded-xl border border-secondary bg-card p-3.5 text-xs dark:border-muted dark:bg-[#0E1A29]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GitCompare className="h-4 w-4 text-[#0078d4]" />
+          <GitCompare className="h-4 w-4 text-brand" />
           <h4 className="font-bold text-foreground dark:text-primary-foreground">Diff Comparison</h4>
         </div>
         <div className="flex items-center gap-1">
@@ -41,7 +41,7 @@ export function ChangeComparison({
             onClick={() => setViewMode("inline")}
             className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors ${
               viewMode === "inline"
-                ? "bg-[#0078d4] text-primary-foreground"
+                ? "bg-brand text-primary-foreground"
                 : "bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground"
             }`}
           >
@@ -53,7 +53,7 @@ export function ChangeComparison({
             onClick={() => setViewMode("split")}
             className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors ${
               viewMode === "split"
-                ? "bg-[#0078d4] text-primary-foreground"
+                ? "bg-brand text-primary-foreground"
                 : "bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground"
             }`}
           >

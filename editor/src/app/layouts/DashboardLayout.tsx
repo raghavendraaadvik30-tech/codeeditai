@@ -591,11 +591,11 @@ export const DashboardLayout: React.FC = () => {
 
   return (
 
-    <div className="flex h-screen overflow-hidden bg-[#F3F4F6] font-sans text-foreground">
+    <div className="flex h-screen overflow-hidden bg-muted font-sans text-foreground">
 
       <aside
 
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#E5E7EB] bg-card transition-all duration-300 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-secondary bg-card transition-all duration-300 ${
 
           sidebarExpanded ? "w-64" : "w-[76px]"
 
@@ -799,7 +799,7 @@ export const DashboardLayout: React.FC = () => {
 
       >
 
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-[#E5E7EB] bg-card px-6">
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-secondary bg-card px-6">
 
           <div className="flex items-center gap-6">
 

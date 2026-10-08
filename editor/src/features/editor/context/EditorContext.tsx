@@ -12,7 +12,6 @@ import type { ReactNode, RefObject } from "react";
 import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
 import { useDocumentModel } from "../store/documentModel";
 import { loadGoogleFont } from "../modules/document/api/fontapi";
-import { SelectionManager } from "../utils/selectionManager";
 
 interface SavedSelectionData {
   range: Range;
@@ -298,24 +297,6 @@ export function getActionLabel(prevHtml: string, currHtml: string, customLabel?:
 
 export type ViewMode = "print" | "web" | "read" | "outline" | "draft";
 
-export interface ToolbarState {
-  bold: boolean | "mixed";
-  italic: boolean | "mixed";
-  underline: boolean | "mixed";
-  strikethrough: boolean | "mixed";
-  subscript: boolean;
-  superscript: boolean;
-  fontSize: string;
-  fontFamily: string;
-  textColor: string;
-  highlightColor: string;
-  alignment: "left" | "center" | "right" | "justify";
-  lineSpacing: string;
-  blockStyle: string;
-  isBulletList: boolean;
-  isNumberedList: boolean;
-}
-
 export interface EditorContextType {
   activePanel: string;
   setActivePanel: React.Dispatch<React.SetStateAction<string>>;
@@ -328,8 +309,6 @@ export interface EditorContextType {
 
   editorRef: RefObject<HTMLDivElement | null>;
 
-  toolbarState: ToolbarState;
-
   /**
    * Applies a style token to the current editor selection.
    */
@@ -339,8 +318,6 @@ export interface EditorContextType {
    * Applies font size (in pt) to active selection or current cursor without losing selection.
    */
   applyFontSize: (size: string | number) => void;
-  increaseFontSize: () => void;
-  decreaseFontSize: () => void;
 
   /**
    * Applies font family to active selection or current cursor.
@@ -348,31 +325,14 @@ export interface EditorContextType {
   applyFontFamily: (font: string) => void;
 
   /**
-   * Toggles bold/italic/underline/strikethrough/subscript/superscript
-   */
-  toggleBold: () => void;
-  toggleItalic: () => void;
-  toggleUnderline: () => void;
-  toggleStrikethrough: () => void;
-  toggleSubscript: () => void;
-  toggleSuperscript: () => void;
-
-  applyTextColor: (color: string) => void;
-  applyHighlightColor: (color: string) => void;
-  applyAlignment: (align: "left" | "center" | "right" | "justify") => void;
-  applyLineSpacing: (spacing: string | number) => void;
-  clearFormatting: () => void;
-  selectAllBody: () => void;
-
-  /**
    * Executes a native formatting command (bold, italic, underline, align, etc.) preserving selection.
    */
   applyFormatCommand: (command: string, value?: string) => void;
   exec: (command: string, value?: string) => void;
   applyBulletStyle: (
-    bulletChar: string,
-    styleType: string
-  ) => void;
+  bulletChar: string,
+  styleType: string
+) => void;
   applyNumberingStyle: (style?: string) => void;
   applyMultilevelStyle: (style?: string) => void;
   toggleMultilevelList: (type?: string) => void;
@@ -510,169 +470,72 @@ export function EditorProvider({
   const [selection, setSelection] =
     useState<Selection | null>(null);
 
-  const [toolbarState, setToolbarState] = useState<ToolbarState>({
-    bold: false,
-    italic: false,
-    underline: false,
-    strikethrough: false,
-    subscript: false,
-    superscript: false,
-    fontSize: "12",
-    fontFamily: "Calibri",
-    textColor: "#000000",
-    highlightColor: "transparent",
-    alignment: "left",
-    lineSpacing: "1.15",
-    blockStyle: "Normal",
-    isBulletList: false,
-    isNumberedList: false,
-  });
-
   // Saved selection tracking for active editor contenteditable pages
   const savedSelectionRef = useRef<SavedSelectionData | null>(null);
-  const preserveSelectionRef = useRef(false);
+const preserveSelectionRef = useRef(false);
 
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      /*
-       * IMPORTANT:
-       * While formatting is being applied, the browser can fire
-       * selectionchange several times. Do NOT overwrite the
-       * original selected range during that period.
-       */
-      if (preserveSelectionRef.current) {
-        return;
-      }
+useEffect(() => {
+  const handleSelectionChange = () => {
+    /*
+     * IMPORTANT:
+     * While formatting is being applied, the browser can fire
+     * selectionchange several times. Do NOT overwrite the
+     * original selected range during that period.
+     */
+    if (preserveSelectionRef.current) {
+      return;
+    }
 
-      const sel = window.getSelection();
+    const sel = window.getSelection();
 
-      if (!sel || sel.rangeCount === 0) {
-        return;
-      }
+    if (!sel || sel.rangeCount === 0) {
+      return;
+    }
 
-      const range = sel.getRangeAt(0);
-      const ancestor = range.commonAncestorContainer;
-      const el =
-        ancestor.nodeType === Node.ELEMENT_NODE
-          ? (ancestor as HTMLElement)
-          : ancestor.parentElement;
+    const range = sel.getRangeAt(0);
 
-      const pageEl =
-        el?.closest<HTMLElement>(
-          '[contenteditable="true"][data-page-id]'
-        );
+    const ancestor = range.commonAncestorContainer;
 
-      if (!pageEl) {
-        /*
-         * Selection moved to toolbar/ribbon.
-         * KEEP the previous editor selection.
-         */
-        return;
-      }
+    const el =
+      ancestor.nodeType === Node.ELEMENT_NODE
+        ? (ancestor as HTMLElement)
+        : ancestor.parentElement;
 
-      const saved = saveSelectionData(
-        pageEl,
-        range
+    const pageEl =
+      el?.closest<HTMLElement>(
+        '[contenteditable="true"][data-page-id]'
       );
 
-      if (saved) {
-        savedSelectionRef.current = saved;
-        SelectionManager.saveSelection();
-      }
+    if (!pageEl) {
+      /*
+       * Selection moved to toolbar/ribbon.
+       * KEEP the previous editor selection.
+       */
+      return;
+    }
 
-      // Compute and update full active toolbar state
-      if (el) {
-        try {
-          const isBold = document.queryCommandState("bold") || Boolean(el.closest("b, strong") || (window.getComputedStyle(el).fontWeight && parseInt(window.getComputedStyle(el).fontWeight, 10) >= 600));
-          const isItalic = document.queryCommandState("italic") || Boolean(el.closest("i, em") || window.getComputedStyle(el).fontStyle === "italic");
-          const isUnderline = document.queryCommandState("underline") || Boolean(el.closest("u") || window.getComputedStyle(el).textDecoration.includes("underline"));
-          const isStrike = document.queryCommandState("strikeThrough") || Boolean(el.closest("s, strike") || window.getComputedStyle(el).textDecoration.includes("line-through"));
-          const isSub = document.queryCommandState("subscript") || Boolean(el.closest("sub"));
-          const isSuper = document.queryCommandState("superscript") || Boolean(el.closest("sup"));
+    const saved = saveSelectionData(
+      pageEl,
+      range
+    );
 
-          // Font size in pt
-          let curFontSize = "12";
-          const sizeSpan = el.closest<HTMLElement>("span[style*='font-size']");
-          if (sizeSpan && sizeSpan.style.fontSize) {
-            const ptMatch = sizeSpan.style.fontSize.match(/(\d+(?:\.\d+)?)\s*pt/i);
-            if (ptMatch) {
-              curFontSize = ptMatch[1];
-            } else {
-              const px = parseFloat(sizeSpan.style.fontSize);
-              if (!isNaN(px)) curFontSize = String(Math.round(px * 0.75));
-            }
-          } else {
-            const computedSize = window.getComputedStyle(el).fontSize;
-            const px = parseFloat(computedSize);
-            if (!isNaN(px)) curFontSize = String(Math.round(px * 0.75));
-          }
+    if (saved) {
+      savedSelectionRef.current = saved;
+    }
+  };
 
-          // Font family
-          const fontSpan = el.closest<HTMLElement>("span[style*='font-family']");
-          const rawFont = fontSpan?.style.fontFamily || window.getComputedStyle(el).fontFamily || "Calibri";
-          const curFont = rawFont.split(",")[0].replace(/['"]/g, "").trim() || "Calibri";
+  document.addEventListener(
+    "selectionchange",
+    handleSelectionChange
+  );
 
-          // Text color & highlight
-          const curTextColor = window.getComputedStyle(el).color || "#000000";
-          const bgSpan = el.closest<HTMLElement>("span[style*='background']");
-          const curHighlight = bgSpan?.style.backgroundColor || "transparent";
-
-          // Alignment
-          const block = el.closest("p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th, div") as HTMLElement | null;
-          const textAlign = block ? (window.getComputedStyle(block).textAlign as "left" | "center" | "right" | "justify") : "left";
-
-          // Line Spacing
-          const curLineHeight = block ? (block.style.lineHeight || "1.15") : "1.15";
-
-          // Block style
-          let curBlockStyle = "Normal";
-          if (el.closest("h1")) curBlockStyle = "Heading 1";
-          else if (el.closest("h2")) curBlockStyle = "Heading 2";
-          else if (el.closest("h3")) curBlockStyle = "Heading 3";
-          else if (el.closest("h4")) curBlockStyle = "Heading 4";
-          else if (el.closest("blockquote")) curBlockStyle = "Quote";
-          else if (el.closest('[data-style="Title"]')) curBlockStyle = "Title";
-          else if (el.closest('[data-style="Subtitle"]')) curBlockStyle = "Subtitle";
-
-          // Lists
-          const isBullet = Boolean(el.closest("ul"));
-          const isNumbered = Boolean(el.closest("ol"));
-
-          setToolbarState({
-            bold: isBold,
-            italic: isItalic,
-            underline: isUnderline,
-            strikethrough: isStrike,
-            subscript: isSub,
-            superscript: isSuper,
-            fontSize: curFontSize,
-            fontFamily: curFont,
-            textColor: curTextColor,
-            highlightColor: curHighlight,
-            alignment: ["left", "center", "right", "justify"].includes(textAlign) ? textAlign : "left",
-            lineSpacing: curLineHeight,
-            blockStyle: curBlockStyle,
-            isBulletList: isBullet,
-            isNumberedList: isNumbered,
-          });
-        } catch {
-          // ignore
-        }
-      }
-    };
-
-    document.addEventListener(
+  return () => {
+    document.removeEventListener(
       "selectionchange",
       handleSelectionChange
     );
-
-    return () => {
-      document.removeEventListener(
-        "selectionchange",
-        handleSelectionChange
-      );
-    };
-  }, []);
+  };
+}, []);
   const restoreEditorSelection = useCallback((): boolean => {
   const sel = window.getSelection();
   if (!sel) return false;
@@ -1014,216 +877,218 @@ export function EditorProvider({
   }, [restoreEditorSelection, editorRef]);
 
   const applyFormatCommand = useCallback(
-    (command: string, value?: string) => {
-      const restored = restoreEditorSelection();
-      if (!restored) {
-        return;
-      }
+  (command: string, value?: string) => {
+    /*
+     * ============================================================
+     * STEP 1
+     * Restore the ORIGINAL editor selection.
+     * ============================================================
+     */
+    const restored = restoreEditorSelection();
 
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) {
-        return;
-      }
+    if (!restored) {
+      return;
+    }
 
-      const range = sel.getRangeAt(0);
-      const ancestor = range.commonAncestorContainer;
-      const el =
-        ancestor.nodeType === Node.ELEMENT_NODE
-          ? (ancestor as HTMLElement)
-          : ancestor.parentElement;
+    const sel = window.getSelection();
 
-      const pageEl =
-        el?.closest<HTMLElement>(
-          '[contenteditable="true"][data-page-id]'
-        ) || editorRef.current;
+    if (!sel || sel.rangeCount === 0) {
+      return;
+    }
 
-      if (!pageEl) {
-        return;
-      }
+    const range = sel.getRangeAt(0);
 
-      // Collapsed selection (no text selected) -> prepare future typing state
-      if (range.collapsed) {
-        try {
-          // Attempt native execCommand first for toggling active styles
-          document.execCommand(command, false, value);
-        } catch {
-          // ignore
-        }
+    /*
+     * We need an actual text selection.
+     */
+    if (range.collapsed) {
+      return;
+    }
 
-        // If command is an inline styling command and browser didn't insert a styled node,
-        // create a zero-width space placeholder with current styling
-        if (["bold", "italic", "underline", "strikeThrough", "foreColor", "hiliteColor"].includes(command)) {
-          const span = document.createElement("span");
-          if (command === "bold") span.style.fontWeight = "bold";
-          if (command === "italic") span.style.fontStyle = "italic";
-          if (command === "underline") span.style.textDecoration = "underline";
-          if (command === "strikeThrough") span.style.textDecoration = "line-through";
-          if (command === "foreColor" && value) span.style.color = value;
-          if (command === "hiliteColor" && value) span.style.backgroundColor = value;
-          span.innerHTML = "&#8203;";
+    /*
+     * ============================================================
+     * STEP 2
+     * Find the editor page.
+     * ============================================================
+     */
+    const ancestor = range.commonAncestorContainer;
 
-          range.insertNode(span);
-          const newRange = document.createRange();
-          newRange.setStart(span.firstChild || span, 1);
-          newRange.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(newRange);
+    const el =
+      ancestor.nodeType === Node.ELEMENT_NODE
+        ? (ancestor as HTMLElement)
+        : ancestor.parentElement;
 
-          const saved = saveSelectionData(pageEl, newRange);
-          if (saved) savedSelectionRef.current = saved;
-        }
+    const pageEl =
+      el?.closest<HTMLElement>(
+        '[contenteditable="true"][data-page-id]'
+      ) || editorRef.current;
 
-        pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-        return;
-      }
+    if (!pageEl) {
+      return;
+    }
 
-      const saved = saveSelectionData(pageEl, range);
-      if (!saved) return;
-      savedSelectionRef.current = saved;
+    /*
+     * ============================================================
+     * STEP 3
+     * SAVE THE EXACT CURRENT SELECTION
+     *
+     * This becomes the permanent selection we restore
+     * after RED / BLUE / GREEN.
+     * ============================================================
+     */
+    const saved = saveSelectionData(
+      pageEl,
+      range
+    );
 
-      preserveSelectionRef.current = true;
+    if (!saved) {
+      return;
+    }
 
-      try {
-        document.execCommand(command, false, value);
-      } catch (error) {
-        console.warn("Formatting command failed:", error);
-        preserveSelectionRef.current = false;
-        return;
-      }
+    savedSelectionRef.current = saved;
 
-      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+    /*
+     * ============================================================
+     * STEP 4
+     * LOCK selection tracking.
+     *
+     * Browser may fire selectionchange while execCommand
+     * modifies the DOM.
+     * ============================================================
+     */
+    preserveSelectionRef.current = true;
 
+    /*
+     * ============================================================
+     * STEP 5
+     * APPLY FORMAT
+     * ============================================================
+     */
+    try {
+      document.execCommand(
+        command,
+        false,
+        value
+      );
+    } catch (error) {
+      console.warn(
+        "Formatting command failed:",
+        error
+      );
+
+      preserveSelectionRef.current = false;
+      return;
+    }
+
+    /*
+     * ============================================================
+     * STEP 6
+     * Tell the editor that the HTML changed.
+     * ============================================================
+     */
+    pageEl.dispatchEvent(
+      new Event("input", {
+        bubbles: true,
+      })
+    );
+
+    /*
+     * ============================================================
+     * STEP 7
+     * Restore the SAME selection after DOM changes.
+     * ============================================================
+     */
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          preserveSelectionRef.current = true;
+        preserveSelectionRef.current = true;
+
+        /*
+         * IMPORTANT:
+         * restoreEditorSelection() will now ONLY restore
+         * savedSelectionRef.current.
+         *
+         * It will NOT overwrite it with the toolbar selection.
+         */
+        const restoredAgain =
           restoreEditorSelection();
 
-          const finalSel = window.getSelection();
-          if (finalSel && finalSel.rangeCount > 0) {
-            const finalRange = finalSel.getRangeAt(0);
-            if (!finalRange.collapsed) {
-              const finalAncestor = finalRange.commonAncestorContainer;
-              const finalEl =
-                finalAncestor.nodeType === Node.ELEMENT_NODE
-                  ? (finalAncestor as HTMLElement)
-                  : finalAncestor.parentElement;
+        if (!restoredAgain) {
+          console.warn(
+            "Could not restore formatted text selection."
+          );
+        }
 
-              const finalPage =
-                finalEl?.closest<HTMLElement>(
-                  '[contenteditable="true"][data-page-id]'
-                ) || pageEl;
+        /*
+         * ========================================================
+         * STEP 8
+         * Keep the selection saved for the NEXT color click.
+         *
+         * Example:
+         *
+         * RED
+         *  ↓
+         * restore Hello World
+         *  ↓
+         * apply RED
+         *  ↓
+         * restore Hello World
+         *  ↓
+         * save SAME selection
+         * ========================================================
+         */
+        const finalSel = window.getSelection();
 
-              if (finalPage) {
-                const finalSaved = saveSelectionData(finalPage, finalRange);
-                if (finalSaved) {
-                  savedSelectionRef.current = finalSaved;
-                }
+        if (
+          finalSel &&
+          finalSel.rangeCount > 0
+        ) {
+          const finalRange =
+            finalSel.getRangeAt(0);
+
+          if (!finalRange.collapsed) {
+            const finalAncestor =
+              finalRange.commonAncestorContainer;
+
+            const finalEl =
+              finalAncestor.nodeType === Node.ELEMENT_NODE
+                ? (finalAncestor as HTMLElement)
+                : finalAncestor.parentElement;
+
+            const finalPage =
+              finalEl?.closest<HTMLElement>(
+                '[contenteditable="true"][data-page-id]'
+              ) || pageEl;
+
+            if (finalPage) {
+              const finalSaved =
+                saveSelectionData(
+                  finalPage,
+                  finalRange
+                );
+
+              if (finalSaved) {
+                savedSelectionRef.current =
+                  finalSaved;
               }
             }
           }
+        }
 
-          setTimeout(() => {
-            preserveSelectionRef.current = false;
-          }, 0);
-        });
+        /*
+         * Unlock selection tracking only after
+         * everything has been restored and saved.
+         */
+        setTimeout(() => {
+          preserveSelectionRef.current = false;
+        }, 0);
       });
-    },
-    [restoreEditorSelection, editorRef]
-  );
-
-  const toggleBold = useCallback(() => applyFormatCommand("bold"), [applyFormatCommand]);
-  const toggleItalic = useCallback(() => applyFormatCommand("italic"), [applyFormatCommand]);
-  const toggleUnderline = useCallback(() => applyFormatCommand("underline"), [applyFormatCommand]);
-  const toggleStrikethrough = useCallback(() => applyFormatCommand("strikeThrough"), [applyFormatCommand]);
-  const toggleSubscript = useCallback(() => applyFormatCommand("subscript"), [applyFormatCommand]);
-  const toggleSuperscript = useCallback(() => applyFormatCommand("superscript"), [applyFormatCommand]);
-
-  const applyTextColor = useCallback(
-    (color: string) => applyFormatCommand("foreColor", color),
-    [applyFormatCommand]
-  );
-
-  const applyHighlightColor = useCallback(
-    (color: string) => {
-      if (!color || color === "transparent" || color === "none") {
-        applyFormatCommand("hiliteColor", "transparent");
-      } else {
-        applyFormatCommand("hiliteColor", color);
-      }
-    },
-    [applyFormatCommand]
-  );
-
-  const applyAlignment = useCallback(
-    (align: "left" | "center" | "right" | "justify") => {
-      if (align === "center") applyFormatCommand("justifyCenter");
-      else if (align === "right") applyFormatCommand("justifyRight");
-      else if (align === "justify") applyFormatCommand("justifyFull");
-      else applyFormatCommand("justifyLeft");
-    },
-    [applyFormatCommand]
-  );
-
-  const applyLineSpacing = useCallback(
-    (spacing: string | number) => {
-      restoreEditorSelection();
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
-      const anc = range.commonAncestorContainer;
-      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
-      const pageEl = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
-      const block = el?.closest("p, h1, h2, h3, h4, h5, h6, li, blockquote, div") as HTMLElement | null;
-      if (block) {
-        block.style.lineHeight = String(spacing);
-        pageEl?.dispatchEvent(new Event("input", { bubbles: true }));
-      }
-    },
-    [restoreEditorSelection, editorRef]
-  );
-
-  const increaseFontSize = useCallback(() => {
-    const cur = parseInt(toolbarState.fontSize, 10) || 12;
-    const next = cur < 12 ? cur + 1 : cur < 28 ? cur + 2 : cur + 4;
-    applyFontSize(Math.min(72, next));
-  }, [toolbarState.fontSize, applyFontSize]);
-
-  const decreaseFontSize = useCallback(() => {
-    const cur = parseInt(toolbarState.fontSize, 10) || 12;
-    const next = cur <= 12 ? cur - 1 : cur <= 28 ? cur - 2 : cur - 4;
-    applyFontSize(Math.max(6, next));
-  }, [toolbarState.fontSize, applyFontSize]);
-
-  const clearFormatting = useCallback(() => {
-    restoreEditorSelection();
-    document.execCommand("removeFormat", false);
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      const range = sel.getRangeAt(0);
-      const anc = range.commonAncestorContainer;
-      const el = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
-      const pageEl = el?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
-      if (pageEl) {
-        pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-      }
-    }
-  }, [restoreEditorSelection, editorRef]);
-
-  const selectAllBody = useCallback(() => {
-    const pageEditors = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-editor-page]")
-    ).filter((pageEditor) => pageEditor.isContentEditable);
-    const sel = window.getSelection();
-    if (sel && pageEditors.length > 0) {
-      const range = document.createRange();
-      const firstPage = pageEditors[0];
-      const lastPage = pageEditors[pageEditors.length - 1];
-      range.setStart(firstPage, 0);
-      range.setEnd(lastPage, lastPage.childNodes.length);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-  }, []);
+    });
+  },
+  [
+    restoreEditorSelection,
+    editorRef,
+  ]
+);
 
   const applyBlockStyle = useCallback((tag: string) => {
     restoreEditorSelection();
@@ -2481,7 +2346,13 @@ const applyBulletStyle = useCallback(
     setTimeout(() => {
       restoreEditorSelection();
     }, 0);
-  }, [restoreEditorSelection, editorRef]);
+  },
+  [
+    restoreEditorSelection,
+    editorRef,
+  ]
+);
+
 
   const value: EditorContextType = {
     activePanel,
@@ -2494,25 +2365,10 @@ const applyBulletStyle = useCallback(
     setAiPanelOpen,
 
     editorRef,
-    toolbarState,
 
     applyStyleToken,
     applyFontSize,
-    increaseFontSize,
-    decreaseFontSize,
     applyFontFamily,
-    toggleBold,
-    toggleItalic,
-    toggleUnderline,
-    toggleStrikethrough,
-    toggleSubscript,
-    toggleSuperscript,
-    applyTextColor,
-    applyHighlightColor,
-    applyAlignment,
-    applyLineSpacing,
-    clearFormatting,
-    selectAllBody,
     applyFormatCommand,
     applyBlockStyle,
     restoreEditorSelection,
@@ -2539,9 +2395,9 @@ const applyBulletStyle = useCallback(
     pendingPermissionFile,
     setPendingPermissionFile,
 
-    exec: applyFormatCommand,
+   exec: applyFormatCommand,
 
-    applyBulletStyle,
+applyBulletStyle,
     applyNumberingStyle: (style?: string) => applyFormatCommand("insertOrderedList", style),
     applyMultilevelStyle: (style?: string) => applyFormatCommand("insertOrderedList", style),
     toggleMultilevelList: (type?: string) => applyFormatCommand("insertOrderedList", type),

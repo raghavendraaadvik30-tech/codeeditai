@@ -138,7 +138,7 @@ export default function EditorStatusBar() {
             aria-pressed={viewMode === "read"}
             className={`
               p-1
-              rounded-[2px]
+              rounded-xs
               transition-colors
               ${
                 viewMode === "read"
@@ -158,7 +158,7 @@ export default function EditorStatusBar() {
             aria-pressed={viewMode === "print"}
             className={`
               p-1
-              rounded-[2px]
+              rounded-xs
               transition-colors
               ${
                 viewMode === "print"
@@ -178,7 +178,7 @@ export default function EditorStatusBar() {
             aria-pressed={viewMode === "web"}
             className={`
               p-1
-              rounded-[2px]
+              rounded-xs
               transition-colors
               ${
                 viewMode === "web"
@@ -208,7 +208,7 @@ export default function EditorStatusBar() {
             aria-pressed={viewMode === "outline"}
             className={`
               p-1
-              rounded-[2px]
+              rounded-xs
               transition-colors
               ${
                 viewMode === "outline"
@@ -228,7 +228,7 @@ export default function EditorStatusBar() {
             aria-pressed={viewMode === "draft"}
             className={`
               p-1
-              rounded-[2px]
+              rounded-xs
               transition-colors
               ${
                 viewMode === "draft"
@@ -261,7 +261,7 @@ export default function EditorStatusBar() {
               text-[11px]
               text-secondary-foreground
               hover:bg-secondary/70
-              rounded-[2px]
+              rounded-xs
               transition-colors
               dark:text-muted-foreground
               dark:hover:bg-muted
@@ -279,7 +279,7 @@ export default function EditorStatusBar() {
             aria-label="Zoom Out"
             className="
               p-0.5
-              rounded-[2px]
+              rounded-xs
               text-secondary-foreground
               hover:bg-secondary/70
               hover:text-foreground
@@ -334,7 +334,7 @@ export default function EditorStatusBar() {
             aria-label="Zoom In"
             className="
               p-0.5
-              rounded-[2px]
+              rounded-xs
               text-secondary-foreground
               hover:bg-secondary/70
               hover:text-foreground

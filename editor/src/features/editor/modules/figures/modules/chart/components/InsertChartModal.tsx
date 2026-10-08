@@ -98,7 +98,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search charts..."
-              className="w-full h-[44px] pl-10 pr-9 text-sm bg-muted border border-secondary rounded-xl outline-none transition-all placeholder:text-muted-foreground focus:bg-card focus:border-[#0078d4] focus:ring-2 focus:ring-[#0078d4]/15 dark:bg-[#0c1622] dark:border-secondary-foreground dark:text-primary-foreground dark:focus:border-primary"
+              className="w-full h-[44px] pl-10 pr-9 text-sm bg-muted border border-secondary rounded-xl outline-none transition-all placeholder:text-muted-foreground focus:bg-card focus:border-brand focus:ring-2 focus:ring-brand/15 dark:bg-[#0c1622] dark:border-secondary-foreground dark:text-primary-foreground dark:focus:border-primary"
               autoFocus
             />
             {searchQuery && (
@@ -147,16 +147,16 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
                       }
                     }}
                     className={`
-                      group relative flex flex-col justify-between items-center rounded-xl p-3 min-h-[140px] max-h-[155px] border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#0078d4]
+                      group relative flex flex-col justify-between items-center rounded-xl p-3 min-h-[140px] max-h-[155px] border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-brand
                       ${isSelected
-                        ? 'border-2 border-[#0078d4] bg-primary/50 shadow-xs dark:border-[#0078d4] dark:bg-navy-950/30'
+                        ? 'border-2 border-brand bg-primary/50 shadow-xs dark:border-brand dark:bg-navy-950/30'
                         : 'border-secondary bg-card hover:border-border hover:shadow-xs dark:border-muted dark:bg-[#111D29] dark:hover:border-secondary-foreground'
                       }
                     `}
                   >
                     {/* Selected Badge Checkmark */}
                     {isSelected && (
-                      <div className="absolute top-2.5 right-2.5 flex items-center justify-center w-4.5 h-4.5 rounded-full bg-[#0078d4] text-primary-foreground shadow-xs">
+                      <div className="absolute top-2.5 right-2.5 flex items-center justify-center w-4.5 h-4.5 rounded-full bg-brand text-primary-foreground shadow-xs">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -169,7 +169,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
                     {/* Chart Name */}
                     <span
                       className={`mt-1.5 text-[14px] font-semibold text-center leading-tight transition-colors ${isSelected
-                          ? 'text-[#0078d4] dark:text-primary'
+                          ? 'text-brand dark:text-primary'
                           : 'text-foreground dark:text-muted-foreground group-hover:text-foreground dark:group-hover:text-primary-foreground'
                         }`}
                     >
@@ -195,7 +195,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
             type="button"
             onClick={handleConfirmInsert}
             disabled={!selectedType}
-            className="px-5 py-2 text-sm font-semibold text-primary-foreground bg-[#0078d4] rounded-lg shadow-xs hover:bg-[#005a9e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-5 py-2 text-sm font-semibold text-primary-foreground bg-brand rounded-lg shadow-xs hover:bg-brand-deep disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Insert
           </button>

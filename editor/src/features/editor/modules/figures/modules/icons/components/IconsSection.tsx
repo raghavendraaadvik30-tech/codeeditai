@@ -42,7 +42,7 @@ export const IconsSection: React.FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex items-center gap-1.5 rounded-md bg-[#0078d4] px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-[#005a9e] focus:outline-none"
+                className="flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-brand-deep focus:outline-none"
               >
                 <span>Insert</span>
                 <ChevronDown className="h-3.5 w-3.5" />

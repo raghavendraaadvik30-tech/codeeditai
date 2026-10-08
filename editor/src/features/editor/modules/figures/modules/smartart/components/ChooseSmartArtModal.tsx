@@ -206,7 +206,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
               <div className="flex items-center gap-3">
                 <SmartArtCategoryIcon category="header" />
                 <div>
-                  <h2 className="text-[20px] font-bold text-[#0f2744] dark:text-primary-foreground leading-tight">
+                  <h2 className="text-[20px] font-bold text-navy-900 dark:text-primary-foreground leading-tight">
                     SmartArt
                   </h2>
                   <p className="text-[14px] text-muted0 dark:text-muted-foreground font-normal mt-0.5">
@@ -238,8 +238,8 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                       <span
                         className={`text-[16px] leading-tight truncate ${
                           isSelected
-                            ? 'font-bold text-[#0078d4] dark:text-primary'
-                            : 'font-semibold text-[#1f2937] dark:text-muted-foreground'
+                            ? 'font-bold text-brand dark:text-primary'
+                            : 'font-semibold text-foreground dark:text-muted-foreground'
                         }`}
                       >
                         {cat.label}
@@ -249,7 +249,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     <span
                       className={`text-[18px] font-bold shrink-0 transition-colors ${
                         isSelected
-                          ? 'text-[#0078d4] dark:text-primary'
+                          ? 'text-brand dark:text-primary'
                           : 'text-muted-foreground'
                       }`}
                     >
@@ -361,7 +361,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
           <button
             type="button"
             onClick={handleConfirm}
-            className="px-5 py-1.5 text-xs font-semibold rounded-md bg-[#0078d4] text-primary-foreground hover:bg-[#005a9e] shadow-xs transition-colors"
+            className="px-5 py-1.5 text-xs font-semibold rounded-md bg-brand text-primary-foreground hover:bg-brand-deep shadow-xs transition-colors"
           >
             OK
           </button>

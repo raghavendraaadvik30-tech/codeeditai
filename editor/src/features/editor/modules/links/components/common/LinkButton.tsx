@@ -25,7 +25,7 @@ export function LinkButton({
   ...props
 }: LinkButtonProps) {
   const variantStyles = {
-    primary: 'bg-[#0078d4] text-primary-foreground hover:bg-[#005a9e] dark:bg-[#0078d4] dark:hover:bg-[#005a9e]',
+    primary: 'bg-brand text-primary-foreground hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep',
     secondary: 'bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground',
     outline: 'border border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted',
     danger: 'bg-destructive/10 text-destructive hover:bg-destructive/10 dark:bg-destructive/40 dark:text-destructive dark:hover:bg-destructive/60',

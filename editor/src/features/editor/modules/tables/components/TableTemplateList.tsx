@@ -20,11 +20,11 @@ export function TableTemplateList() {
       {templates.map((tpl: TableTemplate) => (
         <div
           key={tpl.id}
-          className="group flex flex-col justify-between rounded-xl border border-secondary/80 bg-card p-3 transition-all hover:border-[#0078d4]/60 dark:border-muted/80 dark:bg-[#091524] dark:hover:border-secondary-foreground"
+          className="group flex flex-col justify-between rounded-xl border border-secondary/80 bg-card p-3 transition-all hover:border-brand/60 dark:border-muted/80 dark:bg-[#091524] dark:hover:border-secondary-foreground"
         >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[#0078d4] dark:bg-navy-950/40">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-brand dark:bg-navy-950/40">
                 <Table className="h-3.5 w-3.5" />
               </div>
               <div>
@@ -40,7 +40,7 @@ export function TableTemplateList() {
             <button
               type="button"
               onClick={() => insertTemplate(tpl)}
-              className="flex h-6 items-center gap-1 rounded-md bg-[#0078d4]/10 px-2 text-[11px] font-medium text-[#0078d4] hover:bg-[#0078d4] hover:text-primary-foreground transition-colors"
+              className="flex h-6 items-center gap-1 rounded-md bg-brand/10 px-2 text-[11px] font-medium text-brand hover:bg-brand hover:text-primary-foreground transition-colors"
             >
               <Plus className="h-3 w-3" />
               Insert

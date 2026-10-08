@@ -240,7 +240,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                 <select
                   value={headingSize}
                   onChange={(e) => setHeadingSize(e.target.value)}
-                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4] appearance-none cursor-pointer"
+                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none cursor-pointer"
                 >
                   <option value="auto">Auto (Recommended)</option>
                   <option value="8pt">8pt</option>
@@ -263,7 +263,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                 <select
                   value={textSize}
                   onChange={(e) => setTextSize(e.target.value)}
-                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4] appearance-none cursor-pointer"
+                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none cursor-pointer"
                 >
                   <option value="auto">Auto (Recommended)</option>
                   <option value="8pt">8pt</option>
@@ -287,7 +287,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                   onChange={(e) =>
                     setTitleOption(e.target.value as "with" | "without" | "only")
                   }
-                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4] appearance-none cursor-pointer"
+                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none cursor-pointer"
                 >
                   <option value="with">With Title</option>
                   <option value="without">Without Title</option>
@@ -332,7 +332,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                       e.currentTarget.blur();
                     }
                   }}
-                  className="w-12 h-8 text-xs text-center font-semibold border border-border dark:border-secondary-foreground rounded-md bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
+                  className="w-12 h-8 text-xs text-center font-semibold border border-border dark:border-secondary-foreground rounded-md bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                 />
                 <button
                   type="button"
@@ -380,7 +380,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                       e.currentTarget.blur();
                     }
                   }}
-                  className="w-12 h-8 text-xs text-center font-semibold border border-border dark:border-secondary-foreground rounded-md bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
+                  className="w-12 h-8 text-xs text-center font-semibold border border-border dark:border-secondary-foreground rounded-md bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                 />
                 <button
                   type="button"
@@ -406,7 +406,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
               <Switch
                 checked={autoFit}
                 onCheckedChange={setAutoFit}
-                className="data-[state=checked]:bg-[#0078d4]"
+                className="data-[state=checked]:bg-brand"
               />
             </div>
           </div>
@@ -415,13 +415,13 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
           <div className="md:col-span-7 flex flex-col">
             <div className="pb-1 mb-2">
               <h3 className="text-xs font-bold text-foreground dark:text-muted uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[#e81123]" />
+                <Sparkles className="h-3.5 w-3.5 text-destructive" />
                 <span>PREVIEW</span>
               </h3>
             </div>
 
             {/* Page Sheet Container */}
-            <div className="flex-1 bg-[#f3f2f1] dark:bg-secondary/60 border border-secondary dark:border-muted rounded-lg p-6 flex items-center justify-center min-h-[340px] select-none">
+            <div className="flex-1 bg-muted dark:bg-secondary/60 border border-secondary dark:border-muted rounded-lg p-6 flex items-center justify-center min-h-[340px] select-none">
               <div className="w-full bg-card dark:bg-muted shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-secondary dark:border-secondary-foreground p-6 rounded-md min-h-[240px] flex flex-col justify-start">
                 {/* Caption Preview */}
                 {(titleOption === "with" || titleOption === "only") && (
@@ -445,7 +445,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                           {Array.from({ length: columns }).map((_, i) => (
                             <th
                               key={i}
-                              className="border border-[#8a8886] bg-[#f3f2f1] dark:bg-secondary-foreground/60 px-2.5 py-2 text-left font-bold text-foreground dark:text-muted"
+                              className="border border-[#8a8886] bg-muted dark:bg-secondary-foreground/60 px-2.5 py-2 text-left font-bold text-foreground dark:text-muted"
                               style={{
                                 fontSize: getFontSizeStyle(headingSize),
                                 width: `${100 / columns}%`,
@@ -486,7 +486,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-3 bg-[#f3f2f1] dark:bg-secondary border-t border-secondary dark:border-muted">
+        <div className="flex items-center justify-end gap-3 px-6 py-3 bg-muted dark:bg-secondary border-t border-secondary dark:border-muted">
           <Button
             type="button"
             variant="outline"
@@ -498,7 +498,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
           <Button
             type="button"
             onClick={handleInsert}
-            className="h-8 px-5 text-xs font-semibold bg-[#0078d4] hover:bg-[#106ebe] active:bg-[#005a9e] text-primary-foreground rounded-md transition-colors shadow-sm"
+            className="h-8 px-5 text-xs font-semibold bg-brand hover:bg-brand active:bg-brand-deep text-primary-foreground rounded-md transition-colors shadow-sm"
           >
             Insert Table
           </Button>

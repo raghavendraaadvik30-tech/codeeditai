@@ -734,7 +734,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
           {/* Anchor indicator for text-wrapping modes (MS Word-style) */}
           {chart.wrapMode && chart.wrapMode !== 'inline' && (
             <div
-              className="absolute -left-7 top-1 text-[#0078d4] dark:text-[#38bdf8] select-none pointer-events-none z-30"
+              className="absolute -left-7 top-1 text-brand dark:text-sky-400 select-none pointer-events-none z-30"
               title="Anchored to text"
             >
               <Anchor className="w-4 h-4" />
@@ -807,7 +807,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               }}
               className={`w-[30px] h-[30px] rounded-xs flex items-center justify-center shadow-md border transition-all cursor-pointer ${
                 isLayoutOptionsOpen
-                  ? 'bg-[#242424] border-[#38bdf8] ring-1 ring-[#38bdf8]'
+                  ? 'bg-[#242424] border-sky-400 ring-1 ring-sky-400'
                   : 'bg-[#2b2b2b] border-[#555555] hover:border-border'
               }`}
             >
