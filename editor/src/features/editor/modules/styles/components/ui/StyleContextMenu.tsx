@@ -211,7 +211,7 @@ export function StyleContextMenu({
         top-full
         z-50
         mt-1
-        w-[300px]
+        w-75
         rounded-lg
         border
         border-border

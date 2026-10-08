@@ -148,7 +148,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
       </div>
 
       {/* Documents List */}
-      <div className="overflow-y-auto max-h-[200px] space-y-1.5 pr-0.5">
+      <div className="overflow-y-auto max-h-50 space-y-1.5 pr-0.5">
         {filteredDocs.length === 0 ? (
           <div className="p-6 text-center text-xs text-muted-foreground">
             No documents found in repository.

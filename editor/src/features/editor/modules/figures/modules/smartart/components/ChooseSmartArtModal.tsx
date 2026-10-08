@@ -177,7 +177,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
       aria-labelledby="smartart-modal-title"
     >
       <div
-        className="relative flex flex-col w-full max-w-5xl h-[600px] bg-card rounded-xl shadow-2xl border border-secondary overflow-hidden text-foreground dark:bg-[#111D29] dark:border-muted dark:text-muted animate-in zoom-in-95 duration-150"
+        className="relative flex flex-col w-full max-w-5xl h-150 bg-card rounded-xl shadow-2xl border border-secondary overflow-hidden text-foreground dark:bg-[#111D29] dark:border-muted dark:text-muted animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL TOP BAR */}
@@ -206,10 +206,10 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
               <div className="flex items-center gap-3">
                 <SmartArtCategoryIcon category="header" />
                 <div>
-                  <h2 className="text-[20px] font-bold text-navy-900 dark:text-primary-foreground leading-tight">
+                  <h2 className="text-xl font-bold text-navy-900 dark:text-primary-foreground leading-tight">
                     SmartArt
                   </h2>
-                  <p className="text-[14px] text-muted0 dark:text-muted-foreground font-normal mt-0.5">
+                  <p className="text-sm text-muted0 dark:text-muted-foreground font-normal mt-0.5">
                     Choose a SmartArt graphic
                   </p>
                 </div>
@@ -226,7 +226,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center justify-between w-full h-[54px] px-3.5 rounded-[10px] transition-colors duration-150 text-left outline-none cursor-pointer ${
+                    className={`flex items-center justify-between w-full h-13.5 px-3.5 rounded-[10px] transition-colors duration-150 text-left outline-none cursor-pointer ${
                       isSelected
                         ? 'bg-[#EEF5FF] dark:bg-navy-950/70'
                         : 'bg-transparent hover:bg-[#F5F8FC] dark:hover:bg-muted/60'
@@ -236,7 +236,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     <div className="flex items-center gap-3.5 min-w-0">
                       <SmartArtCategoryIcon category={cat.id} isSelected={isSelected} />
                       <span
-                        className={`text-[16px] leading-tight truncate ${
+                        className={`text-base leading-tight truncate ${
                           isSelected
                             ? 'font-bold text-brand dark:text-primary'
                             : 'font-semibold text-foreground dark:text-muted-foreground'
@@ -247,7 +247,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     </div>
 
                     <span
-                      className={`text-[18px] font-bold shrink-0 transition-colors ${
+                      className={`text-lg font-bold shrink-0 transition-colors ${
                         isSelected
                           ? 'text-brand dark:text-primary'
                           : 'text-muted-foreground'

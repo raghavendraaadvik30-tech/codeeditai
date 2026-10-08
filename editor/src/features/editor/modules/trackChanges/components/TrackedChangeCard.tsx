@@ -66,7 +66,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       {/* 1. Header: Author & Formatted Time */}
       <div className="flex items-center justify-between">
         <span
-          className="font-semibold text-foreground dark:text-muted truncate max-w-[150px] text-xs"
+          className="font-semibold text-foreground dark:text-muted truncate max-w-37.5 text-xs"
           title={change.author}
         >
           {change.author || "Current User"}

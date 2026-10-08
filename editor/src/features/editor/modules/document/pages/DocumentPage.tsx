@@ -1063,7 +1063,7 @@ export default function DocumentPage() {
       {/* Floating Microsoft Word-Style Find & Replace Dialog */}
       {isFindReplaceDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-[0.5px]">
-          <div className="w-[500px] rounded-lg border border-border bg-card shadow-2xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+          <div className="w-125 rounded-lg border border-border bg-card shadow-2xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden animate-in fade-in zoom-in-95 duration-100">
             {/* Window Title Bar */}
             <div className="flex items-center justify-between border-b border-secondary bg-muted px-3.5 py-1.5 dark:border-muted dark:bg-[#07131E]">
               <span className="text-xs font-semibold text-foreground dark:text-muted-foreground select-none">
@@ -1176,7 +1176,7 @@ export default function DocumentPage() {
                     onClick={handleReplace}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[76px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-19 rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
                         ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                         : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -1189,7 +1189,7 @@ export default function DocumentPage() {
                     onClick={handleReplaceAll}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[86px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-21.5 rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
                         ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                         : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -1202,7 +1202,7 @@ export default function DocumentPage() {
                     onClick={handleFindNext}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[76px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-19 rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
                         ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                         : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -1213,7 +1213,7 @@ export default function DocumentPage() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="min-w-[76px] rounded-xs border border-brand bg-card px-3 py-1 text-center text-xs font-normal text-foreground shadow-2xs hover:bg-muted active:bg-secondary dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
+                    className="min-w-19 rounded-xs border border-brand bg-card px-3 py-1 text-center text-xs font-normal text-foreground shadow-2xs hover:bg-muted active:bg-secondary dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
                   >
                     Cancel
                   </button>
@@ -1225,7 +1225,7 @@ export default function DocumentPage() {
                     onClick={handleFindNext}
                     disabled={!findText.trim()}
                     className={cn(
-                      "min-w-[80px] rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
+                      "min-w-20 rounded-xs border px-3 py-1 text-center text-xs transition-colors select-none",
                       !findText.trim()
                         ? "border-border bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                         : "border-border bg-card text-foreground hover:bg-muted hover:border-[#94a3b8] active:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -1236,7 +1236,7 @@ export default function DocumentPage() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="min-w-[80px] rounded-xs border border-brand bg-card px-3 py-1 text-center text-xs font-normal text-foreground shadow-2xs hover:bg-muted active:bg-secondary dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
+                    className="min-w-20 rounded-xs border border-brand bg-card px-3 py-1 text-center text-xs font-normal text-foreground shadow-2xs hover:bg-muted active:bg-secondary dark:border-primary dark:bg-muted dark:text-primary-foreground cursor-pointer select-none"
                   >
                     Cancel
                   </button>

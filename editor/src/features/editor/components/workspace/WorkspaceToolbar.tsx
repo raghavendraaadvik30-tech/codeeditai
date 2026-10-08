@@ -41,7 +41,7 @@ export default function WorkspaceToolbar({
       className="
         flex
         h-full
-        w-[72px]
+        w-18
         shrink-0
         flex-col
         items-center
@@ -132,16 +132,16 @@ export default function WorkspaceToolbar({
                   `
               )}
             >
-              <Icon className="h-[19px] w-[19px]" />
+              <Icon className="h-4.75 w-4.75" />
 
               {isActive && (
                 <span
                   className="
                     absolute
-                    -left-[1px]
+                    -left-0.25
                     top-1
                     bottom-1
-                    w-[3px]
+                    w-0.75
                     rounded-r-full
                     bg-primary
                   "

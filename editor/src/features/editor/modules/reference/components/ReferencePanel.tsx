@@ -92,7 +92,7 @@ export function ReferencePanel() {
         </div>
 
         {/* Source Cards */}
-        <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-0.5 scrollbar-thin">
+        <div className="space-y-2.5 max-h-105 overflow-y-auto pr-0.5 scrollbar-thin">
           {refs.sources.length === 0 ? (
             <div className="rounded-xl border border-dashed border-secondary p-6 text-center text-muted-foreground dark:border-muted">
               <p className="font-semibold text-xs text-secondary-foreground dark:text-muted-foreground">No sources registered</p>

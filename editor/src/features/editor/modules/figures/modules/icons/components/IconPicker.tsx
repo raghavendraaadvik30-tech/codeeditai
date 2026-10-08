@@ -23,7 +23,7 @@ export default function IconPicker({
   }
 
   return (
-    <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-[280px] overflow-y-auto p-1 scrollbar-thin">
+    <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-70 overflow-y-auto p-1 scrollbar-thin">
       {icons.map((item) => {
         const isSelected = selected?.id === item.id;
         return (

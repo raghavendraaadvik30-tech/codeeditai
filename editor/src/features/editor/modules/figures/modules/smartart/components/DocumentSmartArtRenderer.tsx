@@ -652,7 +652,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 <React.Fragment key={node.id}>
                   <div
                     onClick={(e) => handleNodeClick(e, node.id)}
-                    className={`flex-1 min-w-[120px] max-w-[200px] h-28 flex flex-col justify-center items-center p-3 text-primary-foreground shadow-md transition-transform cursor-pointer ${
+                    className={`flex-1 min-w-30 max-w-50 h-28 flex flex-col justify-center items-center p-3 text-primary-foreground shadow-md transition-transform cursor-pointer ${
                       isNodeSelected ? 'ring-3 ring-primary scale-105 z-10' : 'hover:scale-102'
                     }`}
                     style={styleObj}
@@ -728,7 +728,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 <div
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
-                  className={`flex-1 min-w-[120px] max-w-[200px] h-28 flex flex-col justify-center items-center p-3 text-primary-foreground transition-transform cursor-pointer shadow-md ${
+                  className={`flex-1 min-w-30 max-w-50 h-28 flex flex-col justify-center items-center p-3 text-primary-foreground transition-transform cursor-pointer shadow-md ${
                     isNodeSelected ? 'ring-2 ring-primary scale-105 z-10' : 'hover:brightness-105'
                   }`}
                   style={{
@@ -790,7 +790,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 <div
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
-                  className={`relative z-10 flex-1 min-w-[110px] max-w-[180px] p-3 rounded-xl text-primary-foreground shadow-md transition-all cursor-pointer ${
+                  className={`relative z-10 flex-1 min-w-27.5 max-w-45 p-3 rounded-xl text-primary-foreground shadow-md transition-all cursor-pointer ${
                     isNodeSelected ? 'ring-3 ring-primary scale-105' : 'hover:scale-102'
                   }`}
                   style={styleObj}
@@ -924,7 +924,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 return (
                   <div
                     key={node.id}
-                    className={`flex flex-col items-center flex-1 max-w-[150px] ${
+                    className={`flex flex-col items-center flex-1 max-w-37.5 ${
                       isTop ? '-translate-y-6' : 'translate-y-6'
                     }`}
                   >
@@ -986,7 +986,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               const isNodeSelected = selectedNodeId === node.id;
 
               return (
-                <div key={node.id} className="relative z-10 flex flex-col items-center flex-1 max-w-[150px]">
+                <div key={node.id} className="relative z-10 flex flex-col items-center flex-1 max-w-37.5">
                   <div
                     onClick={(e) => handleNodeClick(e, node.id)}
                     className={`w-16 h-16 rounded-full flex flex-col items-center justify-center text-primary-foreground shadow-md transition-all cursor-pointer ${
@@ -1047,7 +1047,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               <React.Fragment key={node.id}>
                 <div
                   onClick={(e) => handleNodeClick(e, node.id)}
-                  className={`flex-1 min-w-[120px] max-w-[200px] p-3 rounded-xl text-primary-foreground shadow-md transition-all cursor-pointer ${
+                  className={`flex-1 min-w-30 max-w-50 p-3 rounded-xl text-primary-foreground shadow-md transition-all cursor-pointer ${
                     isNodeSelected ? 'ring-3 ring-primary scale-105 z-10' : 'hover:scale-102'
                   }`}
                   style={styleObj}
@@ -1247,7 +1247,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 <div
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
-                  className={`flex-1 min-w-[140px] max-w-[220px] flex flex-col rounded-xl border border-secondary bg-card shadow-xs overflow-hidden transition-all cursor-pointer dark:bg-secondary dark:border-muted ${
+                  className={`flex-1 min-w-35 max-w-55 flex flex-col rounded-xl border border-secondary bg-card shadow-xs overflow-hidden transition-all cursor-pointer dark:bg-secondary dark:border-muted ${
                     isNodeSelected ? 'ring-2 ring-primary shadow-md' : 'hover:border-border'
                   }`}
                 >
@@ -1770,7 +1770,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 const styleObj = getStyleClass(bg);
 
                 return (
-                  <div key={child.id} className="relative flex flex-col items-center flex-1 min-w-[100px] max-w-[160px]">
+                  <div key={child.id} className="relative flex flex-col items-center flex-1 min-w-25 max-w-40">
                     <div className="w-0.5 h-4 bg-muted-foreground dark:bg-secondary-foreground" />
                     <div
                       onClick={(e) => handleNodeClick(e, child.id)}
@@ -1821,7 +1821,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
     if (cat === 'Matrix') {
       return (
         <div className="w-full h-full p-4 flex items-center justify-center overflow-auto overscroll-contain">
-          <div className="grid grid-cols-2 gap-3 w-full max-w-lg aspect-square max-h-[320px]">
+          <div className="grid grid-cols-2 gap-3 w-full max-w-lg aspect-square max-h-80">
             {nodes.slice(0, 4).map((node, i) => {
               const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
               const bg = colors[origIndex % colors.length];
@@ -1894,7 +1894,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
         return (
           <div className="flex items-center justify-center gap-4 w-full h-full p-4 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
             {/* Left Stacked Pyramid */}
-            <div className="flex-1 flex flex-col items-center gap-2 max-w-[240px]">
+            <div className="flex-1 flex flex-col items-center gap-2 max-w-60">
               {reversed.map((node, i) => {
                 const origIndex = smartArt.nodes.findIndex((n) => n.id === node.id);
                 const bg = colors[origIndex % colors.length];
@@ -2613,7 +2613,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   toolbarPos.isBelow && toolbarPos.top + 250 > window.innerHeight
                     ? 'bottom-full mb-1'
                     : 'top-full mt-1'
-                } left-0 min-w-[180px] w-48 p-1.5 bg-card border border-secondary rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-muted z-50 animate-in fade-in zoom-in-95 flex flex-col gap-0.5 whitespace-normal`}
+                } left-0 min-w-45 w-48 p-1.5 bg-card border border-secondary rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-muted z-50 animate-in fade-in zoom-in-95 flex flex-col gap-0.5 whitespace-normal`}
               >
                 <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-muted dark:border-muted/80 mb-0.5">
                   SmartArt Style

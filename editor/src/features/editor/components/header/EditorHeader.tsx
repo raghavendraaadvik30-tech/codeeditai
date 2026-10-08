@@ -41,7 +41,7 @@ export default function EditorHeader() {
   return (
     <header
       className="
-        h-[58px]
+        h-14.5
         border-b
         bg-card
         dark:bg-[#0B1620]

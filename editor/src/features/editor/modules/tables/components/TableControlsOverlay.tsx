@@ -1450,7 +1450,7 @@ export function TableControlsOverlay({
             height: `${pos.height}px`,
           }}
         >
-          <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-brand/80" />
+          <div className="h-full w-0.5 transition-colors bg-transparent group-hover:bg-brand/80" />
           <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
@@ -1475,7 +1475,7 @@ export function TableControlsOverlay({
           >
             {/* Visual highlight line */}
             <div
-              className={`h-full w-[2px] transition-colors ${
+              className={`h-full w-0.5 transition-colors ${
                 activeColIndex === col.colIndex
                   ? "bg-brand shadow-[0_0_8px_rgba(0,120,212,0.8)]"
                   : "bg-transparent group-hover:bg-brand/80"
@@ -1506,7 +1506,7 @@ export function TableControlsOverlay({
             height: `${pos.height}px`,
           }}
         >
-          <div className="h-full w-[2px] transition-colors bg-transparent group-hover:bg-brand/80" />
+          <div className="h-full w-0.5 transition-colors bg-transparent group-hover:bg-brand/80" />
           <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
@@ -1531,7 +1531,7 @@ export function TableControlsOverlay({
           >
             {/* Visual highlight line */}
             <div
-              className={`w-full h-[2px] transition-colors ${
+              className={`w-full h-0.5 transition-colors ${
                 activeRowIndex === row.rowIndex
                   ? "bg-brand shadow-[0_0_8px_rgba(0,120,212,0.8)]"
                   : "bg-transparent group-hover:bg-brand/80"

@@ -42,7 +42,7 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
   };
 
   return (
-    <div className="space-y-2 max-h-[340px] overflow-y-auto pr-0.5">
+    <div className="space-y-2 max-h-85 overflow-y-auto pr-0.5">
       {issues.map((issue) => (
         <div
           key={issue.id}

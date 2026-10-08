@@ -68,14 +68,14 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
     >
       {/* Centered Compact Modal Container */}
       <div
-        className="relative flex flex-col w-full max-w-[850px] max-w-[calc(100vw-32px)] max-h-[85vh] bg-card rounded-2xl shadow-2xl border border-secondary/80 overflow-hidden text-foreground dark:bg-[#111D29] dark:border-muted dark:text-muted animate-in zoom-in-95 duration-150"
+        className="relative flex flex-col w-full max-w-212.5 max-w-[calc(100vw-32px)] max-h-[85vh] bg-card rounded-2xl shadow-2xl border border-secondary/80 overflow-hidden text-foreground dark:bg-[#111D29] dark:border-muted dark:text-muted animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-muted dark:border-muted shrink-0">
           <h2
             id="insert-chart-title"
-            className="text-[20px] font-semibold text-foreground dark:text-primary-foreground leading-tight"
+            className="text-xl font-semibold text-foreground dark:text-primary-foreground leading-tight"
           >
             Insert Chart
           </h2>
@@ -98,7 +98,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search charts..."
-              className="w-full h-[44px] pl-10 pr-9 text-sm bg-muted border border-secondary rounded-xl outline-none transition-all placeholder:text-muted-foreground focus:bg-card focus:border-brand focus:ring-2 focus:ring-brand/15 dark:bg-[#0c1622] dark:border-secondary-foreground dark:text-primary-foreground dark:focus:border-primary"
+              className="w-full h-11 pl-10 pr-9 text-sm bg-muted border border-secondary rounded-xl outline-none transition-all placeholder:text-muted-foreground focus:bg-card focus:border-brand focus:ring-2 focus:ring-brand/15 dark:bg-[#0c1622] dark:border-secondary-foreground dark:text-primary-foreground dark:focus:border-primary"
               autoFocus
             />
             {searchQuery && (
@@ -147,7 +147,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
                       }
                     }}
                     className={`
-                      group relative flex flex-col justify-between items-center rounded-xl p-3 min-h-[140px] max-h-[155px] border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-brand
+                      group relative flex flex-col justify-between items-center rounded-xl p-3 min-h-35 max-h-38.75 border transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-brand
                       ${isSelected
                         ? 'border-2 border-brand bg-primary/50 shadow-xs dark:border-brand dark:bg-navy-950/30'
                         : 'border-secondary bg-card hover:border-border hover:shadow-xs dark:border-muted dark:bg-[#111D29] dark:hover:border-secondary-foreground'
@@ -168,7 +168,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
 
                     {/* Chart Name */}
                     <span
-                      className={`mt-1.5 text-[14px] font-semibold text-center leading-tight transition-colors ${isSelected
+                      className={`mt-1.5 text-sm font-semibold text-center leading-tight transition-colors ${isSelected
                           ? 'text-brand dark:text-primary'
                           : 'text-foreground dark:text-muted-foreground group-hover:text-foreground dark:group-hover:text-primary-foreground'
                         }`}

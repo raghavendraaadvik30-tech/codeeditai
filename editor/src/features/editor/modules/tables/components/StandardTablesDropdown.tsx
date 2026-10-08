@@ -209,7 +209,7 @@ export function StandardTablesDropdown() {
       {isOpen && (
         <div
           ref={menuRef}
-          className={`absolute top-full mt-1 z-50 min-w-[270px] rounded-xl border border-secondary/90 bg-card p-1.5 shadow-xl dark:border-muted dark:bg-[#0B1523] animate-in fade-in-0 zoom-in-95 duration-100 select-none ${
+          className={`absolute top-full mt-1 z-50 min-w-67.5 rounded-xl border border-secondary/90 bg-card p-1.5 shadow-xl dark:border-muted dark:bg-[#0B1523] animate-in fade-in-0 zoom-in-95 duration-100 select-none ${
             alignRight ? "right-0" : "left-0"
           }`}
         >

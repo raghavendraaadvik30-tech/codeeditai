@@ -181,7 +181,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
         left: pos ? `${pos.left}px` : '0px',
         visibility: pos ? 'visible' : 'hidden',
       }}
-      className="fixed w-[230px] bg-[#242424] border border-[#444444] rounded-xs shadow-2xl p-3 z-50 text-primary-foreground font-sans select-none animate-in fade-in zoom-in-95 duration-100"
+      className="fixed w-57.5 bg-[#242424] border border-[#444444] rounded-xs shadow-2xl p-3 z-50 text-primary-foreground font-sans select-none animate-in fade-in zoom-in-95 duration-100"
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
@@ -193,7 +193,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             style={{ top: `${pos.notchTop}px` }}
           />
           <div
-            className="absolute -left-[9px] w-0 h-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-[#444444] -z-10"
+            className="absolute -left-2.25 w-0 h-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-[#444444] -z-10"
             style={{ top: `${pos.notchTop}px` }}
           />
         </>
@@ -205,7 +205,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             style={{ top: `${pos.notchTop}px` }}
           />
           <div
-            className="absolute -right-[9px] w-0 h-0 border-y-[6px] border-y-transparent border-l-[8px] border-l-[#444444] -z-10"
+            className="absolute -right-2.25 w-0 h-0 border-y-[6px] border-y-transparent border-l-[8px] border-l-[#444444] -z-10"
             style={{ top: `${pos.notchTop}px` }}
           />
         </>

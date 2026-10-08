@@ -42,7 +42,7 @@ export default function WorkspacePanelHeader({
     <div
       className="
         flex
-        h-[72px]
+        h-18
         shrink-0
         items-start
         justify-between

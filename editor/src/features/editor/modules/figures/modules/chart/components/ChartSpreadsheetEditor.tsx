@@ -484,15 +484,15 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
       </div>
 
       {/* SPREADSHEET GRID CONTAINER (Horizontal & Vertical Scrollable, Controlled Height) */}
-      <div ref={tableContainerRef} className="data-editor-table-container max-h-[190px] overflow-x-auto overflow-y-auto border-b border-secondary">
+      <div ref={tableContainerRef} className="data-editor-table-container max-h-47.5 overflow-x-auto overflow-y-auto border-b border-secondary">
         <table className="w-full border-collapse text-xs font-mono">
           {/* COLUMN LETTERS ROW (A, B, C, D...) */}
           <thead>
             <tr className="bg-muted text-muted0 border-b border-secondary text-center text-[10px] font-semibold">
               <th className="w-9 border-r border-secondary p-1 bg-secondary/60 font-sans">#</th>
-              <th className="min-w-[110px] border-r border-secondary p-1">A</th>
+              <th className="min-w-27.5 border-r border-secondary p-1">A</th>
               {chart.series.map((_, sIdx) => (
-                <th key={sIdx} className="min-w-[90px] border-r border-secondary p-1">
+                <th key={sIdx} className="min-w-22.5 border-r border-secondary p-1">
                   {getColLetter(sIdx + 1)}
                 </th>
               ))}
@@ -682,7 +682,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
         ReactDOM.createPortal(
           <div
             ref={contextMenuRef}
-            className="fixed z-[99999] w-[210px] rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
+            className="fixed z-[99999] w-52.5 rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
             style={{
               top: `${Math.min(contextMenuPos.y, window.innerHeight - 230)}px`,
               left: `${Math.min(contextMenuPos.x, window.innerWidth - 220)}px`,

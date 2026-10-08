@@ -104,7 +104,7 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
   return ReactDOM.createPortal(
     <div
       ref={menuRef}
-      className="fixed z-[99999] w-[230px] rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
+      className="fixed z-[99999] w-57.5 rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
       style={{ top: `${clampedY}px`, left: `${clampedX}px` }}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {

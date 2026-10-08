@@ -2141,7 +2141,7 @@ Please use the credentials above to access the secure portal.`
 
           className="
 
-            sm:max-w-[440px]
+            sm:max-w-110
 
             border
 
@@ -2525,7 +2525,7 @@ Please use the credentials above to access the secure portal.`
 
           className="
 
-            sm:max-w-[440px]
+            sm:max-w-110
 
             border
 
@@ -2897,7 +2897,7 @@ Please use the credentials above to access the secure portal.`
 
           className="
 
-            sm:max-w-[440px]
+            sm:max-w-110
 
             border
 
@@ -3291,7 +3291,7 @@ Please use the credentials above to access the secure portal.`
 
           className="
 
-            sm:max-w-[440px]
+            sm:max-w-110
 
             border
 
@@ -3543,7 +3543,7 @@ Please use the credentials above to access the secure portal.`
 
           className="
 
-            sm:max-w-[440px]
+            sm:max-w-110
 
             border
 

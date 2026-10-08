@@ -27,7 +27,6 @@ import {
   Sigma,
   Files,
   FileDiff,
-  LayoutTemplate,
   Settings,
 } from "lucide-react";
 
@@ -47,6 +46,5 @@ export const WORKSPACE_ICONS: Record<
   symbols: Sigma,
   appendices: Files,
   trackChanges: FileDiff,
-  templates: LayoutTemplate,
   settings: Settings,
 };

@@ -9,7 +9,6 @@ import {
   Sigma,
   Files,
   ShieldCheck,
-  LayoutTemplate,
   Settings,
 } from "lucide-react";
 
@@ -77,12 +76,6 @@ const SIDEBAR_ITEMS = [
     icon: ShieldCheck,
   },
   {
-    id: "templates",
-    label: "Templates",
-    description: "Document templates",
-    icon: LayoutTemplate,
-  },
-  {
     id: "settings",
     label: "Settings",
     description: "Editor settings",
@@ -107,7 +100,7 @@ export default function IconSidebar() {
       className="
         flex
         h-full
-        w-[72px]
+        w-18
         shrink-0
         flex-col
         items-center
@@ -156,10 +149,10 @@ export default function IconSidebar() {
                   <span
                     className="
                       absolute
-                      -left-[2px]
+                      -left-0.5
                       top-1
                       bottom-1
-                      w-[3px]
+                      w-0.75
                       rounded-r-full
                       bg-primary
                     "
@@ -173,11 +166,11 @@ export default function IconSidebar() {
                 className="
                   pointer-events-none
                   absolute
-                  left-[54px]
+                  left-13.5
                   top-1/2
                   z-[9999]
                   w-max
-                  max-w-[240px]
+                  max-w-60
                   -translate-y-1/2
                   translate-x-1
                   rounded-xl

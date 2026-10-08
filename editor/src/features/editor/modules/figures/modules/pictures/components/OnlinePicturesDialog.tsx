@@ -256,7 +256,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
             </div>
 
             {/* Image Preview Box */}
-            <div className="rounded-lg border border-secondary dark:border-muted bg-muted dark:bg-secondary/50 p-2.5 min-h-[120px] flex flex-col items-center justify-center">
+            <div className="rounded-lg border border-secondary dark:border-muted bg-muted dark:bg-secondary/50 p-2.5 min-h-30 flex flex-col items-center justify-center">
               {imageState.status === 'loading' && (
                 <div className="flex flex-col items-center gap-1.5 text-muted0 dark:text-muted-foreground py-3">
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />

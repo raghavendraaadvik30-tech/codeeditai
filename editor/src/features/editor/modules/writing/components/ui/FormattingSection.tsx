@@ -88,7 +88,7 @@ export default function FormattingSection({
             onClick={() => onApply(tool)}
             className="
               flex
-              h-[84px]
+              h-21
               min-w-0
               flex-col
               items-center

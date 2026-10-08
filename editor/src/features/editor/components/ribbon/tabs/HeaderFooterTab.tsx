@@ -418,7 +418,7 @@ export default function HeaderFooterTab() {
   const isDifferentOddEven = activeSection?.differentOddEven ?? false;
 
   return (
-    <div className="flex items-stretch h-[88px] text-secondary-foreground dark:text-muted-foreground select-none overflow-x-auto">
+    <div className="flex items-stretch h-22 text-secondary-foreground dark:text-muted-foreground select-none overflow-x-auto">
 
       {/* ============================================================
           GROUP 1: HEADER & FOOTER
@@ -430,7 +430,7 @@ export default function HeaderFooterTab() {
             customTrigger={
               <button
                 type="button"
-                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-12 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Header: Add or change header"
               >
                 <WordHeaderIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
@@ -447,7 +447,7 @@ export default function HeaderFooterTab() {
             customTrigger={
               <button
                 type="button"
-                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-12 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Footer: Add or change footer"
               >
                 <WordFooterIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
@@ -463,7 +463,7 @@ export default function HeaderFooterTab() {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex flex-col items-center justify-center w-[52px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-13 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Page Number: Insert page numbers into document"
               >
                 <WordPageNumberIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
@@ -529,7 +529,7 @@ export default function HeaderFooterTab() {
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
+      <div className="w-0.25 bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 2: INSERT
@@ -540,7 +540,7 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={handleInsertDateTime}
-            className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
+            className="flex flex-col items-center justify-center w-12 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
             title="Date & Time: Insert current date or time"
           >
             <WordDateTimeIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
@@ -554,7 +554,7 @@ export default function HeaderFooterTab() {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex flex-col items-center justify-center w-[48px] h-[60px] rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
+                className="flex flex-col items-center justify-center w-12 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
                 title="Quick Parts: Insert reusable pieces of content"
               >
                 <WordQuickPartsIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
@@ -588,7 +588,7 @@ export default function HeaderFooterTab() {
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
+      <div className="w-0.25 bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 3: NAVIGATION
@@ -599,7 +599,7 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={goToHeader}
-            className={`flex flex-col items-center justify-center w-[48px] h-[60px] rounded p-0.5 transition-colors cursor-pointer group ${
+            className={`flex flex-col items-center justify-center w-12 h-15 rounded p-0.5 transition-colors cursor-pointer group ${
               activeHFType === "header"
                 ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
                 : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
@@ -617,7 +617,7 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={goToFooter}
-            className={`flex flex-col items-center justify-center w-[48px] h-[60px] rounded p-0.5 transition-colors cursor-pointer group ${
+            className={`flex flex-col items-center justify-center w-12 h-15 rounded p-0.5 transition-colors cursor-pointer group ${
               activeHFType === "footer"
                 ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
                 : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
@@ -641,7 +641,7 @@ export default function HeaderFooterTab() {
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
+      <div className="w-0.25 bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 4: OPTIONS (CHECKBOXES)
@@ -698,7 +698,7 @@ export default function HeaderFooterTab() {
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
+      <div className="w-0.25 bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 5: POSITION (STEPPERS & ALIGNMENT TAB)
@@ -711,7 +711,7 @@ export default function HeaderFooterTab() {
               <WordHeaderTopIcon className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Header from Top:</span>
             </div>
-            <div className="relative flex items-center border border-border dark:border-secondary-foreground rounded bg-card dark:bg-secondary overflow-hidden h-[22px]">
+            <div className="relative flex items-center border border-border dark:border-secondary-foreground rounded bg-card dark:bg-secondary overflow-hidden h-5.5">
               <input
                 type="text"
                 value={`${headerInputVal} ${unit}`}
@@ -748,7 +748,7 @@ export default function HeaderFooterTab() {
               <WordFooterBottomIcon className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Footer from Bottom:</span>
             </div>
-            <div className="relative flex items-center border border-border dark:border-secondary-foreground rounded bg-card dark:bg-secondary overflow-hidden h-[22px]">
+            <div className="relative flex items-center border border-border dark:border-secondary-foreground rounded bg-card dark:bg-secondary overflow-hidden h-5.5">
               <input
                 type="text"
                 value={`${footerInputVal} ${unit}`}
@@ -818,7 +818,7 @@ export default function HeaderFooterTab() {
       </div>
 
       {/* Vertical Group Divider */}
-      <div className="w-[1px] bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
+      <div className="w-0.25 bg-secondary dark:bg-muted self-stretch my-1 shrink-0" />
 
       {/* ============================================================
           GROUP 6: CLOSE HEADER AND FOOTER
@@ -828,7 +828,7 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={exitHeaderFooterMode}
-            className="flex flex-col items-center justify-center w-[54px] h-[60px] rounded hover:bg-destructive/10 hover:border hover:border-destructive/30 dark:hover:bg-destructive/40 dark:hover:border-destructive/60 active:bg-destructive/10 transition-colors p-0.5 cursor-pointer group"
+            className="flex flex-col items-center justify-center w-13.5 h-15 rounded hover:bg-destructive/10 hover:border hover:border-destructive/30 dark:hover:bg-destructive/40 dark:hover:border-destructive/60 active:bg-destructive/10 transition-colors p-0.5 cursor-pointer group"
             title="Close Header and Footer (Esc)"
           >
             <WordCloseIcon className="w-6 h-6 group-hover:scale-105 transition-transform" />

@@ -80,7 +80,7 @@ export const FigureToolbar: React.FC<FigureToolbarProps> = ({
         </button>
       </div>
 
-      <div className="h-4 w-[1px] bg-secondary dark:bg-secondary-foreground" />
+      <div className="h-4 w-0.25 bg-secondary dark:bg-secondary-foreground" />
 
       {/* Resize presets */}
       <button
@@ -91,7 +91,7 @@ export const FigureToolbar: React.FC<FigureToolbarProps> = ({
       >
         <Minimize2 className="h-4 w-4" />
       </button>
-      <span className="text-xs font-medium text-muted0 min-w-[45px] text-center">
+      <span className="text-xs font-medium text-muted0 min-w-11.25 text-center">
         {figure.width}px
       </span>
       <button
@@ -103,7 +103,7 @@ export const FigureToolbar: React.FC<FigureToolbarProps> = ({
         <Maximize2 className="h-4 w-4" />
       </button>
 
-      <div className="h-4 w-[1px] bg-secondary dark:bg-secondary-foreground" />
+      <div className="h-4 w-0.25 bg-secondary dark:bg-secondary-foreground" />
 
       {/* Caption Button */}
       <button

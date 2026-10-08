@@ -154,7 +154,7 @@ export function LinksHistorySection({
                     )}
                   >
                     <Icon className="h-3 w-3 shrink-0" />
-                    <span className="truncate max-w-[90px]">{item.type}</span>
+                    <span className="truncate max-w-22.5">{item.type}</span>
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -162,7 +162,7 @@ export function LinksHistorySection({
                       {item.displayText}
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5 truncate">
-                      <span className="truncate max-w-[200px]" title={item.target}>
+                      <span className="truncate max-w-50" title={item.target}>
                         {item.target}
                       </span>
                       <span>•</span>

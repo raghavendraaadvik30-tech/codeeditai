@@ -421,8 +421,8 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
             </div>
 
             {/* Page Sheet Container */}
-            <div className="flex-1 bg-muted dark:bg-secondary/60 border border-secondary dark:border-muted rounded-lg p-6 flex items-center justify-center min-h-[340px] select-none">
-              <div className="w-full bg-card dark:bg-muted shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-secondary dark:border-secondary-foreground p-6 rounded-md min-h-[240px] flex flex-col justify-start">
+            <div className="flex-1 bg-muted dark:bg-secondary/60 border border-secondary dark:border-muted rounded-lg p-6 flex items-center justify-center min-h-85 select-none">
+              <div className="w-full bg-card dark:bg-muted shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-secondary dark:border-secondary-foreground p-6 rounded-md min-h-60 flex flex-col justify-start">
                 {/* Caption Preview */}
                 {(titleOption === "with" || titleOption === "only") && (
                   <p className="font-bold text-xs text-foreground dark:text-primary-foreground leading-tight mb-3">

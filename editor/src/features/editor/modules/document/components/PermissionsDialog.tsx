@@ -68,7 +68,7 @@ export function PermissionsDialog({
               <h3 className="text-sm font-semibold text-foreground dark:text-primary-foreground">
                 Document Permissions
               </h3>
-              <p className="text-[11px] text-muted-foreground dark:text-muted-foreground truncate max-w-[240px]">
+              <p className="text-[11px] text-muted-foreground dark:text-muted-foreground truncate max-w-60">
                 {model.title || "Untitled Document"}
               </p>
             </div>
@@ -117,7 +117,7 @@ export function PermissionsDialog({
               }`}
             >
               <span
-                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-card shadow-md transition-transform duration-200 ease-in-out mt-[3px] ml-[3px] ${
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-card shadow-md transition-transform duration-200 ease-in-out mt-0.75 ml-0.75 ${
                   editableState ? "translate-x-4" : "translate-x-0"
                 }`}
               />

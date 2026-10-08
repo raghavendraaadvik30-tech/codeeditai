@@ -53,7 +53,7 @@ export default function AIPanel() {
       <div
         className="
           flex
-          h-[74px]
+          h-18.5
           shrink-0
           items-center
           justify-between

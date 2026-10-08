@@ -370,7 +370,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
             {isDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-                <div className="absolute left-0 top-[calc(100%+4px)] z-50 w-full max-h-[180px] overflow-y-auto rounded-md border border-secondary bg-card shadow-lg dark:border-secondary-foreground dark:bg-[#111D29] py-1 scrollbar-thin scrollbar-thumb-secondary dark:scrollbar-thumb-secondary-foreground">
+                <div className="absolute left-0 top-[calc(100%+4px)] z-50 w-full max-h-45 overflow-y-auto rounded-md border border-secondary bg-card shadow-lg dark:border-secondary-foreground dark:bg-[#111D29] py-1 scrollbar-thin scrollbar-thumb-secondary dark:scrollbar-thumb-secondary-foreground">
                   {targets.length === 0 ? (
                     <div className="px-3 py-2 text-xs text-muted-foreground italic">No targets found</div>
                   ) : (

@@ -400,7 +400,7 @@ export function TableContextMenu({
         ref={menuRef}
         data-editor-ui="true"
         data-table-control="true"
-        className="fixed z-50 min-w-[220px] rounded-xl border border-secondary/90 bg-card/95 p-1.5 text-xs text-foreground shadow-2xl backdrop-blur-md dark:border-muted dark:bg-[#09121D]/95 dark:text-muted select-none print:hidden"
+        className="fixed z-50 min-w-55 rounded-xl border border-secondary/90 bg-card/95 p-1.5 text-xs text-foreground shadow-2xl backdrop-blur-md dark:border-muted dark:bg-[#09121D]/95 dark:text-muted select-none print:hidden"
         style={{
           top: `${menuPos.top}px`,
           left: `${menuPos.left}px`,

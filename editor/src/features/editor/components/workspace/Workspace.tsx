@@ -2196,7 +2196,7 @@ function DocumentPage({
                             handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                         />
                       ) : effectiveHeaderHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2225,7 +2225,7 @@ function DocumentPage({
                             handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                         />
                       ) : effectiveHeaderHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2258,7 +2258,7 @@ function DocumentPage({
                             handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                         />
                       ) : effectiveHeaderHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2291,7 +2291,7 @@ function DocumentPage({
                       handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                       setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                     }}
-                    className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                    className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                   />
                 ) : effectiveHeaderHtml ? (
                   <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2359,7 +2359,7 @@ function DocumentPage({
           box-border
           outline-none
           cursor-text
-          text-[14px]
+          text-sm
           leading-7
           text-foreground
 
@@ -2534,7 +2534,7 @@ function DocumentPage({
                             handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                         />
                       ) : effectiveFooterHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
@@ -2563,7 +2563,7 @@ function DocumentPage({
                             handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                         />
                       ) : effectiveFooterHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
@@ -2596,7 +2596,7 @@ function DocumentPage({
                             handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                         />
                       ) : effectiveFooterHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
@@ -2629,7 +2629,7 @@ function DocumentPage({
                       handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                       setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                     }}
-                    className="w-full min-h-[22px] outline-none text-[10px] cursor-text select-text"
+                    className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
                   />
                 ) : effectiveFooterHtml ? (
                   <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />

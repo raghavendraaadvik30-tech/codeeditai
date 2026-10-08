@@ -20,13 +20,13 @@ export function DocumentCanvas() {
       <div className="space-y-2 text-xs">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Document Title:</span>
-          <span className="font-semibold text-foreground dark:text-primary-foreground truncate max-w-[160px]">
+          <span className="font-semibold text-foreground dark:text-primary-foreground truncate max-w-40">
             {model.title || "Untitled Document"}
           </span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Document ID:</span>
-          <span className="font-mono text-[10px] text-muted-foreground truncate max-w-[160px]">
+          <span className="font-mono text-[10px] text-muted-foreground truncate max-w-40">
             {model.id}
           </span>
         </div>

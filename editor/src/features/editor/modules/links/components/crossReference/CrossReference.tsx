@@ -111,7 +111,7 @@ export function CrossReference() {
               <p className="text-muted-foreground">No {selectedType} targets detected in document.</p>
             </div>
           ) : (
-            <div className="max-h-[160px] overflow-y-auto space-y-1 rounded-lg border border-secondary bg-card p-1.5 dark:border-muted dark:bg-[#07131E]">
+            <div className="max-h-40 overflow-y-auto space-y-1 rounded-lg border border-secondary bg-card p-1.5 dark:border-muted dark:bg-[#07131E]">
               {availableTargets.map((target) => {
                 const isSelected = selectedTarget?.id === target.id;
                 return (

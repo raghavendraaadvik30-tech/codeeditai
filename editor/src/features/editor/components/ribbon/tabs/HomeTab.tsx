@@ -269,7 +269,7 @@ const [fontsLoading, setFontsLoading] =
           <div
             ref={undoDropdownRef}
             onMouseDown={preventFocusLoss}
-            className="absolute left-0 top-full z-50 mt-1 min-w-[170px] w-48 border border-muted-foreground/90 bg-card shadow-xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
+            className="absolute left-0 top-full z-50 mt-1 min-w-42.5 w-48 border border-muted-foreground/90 bg-card shadow-xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
           >
             <div
               className="max-h-56 overflow-y-auto py-0.5"
@@ -374,7 +374,7 @@ const [fontsLoading, setFontsLoading] =
           <div
             ref={redoDropdownRef}
             onMouseDown={preventFocusLoss}
-            className="absolute left-0 top-full z-50 mt-1 min-w-[170px] w-48 border border-muted-foreground/90 bg-card shadow-xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
+            className="absolute left-0 top-full z-50 mt-1 min-w-42.5 w-48 border border-muted-foreground/90 bg-card shadow-xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
           >
             <div
               className="max-h-56 overflow-y-auto py-0.5"

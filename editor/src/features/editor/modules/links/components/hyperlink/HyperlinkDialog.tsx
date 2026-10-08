@@ -117,7 +117,7 @@ export function HyperlinkDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
+      <DialogContent className="sm:max-w-120 bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
         <DialogHeader className="p-4 border-b border-muted dark:border-muted">
           <DialogTitle className="text-sm font-semibold text-foreground dark:text-primary-foreground flex items-center gap-2">
             <Globe className="h-4 w-4 text-brand" />

@@ -45,7 +45,7 @@ export function CrossReferenceList({ items, onNavigate }: CrossReferenceListProp
           </p>
         </div>
       ) : (
-        <div className="space-y-1.5 max-h-[260px] overflow-y-auto pr-0.5">
+        <div className="space-y-1.5 max-h-65 overflow-y-auto pr-0.5">
           {filtered.map((item) => (
             <div
               key={item.id}

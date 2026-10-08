@@ -52,7 +52,7 @@ export default function CaseSection({
 
               className={`
                 flex
-                h-[76px]
+                h-19
                 min-w-0
                 flex-col
                 items-center

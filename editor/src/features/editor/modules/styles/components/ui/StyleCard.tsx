@@ -217,7 +217,7 @@ export function StyleCard({
       <div
         className={`
           flex
-          min-h-[48px]
+          min-h-12
           w-full
           items-center
           rounded-lg
@@ -269,7 +269,7 @@ export function StyleCard({
           <div
             className="
               flex
-              min-w-[70px]
+              min-w-17.5
               flex-col
               items-end
               justify-center

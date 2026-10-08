@@ -253,7 +253,7 @@ export default function EditorStatusBar() {
             title="Zoom level. Click to reset to 100%"
             aria-label={`Current zoom level: ${Math.round(zoom)}%. Click to reset to 100%`}
             className="
-              min-w-[38px]
+              min-w-9.5
               px-1
               py-0.5
               text-right
@@ -298,7 +298,7 @@ export default function EditorStatusBar() {
           <div className="relative flex items-center w-24 sm:w-28 mx-0.5">
             {/* Word-style center tick at 100%: (100-25)/(200-25) = 42.86% */}
             <div
-              className="absolute left-[42.86%] h-2 w-[1px] bg-muted-foreground dark:bg-muted-foreground pointer-events-none -translate-x-1/2"
+              className="absolute left-[42.86%] h-2 w-0.25 bg-muted-foreground dark:bg-muted-foreground pointer-events-none -translate-x-1/2"
               title="100%"
             />
             <input

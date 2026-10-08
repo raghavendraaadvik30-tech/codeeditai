@@ -19,12 +19,10 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  ListFilter,
 } from "lucide-react";
 import RibbonButton from "../controls/RibbonButton";
 import RibbonDivider from "../controls/RibbonDivider";
 import { useTrackChanges } from "@/features/editor/modules/trackChanges";
-import { useEditor } from "@/features/editor/context/EditorContext";
 
 export default function ReviewTab() {
   const {
@@ -41,8 +39,6 @@ export default function ReviewTab() {
     nextChange,
     activeChangeId,
   } = useTrackChanges();
-
-  const { setActivePanel, setLeftPanelOpen } = useEditor();
 
   const getActiveChangeId = (): string | null => {
     if (activeChangeId) return activeChangeId;
@@ -77,11 +73,6 @@ export default function ReviewTab() {
       const firstId = first?.getAttribute("data-tc-id");
       if (firstId) rejectChange(firstId);
     }
-  };
-
-  const handleOpenPanel = () => {
-    setActivePanel("trackChanges");
-    setLeftPanelOpen(true);
   };
 
   return (
@@ -187,17 +178,6 @@ export default function ReviewTab() {
         title="Hide visual track changes markup (clean document preview)"
       >
         Hide Markup
-      </RibbonButton>
-
-      <RibbonDivider />
-
-      {/* 6. OPEN SIDEBAR REVIEW PANEL */}
-      <RibbonButton
-        icon={<ListFilter className="h-4 w-4" />}
-        onClick={handleOpenPanel}
-        title="Open Track Changes Review Panel in Sidebar"
-      >
-        Reviewing Pane
       </RibbonButton>
     </div>
   );

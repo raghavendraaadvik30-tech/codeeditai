@@ -57,7 +57,7 @@ export function BookmarkDialog({ open, onOpenChange, onSuccess }: BookmarkDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px] bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
+      <DialogContent className="sm:max-w-105 bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
         <DialogHeader className="p-4 border-b border-muted dark:border-muted">
           <DialogTitle className="text-sm font-semibold text-foreground dark:text-primary-foreground flex items-center gap-2">
             <Bookmark className="h-4 w-4 text-warning-500" />

@@ -60,7 +60,7 @@ export function ChangeHistory() {
                 {item.status === "rejected" && <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />}
                 {item.status === "pending" && <Clock className="h-3.5 w-3.5 text-warning-500 shrink-0" />}
                 <div className="min-w-0">
-                  <div className="font-semibold text-foreground dark:text-muted-foreground truncate max-w-[150px]">
+                  <div className="font-semibold text-foreground dark:text-muted-foreground truncate max-w-37.5">
                     {item.label || `${item.type.toUpperCase()}`}
                   </div>
                   <div className="text-[10px] text-muted-foreground truncate">

@@ -46,7 +46,7 @@ export function BookmarkList({ bookmarks, onNavigate, onDelete }: BookmarkListPr
           </p>
         </div>
       ) : (
-        <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-0.5">
+        <div className="space-y-1.5 max-h-70 overflow-y-auto pr-0.5">
           {filtered.map((bm) => (
             <div
               key={bm.id}

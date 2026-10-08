@@ -83,7 +83,7 @@ export default function WorkspaceSidebar() {
               dark:bg-[#07131E]
             "
           >
-            <div className="flex h-full w-[360px] flex-col">
+            <div className="flex h-full w-90 flex-col">
               {/* HEADER */}
 
               <WorkspacePanelHeader

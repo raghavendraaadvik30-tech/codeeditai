@@ -84,7 +84,7 @@ export default function ShapePicker({
       </div>
 
       {/* Shapes Grid by Category */}
-      <div className="space-y-3.5 max-h-[340px] overflow-y-auto pr-1 scrollbar-thin">
+      <div className="space-y-3.5 max-h-85 overflow-y-auto pr-1 scrollbar-thin">
         {SHAPE_CATEGORIES.map((cat) => {
           if (selectedCategory !== "All" && selectedCategory !== cat) return null;
 

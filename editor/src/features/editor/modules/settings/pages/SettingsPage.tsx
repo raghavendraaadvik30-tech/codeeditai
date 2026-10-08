@@ -15,16 +15,12 @@ import {
   Sun,
   Monitor,
   Check,
-  Key,
-  ShieldCheck,
   User,
   LogOut,
   Pencil,
   CheckCircle2,
   X,
-  Lock,
   Camera,
-  Shield,
   Eye,
   Trash2,
   Upload,
@@ -34,7 +30,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ROUTE_PATHS } from "@/app/router/routePaths";
 
-type SettingsTab = "profile" | "preferences" | "security";
+type SettingsTab = "profile" | "preferences";
 
 function SettingsPageContent() {
   const { settings, updateSettings } = useSettingsContext();
@@ -72,7 +68,6 @@ function SettingsPageContent() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isEditInfoOpen, setIsEditInfoOpen] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isViewPhotoModalOpen, setIsViewPhotoModalOpen] = useState(false);
 
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
@@ -154,19 +149,6 @@ function SettingsPageContent() {
         >
           <Settings className="h-3.5 w-3.5" />
           <span>Preferences</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("security")}
-          className={`flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors ${
-            activeTab === "security"
-              ? "border-brand text-brand"
-              : "border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
-          }`}
-        >
-          <Shield className="h-3.5 w-3.5" />
-          <span>Security & Login</span>
         </button>
       </div>
 
@@ -276,7 +258,7 @@ function SettingsPageContent() {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground dark:text-muted-foreground">Email</span>
                 <span
-                  className="font-semibold text-foreground dark:text-muted truncate max-w-[200px]"
+                  className="font-semibold text-foreground dark:text-muted truncate max-w-50"
                   title={userEmail}
                 >
                   {userEmail}
@@ -618,107 +600,6 @@ function SettingsPageContent() {
                   />
                 </button>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* ============================================================
-            TAB 3: SECURITY & LOGIN (Matches Screenshot 3)
-        ============================================================ */}
-        {activeTab === "security" && (
-          <div className="space-y-4">
-            {/* Card 1: ACCOUNT PASSWORD */}
-            <div className="rounded-2xl border border-secondary/90 bg-card p-5 shadow-sm dark:border-muted dark:bg-[#111D29]">
-              <div className="flex items-center gap-2 pb-3 border-b border-muted dark:border-muted">
-                <Lock className="h-4 w-4 text-secondary-foreground dark:text-muted-foreground" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-foreground dark:text-primary-foreground">
-                  Account Password
-                </h3>
-              </div>
-
-              <div className="pt-3.5 flex items-center justify-between gap-4">
-                <div>
-                  <span className="block text-xs font-semibold text-foreground dark:text-muted-foreground">
-                    Update Password
-                  </span>
-                  <span className="block text-[11px] text-muted-foreground dark:text-muted-foreground leading-relaxed">
-                    Regularly changing your password improves regulatory audit scores.
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsPasswordModalOpen(true)}
-                  className="rounded-xl border border-secondary bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground dark:hover:bg-muted transition-colors shadow-sm shrink-0"
-                >
-                  Change Password
-                </button>
-              </div>
-            </div>
-
-            {/* Card 2: TWO-FACTOR AUTHENTICATION (2FA) */}
-            <div className="rounded-2xl border border-secondary/90 bg-card p-5 shadow-sm dark:border-muted dark:bg-[#111D29] space-y-3.5">
-              <div className="flex items-center gap-2 pb-3 border-b border-muted dark:border-muted">
-                <Key className="h-4 w-4 text-secondary-foreground dark:text-muted-foreground" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-foreground dark:text-primary-foreground">
-                  Two-Factor Authentication (2FA)
-                </h3>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="pr-4">
-                  <span className="block text-xs font-semibold text-foreground dark:text-muted-foreground">
-                    Authenticator App Verification
-                  </span>
-                  <span className="block text-[11px] text-muted-foreground dark:text-muted-foreground leading-relaxed">
-                    Use verification codes from an authenticator app (like Microsoft Authenticator) for login.
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={settings.twoFactorEnabled}
-                  onClick={() => {
-                    updateSettings({
-                      twoFactorEnabled: !settings.twoFactorEnabled,
-                    });
-                    showToast(
-                      `2FA ${
-                        !settings.twoFactorEnabled ? "enabled" : "disabled"
-                      }`
-                    );
-                  }}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    settings.twoFactorEnabled
-                      ? "bg-success-500"
-                      : "bg-secondary dark:bg-secondary-foreground"
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-card shadow ring-0 transition duration-200 ease-in-out ${
-                      settings.twoFactorEnabled
-                        ? "translate-x-5"
-                        : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* Green Success Information Box */}
-              {settings.twoFactorEnabled && (
-                <div className="flex items-start gap-2.5 rounded-xl bg-success-50 p-3.5 border border-success-200 dark:bg-success-950/30 dark:border-success-800/50">
-                  <ShieldCheck className="h-4 w-4 text-success-600 dark:text-success-400 shrink-0 mt-0.5" />
-                  <div className="text-xs">
-                    <span className="font-bold text-success-800 dark:text-success-300">
-                      2FA Status: Enabled & Active
-                    </span>
-                    <p className="mt-0.5 text-[11px] text-secondary-foreground dark:text-muted-foreground leading-relaxed">
-                      Backup codes are active (8 codes remaining). Make sure your authenticator is synced.
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -1071,90 +952,6 @@ function SettingsPageContent() {
                 Close
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================
-          MODAL 3: CHANGE PASSWORD
-      ============================================================ */}
-      {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 animate-in fade-in">
-          <div className="w-full max-w-md rounded-2xl border border-secondary bg-card p-6 shadow-2xl dark:border-muted dark:bg-[#0c1929]">
-            <div className="flex items-center justify-between border-b border-muted pb-3 dark:border-muted">
-              <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-brand" />
-                <h3 className="text-sm font-bold text-foreground dark:text-primary-foreground">Change Account Password</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsPasswordModalOpen(false)}
-                className="rounded-lg p-1 text-muted-foreground hover:bg-muted dark:hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setIsPasswordModalOpen(false);
-                showToast("Password updated successfully");
-              }}
-              className="mt-4 space-y-3 text-xs"
-            >
-              <div>
-                <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="At least 8 characters"
-                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Re-type new password"
-                  className="mt-1 h-9 w-full rounded-lg border border-secondary px-3 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-muted dark:border-muted">
-                <button
-                  type="button"
-                  onClick={() => setIsPasswordModalOpen(false)}
-                  className="rounded-lg px-3 py-1.5 text-xs text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors"
-                >
-                  Update Password
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

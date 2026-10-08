@@ -49,7 +49,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
           </p>
         </div>
       ) : (
-        <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-0.5">
+        <div className="space-y-1.5 max-h-75 overflow-y-auto pr-0.5">
           {filtered.map((link) => (
             <div
               key={link.id}

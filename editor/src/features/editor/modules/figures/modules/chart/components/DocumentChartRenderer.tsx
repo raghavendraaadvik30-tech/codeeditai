@@ -805,7 +805,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
                 e.stopPropagation();
                 setIsLayoutOptionsOpen((prev) => !prev);
               }}
-              className={`w-[30px] h-[30px] rounded-xs flex items-center justify-center shadow-md border transition-all cursor-pointer ${
+              className={`w-7.5 h-7.5 rounded-xs flex items-center justify-center shadow-md border transition-all cursor-pointer ${
                 isLayoutOptionsOpen
                   ? 'bg-[#242424] border-sky-400 ring-1 ring-sky-400'
                   : 'bg-[#2b2b2b] border-[#555555] hover:border-border'

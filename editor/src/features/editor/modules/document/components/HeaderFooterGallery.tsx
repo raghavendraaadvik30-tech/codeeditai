@@ -108,7 +108,7 @@ export function HeaderGallery({
         </DropdownMenuLabel>
 
         {/* Scrollable Gallery Preview List */}
-        <div className="max-h-[340px] overflow-y-auto space-y-2 pr-1 my-1">
+        <div className="max-h-85 overflow-y-auto space-y-2 pr-1 my-1">
           {BUILT_IN_HEADERS.map((tmpl) => (
             <button
               key={tmpl.id}
@@ -238,7 +238,7 @@ export function FooterGallery({
         </DropdownMenuLabel>
 
         {/* Scrollable Gallery Preview List */}
-        <div className="max-h-[340px] overflow-y-auto space-y-2 pr-1 my-1">
+        <div className="max-h-85 overflow-y-auto space-y-2 pr-1 my-1">
           {BUILT_IN_FOOTERS.map((tmpl) => (
             <button
               key={tmpl.id}

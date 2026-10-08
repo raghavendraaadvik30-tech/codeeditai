@@ -130,7 +130,7 @@ export function TablePropertiesDialog({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="max-w-[460px] p-0 overflow-hidden bg-card dark:bg-secondary rounded-xl border border-secondary dark:border-muted shadow-2xl">
+      <DialogContent className="max-w-115 p-0 overflow-hidden bg-card dark:bg-secondary rounded-xl border border-secondary dark:border-muted shadow-2xl">
         <DialogHeader className="px-5 py-3.5 border-b border-muted dark:border-muted flex flex-row items-center justify-between">
           <DialogTitle className="text-sm font-semibold text-foreground dark:text-muted">
             Table Properties

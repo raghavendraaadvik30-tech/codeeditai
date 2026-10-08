@@ -230,7 +230,7 @@ export function StyleModifyModal({
           flex
           max-h-[90vh]
           w-full
-          max-w-[600px]
+          max-w-150
           flex-col
           overflow-hidden
           rounded-xl

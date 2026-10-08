@@ -146,7 +146,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
     >
 
-      <div className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-secondary bg-card shadow-2xl">
+      <div className="w-full max-w-90 overflow-hidden rounded-2xl border border-secondary bg-card shadow-2xl">
 
         <div className="flex items-start justify-between border-b border-muted px-5 py-4">
 
@@ -597,7 +597,7 @@ export const DashboardLayout: React.FC = () => {
 
         className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-secondary bg-card transition-all duration-300 ${
 
-          sidebarExpanded ? "w-64" : "w-[76px]"
+          sidebarExpanded ? "w-64" : "w-19"
 
         } ${
 
@@ -793,7 +793,7 @@ export const DashboardLayout: React.FC = () => {
 
         className={`flex h-screen min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
 
-          sidebarExpanded ? "lg:pl-64" : "lg:pl-[76px]"
+          sidebarExpanded ? "lg:pl-64" : "lg:pl-19"
 
         }`}
 

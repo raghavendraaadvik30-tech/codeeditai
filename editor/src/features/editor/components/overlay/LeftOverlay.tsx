@@ -46,7 +46,6 @@ const PANEL_TITLES: Partial<Record<PanelType, string>> = {
   figures: "Figures",
   references: "References",
   symbols: "Symbols",
-  templates: "Templates",
   document: "Documents",
   settings: "Settings",
   trackChanges: "Track Changes",
@@ -65,7 +64,6 @@ const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
   figures: "Images and figures",
   references: "References and citations",
   symbols: "Greek, math & regulatory",
-  templates: "Document templates",
   document: "Manage clinical documents & records",
   settings: "Editor settings",
   trackChanges: "Review and tracking",
@@ -88,7 +86,6 @@ const PANEL_ICONS: Partial<Record<PanelType, typeof FileText>> = {
   references: Bookmark,
   appendices: Files,
   tables: FileText,
-  templates: FileText,
 };
 
 /* --------------------------------
@@ -108,7 +105,6 @@ const panelMap: Partial<
   trackChanges: Panel,
   references: Panel,
   appendices: Panel,
-  templates: Panel,
 
   symbols: ({ moduleId }) => {
     void moduleId;
@@ -153,7 +149,7 @@ export default function LeftOverlay() {
       <div
         className="
           flex
-          h-[74px]
+          h-18.5
           shrink-0
           items-center
           justify-between
