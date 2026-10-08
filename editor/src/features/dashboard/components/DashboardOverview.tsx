@@ -77,7 +77,7 @@ export default function DashboardOverview() {
       description: "Admins with directory authority",
       icon: ShieldCheck,
       color:
-        "text-indigo-600 bg-indigo-50 border border-indigo-100",
+        "text-primary bg-primary/10 border border-primary/15",
     },
   ];
 

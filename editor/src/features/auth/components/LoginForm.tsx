@@ -186,7 +186,7 @@ const handleLogin = async () => {
 
             {/* Global Error */}
             {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4" />
                 <span>{error}</span>
               </div>

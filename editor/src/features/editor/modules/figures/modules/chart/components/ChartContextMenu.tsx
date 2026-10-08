@@ -92,7 +92,7 @@ export const ChartContextMenu: React.FC<ChartContextMenuProps> = ({
     null, // Separator
     {
       label: 'Delete',
-      icon: <Trash2 className="w-4 h-4 text-destructive/100" />,
+      icon: <Trash2 className="w-4 h-4 text-destructive" />,
       action: () => {
         onDelete();
         onClose();

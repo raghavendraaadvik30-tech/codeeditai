@@ -577,7 +577,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       onClick={(e) => handleNodeClick(e, node.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl text-primary-foreground shadow-md cursor-pointer transition-all ${
                         isNodeSelected
-                          ? 'ring-3 ring-primary/100 scale-[1.02] z-10'
+                          ? 'ring-3 ring-primary scale-[1.02] z-10'
                           : 'hover:scale-[1.01]'
                       } ${smartArt.style === 'outline' ? 'text-foreground' : ''}`}
                       style={styleObj}
@@ -653,7 +653,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   <div
                     onClick={(e) => handleNodeClick(e, node.id)}
                     className={`flex-1 min-w-[120px] max-w-[200px] h-28 flex flex-col justify-center items-center p-3 text-primary-foreground shadow-md transition-transform cursor-pointer ${
-                      isNodeSelected ? 'ring-3 ring-primary/100 scale-105 z-10' : 'hover:scale-102'
+                      isNodeSelected ? 'ring-3 ring-primary scale-105 z-10' : 'hover:scale-102'
                     }`}
                     style={styleObj}
                   >
@@ -791,7 +791,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`relative z-10 flex-1 min-w-[110px] max-w-[180px] p-3 rounded-xl text-primary-foreground shadow-md transition-all cursor-pointer ${
-                    isNodeSelected ? 'ring-3 ring-primary/100 scale-105' : 'hover:scale-102'
+                    isNodeSelected ? 'ring-3 ring-primary scale-105' : 'hover:scale-102'
                   }`}
                   style={styleObj}
                 >
@@ -853,7 +853,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   <div
                     onClick={(e) => handleNodeClick(e, node.id)}
                     className={`w-full max-w-md p-3 rounded-xl text-primary-foreground shadow-sm flex items-center gap-3 transition-all cursor-pointer ${
-                      isNodeSelected ? 'ring-3 ring-primary/100 scale-[1.01]' : 'hover:scale-[1.005]'
+                      isNodeSelected ? 'ring-3 ring-primary scale-[1.01]' : 'hover:scale-[1.005]'
                     }`}
                     style={styleObj}
                   >
@@ -931,7 +931,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     <div
                       onClick={(e) => handleNodeClick(e, node.id)}
                       className={`w-full p-2.5 rounded-xl text-primary-foreground shadow-md text-center transition-all cursor-pointer ${
-                        isNodeSelected ? 'ring-3 ring-primary/100 scale-105' : 'hover:scale-102'
+                        isNodeSelected ? 'ring-3 ring-primary scale-105' : 'hover:scale-102'
                       }`}
                       style={styleObj}
                     >
@@ -990,7 +990,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   <div
                     onClick={(e) => handleNodeClick(e, node.id)}
                     className={`w-16 h-16 rounded-full flex flex-col items-center justify-center text-primary-foreground shadow-md transition-all cursor-pointer ${
-                      isNodeSelected ? 'ring-3 ring-primary/100 scale-110' : 'hover:scale-105'
+                      isNodeSelected ? 'ring-3 ring-primary scale-110' : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: bg }}
                   >
@@ -1048,7 +1048,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 <div
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`flex-1 min-w-[120px] max-w-[200px] p-3 rounded-xl text-primary-foreground shadow-md transition-all cursor-pointer ${
-                    isNodeSelected ? 'ring-3 ring-primary/100 scale-105 z-10' : 'hover:scale-102'
+                    isNodeSelected ? 'ring-3 ring-primary scale-105 z-10' : 'hover:scale-102'
                   }`}
                   style={styleObj}
                 >
@@ -1125,7 +1125,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`flex items-stretch rounded-xl border border-secondary bg-card overflow-hidden shadow-xs transition-all cursor-pointer dark:bg-secondary dark:border-muted ${
-                    isNodeSelected ? 'ring-2 ring-primary/100 shadow-md' : 'hover:border-border'
+                    isNodeSelected ? 'ring-2 ring-primary shadow-md' : 'hover:border-border'
                   }`}
                 >
                   <div
@@ -1187,7 +1187,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`flex items-center gap-3 p-2.5 rounded-xl border bg-card dark:bg-secondary transition-all cursor-pointer ${
                     isNodeSelected
-                      ? 'border-primary/100 ring-2 ring-primary/100/20 shadow-md'
+                      ? 'border-primary ring-2 ring-primary/20 shadow-md'
                       : 'border-secondary dark:border-muted hover:border-border'
                   }`}
                   style={{ borderLeft: `5px solid ${bg}` }}
@@ -1248,7 +1248,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`flex-1 min-w-[140px] max-w-[220px] flex flex-col rounded-xl border border-secondary bg-card shadow-xs overflow-hidden transition-all cursor-pointer dark:bg-secondary dark:border-muted ${
-                    isNodeSelected ? 'ring-2 ring-primary/100 shadow-md' : 'hover:border-border'
+                    isNodeSelected ? 'ring-2 ring-primary shadow-md' : 'hover:border-border'
                   }`}
                 >
                   <div
@@ -1307,7 +1307,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`flex items-stretch gap-2.5 p-1 rounded-xl border border-secondary bg-card transition-all cursor-pointer dark:bg-secondary dark:border-muted ${
-                    isNodeSelected ? 'ring-2 ring-primary/100 shadow-md' : 'hover:border-border'
+                    isNodeSelected ? 'ring-2 ring-primary shadow-md' : 'hover:border-border'
                   }`}
                 >
                   <div
@@ -1365,7 +1365,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`flex items-center gap-3 p-3 rounded-lg border border-secondary transition-all cursor-pointer dark:border-muted ${
-                    isNodeSelected ? 'ring-2 ring-primary/100 shadow-md' : 'hover:border-border'
+                    isNodeSelected ? 'ring-2 ring-primary shadow-md' : 'hover:border-border'
                   }`}
                   style={{
                     backgroundColor: `${bg}10`,
@@ -1426,7 +1426,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 onClick={(e) => handleNodeClick(e, node.id)}
                 className={`flex items-center gap-3.5 p-2.5 rounded-xl border bg-card dark:bg-secondary transition-all cursor-pointer ${
                   isNodeSelected
-                    ? 'border-primary/100 ring-2 ring-primary/100/20 shadow-sm'
+                    ? 'border-primary ring-2 ring-primary/20 shadow-sm'
                     : 'border-secondary dark:border-muted hover:border-border'
                 }`}
               >
@@ -1510,7 +1510,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               <div
                 onClick={(e) => handleNodeClick(e, centerNode.id)}
                 className={`absolute z-10 w-28 h-20 rounded-2xl flex flex-col items-center justify-center p-2 text-primary-foreground shadow-xl cursor-pointer transition-transform ${
-                  selectedNodeId === centerNode.id ? 'ring-3 ring-primary/100 scale-110' : 'hover:scale-105'
+                  selectedNodeId === centerNode.id ? 'ring-3 ring-primary scale-110' : 'hover:scale-105'
                 }`}
                 style={getStyleClass(colors[0])}
               >
@@ -1546,7 +1546,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`absolute z-10 w-24 h-16 rounded-xl flex flex-col items-center justify-center p-1.5 text-primary-foreground shadow-md cursor-pointer transition-transform ${
-                    isNodeSelected ? 'ring-3 ring-primary/100 scale-110' : 'hover:scale-105'
+                    isNodeSelected ? 'ring-3 ring-primary scale-110' : 'hover:scale-105'
                   }`}
                   style={{
                     transform: `translate(${x}px, ${y}px)`,
@@ -1595,7 +1595,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 key={node.id}
                 onClick={(e) => handleNodeClick(e, node.id)}
                 className={`absolute w-28 h-20 rounded-xl flex flex-col items-center justify-center p-2 text-primary-foreground shadow-md transition-transform cursor-pointer ${
-                  isNodeSelected ? 'ring-3 ring-primary/100 scale-105 z-10' : 'hover:scale-105'
+                  isNodeSelected ? 'ring-3 ring-primary scale-105 z-10' : 'hover:scale-105'
                 }`}
                 style={{
                   transform: `translate(${x}px, ${y}px)`,
@@ -1641,7 +1641,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 <div
                   onClick={(e) => handleNodeClick(e, rootNode.id)}
                   className={`w-40 p-3 rounded-xl text-primary-foreground shadow-md text-center cursor-pointer transition-all ${
-                    selectedNodeId === rootNode.id ? 'ring-3 ring-primary/100 scale-105' : 'hover:scale-102'
+                    selectedNodeId === rootNode.id ? 'ring-3 ring-primary scale-105' : 'hover:scale-102'
                   }`}
                   style={getStyleClass(colors[0])}
                 >
@@ -1690,7 +1690,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       <div
                         onClick={(e) => handleNodeClick(e, branch.id)}
                         className={`w-40 p-2.5 rounded-lg text-primary-foreground shadow-xs cursor-pointer transition-all ${
-                          isNodeSelected ? 'ring-3 ring-primary/100 scale-105' : 'hover:scale-102'
+                          isNodeSelected ? 'ring-3 ring-primary scale-105' : 'hover:scale-102'
                         }`}
                         style={getStyleClass(bg)}
                       >
@@ -1727,7 +1727,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               <div
                 onClick={(e) => handleNodeClick(e, rootNode.id)}
                 className={`w-48 p-2.5 rounded-xl text-primary-foreground shadow-md text-center cursor-pointer transition-all ${
-                  selectedNodeId === rootNode.id ? 'ring-3 ring-primary/100 scale-105' : 'hover:scale-102'
+                  selectedNodeId === rootNode.id ? 'ring-3 ring-primary scale-105' : 'hover:scale-102'
                 }`}
                 style={getStyleClass(colors[0])}
               >
@@ -1775,7 +1775,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     <div
                       onClick={(e) => handleNodeClick(e, child.id)}
                       className={`w-full p-2.5 rounded-xl text-primary-foreground shadow-xs text-center cursor-pointer transition-all ${
-                        isNodeSelected ? 'ring-3 ring-primary/100 scale-105' : 'hover:scale-[1.02]'
+                        isNodeSelected ? 'ring-3 ring-primary scale-105' : 'hover:scale-[1.02]'
                       }`}
                       style={styleObj}
                     >
@@ -1833,7 +1833,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`rounded-xl p-3 flex flex-col justify-between shadow-xs border transition-all cursor-pointer ${
-                    isNodeSelected ? 'ring-3 ring-primary/100 shadow-md' : 'hover:scale-[1.01]'
+                    isNodeSelected ? 'ring-3 ring-primary shadow-md' : 'hover:scale-[1.01]'
                   }`}
                   style={{
                     backgroundColor: `${bg}12`,
@@ -1906,7 +1906,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     key={node.id}
                     onClick={(e) => handleNodeClick(e, node.id)}
                     className={`h-11 rounded-lg text-primary-foreground shadow-sm flex items-center justify-center px-2 cursor-pointer transition-all ${
-                      isNodeSelected ? 'ring-3 ring-primary/100 scale-105 z-10' : 'hover:brightness-105'
+                      isNodeSelected ? 'ring-3 ring-primary scale-105 z-10' : 'hover:brightness-105'
                     }`}
                     style={{
                       width: `${widthPercent}%`,
@@ -1933,7 +1933,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     key={node.id}
                     onClick={(e) => handleNodeClick(e, node.id)}
                     className={`p-2 rounded-lg border bg-card dark:bg-secondary transition-all cursor-pointer ${
-                      isNodeSelected ? 'border-primary/100 ring-2 ring-primary/100/20 shadow-xs' : 'border-secondary dark:border-muted'
+                      isNodeSelected ? 'border-primary ring-2 ring-primary/20 shadow-xs' : 'border-secondary dark:border-muted'
                     }`}
                     style={{ borderLeft: `4px solid ${bg}` }}
                   >
@@ -1986,7 +1986,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 key={node.id}
                 onClick={(e) => handleNodeClick(e, node.id)}
                 className={`h-12 rounded-xl text-primary-foreground shadow-sm flex items-center justify-center px-4 transition-all cursor-pointer ${
-                  isNodeSelected ? 'ring-3 ring-primary/100 scale-[1.02] z-10' : 'hover:brightness-105'
+                  isNodeSelected ? 'ring-3 ring-primary scale-[1.02] z-10' : 'hover:brightness-105'
                 }`}
                 style={{
                   width: `${widthPercent}%`,
@@ -2029,7 +2029,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
           <div
             onClick={(e) => handleNodeClick(e, node.id)}
             className={`w-full max-w-xl p-6 rounded-2xl border bg-card dark:bg-secondary shadow-md relative transition-all cursor-pointer ${
-              isNodeSelected ? 'ring-3 ring-primary/100 shadow-xl' : 'hover:shadow-lg'
+              isNodeSelected ? 'ring-3 ring-primary shadow-xl' : 'hover:shadow-lg'
             }`}
             style={{ borderLeft: `8px solid ${bg}` }}
           >
@@ -2084,7 +2084,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 key={node.id}
                 onClick={(e) => handleNodeClick(e, node.id)}
                 className={`p-4 rounded-xl border border-secondary bg-card dark:bg-secondary dark:border-muted shadow-xs flex flex-col items-center text-center justify-between transition-all cursor-pointer ${
-                  isNodeSelected ? 'ring-3 ring-primary/100 shadow-md' : 'hover:border-border'
+                  isNodeSelected ? 'ring-3 ring-primary shadow-md' : 'hover:border-border'
                 }`}
                 style={{ borderTop: `4px solid ${bg}` }}
               >
@@ -2140,7 +2140,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 key={node.id}
                 onClick={(e) => handleNodeClick(e, node.id)}
                 className={`rounded-xl border border-secondary bg-card overflow-hidden shadow-xs flex flex-col justify-between transition-all cursor-pointer dark:bg-secondary dark:border-muted ${
-                  isNodeSelected ? 'ring-2 ring-primary/100 shadow-md' : 'hover:border-border'
+                  isNodeSelected ? 'ring-2 ring-primary shadow-md' : 'hover:border-border'
                 }`}
               >
                 <div
@@ -2194,7 +2194,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
               key={node.id}
               onClick={(e) => handleNodeClick(e, node.id)}
               className={`rounded-xl border border-secondary bg-card p-3.5 shadow-xs flex flex-col justify-between transition-all cursor-pointer dark:bg-secondary dark:border-muted ${
-                isNodeSelected ? 'ring-2 ring-primary/100 shadow-md' : 'hover:border-border'
+                isNodeSelected ? 'ring-2 ring-primary shadow-md' : 'hover:border-border'
               }`}
               style={{ borderTop: `4px solid ${bg}` }}
             >
@@ -2309,7 +2309,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     onClick={() => setSelectedNodeId(node.id)}
                     className={`flex flex-col gap-1 p-1.5 rounded-md border transition-all ${
                       isNodeSelected
-                        ? 'border-primary/100 bg-card shadow-xs dark:bg-secondary'
+                        ? 'border-primary bg-card shadow-xs dark:bg-secondary'
                         : 'border-transparent hover:bg-muted dark:hover:bg-muted/60'
                     }`}
                   >
@@ -2333,7 +2333,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         <button
                           type="button"
                           onClick={(e) => handleRemoveShape(node.id, e)}
-                          className="text-muted-foreground hover:text-destructive/100 p-0.5 rounded transition-opacity"
+                          className="text-muted-foreground hover:text-destructive p-0.5 rounded transition-opacity"
                           title="Delete Step"
                         >
                           <X className="w-3 h-3" />

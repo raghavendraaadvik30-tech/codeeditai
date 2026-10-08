@@ -285,7 +285,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                     }}
                     className={`group flex flex-col items-center justify-between p-2 rounded-lg border transition-all text-center aspect-[4/3] ${
                       isSelected
-                        ? 'border-primary bg-primary/60 ring-2 ring-primary/100/20 shadow-xs dark:border-primary/100 dark:bg-blue-950/30'
+                        ? 'border-primary bg-primary/60 ring-2 ring-primary/20 shadow-xs dark:border-primary dark:bg-blue-950/30'
                         : 'border-secondary bg-muted/30 hover:border-border hover:bg-muted/50 dark:border-muted dark:bg-secondary/30 dark:hover:border-secondary-foreground'
                     }`}
                     title={layout.name}

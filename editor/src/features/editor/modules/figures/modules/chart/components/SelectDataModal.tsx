@@ -112,14 +112,14 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
                       type="text"
                       value={s.name}
                       onChange={(e) => handleRenameSeries(idx, e.target.value)}
-                      className="w-full h-6 px-1.5 border border-secondary rounded text-xs outline-none focus:border-primary/100"
+                      className="w-full h-6 px-1.5 border border-secondary rounded text-xs outline-none focus:border-primary"
                     />
                   </div>
                   {seriesList.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveSeries(idx)}
-                      className="ml-2 text-muted-foreground hover:text-destructive/100"
+                      className="ml-2 text-muted-foreground hover:text-destructive"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -142,7 +142,7 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
                     type="text"
                     value={cat}
                     onChange={(e) => handleRenameCategory(idx, e.target.value)}
-                    className="px-2 py-1 bg-card border border-secondary rounded text-secondary-foreground text-xs font-medium outline-none focus:border-primary/100"
+                    className="px-2 py-1 bg-card border border-secondary rounded text-secondary-foreground text-xs font-medium outline-none focus:border-primary"
                   />
                 ))}
               </div>

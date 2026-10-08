@@ -40,7 +40,7 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
       <div className="w-full max-w-md rounded-2xl border border-secondary bg-card p-6 shadow-2xl dark:border-muted dark:bg-[#111D29]">
         <div className="flex items-center justify-between pb-4 border-b border-muted dark:border-muted">
           <div className="flex items-center gap-2">
-            <Crop className="h-5 w-5 text-primary/100" />
+            <Crop className="h-5 w-5 text-primary" />
             <h3 className="text-base font-semibold text-foreground dark:text-primary-foreground">
               Crop & Scale Figure
             </h3>

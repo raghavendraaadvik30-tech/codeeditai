@@ -34,7 +34,7 @@ export const FigureSettings: React.FC<FigureSettingsProps> = ({
         <select
           value={figure.alignment}
           onChange={(e) => onUpdate({ alignment: e.target.value as FigureAlignment })}
-          className="mt-1 w-full rounded-lg border border-secondary bg-muted p-2 text-xs outline-none focus:border-primary/100 dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+          className="mt-1 w-full rounded-lg border border-secondary bg-muted p-2 text-xs outline-none focus:border-primary dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
         >
           <option value="left">Left Aligned</option>
           <option value="center">Center Aligned</option>
@@ -52,7 +52,7 @@ export const FigureSettings: React.FC<FigureSettingsProps> = ({
         <select
           value={figure.fitMode}
           onChange={(e) => onUpdate({ fitMode: e.target.value as FigureFitMode })}
-          className="mt-1 w-full rounded-lg border border-secondary bg-muted p-2 text-xs outline-none focus:border-primary/100 dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+          className="mt-1 w-full rounded-lg border border-secondary bg-muted p-2 text-xs outline-none focus:border-primary dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
         >
           <option value="contain">Contain (Keep Proportion)</option>
           <option value="cover">Cover (Fill Container)</option>

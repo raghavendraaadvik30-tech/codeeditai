@@ -668,7 +668,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
         isEditingThisChart
           ? 'flex flex-col gap-2 p-2 bg-muted/60 rounded-xl border border-emerald-500/30 shadow-xs'
           : isSelected
-          ? 'relative ring-2 ring-primary/100 rounded-lg shadow-xs cursor-grab active:cursor-grabbing'
+          ? 'relative ring-2 ring-primary rounded-lg shadow-xs cursor-grab active:cursor-grabbing'
           : 'relative hover:ring-1 hover:ring-secondary rounded-lg cursor-pointer'
       }`}
       onClick={handleChartClick}
@@ -713,7 +713,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               type="text"
               value={chart.title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              className="text-base font-bold text-foreground bg-transparent outline-none border-b border-transparent hover:border-border focus:border-primary/100 transition-colors px-1"
+              className="text-base font-bold text-foreground bg-transparent outline-none border-b border-transparent hover:border-border focus:border-primary transition-colors px-1"
               placeholder="Enter Chart Title"
             />
           </div>
@@ -728,7 +728,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
         <>
           {/* Visual selection outline overlay when selected (renders above text at z-30) */}
           <div
-            className="absolute inset-0 ring-2 ring-primary/100 rounded-lg pointer-events-none z-30"
+            className="absolute inset-0 ring-2 ring-primary rounded-lg pointer-events-none z-30"
           />
 
           {/* Anchor indicator for text-wrapping modes (MS Word-style) */}

@@ -19,7 +19,7 @@ export default function IconSearch({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-9 pl-8 pr-3 text-xs bg-card dark:bg-secondary border border-secondary dark:border-muted rounded-lg outline-none focus:ring-1 focus:ring-primary/100 text-foreground dark:text-muted placeholder:text-muted-foreground"
+        className="w-full h-9 pl-8 pr-3 text-xs bg-card dark:bg-secondary border border-secondary dark:border-muted rounded-lg outline-none focus:ring-1 focus:ring-primary text-foreground dark:text-muted placeholder:text-muted-foreground"
       />
     </div>
   );

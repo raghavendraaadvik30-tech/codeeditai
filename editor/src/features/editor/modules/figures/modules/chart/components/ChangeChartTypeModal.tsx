@@ -68,7 +68,7 @@ export const ChangeChartTypeModal: React.FC<ChangeChartTypeModalProps> = ({
                     group relative flex flex-col items-center rounded-xl p-2.5 border transition-all text-center cursor-pointer select-none
                     ${
                       isSelected
-                        ? 'border-primary bg-primary/50 shadow-sm ring-2 ring-primary/100/20'
+                        ? 'border-primary bg-primary/50 shadow-sm ring-2 ring-primary/20'
                         : 'border-secondary bg-card hover:border-border hover:bg-muted'
                     }
                   `}

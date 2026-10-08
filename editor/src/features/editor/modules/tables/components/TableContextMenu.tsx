@@ -493,7 +493,7 @@ export function TableContextMenu({
             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <PlusCircle className="h-3.5 w-3.5 text-primary/100" />
+              <PlusCircle className="h-3.5 w-3.5 text-primary" />
               <span>Insert</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -507,7 +507,7 @@ export function TableContextMenu({
                 onClick={() => runTableAction(insertColLeft)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer"
               >
-                <ArrowLeftToLine className="h-3.5 w-3.5 text-primary/100" />
+                <ArrowLeftToLine className="h-3.5 w-3.5 text-primary" />
                 <span>Insert Columns to the Left</span>
               </button>
               <button
@@ -515,7 +515,7 @@ export function TableContextMenu({
                 onClick={() => runTableAction(insertColRight)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer"
               >
-                <ArrowRightToLine className="h-3.5 w-3.5 text-primary/100" />
+                <ArrowRightToLine className="h-3.5 w-3.5 text-primary" />
                 <span>Insert Columns to the Right</span>
               </button>
               <div className="my-1 h-px bg-muted dark:bg-muted" />
@@ -524,7 +524,7 @@ export function TableContextMenu({
                 onClick={() => runTableAction(insertRowAbove)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer"
               >
-                <ArrowUpToLine className="h-3.5 w-3.5 text-primary/100" />
+                <ArrowUpToLine className="h-3.5 w-3.5 text-primary" />
                 <span>Insert Rows Above</span>
               </button>
               <button
@@ -532,7 +532,7 @@ export function TableContextMenu({
                 onClick={() => runTableAction(insertRowBelow)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer"
               >
-                <ArrowDownToLine className="h-3.5 w-3.5 text-primary/100" />
+                <ArrowDownToLine className="h-3.5 w-3.5 text-primary" />
                 <span>Insert Rows Below</span>
               </button>
             </div>,
@@ -709,7 +709,7 @@ export function TableContextMenu({
           className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           onMouseEnter={() => setActiveSubmenu(null)}
         >
-          <RotateCw className="h-3.5 w-3.5 text-primary/100" />
+          <RotateCw className="h-3.5 w-3.5 text-primary" />
           <span>Text Direction...</span>
         </button>
 
@@ -870,7 +870,7 @@ export function TableContextMenu({
             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <Maximize2 className="h-3.5 w-3.5 text-primary/100" />
+              <Maximize2 className="h-3.5 w-3.5 text-primary" />
               <span>AutoFit</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1030,7 +1030,7 @@ export function TableContextMenu({
           className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           onMouseEnter={() => setActiveSubmenu(null)}
         >
-          <Link2 className="h-3.5 w-3.5 text-primary/100" />
+          <Link2 className="h-3.5 w-3.5 text-primary" />
           <span>Hyperlink...</span>
         </button>
 
@@ -1083,7 +1083,7 @@ export function TableContextMenu({
                 onClick={() => runTableAction(distributeColumns)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer"
               >
-                <Columns className="h-3.5 w-3.5 text-primary/100" />
+                <Columns className="h-3.5 w-3.5 text-primary" />
                 <span>Distribute Columns Evenly</span>
               </button>
               <div className="my-1 h-px bg-muted dark:bg-muted" />
@@ -1100,7 +1100,7 @@ export function TableContextMenu({
                 onClick={() => runTableAction(mergeWithNextTable)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted dark:hover:bg-muted/80 cursor-pointer text-primary dark:text-indigo-400"
               >
-                <Combine className="h-3.5 w-3.5 text-primary/100" />
+                <Combine className="h-3.5 w-3.5 text-primary" />
                 <span>Merge with Next Table</span>
               </button>
               <div className="my-1 h-px bg-muted dark:bg-muted" />

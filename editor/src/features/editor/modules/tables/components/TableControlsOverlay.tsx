@@ -1395,7 +1395,7 @@ export function TableControlsOverlay({
               className="flex items-center gap-1 rounded px-1.5 py-0.5 text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted transition-colors"
               title="AutoFit Table to Page Margins (100%)"
             >
-              <Maximize2 className="h-3 w-3 text-primary/100" />
+              <Maximize2 className="h-3 w-3 text-primary" />
               <span>Fit Page</span>
             </button>
             <span className="text-muted-foreground dark:text-secondary-foreground">|</span>

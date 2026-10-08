@@ -48,7 +48,7 @@ export default function ShapePicker({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search shapes..."
-          className="w-full h-8 pl-8 pr-3 text-xs bg-card dark:bg-secondary border border-secondary dark:border-muted rounded-lg outline-none focus:ring-1 focus:ring-primary/100 text-foreground dark:text-muted placeholder:text-muted-foreground"
+          className="w-full h-8 pl-8 pr-3 text-xs bg-card dark:bg-secondary border border-secondary dark:border-muted rounded-lg outline-none focus:ring-1 focus:ring-primary text-foreground dark:text-muted placeholder:text-muted-foreground"
         />
       </div>
 
@@ -118,8 +118,8 @@ export default function ShapePicker({
                       onDoubleClick={() => handleCardDoubleClick(shape)}
                       className={`relative flex flex-col items-center justify-center p-2 h-9 rounded-lg border transition-all cursor-pointer ${
                         isSelected
-                          ? "border-primary bg-primary/80 dark:bg-blue-950/60 ring-2 ring-primary/100/20 text-primary dark:text-primary"
-                          : "border-secondary dark:border-muted bg-card dark:bg-secondary text-secondary-foreground dark:text-muted-foreground hover:border-primary/100 hover:bg-primary/60 dark:hover:bg-blue-950/40 hover:text-primary dark:hover:text-primary"
+                          ? "border-primary bg-primary/80 dark:bg-blue-950/60 ring-2 ring-primary/20 text-primary dark:text-primary"
+                          : "border-secondary dark:border-muted bg-card dark:bg-secondary text-secondary-foreground dark:text-muted-foreground hover:border-primary hover:bg-primary/60 dark:hover:bg-blue-950/40 hover:text-primary dark:hover:text-primary"
                       }`}
                     >
                       {isSelected && (

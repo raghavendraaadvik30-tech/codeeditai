@@ -454,7 +454,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
     >
       {/* SELECTION OVERLAY BOUNDING BOX WHEN SELECTED */}
       {isSelected && (
-        <div className="absolute inset-0 border-2 border-dashed border-primary/100 pointer-events-none rounded-xs z-20" />
+        <div className="absolute inset-0 border-2 border-dashed border-primary pointer-events-none rounded-xs z-20" />
       )}
 
       {/* RENDER PICTURE IMAGE */}
@@ -575,7 +575,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
             type="button"
             title="Delete Picture"
             onClick={handleDelete}
-            className="p-1 rounded text-destructive/100 hover:bg-destructive/10 dark:hover:bg-red-950/50 hover:text-destructive transition-colors"
+            className="p-1 rounded text-destructive hover:bg-destructive/10 dark:hover:bg-red-950/50 hover:text-destructive transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>

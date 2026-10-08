@@ -1637,11 +1637,11 @@ export default function LayoutTab() {
                         type="button"
                         size="sm"
                         onClick={() => fileInputRef.current?.click()}
-                        className="h-8 px-3.5 text-xs font-medium bg-[#1d8cd7] hover:bg-[#157bbd] text-white cursor-pointer rounded shadow-xs"
+                        className="h-8 px-3.5 text-xs font-medium bg-[#1d8cd7] hover:bg-[#157bbd] text-primary-foreground cursor-pointer rounded shadow-xs"
                       >
                         Choose File
                       </Button>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+                      <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                         {wmFileName || "No file chosen"}
                       </span>
                     </div>

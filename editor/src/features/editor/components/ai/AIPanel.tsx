@@ -58,7 +58,7 @@ export default function AIPanel() {
           items-center
           justify-between
           border-b
-          border-slate-200
+          border-secondary
           px-4
         "
       >
@@ -83,10 +83,10 @@ export default function AIPanel() {
             items-center
             justify-center
             rounded-md
-            text-slate-500
+            text-muted-foreground
             transition-colors
-            hover:bg-slate-100
-            hover:text-slate-900
+            hover:bg-muted
+            hover:text-foreground
           "
           aria-label="Close AI Assistant"
           title="Close"

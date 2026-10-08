@@ -67,7 +67,7 @@ export const ChartStyleModal: React.FC<ChartStyleModalProps> = ({
                     group relative flex flex-col items-center rounded-xl p-3 border transition-all text-center cursor-pointer select-none
                     ${
                       isSelected
-                        ? 'border-primary bg-primary/50 dark:bg-blue-950/30 shadow-sm ring-2 ring-primary/100/20'
+                        ? 'border-primary bg-primary/50 dark:bg-blue-950/30 shadow-sm ring-2 ring-primary/20'
                         : 'border-secondary bg-card hover:border-border hover:bg-muted dark:bg-[#162534] dark:border-secondary-foreground dark:hover:bg-muted'
                     }
                   `}
@@ -87,10 +87,10 @@ export const ChartStyleModal: React.FC<ChartStyleModalProps> = ({
                     }}
                   >
                     <div className="flex items-end gap-1.5 h-12 w-full justify-center px-2">
-                      <div className="w-3 h-8 bg-primary/100 rounded-t-xs" />
+                      <div className="w-3 h-8 bg-primary rounded-t-xs" />
                       <div className="w-3 h-11 bg-emerald-500 rounded-t-xs" />
                       <div className="w-3 h-6 bg-amber-500 rounded-t-xs" />
-                      <div className="w-3 h-9 bg-primary/100 rounded-t-xs" />
+                      <div className="w-3 h-9 bg-primary rounded-t-xs" />
                     </div>
                   </div>
 

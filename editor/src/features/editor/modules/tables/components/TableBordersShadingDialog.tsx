@@ -228,7 +228,7 @@ export function TableBordersShadingDialog({
                       onClick={() => setBorderSetting(id)}
                       className={`h-8 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                         borderSetting === id
-                          ? "bg-primary/10 border-primary/100 text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
+                          ? "bg-primary/10 border-primary text-primary/90 dark:bg-blue-950/50 dark:border-primary dark:text-primary/30"
                           : "border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary dark:text-muted-foreground"
                       }`}
                     >
@@ -289,7 +289,7 @@ export function TableBordersShadingDialog({
                       onClick={() => setBorderColor(c.hex)}
                       className={`h-5 w-5 rounded-full border transition-transform hover:scale-110 cursor-pointer ${
                         borderColor.toLowerCase() === c.hex.toLowerCase()
-                          ? "ring-2 ring-primary/100 scale-110"
+                          ? "ring-2 ring-primary scale-110"
                           : "border-border dark:border-secondary-foreground"
                       }`}
                       style={{ backgroundColor: c.hex }}
@@ -327,7 +327,7 @@ export function TableBordersShadingDialog({
                       onClick={() => setShadingColor(c.hex)}
                       className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all cursor-pointer ${
                         shadingColor.toLowerCase() === c.hex.toLowerCase()
-                          ? "ring-2 ring-primary/100 border-primary/100 bg-primary/40 dark:bg-blue-950/40"
+                          ? "ring-2 ring-primary border-primary bg-primary/40 dark:bg-blue-950/40"
                           : "border-secondary bg-card dark:border-muted dark:bg-muted"
                       }`}
                     >

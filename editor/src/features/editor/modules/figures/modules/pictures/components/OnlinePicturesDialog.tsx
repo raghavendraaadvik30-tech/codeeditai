@@ -241,7 +241,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
                 placeholder="https://..."
                 className={`w-full h-8 text-xs font-mono rounded-md ${
                   imageState.status === 'error'
-                    ? 'border-destructive/100 focus-visible:ring-destructive/100/30'
+                    ? 'border-destructive focus-visible:ring-destructive/30'
                     : 'border-border dark:border-secondary-foreground'
                 }`}
               />

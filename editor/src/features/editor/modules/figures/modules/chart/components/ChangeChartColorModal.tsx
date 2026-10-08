@@ -66,7 +66,7 @@ export const ChangeChartColorModal: React.FC<ChangeChartColorModalProps> = ({
                   flex w-full items-center justify-between p-3 rounded-xl border transition-all text-left cursor-pointer select-none
                   ${
                     isSelected
-                      ? 'border-primary bg-primary/50 dark:bg-blue-950/30 shadow-xs ring-2 ring-primary/100/20'
+                      ? 'border-primary bg-primary/50 dark:bg-blue-950/30 shadow-xs ring-2 ring-primary/20'
                       : 'border-secondary bg-card hover:border-border hover:bg-muted dark:bg-[#162534] dark:border-secondary-foreground dark:hover:bg-muted'
                   }
                 `}

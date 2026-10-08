@@ -537,7 +537,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                       <button
                         type="button"
                         onClick={() => handleRemoveSeries(sIdx)}
-                        className="opacity-0 group-hover:opacity-100 p-0.5 text-muted-foreground hover:text-destructive/100 transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 p-0.5 text-muted-foreground hover:text-destructive transition-opacity"
                         title="Delete series"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -625,7 +625,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveCategory(catIdx)}
-                      className="opacity-0 group-hover:opacity-100 p-0.5 text-muted-foreground hover:text-destructive/100 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 p-0.5 text-muted-foreground hover:text-destructive transition-opacity"
                       title="Delete row"
                     >
                       <Trash2 className="w-3 h-3" />

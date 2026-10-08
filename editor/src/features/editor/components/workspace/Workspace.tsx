@@ -425,7 +425,7 @@ export default function Workspace() {
             rounded-full
             bg-gradient-to-br
             from-primary
-            to-primary
+            to-primary/80
             text-primary-foreground
             shadow-lg
             transition-all

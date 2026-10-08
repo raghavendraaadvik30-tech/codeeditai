@@ -61,7 +61,7 @@ export const FigureCaptionDialog: React.FC<FigureCaptionDialogProps> = ({
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="e.g. Figure 1: System Architecture Diagram overviewing the backend pipeline."
-              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-3 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-3 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
 
@@ -74,7 +74,7 @@ export const FigureCaptionDialog: React.FC<FigureCaptionDialogProps> = ({
               value={altText}
               onChange={(e) => setAltText(e.target.value)}
               placeholder="Brief description of the image content for accessibility"
-              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
 

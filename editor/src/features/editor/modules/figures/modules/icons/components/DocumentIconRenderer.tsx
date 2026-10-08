@@ -495,7 +495,7 @@ export default function DocumentIconRenderer({
     >
       {/* SELECTION OVERLAY BOUNDING BOX WHEN SELECTED */}
       {isSelected && (
-        <div className="absolute inset-0 border border-dashed border-primary/100/80 pointer-events-none rounded-xs z-20" />
+        <div className="absolute inset-0 border border-dashed border-primary/80 pointer-events-none rounded-xs z-20" />
       )}
 
       {/* RENDER ICON */}
@@ -609,7 +609,7 @@ export default function DocumentIconRenderer({
             title="Delete Icon"
             onClick={handleDelete}
             onPointerDown={(e) => e.stopPropagation()}
-            className="p-1 rounded text-red-400 hover:bg-destructive/100/20 hover:text-red-300 transition-colors cursor-pointer"
+            className="p-1 rounded text-red-400 hover:bg-destructive/20 hover:text-red-300 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>

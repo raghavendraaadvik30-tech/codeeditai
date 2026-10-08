@@ -587,12 +587,12 @@ export default function HeaderActions() {
           px-3
           text-sm
 
-          text-slate-600
-          hover:bg-slate-100
-          hover:text-slate-900
+          text-secondary-foreground
+          hover:bg-muted
+          hover:text-foreground
 
           dark:text-slate-300
-          dark:hover:bg-slate-800
+          dark:hover:bg-muted
           dark:hover:text-white
         "
         onClick={handleUploadClick}

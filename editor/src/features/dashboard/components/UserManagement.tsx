@@ -1676,7 +1676,7 @@ Please use the credentials above to access the secure portal.`
 
                             user.role === "Admin"
 
-                              ? "bg-indigo-50 text-indigo-700"
+                              ? "bg-primary/10 text-primary"
 
                               : user.role === "Author"
 
@@ -1843,7 +1843,7 @@ Please use the credentials above to access the secure portal.`
 
                           border-primary/30
 
-                          hover:border-blue-400
+                          hover:border-primary
 
                           bg-primary/10
 
@@ -2015,7 +2015,7 @@ Please use the credentials above to access the secure portal.`
 
                             text-destructive
 
-                            hover:text-rose-700
+                            hover:text-destructive
 
                             hover:bg-muted
 
@@ -3485,7 +3485,7 @@ Please use the credentials above to access the secure portal.`
 
                 bg-destructive
 
-                hover:bg-rose-700
+                hover:bg-destructive
 
                 text-primary-foreground
 
@@ -3569,7 +3569,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <DialogTitle className="text-base font-bold text-slate-950 flex items-center gap-2">
+            <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
 
 
 

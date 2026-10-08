@@ -515,7 +515,7 @@ export default function DocumentShapeRenderer({
     >
       {/* EXACTLY ONE SELECTION CONTAINER OVERLAY WHEN SELECTED */}
       {isSelected && (
-        <div className="absolute inset-0 border border-dashed border-primary/100/90 pointer-events-none rounded-xs z-20" />
+        <div className="absolute inset-0 border border-dashed border-primary/90 pointer-events-none rounded-xs z-20" />
       )}
 
       {/* SHAPE ICON SVG */}
@@ -544,7 +544,7 @@ export default function DocumentShapeRenderer({
             }}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
-            className="absolute inset-x-2 text-center text-xs font-semibold bg-card/90 dark:bg-muted/90 text-foreground dark:text-muted rounded px-1 py-0.5 border border-primary/100 shadow-xs z-30 outline-hidden pointer-events-auto"
+            className="absolute inset-x-2 text-center text-xs font-semibold bg-card/90 dark:bg-muted/90 text-foreground dark:text-muted rounded px-1 py-0.5 border border-primary shadow-xs z-30 outline-hidden pointer-events-auto"
           />
         ) : text ? (
           <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-foreground dark:text-muted pointer-events-none px-2 select-none">
@@ -638,7 +638,7 @@ export default function DocumentShapeRenderer({
             title="Delete Shape"
             onClick={handleDelete}
             onPointerDown={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-red-400 hover:bg-destructive/100/20 hover:text-red-300 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-red-400 hover:bg-destructive/20 hover:text-red-300 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Delete</span>

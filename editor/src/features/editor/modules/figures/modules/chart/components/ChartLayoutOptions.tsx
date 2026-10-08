@@ -327,7 +327,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             name={`layout-pos-${chart.id}`}
             checked={positionMode === 'moveWithText'}
             onChange={() => handleSelectPositionMode('moveWithText')}
-            className="accent-primary/100 w-3 h-3 cursor-pointer"
+            className="accent-primary w-3 h-3 cursor-pointer"
           />
           <span className="group-hover:text-primary-foreground flex-1">
             <span className="underline">M</span>ove with text
@@ -342,7 +342,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
             name={`layout-pos-${chart.id}`}
             checked={positionMode === 'fixPosition'}
             onChange={() => handleSelectPositionMode('fixPosition')}
-            className="accent-primary/100 w-3 h-3 cursor-pointer"
+            className="accent-primary w-3 h-3 cursor-pointer"
           />
           <span className="group-hover:text-primary-foreground flex-1">
             Fix positio<span className="underline">n</span> on page

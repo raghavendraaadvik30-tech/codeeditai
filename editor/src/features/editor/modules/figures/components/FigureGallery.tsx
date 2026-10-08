@@ -49,13 +49,13 @@ export const FigureGallery: React.FC<FigureGalleryProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search figures..."
-            className="w-full rounded-xl border border-secondary bg-muted pl-9 pr-3 py-2 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+            className="w-full rounded-xl border border-secondary bg-muted pl-9 pr-3 py-2 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
           />
         </div>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="rounded-xl border border-secondary bg-muted px-3 py-2 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+          className="rounded-xl border border-secondary bg-muted px-3 py-2 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
         >
           <option value="ALL">All Categories</option>
           {FIGURE_CATEGORIES.map((cat) => (
@@ -84,7 +84,7 @@ export const FigureGallery: React.FC<FigureGalleryProps> = ({
                 onClick={() => onSelectFigure(fig)}
                 className={`group relative cursor-pointer overflow-hidden rounded-xl border p-2 transition-all duration-200 ${
                   isSelected
-                    ? 'border-primary/100 bg-primary/40 ring-2 ring-primary/100/20 dark:bg-blue-950/30'
+                    ? 'border-primary bg-primary/40 ring-2 ring-primary/20 dark:bg-blue-950/30'
                     : 'border-secondary bg-card hover:border-border hover:shadow-md dark:border-muted dark:bg-[#111D29]'
                 }`}
               >

@@ -109,7 +109,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Workflow Diagram"
-              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
 
@@ -120,7 +120,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             >
               {FIGURE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -139,7 +139,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="e.g. Figure 1: Architectural diagram."
-              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
         </div>
@@ -159,11 +159,11 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
             }}
             className={`mt-4 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
               dragOver
-                ? 'border-primary/100 bg-primary/50 dark:bg-blue-950/20'
+                ? 'border-primary bg-primary/50 dark:bg-blue-950/20'
                 : 'border-border dark:border-secondary-foreground'
             }`}
           >
-            <UploadCloud className="h-10 w-10 text-primary/100" />
+            <UploadCloud className="h-10 w-10 text-primary" />
             <p className="mt-2 text-xs font-medium text-secondary-foreground dark:text-muted-foreground">
               Drag & drop an image here, or{' '}
               <label className="cursor-pointer text-primary hover:underline">
@@ -192,7 +192,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://example.com/image.png"
-                className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary/100 focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
+                className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">

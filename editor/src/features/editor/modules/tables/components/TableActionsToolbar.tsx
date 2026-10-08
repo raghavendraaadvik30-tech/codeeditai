@@ -67,7 +67,7 @@ export function TableActionsToolbar() {
           onClick={insertRowAbove}
           className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary/60 dark:text-muted-foreground transition-colors"
         >
-          <ArrowUpToLine className="h-3.5 w-3.5 text-primary/100" />
+          <ArrowUpToLine className="h-3.5 w-3.5 text-primary" />
           <span>Row Above</span>
         </button>
 
@@ -77,7 +77,7 @@ export function TableActionsToolbar() {
           onClick={insertRowBelow}
           className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary/60 dark:text-muted-foreground transition-colors"
         >
-          <ArrowDownToLine className="h-3.5 w-3.5 text-primary/100" />
+          <ArrowDownToLine className="h-3.5 w-3.5 text-primary" />
           <span>Row Below</span>
         </button>
 
@@ -87,7 +87,7 @@ export function TableActionsToolbar() {
           onClick={insertColLeft}
           className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary/60 dark:text-muted-foreground transition-colors"
         >
-          <ArrowLeftToLine className="h-3.5 w-3.5 text-primary/100" />
+          <ArrowLeftToLine className="h-3.5 w-3.5 text-primary" />
           <span>Col Left</span>
         </button>
 
@@ -97,7 +97,7 @@ export function TableActionsToolbar() {
           onClick={insertColRight}
           className="flex items-center gap-2 rounded-lg border border-muted bg-muted/70 px-2.5 py-1.5 text-xs text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-secondary/60 dark:text-muted-foreground transition-colors"
         >
-          <ArrowRightToLine className="h-3.5 w-3.5 text-primary/100" />
+          <ArrowRightToLine className="h-3.5 w-3.5 text-primary" />
           <span>Col Right</span>
         </button>
 
@@ -157,7 +157,7 @@ export function TableActionsToolbar() {
           onClick={mergeWithNextTable}
           className="flex items-center gap-2 rounded-lg border border-indigo-200/70 bg-primary/50 px-2.5 py-1.5 text-xs text-primary/90 hover:bg-primary/15 dark:border-indigo-900/60 dark:bg-indigo-950/30 dark:text-indigo-300 transition-colors"
         >
-          <Combine className="h-3.5 w-3.5 text-primary/100" />
+          <Combine className="h-3.5 w-3.5 text-primary" />
           <span>Merge Table</span>
         </button>
       </div>
@@ -181,7 +181,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.horizontalAlign === "left"
-                  ? "border-primary/100 bg-primary/10 text-primary/90 font-semibold dark:border-primary/100 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Left"
@@ -196,7 +196,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.horizontalAlign === "center"
-                  ? "border-primary/100 bg-primary/10 text-primary/90 font-semibold dark:border-primary/100 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Center"
@@ -211,7 +211,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.horizontalAlign === "right"
-                  ? "border-primary/100 bg-primary/10 text-primary/90 font-semibold dark:border-primary/100 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Right"
@@ -233,7 +233,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.verticalAlign === "top"
-                  ? "border-primary/100 bg-primary/10 text-primary/90 font-semibold dark:border-primary/100 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Top"
@@ -248,7 +248,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.verticalAlign === "middle"
-                  ? "border-primary/100 bg-primary/10 text-primary/90 font-semibold dark:border-primary/100 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Middle (Center)"
@@ -263,7 +263,7 @@ export function TableActionsToolbar() {
               className={cn(
                 "flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors",
                 activeCellFormat?.verticalAlign === "bottom"
-                  ? "border-primary/100 bg-primary/10 text-primary/90 font-semibold dark:border-primary/100 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+                  ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
                   : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
               )}
               title="Align Bottom"
@@ -282,7 +282,7 @@ export function TableActionsToolbar() {
           className={cn(
             "flex h-8 w-full items-center justify-center gap-2 rounded-md border text-xs font-medium transition-colors",
             activeCellFormat?.isVerticalText
-              ? "border-primary/100 bg-primary/10 text-primary/90 font-semibold dark:border-primary/100 dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
+              ? "border-primary bg-primary/10 text-primary/90 font-semibold dark:border-primary dark:bg-blue-950/60 dark:text-blue-300 shadow-xs"
               : "border-secondary bg-muted text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground"
           )}
           title={
@@ -293,7 +293,7 @@ export function TableActionsToolbar() {
         >
           <RotateCw
             className={cn(
-              "h-3.5 w-3.5 text-primary/100 transition-transform duration-200",
+              "h-3.5 w-3.5 text-primary transition-transform duration-200",
               activeCellFormat?.isVerticalText && "rotate-90 text-primary dark:text-primary"
             )}
           />
@@ -317,7 +317,7 @@ export function TableActionsToolbar() {
             className="flex items-center gap-1.5 rounded-lg border border-secondary bg-muted px-2.5 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground transition-colors"
             title="Fit Table to Page Width (100%)"
           >
-            <Maximize2 className="h-3.5 w-3.5 text-primary/100" />
+            <Maximize2 className="h-3.5 w-3.5 text-primary" />
             <span>Fit to Page</span>
           </button>
 
