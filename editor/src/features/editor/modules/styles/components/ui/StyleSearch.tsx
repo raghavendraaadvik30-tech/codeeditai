@@ -93,9 +93,14 @@ export function StyleSearch({
           border
           border-border
           bg-background
+          dark:bg-card
           pl-9
           pr-3
           text-sm
+          text-foreground
+          placeholder:text-muted-foreground
+          dark:text-foreground
+          dark:placeholder:text-muted-foreground
           outline-none
           transition
           focus:border-primary

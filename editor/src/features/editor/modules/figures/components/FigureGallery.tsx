@@ -104,7 +104,7 @@ export const FigureGallery: React.FC<FigureGalleryProps> = ({
                   <p className="truncate text-xs font-semibold text-foreground dark:text-primary-foreground">
                     {fig.title}
                   </p>
-                  <p className="truncate text-[10px] text-muted0">
+                  <p className="truncate text-10px text-muted-foreground">
                     {fig.category} • {fig.width}px
                   </p>
                 </div>

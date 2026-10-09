@@ -91,7 +91,7 @@ export const FigureToolbar: React.FC<FigureToolbarProps> = ({
       >
         <Minimize2 className="h-4 w-4" />
       </button>
-      <span className="text-xs font-medium text-muted0 min-w-11.25 text-center">
+      <span className="text-xs font-medium text-muted-foreground min-w-11.25 text-center">
         {figure.width}px
       </span>
       <button

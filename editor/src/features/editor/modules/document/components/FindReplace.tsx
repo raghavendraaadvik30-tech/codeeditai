@@ -278,7 +278,7 @@ export function FindReplace() {
 
       <div className="space-y-2 text-xs">
         <div>
-          <label className="block text-[11px] font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
+          <label className="block text-11px font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
             Find what:
           </label>
           <input
@@ -305,7 +305,7 @@ export function FindReplace() {
 
         {navTab === "replace" && (
           <div>
-            <label className="block text-[11px] font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
+            <label className="block text-11px font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
               Replace with:
             </label>
             <input
@@ -325,7 +325,7 @@ export function FindReplace() {
         )}
 
         {searchStatus && (
-          <div className="text-[11px] text-primary dark:text-primary italic">
+          <div className="text-11px text-primary dark:text-primary italic">
             {searchStatus}
           </div>
         )}
@@ -337,7 +337,7 @@ export function FindReplace() {
               onClick={handleReplace}
               disabled={!findText.trim()}
               className={cn(
-                "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none",
+                "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none",
                 !findText.trim()
                   ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                   : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -350,7 +350,7 @@ export function FindReplace() {
               onClick={handleReplaceAll}
               disabled={!findText.trim()}
               className={cn(
-                "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
+                "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none whitespace-nowrap",
                 !findText.trim()
                   ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                   : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -363,7 +363,7 @@ export function FindReplace() {
               onClick={handleFindNext}
               disabled={!findText.trim()}
               className={cn(
-                "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
+                "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none whitespace-nowrap",
                 !findText.trim()
                   ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                   : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -374,7 +374,7 @@ export function FindReplace() {
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded-[3px] border border-primary/80 bg-card py-1 px-1 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
+              className="rounded-[3px] border border-primary/80 bg-card py-1 px-1 text-center text-11px font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
             >
               Cancel
             </button>
@@ -386,7 +386,7 @@ export function FindReplace() {
               onClick={handleFindNext}
               disabled={!findText.trim()}
               className={cn(
-                "flex-1 rounded-[3px] border py-1 text-center text-[11px] font-normal transition-colors select-none",
+                "flex-1 rounded-[3px] border py-1 text-center text-11px font-normal transition-colors select-none",
                 !findText.trim()
                   ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                   : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -397,7 +397,7 @@ export function FindReplace() {
             <button
               type="button"
               onClick={handleCancel}
-              className="flex-1 rounded-[3px] border border-primary/80 bg-card py-1 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
+              className="flex-1 rounded-[3px] border border-primary/80 bg-card py-1 text-center text-11px font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
             >
               Cancel
             </button>

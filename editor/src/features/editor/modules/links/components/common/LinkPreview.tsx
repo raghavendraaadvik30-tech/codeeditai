@@ -42,7 +42,7 @@ export function LinkPreview({ link, onNavigate, onEdit, onRemove }: LinkPreviewP
             <h4 className="text-xs font-semibold text-foreground truncate dark:text-primary-foreground">
               {link.displayText || link.target}
             </h4>
-            <p className="text-[11px] text-muted-foreground truncate dark:text-muted-foreground">
+            <p className="text-11px text-muted-foreground truncate dark:text-muted-foreground">
               {link.target}
             </p>
           </div>
@@ -52,7 +52,7 @@ export function LinkPreview({ link, onNavigate, onEdit, onRemove }: LinkPreviewP
       </div>
 
       {/* Protocol info & status */}
-      <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-muted dark:border-muted/80">
+      <div className="flex items-center justify-between text-10px text-muted-foreground pt-1 border-t border-muted dark:border-muted/80">
         <div className="flex items-center gap-1.5">
           {link.type === 'external' && (
             isSecure ? (

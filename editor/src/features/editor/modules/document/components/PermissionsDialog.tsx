@@ -68,13 +68,13 @@ export function PermissionsDialog({
               <h3 className="text-sm font-semibold text-foreground dark:text-primary-foreground">
                 Document Permissions
               </h3>
-              <p className="text-[11px] text-muted-foreground dark:text-muted-foreground truncate max-w-60">
+              <p className="text-11px text-muted-foreground dark:text-muted-foreground truncate max-w-60">
                 {model.title || "Untitled Document"}
               </p>
             </div>
           </div>
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-11px font-medium ${
               editableState
                 ? "bg-success-100 text-success-700 dark:bg-success-950/50 dark:text-success-400"
                 : "bg-warning-100 text-warning-700 dark:bg-warning-950/50 dark:text-warning-400"
@@ -100,7 +100,7 @@ export function PermissionsDialog({
               <div className="font-medium text-foreground dark:text-muted-foreground">
                 Allow Document Editing
               </div>
-              <div className="text-[11px] text-muted-foreground dark:text-muted-foreground">
+              <div className="text-11px text-muted-foreground dark:text-muted-foreground">
                 When disabled, typing and canvas modifications are locked.
               </div>
             </div>
@@ -126,7 +126,7 @@ export function PermissionsDialog({
 
           {/* Access Roles */}
           <div>
-            <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground uppercase tracking-wider mb-2">
+            <label className="block text-11px font-semibold text-secondary-foreground dark:text-muted-foreground uppercase tracking-wider mb-2">
               Access Permission Level
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -141,7 +141,7 @@ export function PermissionsDialog({
               >
                 <Edit3 className="h-4 w-4 mb-1" />
                 <span className="font-medium text-xs">Editor</span>
-                <span className="text-[10px] text-muted-foreground mt-0.5">Full edits</span>
+                <span className="text-10px text-muted-foreground mt-0.5">Full edits</span>
               </button>
 
               <button
@@ -155,7 +155,7 @@ export function PermissionsDialog({
               >
                 <Users className="h-4 w-4 mb-1" />
                 <span className="font-medium text-xs">Reviewer</span>
-                <span className="text-[10px] text-muted-foreground mt-0.5">Suggest only</span>
+                <span className="text-10px text-muted-foreground mt-0.5">Suggest only</span>
               </button>
 
               <button
@@ -169,14 +169,14 @@ export function PermissionsDialog({
               >
                 <Eye className="h-4 w-4 mb-1" />
                 <span className="font-medium text-xs">Viewer</span>
-                <span className="text-[10px] text-muted-foreground mt-0.5">Read-only</span>
+                <span className="text-10px text-muted-foreground mt-0.5">Read-only</span>
               </button>
             </div>
           </div>
 
           {/* Advanced Protection Options */}
           <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between text-[11px] text-secondary-foreground dark:text-muted-foreground">
+            <div className="flex items-center justify-between text-11px text-secondary-foreground dark:text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5 text-success-500" />
                 Prevent accidental layout resets

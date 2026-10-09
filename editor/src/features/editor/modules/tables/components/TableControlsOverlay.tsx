@@ -1381,7 +1381,7 @@ export function TableControlsOverlay({
           data-editor-ui="true"
           data-table-control="autofit-badge"
           contentEditable={false}
-          className="absolute z-30 flex items-center gap-1 -translate-y-full pb-1 text-[11px] font-medium print:hidden"
+          className="absolute z-30 flex items-center gap-1 -translate-y-full pb-1 text-11px font-medium print:hidden"
           style={{
             top: `${pos.top - 4}px`,
             left: `${pos.left + 28}px`,
@@ -1568,7 +1568,7 @@ export function TableControlsOverlay({
       {isResizing && resizeDimensions && (
         <div
           data-editor-ui="true"
-          className="absolute z-30 -translate-x-1/2 rounded bg-foreground/90 px-2 py-1 text-[10px] font-semibold text-primary-foreground shadow-md backdrop-blur-sm print:hidden dark:bg-muted dark:text-secondary"
+          className="absolute z-30 -translate-x-1/2 rounded bg-foreground/90 px-2 py-1 text-10px font-semibold text-primary-foreground shadow-md backdrop-blur-sm print:hidden dark:bg-muted dark:text-secondary"
           style={{
             top: `${pos.top + pos.height + 8}px`,
             left: `${pos.left + pos.width}px`,
@@ -1593,7 +1593,7 @@ export function TableControlsOverlay({
             boxShadow: "0 12px 36px rgba(0, 120, 212, 0.25)",
           }}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-brand mb-1">
+          <div className="flex items-center gap-1.5 text-11px font-semibold text-brand mb-1">
             <Move className="h-3.5 w-3.5" />
             <span>Moving Table (Drop to place)</span>
           </div>

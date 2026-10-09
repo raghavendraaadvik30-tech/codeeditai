@@ -209,7 +209,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                   <h2 className="text-xl font-bold text-navy-900 dark:text-primary-foreground leading-tight">
                     SmartArt
                   </h2>
-                  <p className="text-sm text-muted0 dark:text-muted-foreground font-normal mt-0.5">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground font-normal mt-0.5">
                     Choose a SmartArt graphic
                   </p>
                 </div>
@@ -264,7 +264,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
           {/* COLUMN 2: LAYOUT THUMBNAILS GRID */}
           <div className="flex-1 min-w-0 border-r border-secondary dark:border-muted p-4 overflow-y-auto bg-card dark:bg-[#111D29]">
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-muted dark:border-muted/80">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted0 dark:text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
                 {selectedCategory} Layouts ({categoryLayouts.length})
               </span>
             </div>
@@ -299,7 +299,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
                       />
                     </div>
                     <span
-                      className={`mt-1 text-[11px] leading-tight line-clamp-2 w-full font-medium ${
+                      className={`mt-1 text-11px leading-tight line-clamp-2 w-full font-medium ${
                         isSelected
                           ? 'text-primary/90 dark:text-navy-300 font-semibold'
                           : 'text-secondary-foreground dark:text-muted-foreground'
@@ -316,7 +316,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
           {/* COLUMN 3: LARGE PREVIEW & DESCRIPTION */}
           <div className="w-72 shrink-0 p-4 flex flex-col justify-between bg-muted/20 dark:bg-foreground/10 overflow-y-auto">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted0 dark:text-muted-foreground mb-3 block">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-3 block">
                 Preview
               </span>
 
@@ -343,7 +343,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-secondary/80 dark:border-muted/80 text-[11px] text-muted-foreground">
+            <div className="mt-4 pt-3 border-t border-secondary/80 dark:border-muted/80 text-11px text-muted-foreground">
               Double-click any layout to insert directly.
             </div>
           </div>

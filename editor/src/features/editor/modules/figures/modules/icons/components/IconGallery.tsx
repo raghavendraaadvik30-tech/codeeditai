@@ -75,7 +75,7 @@ export default function IconGallery({
 
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-3 bg-muted dark:bg-secondary/50 border-t border-muted dark:border-muted">
-          <span className="text-xs text-muted0">
+          <span className="text-xs text-muted-foreground">
             {selected ? `Selected: ${selected.name}` : "Select an icon to insert"}
           </span>
           <div className="flex gap-2">

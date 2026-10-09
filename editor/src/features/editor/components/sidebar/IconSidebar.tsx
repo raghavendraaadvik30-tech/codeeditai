@@ -105,8 +105,8 @@ export default function IconSidebar() {
         flex-col
         items-center
         border-r
-        border-secondary
-        bg-card
+        border-sidebar-border
+        bg-sidebar
         py-3
         dark:border-muted
         dark:bg-[#07131E]
@@ -133,13 +133,13 @@ export default function IconSidebar() {
                   w-10
                   items-center
                   justify-center
-                  rounded-lg
+                  rounded-xl
                   transition-all
                   duration-150
                   ${
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-primary-foreground"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs border border-sidebar-border/60 dark:bg-primary dark:text-primary-foreground"
+                      : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-primary-foreground"
                   }
                 `}
               >
@@ -150,8 +150,8 @@ export default function IconSidebar() {
                     className="
                       absolute
                       -left-0.5
-                      top-1
-                      bottom-1
+                      top-1.5
+                      bottom-1.5
                       w-0.75
                       rounded-r-full
                       bg-primary
@@ -175,7 +175,7 @@ export default function IconSidebar() {
                   translate-x-1
                   rounded-xl
                   border
-                  border-secondary
+                  border-sidebar-border
                   bg-card
                   px-4
                   py-2.5

@@ -41,7 +41,7 @@ function TablesPageContent() {
       {/* 1. TOP HEADER: TABLES MANAGER & NEW BUTTON */}
       <div className="border-b border-secondary/80 p-3.5 space-y-3 dark:border-muted/80">
         <div className="flex items-center justify-between">
-          <h3 className="text-[10px] font-bold text-muted0 uppercase tracking-wider dark:text-muted-foreground">
+          <h3 className="text-10px font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
             Tables Manager
           </h3>
           <button
@@ -80,7 +80,7 @@ function TablesPageContent() {
           <button
             type="button"
             onClick={() => toggleSection("quickGrid")}
-            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
+            className="flex w-full items-center justify-between text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Table2 className="h-3.5 w-3.5 text-brand" />
@@ -102,7 +102,7 @@ function TablesPageContent() {
           <button
             type="button"
             onClick={() => toggleSection("actions")}
-            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
+            className="flex w-full items-center justify-between text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Sliders className="h-3.5 w-3.5 text-brand" />
@@ -124,7 +124,7 @@ function TablesPageContent() {
           <button
             type="button"
             onClick={() => toggleSection("standardTables")}
-            className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted0 dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
+            className="flex w-full items-center justify-between text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Table2 className="h-3.5 w-3.5 text-brand" />

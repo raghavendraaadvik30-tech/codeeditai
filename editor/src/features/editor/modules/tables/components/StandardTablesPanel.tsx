@@ -140,7 +140,7 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
               <div className="text-xs font-semibold text-foreground dark:text-muted truncate">
                 {item.title}
               </div>
-              <div className="text-[11px] text-muted0 dark:text-muted-foreground truncate">
+              <div className="text-11px text-muted-foreground dark:text-muted-foreground truncate">
                 {item.description}
               </div>
             </div>
@@ -153,7 +153,7 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
               e.stopPropagation();
               handleSelect(item.id);
             }}
-            className="flex h-6 shrink-0 items-center gap-1 rounded-md bg-brand/10 px-2 text-[11px] font-medium text-brand hover:bg-brand hover:text-primary-foreground transition-colors cursor-pointer"
+            className="flex h-6 shrink-0 items-center gap-1 rounded-md bg-brand/10 px-2 text-11px font-medium text-brand hover:bg-brand hover:text-primary-foreground transition-colors cursor-pointer"
           >
             <Plus className="h-3 w-3" />
             <span>Insert</span>

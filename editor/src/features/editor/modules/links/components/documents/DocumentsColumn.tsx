@@ -190,7 +190,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                       >
                         {doc.name}
                       </p>
-                      <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted-foreground dark:text-muted-foreground">
+                      <div className="flex items-center gap-2 mt-0.5 text-10px text-muted-foreground dark:text-muted-foreground">
                         <span>{doc.category}</span>
                         <span>•</span>
                         <span>{doc.size}</span>
@@ -206,12 +206,12 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
                 </div>
 
                 {/* Updated date */}
-                <div className="mt-1.5 pt-1 border-t border-secondary/60 dark:border-muted/60 flex items-center justify-between text-[10px] text-muted-foreground">
+                <div className="mt-1.5 pt-1 border-t border-secondary/60 dark:border-muted/60 flex items-center justify-between text-10px text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {doc.updatedAt}
                   </span>
-                  <span className="uppercase text-[9px] font-bold tracking-wider px-1 py-[0.8px] rounded bg-muted dark:bg-muted text-secondary-foreground dark:text-muted-foreground">
+                  <span className="uppercase text-9px font-bold tracking-wider px-1 py-[0.8px] rounded bg-muted dark:bg-muted text-secondary-foreground dark:text-muted-foreground">
                     {doc.extension}
                   </span>
                 </div>
@@ -223,7 +223,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
 
       {/* Success Notification */}
       {successMsg && (
-        <div className="mt-2 text-[11px] text-success-600 dark:text-success-400 font-medium text-center">
+        <div className="mt-2 text-11px text-success-600 dark:text-success-400 font-medium text-center">
           {successMsg}
         </div>
       )}
@@ -235,7 +235,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleInsertDocRef(selectedDoc)}
-            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition shadow-sm active:scale-[0.99]"
+            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition shadow-sm active:scale-99"
           >
             <span>Insert Selected Document</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -245,7 +245,7 @@ export function DocumentsColumn({ onLinkInserted }: DocumentsColumnProps) {
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => handleOpenDoc(selectedDoc)}
-            className="w-full h-7 flex items-center justify-center gap-1.5 rounded-md border border-secondary bg-muted text-secondary-foreground text-[11px] font-medium hover:bg-muted transition dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted"
+            className="w-full h-7 flex items-center justify-center gap-1.5 rounded-md border border-secondary bg-muted text-secondary-foreground text-11px font-medium hover:bg-muted transition dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted"
           >
             <ExternalLink className="h-3 w-3 text-muted-foreground" />
             <span>Open Document</span>

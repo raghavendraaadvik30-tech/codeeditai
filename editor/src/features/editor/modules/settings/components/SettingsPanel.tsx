@@ -17,13 +17,13 @@ export function SettingsPanel() {
 
   return (
     <div className="space-y-4 p-4 text-xs">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+      <div className="text-10px font-bold uppercase tracking-wider text-muted-foreground">
         Workspace Preferences
       </div>
 
       {/* Theme Selection */}
       <div className="space-y-1.5">
-        <label className="text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+        <label className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
           Color Theme
         </label>
         <div className="grid grid-cols-3 gap-1.5">
@@ -51,7 +51,7 @@ export function SettingsPanel() {
 
       {/* Typography */}
       <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
           <Type className="h-3.5 w-3.5" />
           <span>Editor Typography</span>
         </div>
@@ -70,7 +70,7 @@ export function SettingsPanel() {
 
       {/* Layout Options */}
       <div className="space-y-2 pt-2 border-t border-muted dark:border-muted">
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
           <Layout className="h-3.5 w-3.5" />
           <span>Document Display</span>
         </div>

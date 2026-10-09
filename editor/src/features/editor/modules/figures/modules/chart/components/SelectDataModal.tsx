@@ -74,7 +74,7 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-secondary">
           <div>
             <h2 className="text-sm font-semibold text-foreground">Select Data Source</h2>
-            <p className="text-xs text-muted0">Configure chart legend series and categories</p>
+            <p className="text-xs text-muted-foreground">Configure chart legend series and categories</p>
           </div>
           <button
             type="button"
@@ -93,7 +93,7 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
               <button
                 type="button"
                 onClick={handleAddSeries}
-                className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/90"
+                className="flex items-center gap-1 text-11px font-semibold text-primary hover:text-primary/90"
               >
                 <Plus className="w-3 h-3" />
                 <span>Add Series</span>

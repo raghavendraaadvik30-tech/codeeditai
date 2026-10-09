@@ -20,6 +20,7 @@ export function useWriting() {
 
   const {
     exec,
+    applyBulletStyle,
     applyNumberingStyle,
     applyMultilevelStyle,
     toggleMultilevelList,
@@ -117,8 +118,15 @@ export function useWriting() {
       setActiveCase(action.label);
 
       /*
-       * Notify React/editor that the content changed.
+       * Notify React/editor that the content changed across all pages.
        */
+      const pageEls = document.querySelectorAll<HTMLElement>(
+        "[data-editor-page][contenteditable='true'], [contenteditable='true'][data-page-id], [contenteditable='true'][data-hf-type]"
+      );
+      pageEls.forEach((p) => {
+        p.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+
       if (editorRef.current) {
         editorRef.current.dispatchEvent(
           new Event("input", {
@@ -209,9 +217,19 @@ export function useWriting() {
    */
   const applyFormatting = useCallback(
     (tool: FormattingTool) => {
+      restoreEditorSelection();
       exec(tool.cmd);
+      if (editorRef.current) {
+        editorRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      requestAnimationFrame(() => {
+        restoreEditorSelection();
+      });
+      setTimeout(() => {
+        restoreEditorSelection();
+      }, 0);
     },
-    [exec]
+    [restoreEditorSelection, exec, editorRef]
   );
 
   /**
@@ -219,9 +237,19 @@ export function useWriting() {
    */
   const applyAlignment = useCallback(
     (tool: AlignmentTool) => {
+      restoreEditorSelection();
       exec(tool.cmd);
+      if (editorRef.current) {
+        editorRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      requestAnimationFrame(() => {
+        restoreEditorSelection();
+      });
+      setTimeout(() => {
+        restoreEditorSelection();
+      }, 0);
     },
-    [exec]
+    [restoreEditorSelection, exec, editorRef]
   );
 
   /**
@@ -297,201 +325,54 @@ const applyFontColor = useCallback(
    */
   const applyHighlight = useCallback(
     (color: string) => {
+      restoreEditorSelection();
       exec("hiliteColor", color);
+      if (editorRef.current) {
+        editorRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      requestAnimationFrame(() => {
+        restoreEditorSelection();
+      });
+      setTimeout(() => {
+        restoreEditorSelection();
+      }, 0);
     },
-    [exec]
+    [restoreEditorSelection, exec, editorRef]
   );
 
   /**
    * Removes text highlight.
    */
   const clearHighlight = useCallback(() => {
-    exec(
-      "hiliteColor",
-      "transparent"
-    );
-  }, [exec]);
+    restoreEditorSelection();
+    exec("hiliteColor", "transparent");
+    if (editorRef.current) {
+      editorRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    requestAnimationFrame(() => {
+      restoreEditorSelection();
+    });
+    setTimeout(() => {
+      restoreEditorSelection();
+    }, 0);
+  }, [restoreEditorSelection, exec, editorRef]);
 
   /**
    * Applies bullet list.
    */
   const applyBullets = useCallback(
     (style?: string) => {
-      const restored =
-        restoreEditorSelection();
-
-      if (!restored) {
+      if (!style) {
+        applyBulletStyle("", "disc");
         return;
       }
-
-      if (!editorRef.current) {
-        return;
-      }
-
-      /*
-       * Normal bullet
-       */
-      if (!style || style === "disc") {
-        exec("insertUnorderedList");
-        return;
-      }
-
-      /*
-       * Circle
-       */
-      if (style === "circle") {
-        exec("insertUnorderedList");
-
-        setTimeout(() => {
-          const selection =
-            window.getSelection();
-
-          if (
-            !selection ||
-            selection.rangeCount === 0
-          ) {
-            return;
-          }
-
-          let node: Node | null =
-            selection
-              .getRangeAt(0)
-              .startContainer;
-
-          while (
-            node &&
-            node !== editorRef.current
-          ) {
-            if (
-              node instanceof
-              HTMLUListElement
-            ) {
-              node.style.listStyleType =
-                "circle";
-
-              break;
-            }
-
-            node = node.parentNode;
-          }
-        }, 0);
-
-        return;
-      }
-
-      /*
-       * Square
-       */
-      if (style === "square") {
-        exec("insertUnorderedList");
-
-        setTimeout(() => {
-          const selection =
-            window.getSelection();
-
-          if (
-            !selection ||
-            selection.rangeCount === 0
-          ) {
-            return;
-          }
-
-          let node: Node | null =
-            selection
-              .getRangeAt(0)
-              .startContainer;
-
-          while (
-            node &&
-            node !== editorRef.current
-          ) {
-            if (
-              node instanceof
-              HTMLUListElement
-            ) {
-              node.style.listStyleType =
-                "square";
-
-              break;
-            }
-
-            node = node.parentNode;
-          }
-        }, 0);
-
-        return;
-      }
-
-      /*
-       * Custom bullet
-       */
       if (style.startsWith("custom:")) {
-        const bulletChar =
-          style.substring(7);
-
-        exec("insertUnorderedList");
-
-        setTimeout(() => {
-          const selection =
-            window.getSelection();
-
-          if (
-            !selection ||
-            selection.rangeCount === 0
-          ) {
-            return;
-          }
-
-          let node: Node | null =
-            selection
-              .getRangeAt(0)
-              .startContainer;
-
-          while (
-            node &&
-            node !== editorRef.current
-          ) {
-            if (
-              node instanceof
-              HTMLUListElement
-            ) {
-              node.style.listStyleType =
-                "none";
-
-              node.setAttribute(
-                "data-custom-bullet",
-                bulletChar
-              );
-
-              node
-                .querySelectorAll(
-                  ":scope > li"
-                )
-                .forEach((li) => {
-                  li.setAttribute(
-                    "data-custom-bullet",
-                    bulletChar
-                  );
-
-                  (
-                    li as HTMLElement
-                  ).style.listStyleType =
-                    "none";
-                });
-
-              break;
-            }
-
-            node = node.parentNode;
-          }
-        }, 0);
+        applyBulletStyle(style.substring(7), "custom");
+      } else {
+        applyBulletStyle("", style);
       }
     },
-    [
-      restoreEditorSelection,
-      exec,
-      editorRef,
-    ]
+    [applyBulletStyle]
   );
 
   /**
@@ -499,25 +380,9 @@ const applyFontColor = useCallback(
    */
   const applyNumbering = useCallback(
     (style?: string) => {
-      const restored =
-        restoreEditorSelection();
-
-      if (!restored) {
-        return;
-      }
-
-      if (style) {
-        applyNumberingStyle(style);
-        return;
-      }
-
-      exec("insertOrderedList");
+      applyNumberingStyle(style || "decimal");
     },
-    [
-      restoreEditorSelection,
-      applyNumberingStyle,
-      exec,
-    ]
+    [applyNumberingStyle]
   );
 
   /**

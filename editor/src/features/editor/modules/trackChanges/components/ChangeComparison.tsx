@@ -39,7 +39,7 @@ export function ChangeComparison({
           <button
             type="button"
             onClick={() => setViewMode("inline")}
-            className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors ${
+            className={`flex items-center gap-1 rounded px-2 py-1 text-11px font-medium transition-colors ${
               viewMode === "inline"
                 ? "bg-brand text-primary-foreground"
                 : "bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground"
@@ -51,7 +51,7 @@ export function ChangeComparison({
           <button
             type="button"
             onClick={() => setViewMode("split")}
-            className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors ${
+            className={`flex items-center gap-1 rounded px-2 py-1 text-11px font-medium transition-colors ${
               viewMode === "split"
                 ? "bg-brand text-primary-foreground"
                 : "bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground"
@@ -92,11 +92,11 @@ export function ChangeComparison({
       ) : (
         <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto thin-scroll">
           <div className="rounded-lg border border-destructive/20 bg-destructive/30 p-2 text-xs dark:border-destructive/40 dark:bg-destructive/10">
-            <span className="text-[10px] font-bold text-destructive uppercase block mb-1">Original</span>
+            <span className="text-10px font-bold text-destructive uppercase block mb-1">Original</span>
             <div className="text-secondary-foreground dark:text-muted-foreground whitespace-pre-wrap">{oldText || "No original content"}</div>
           </div>
           <div className="rounded-lg border border-success-200 bg-success-50/30 p-2 text-xs dark:border-success-900/40 dark:bg-success-950/10">
-            <span className="text-[10px] font-bold text-success-600 uppercase block mb-1">Modified</span>
+            <span className="text-10px font-bold text-success-600 uppercase block mb-1">Modified</span>
             <div className="text-secondary-foreground dark:text-muted-foreground whitespace-pre-wrap">{newText || "No modified content"}</div>
           </div>
         </div>

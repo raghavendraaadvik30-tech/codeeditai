@@ -238,7 +238,7 @@ export default function ChartDesignTab() {
                 className="flex flex-col items-start p-2 cursor-pointer text-xs"
               >
                 <span className="font-semibold text-foreground">{layout.name}</span>
-                <span className="text-[11px] text-muted-foreground">{layout.description}</span>
+                <span className="text-11px text-muted-foreground">{layout.description}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -316,7 +316,7 @@ export default function ChartDesignTab() {
                   <div className="w-1.5 h-3.5 bg-primary rounded-xs" />
                   <div className="w-1.5 h-1.5 bg-primary rounded-xs" />
                 </div>
-                <span className="text-[9px] font-medium text-secondary-foreground leading-none mt-0.5">
+                <span className="text-9px font-medium text-secondary-foreground leading-none mt-0.5">
                   {style.name}
                 </span>
               </button>

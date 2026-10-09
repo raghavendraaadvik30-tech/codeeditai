@@ -38,7 +38,7 @@ export default function HeaderLogo() {
       <div className="leading-tight">
         <h1
           className="
-            text-[17px]
+            text-17px
             font-semibold
             text-foreground
             dark:text-primary-foreground"

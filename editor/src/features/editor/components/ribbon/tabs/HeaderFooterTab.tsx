@@ -434,7 +434,7 @@ export default function HeaderFooterTab() {
                 title="Header: Add or change header"
               >
                 <WordHeaderIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[11px] leading-tight text-foreground dark:text-muted mt-1 flex items-center gap-0.5">
+                <span className="text-11px leading-tight text-foreground dark:text-muted mt-1 flex items-center gap-0.5">
                   Header
                   <ChevronDown className="w-2.5 h-2.5 text-muted-foreground" />
                 </span>
@@ -451,7 +451,7 @@ export default function HeaderFooterTab() {
                 title="Footer: Add or change footer"
               >
                 <WordFooterIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[11px] leading-tight text-foreground dark:text-muted mt-1 flex items-center gap-0.5">
+                <span className="text-11px leading-tight text-foreground dark:text-muted mt-1 flex items-center gap-0.5">
                   Footer
                   <ChevronDown className="w-2.5 h-2.5 text-muted-foreground" />
                 </span>
@@ -467,7 +467,7 @@ export default function HeaderFooterTab() {
                 title="Page Number: Insert page numbers into document"
               >
                 <WordPageNumberIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
+                <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
                   <span>Page</span>
                   <span className="flex items-center gap-0.5">
                     Number
@@ -523,7 +523,7 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 1 Label */}
-        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-10px text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Header &amp; Footer
         </div>
       </div>
@@ -544,7 +544,7 @@ export default function HeaderFooterTab() {
             title="Date & Time: Insert current date or time"
           >
             <WordDateTimeIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
+            <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
               <span>Date &amp;</span>
               <span>Time</span>
             </span>
@@ -558,7 +558,7 @@ export default function HeaderFooterTab() {
                 title="Quick Parts: Insert reusable pieces of content"
               >
                 <WordQuickPartsIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
+                <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
                   <span>Quick</span>
                   <span className="flex items-center gap-0.5">
                     Parts
@@ -582,7 +582,7 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 2 Label */}
-        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-10px text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Insert
         </div>
       </div>
@@ -607,7 +607,7 @@ export default function HeaderFooterTab() {
             title="Go to Header"
           >
             <WordGoToHeaderIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
+            <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
               <span>Go to</span>
               <span>Header</span>
             </span>
@@ -625,7 +625,7 @@ export default function HeaderFooterTab() {
             title="Go to Footer"
           >
             <WordGoToFooterIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
+            <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
               <span>Go to</span>
               <span>Footer</span>
             </span>
@@ -635,7 +635,7 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 3 Label */}
-        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-10px text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Navigation
         </div>
       </div>
@@ -647,7 +647,7 @@ export default function HeaderFooterTab() {
           GROUP 4: OPTIONS (CHECKBOXES)
       ============================================================ */}
       <div className="flex flex-col justify-between items-start px-2 shrink-0">
-        <div className="flex flex-col justify-center gap-1.5 flex-1 pt-1 text-[11px]">
+        <div className="flex flex-col justify-center gap-1.5 flex-1 pt-1 text-11px">
           <label className="flex items-center gap-1.5 select-none cursor-pointer hover:text-foreground dark:hover:text-primary-foreground">
             <input
               type="checkbox"
@@ -692,7 +692,7 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 4 Label */}
-        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center w-full py-0.5 select-none">
+        <div className="text-10px text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center w-full py-0.5 select-none">
           Options
         </div>
       </div>
@@ -704,10 +704,10 @@ export default function HeaderFooterTab() {
           GROUP 5: POSITION (STEPPERS & ALIGNMENT TAB)
       ============================================================ */}
       <div className="flex flex-col justify-between items-start px-2 shrink-0">
-        <div className="flex flex-col justify-center gap-1 flex-1 pt-0.5 text-[11px]">
+        <div className="flex flex-col justify-center gap-1 flex-1 pt-0.5 text-11px">
           {/* Header from Top */}
           <div className="flex items-center justify-between gap-1.5 w-full">
-            <div className="flex items-center gap-1 text-secondary-foreground dark:text-muted-foreground text-[11px]">
+            <div className="flex items-center gap-1 text-secondary-foreground dark:text-muted-foreground text-11px">
               <WordHeaderTopIcon className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Header from Top:</span>
             </div>
@@ -721,20 +721,20 @@ export default function HeaderFooterTab() {
                   const num = parseFloat(raw);
                   if (!isNaN(num)) handleHeaderDistanceChange(num);
                 }}
-                className="w-16 px-1.5 text-[11px] text-foreground dark:text-muted outline-none bg-transparent"
+                className="w-16 px-1.5 text-11px text-foreground dark:text-muted outline-none bg-transparent"
               />
               <div className="flex flex-col border-l border-secondary dark:border-muted h-full">
                 <button
                   type="button"
                   onClick={() => stepDistance("header", 1)}
-                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 cursor-pointer"
+                  className="px-1 text-8px leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 cursor-pointer"
                 >
                   ▲
                 </button>
                 <button
                   type="button"
                   onClick={() => stepDistance("header", -1)}
-                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 border-t border-secondary dark:border-muted cursor-pointer"
+                  className="px-1 text-8px leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 border-t border-secondary dark:border-muted cursor-pointer"
                 >
                   ▼
                 </button>
@@ -744,7 +744,7 @@ export default function HeaderFooterTab() {
 
           {/* Footer from Bottom */}
           <div className="flex items-center justify-between gap-1.5 w-full">
-            <div className="flex items-center gap-1 text-secondary-foreground dark:text-muted-foreground text-[11px]">
+            <div className="flex items-center gap-1 text-secondary-foreground dark:text-muted-foreground text-11px">
               <WordFooterBottomIcon className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Footer from Bottom:</span>
             </div>
@@ -758,20 +758,20 @@ export default function HeaderFooterTab() {
                   const num = parseFloat(raw);
                   if (!isNaN(num)) handleFooterDistanceChange(num);
                 }}
-                className="w-16 px-1.5 text-[11px] text-foreground dark:text-muted outline-none bg-transparent"
+                className="w-16 px-1.5 text-11px text-foreground dark:text-muted outline-none bg-transparent"
               />
               <div className="flex flex-col border-l border-secondary dark:border-muted h-full">
                 <button
                   type="button"
                   onClick={() => stepDistance("footer", 1)}
-                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 cursor-pointer"
+                  className="px-1 text-8px leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 cursor-pointer"
                 >
                   ▲
                 </button>
                 <button
                   type="button"
                   onClick={() => stepDistance("footer", -1)}
-                  className="px-1 text-[8px] leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 border-t border-secondary dark:border-muted cursor-pointer"
+                  className="px-1 text-8px leading-none hover:bg-muted dark:hover:bg-muted flex items-center justify-center h-1/2 border-t border-secondary dark:border-muted cursor-pointer"
                 >
                   ▼
                 </button>
@@ -783,7 +783,7 @@ export default function HeaderFooterTab() {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex items-center gap-1 px-1 py-0.5 rounded text-[11px] text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer transition-colors"
+                className="flex items-center gap-1 px-1 py-0.5 rounded text-11px text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer transition-colors"
                 title="Insert Alignment Tab"
               >
                 <WordAlignmentTabIcon className="w-3.5 h-3.5 text-primary" />
@@ -797,7 +797,7 @@ export default function HeaderFooterTab() {
                 Right Tab
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <div className="px-2 py-1 text-[10px] text-muted-foreground">
+              <div className="px-2 py-1 text-10px text-muted-foreground">
                 Unit:{" "}
                 <button
                   type="button"
@@ -812,7 +812,7 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 5 Label */}
-        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center w-full py-0.5 select-none">
+        <div className="text-10px text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center w-full py-0.5 select-none">
           Position
         </div>
       </div>
@@ -832,7 +832,7 @@ export default function HeaderFooterTab() {
             title="Close Header and Footer (Esc)"
           >
             <WordCloseIcon className="w-6 h-6 group-hover:scale-105 transition-transform" />
-            <span className="text-[10px] leading-3 text-foreground dark:text-muted mt-1 text-center flex flex-col items-center font-medium">
+            <span className="text-10px leading-3 text-foreground dark:text-muted mt-1 text-center flex flex-col items-center font-medium">
               <span>Close Header</span>
               <span>and Footer</span>
             </span>
@@ -840,7 +840,7 @@ export default function HeaderFooterTab() {
         </div>
 
         {/* Group 6 Label */}
-        <div className="text-[10px] text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
+        <div className="text-10px text-muted-foreground dark:text-muted-foreground font-normal tracking-tight text-center py-0.5 select-none">
           Close
         </div>
       </div>

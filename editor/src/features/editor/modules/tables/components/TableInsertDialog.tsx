@@ -303,7 +303,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                 <span className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                   Rows
                 </span>
-                <span className="text-[10px] text-muted0">Range: 1 – 100</span>
+                <span className="text-10px text-muted-foreground">Range: 1 – 100</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -351,7 +351,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                 <span className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                   Columns
                 </span>
-                <span className="text-[10px] text-muted0">Range: 1 – 20</span>
+                <span className="text-10px text-muted-foreground">Range: 1 – 20</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -399,7 +399,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                 <span className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                   Auto Fit to Page Width
                 </span>
-                <span className="text-[10px] text-muted0">
+                <span className="text-10px text-muted-foreground">
                   Stretch table fully to margins
                 </span>
               </div>
@@ -474,7 +474,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                       </tbody>
                     </table>
                     {rows > 5 && (
-                      <div className="text-[10px] text-center text-muted-foreground italic mt-2.5">
+                      <div className="text-10px text-center text-muted-foreground italic mt-2.5">
                         ... and {rows - 5} more row(s)
                       </div>
                     )}

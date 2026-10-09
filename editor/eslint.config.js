@@ -77,6 +77,14 @@ export default defineConfig([
       'shadcn/require-static-classes': 'warn',
 
       // -------------------------
+      // React & Fast Refresh
+      // -------------------------
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'off',
+      'react-hooks/refs': 'off',
+
+      // -------------------------
       // TypeScript consistency
       // -------------------------
 

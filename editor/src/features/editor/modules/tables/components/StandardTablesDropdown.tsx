@@ -191,7 +191,7 @@ export function StandardTablesDropdown() {
           <span className="text-xs font-semibold leading-tight text-foreground dark:text-muted">
             Standard Tables
           </span>
-          <span className="text-[10px] leading-tight text-muted-foreground font-normal">
+          <span className="text-10px leading-tight text-muted-foreground font-normal">
             Tables
           </span>
         </div>
@@ -228,7 +228,7 @@ export function StandardTablesDropdown() {
                 <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-muted0 dark:text-muted-foreground">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   Heading 12pt, Text 12pt
                 </span>
               </div>
@@ -248,7 +248,7 @@ export function StandardTablesDropdown() {
                 <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-muted0 dark:text-muted-foreground">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   Heading 10pt, Text 10pt
                 </span>
               </div>
@@ -268,7 +268,7 @@ export function StandardTablesDropdown() {
                 <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-muted0 dark:text-muted-foreground">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   Title Only
                 </span>
               </div>
@@ -288,7 +288,7 @@ export function StandardTablesDropdown() {
                 <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-muted0 dark:text-muted-foreground">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   No Title 12pt
                 </span>
               </div>

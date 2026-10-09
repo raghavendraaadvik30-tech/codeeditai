@@ -71,7 +71,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
         >
           {change.author || "Current User"}
         </span>
-        <span className="text-[11px] text-muted-foreground font-medium">
+        <span className="text-11px text-muted-foreground font-medium">
           {formattedTime}
         </span>
       </div>
@@ -79,22 +79,22 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
       {/* 2. Badge & Change ID */}
       <div className="flex items-center gap-2 flex-wrap">
         {change.type === "delete" && (
-          <span className="rounded bg-destructive/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-destructive border border-destructive/20 dark:bg-destructive/40 dark:text-destructive dark:border-destructive/60">
+          <span className="rounded bg-destructive/10 px-2 py-0.5 text-9px font-bold uppercase tracking-wider text-destructive border border-destructive/20 dark:bg-destructive/40 dark:text-destructive dark:border-destructive/60">
             DELETION
           </span>
         )}
         {change.type === "insert" && (
-          <span className="rounded bg-success-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-success-700 border border-success-200 dark:bg-success-950/40 dark:text-success-400 dark:border-success-900/60">
+          <span className="rounded bg-success-50 px-2 py-0.5 text-9px font-bold uppercase tracking-wider text-success-700 border border-success-200 dark:bg-success-950/40 dark:text-success-400 dark:border-success-900/60">
             INSERTION
           </span>
         )}
         {change.type === "edit" && (
-          <span className="rounded bg-warning-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-warning-700 border border-warning-200 dark:bg-warning-950/40 dark:text-warning-400 dark:border-warning-900/60">
+          <span className="rounded bg-warning-50 px-2 py-0.5 text-9px font-bold uppercase tracking-wider text-warning-700 border border-warning-200 dark:bg-warning-950/40 dark:text-warning-400 dark:border-warning-900/60">
             EDIT
           </span>
         )}
 
-        <span className="text-[11px] text-muted-foreground font-mono">
+        <span className="text-11px text-muted-foreground font-mono">
           ID: {change.id}
         </span>
       </div>
@@ -115,7 +115,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
           {change.type === "edit" && (
             <div className="border-l-2 border-warning-500 pl-2 text-xs space-y-0.5 bg-warning-50/20 p-1 rounded-r">
               {change.originalText && (
-                <div className="text-destructive dark:text-destructive line-through text-[11px] break-words">
+                <div className="text-destructive dark:text-destructive line-through text-11px break-words">
                   {change.originalText}
                 </div>
               )}
@@ -180,7 +180,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                     key={c.id}
                     className="rounded-lg border border-secondary bg-muted/80 p-2 text-xs text-secondary-foreground dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
                   >
-                    <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground mb-1">
+                    <div className="flex items-center justify-between text-10px font-semibold text-muted-foreground dark:text-muted-foreground mb-1">
                       <span>{c.author}</span>
                       <span>
                         {new Date(c.timestamp).toLocaleTimeString([], {
@@ -197,7 +197,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
                 ))}
               </div>
             ) : (
-              <p className="text-[11px] text-muted-foreground italic">No comments on this change yet.</p>
+              <p className="text-11px text-muted-foreground italic">No comments on this change yet.</p>
             )}
 
             <form onSubmit={handleAddComment} className="flex gap-1.5 pt-1">

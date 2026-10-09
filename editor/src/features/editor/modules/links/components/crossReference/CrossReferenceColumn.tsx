@@ -239,7 +239,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
       {/* Reference Type Pills Grid */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+          <label className="block text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
             Reference Type
           </label>
           <button
@@ -264,7 +264,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                   setError(null);
                 }}
                 className={cn(
-                  'flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-[11px] font-semibold transition border select-none',
+                  'flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-10px font-medium transition border select-none',
                   isSelected
                     ? 'border-primary bg-primary/10 text-primary/90 dark:border-primary dark:bg-navy-950/40 dark:text-navy-300 shadow-xs'
                     : 'border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-[#111D29] dark:text-muted-foreground'
@@ -281,7 +281,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
       {/* Bookmark creation tool when Bookmark is selected */}
       {selectedType === 'bookmark' && (
         <div className="p-2 rounded-md border border-warning-200 bg-warning-50/50 dark:border-warning-900/50 dark:bg-warning-950/20 space-y-1.5">
-          <label className="block text-[10px] font-bold text-warning-800 dark:text-warning-300">
+          <label className="block text-10px font-semibold text-warning-800 dark:text-warning-300">
             + Create Bookmark at Selection / Cursor
           </label>
           <div className="flex gap-1.5">
@@ -290,7 +290,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
               value={newBookmarkName}
               onChange={(e) => setNewBookmarkName(e.target.value)}
               placeholder="e.g. SafetySummary"
-              className="flex-1 h-7 px-2 text-xs rounded border border-warning-200 bg-card dark:bg-[#111D29] text-foreground dark:text-muted-foreground focus:outline-none placeholder:text-muted-foreground"
+              className="flex-1 h-7 px-2 text-11px rounded border border-warning-200 bg-card dark:bg-[#111D29] text-foreground dark:text-muted-foreground focus:outline-none placeholder:text-11px placeholder:text-muted-foreground"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreateBookmark();
               }}
@@ -299,14 +299,14 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleCreateBookmark}
-              className="h-7 px-2.5 rounded bg-warning-600 hover:bg-warning-700 text-primary-foreground text-[11px] font-semibold flex items-center gap-1 shrink-0 shadow-2xs"
+              className="h-7 px-2.5 rounded bg-warning-600 hover:bg-warning-700 text-primary-foreground text-10px font-semibold flex items-center gap-1 shrink-0 shadow-2xs"
             >
               <Plus className="h-3 w-3" />
               Add
             </button>
           </div>
           {bookmarkSuccess && (
-            <p className="text-[10px] text-success-600 dark:text-success-400 font-medium">
+            <p className="text-10px text-success-600 dark:text-success-400 font-medium">
               {bookmarkSuccess}
             </p>
           )}
@@ -316,21 +316,21 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
       {/* For Which Target Dropdown */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">
+          <label className="block text-10px font-semibold text-secondary-foreground dark:text-muted-foreground">
             For which target ({targets.length} found)
           </label>
           <button
             type="button"
             onClick={handleManualRefresh}
-            className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/90 dark:text-primary"
+            className="flex items-center gap-1 text-9px text-primary hover:text-primary/90 dark:text-primary"
             title="Scan document for targets"
           >
-            <RefreshCw className={cn("h-3 w-3", isScanning && "animate-spin")} />
+            <RefreshCw className={cn("h-2.5 w-2.5", isScanning && "animate-spin")} />
             Refresh
           </button>
         </div>
         {targets.length === 0 ? (
-          <div className="p-2 text-center text-xs text-muted-foreground bg-muted dark:bg-[#111D29] rounded-md border border-dashed border-border dark:border-secondary-foreground">
+          <div className="p-2 text-center text-10px text-muted-foreground bg-muted dark:bg-[#111D29] rounded-md border border-dashed border-border dark:border-secondary-foreground">
             {selectedType === 'bookmark'
               ? 'No bookmarks in document yet. Type a name above and click "Add".'
               : `No ${currentTypeLabel.toLowerCase()}s created in the document yet.`}
@@ -345,7 +345,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                   setSuccessMsg(`Navigated to ${t.title}`);
                   setTimeout(() => setSuccessMsg(null), 2000);
                 }}
-                className="w-full text-left px-2.5 py-1.5 text-[11px] rounded bg-muted hover:bg-muted border border-secondary text-secondary-foreground dark:bg-[#111D29] dark:hover:bg-[#1A2C3D] dark:border-muted dark:text-muted-foreground transition"
+                className="w-full text-left px-2.5 py-1.5 text-10px rounded bg-muted hover:bg-muted border border-secondary text-secondary-foreground dark:bg-[#111D29] dark:hover:bg-[#1A2C3D] dark:border-muted dark:text-muted-foreground transition"
               >
                 {t.title}
               </button>
@@ -359,7 +359,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                 if (!isDropdownOpen) refreshTargets();
                 setIsDropdownOpen(!isDropdownOpen);
               }}
-              className="w-full h-8 px-2.5 text-xs rounded-md border border-secondary bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted flex items-center justify-between transition-colors"
+              className="w-full h-7.5 px-2.5 text-11px rounded-md border border-secondary bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted flex items-center justify-between transition-colors"
             >
               <span className="truncate pr-2">
                 {targets.find((t) => t.id === selectedTargetId)?.title || 'Select a target'}
@@ -372,7 +372,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                 <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
                 <div className="absolute left-0 top-[calc(100%+4px)] z-50 w-full max-h-45 overflow-y-auto rounded-md border border-secondary bg-card shadow-lg dark:border-secondary-foreground dark:bg-[#111D29] py-1 scrollbar-thin scrollbar-thumb-secondary dark:scrollbar-thumb-secondary-foreground">
                   {targets.length === 0 ? (
-                    <div className="px-3 py-2 text-xs text-muted-foreground italic">No targets found</div>
+                    <div className="px-3 py-2 text-10px text-muted-foreground italic">No targets found</div>
                   ) : (
                     targets.map((t) => (
                       <button
@@ -383,7 +383,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                           setIsDropdownOpen(false);
                         }}
                         className={cn(
-                          "w-full text-left px-3 py-1.5 text-[11px] hover:bg-muted dark:hover:bg-muted transition-colors truncate",
+                          "w-full text-left px-3 py-1.5 text-10px hover:bg-muted dark:hover:bg-muted transition-colors truncate",
                           selectedTargetId === t.id && "bg-primary/50 text-primary dark:bg-navy-900/20 dark:text-primary font-medium"
                         )}
                         title={t.title}
@@ -404,14 +404,14 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
         <>
           {/* Error / Success Feedback */}
           {error && (
-            <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-[11px] dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
+            <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-10px dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-1.5 p-2 rounded-md bg-success-50 border border-success-200 text-success-700 text-[11px] dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
+            <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-success-50 border border-success-200 text-success-700 text-10px dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
               <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -423,7 +423,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
             disabled={targets.length === 0}
             onMouseDown={(e) => e.preventDefault()}
             onClick={handleInsertReference}
-            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-[0.99]"
+            className="w-full h-7.5 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-11px font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-99"
           >
             <span>Insert Reference</span>
             <ArrowRight className="h-3.5 w-3.5" />

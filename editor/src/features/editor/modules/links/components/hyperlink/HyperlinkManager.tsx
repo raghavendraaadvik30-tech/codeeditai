@@ -58,7 +58,7 @@ export function HyperlinkManager() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
+        <span className="text-10px font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
           Hyperlinks ({links.length})
         </span>
         <div className="flex items-center gap-1">
@@ -73,7 +73,7 @@ export function HyperlinkManager() {
           <button
             type="button"
             onClick={() => setDialogOpen(true)}
-            className="flex h-6 items-center gap-1 rounded bg-brand px-2 text-[11px] font-semibold text-primary-foreground hover:bg-brand-deep"
+            className="flex h-6 items-center gap-1 rounded bg-brand px-2 text-11px font-semibold text-primary-foreground hover:bg-brand-deep"
           >
             <Plus className="h-3 w-3" /> Add Link
           </button>

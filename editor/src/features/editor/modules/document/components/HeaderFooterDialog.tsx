@@ -48,7 +48,7 @@ function HeaderFooterDialogContent({ onClose }: { onClose: () => void }) {
 
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+            <label className="block text-11px font-medium text-muted-foreground mb-1">
               Header Text
             </label>
             <input
@@ -61,7 +61,7 @@ function HeaderFooterDialogContent({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+            <label className="block text-11px font-medium text-muted-foreground mb-1">
               Footer Text
             </label>
             <input

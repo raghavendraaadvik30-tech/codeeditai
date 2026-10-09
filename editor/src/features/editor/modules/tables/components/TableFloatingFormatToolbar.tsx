@@ -554,7 +554,7 @@ export function TableFloatingFormatToolbar() {
             closeAllSubmenus();
             setFontMenuOpen(next);
           }}
-          className="flex h-7 items-center gap-1 rounded px-1.5 hover:bg-muted dark:hover:bg-muted text-[11px] font-medium w-24 justify-between shrink-0"
+          className="flex h-7 items-center gap-1 rounded px-1.5 hover:bg-muted dark:hover:bg-muted text-11px font-medium w-24 justify-between shrink-0"
           title="Font Family"
         >
           <span className="truncate">{currentFont}</span>
@@ -593,7 +593,7 @@ export function TableFloatingFormatToolbar() {
             closeAllSubmenus();
             setSizeMenuOpen(next);
           }}
-          className="flex h-7 items-center gap-0.5 rounded px-1.5 hover:bg-muted dark:hover:bg-muted text-[11px] font-medium w-14 justify-between shrink-0"
+          className="flex h-7 items-center gap-0.5 rounded px-1.5 hover:bg-muted dark:hover:bg-muted text-11px font-medium w-14 justify-between shrink-0"
           title="Font Size"
         >
           <span>{currentSize}</span>
@@ -627,7 +627,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => stepFontSize(1)}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-[11px] font-bold"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-11px font-bold"
         title="Increase Font Size (A+)"
       >
         A<sup>+</sup>
@@ -637,7 +637,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => stepFontSize(-1)}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-[11px] font-bold"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-11px font-bold"
         title="Decrease Font Size (A-)"
       >
         A<sup>-</sup>
@@ -797,7 +797,7 @@ export function TableFloatingFormatToolbar() {
 
         {textColorOpen && (
           <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-foreground space-y-1">
-            <div className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <div className="text-9px font-bold uppercase tracking-wider text-muted-foreground px-1">
               Text Color
             </div>
             {TEXT_COLORS.map((c) => (
@@ -840,7 +840,7 @@ export function TableFloatingFormatToolbar() {
 
         {highlightOpen && (
           <div className="absolute left-0 top-full mt-1 z-50 w-36 rounded-md border border-secondary bg-card p-1.5 shadow-lg dark:border-muted dark:bg-foreground space-y-1">
-            <div className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <div className="text-9px font-bold uppercase tracking-wider text-muted-foreground px-1">
               Highlight Color
             </div>
             {HIGHLIGHT_COLORS.map((c) => (
@@ -869,7 +869,7 @@ export function TableFloatingFormatToolbar() {
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => execFormat("removeFormat")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-muted0"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-muted dark:hover:bg-muted text-muted-foreground"
         title="Clear Formatting"
       >
         <RemoveFormatting className="h-3.5 w-3.5" />

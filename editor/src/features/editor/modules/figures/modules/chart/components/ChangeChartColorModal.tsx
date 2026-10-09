@@ -36,7 +36,7 @@ export const ChangeChartColorModal: React.FC<ChangeChartColorModalProps> = ({
             <h2 className="text-base font-semibold text-foreground dark:text-primary-foreground">
               Color Palette
             </h2>
-            <p className="text-xs text-muted0 dark:text-muted-foreground">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               Select a color theme for the active chart.
             </p>
           </div>

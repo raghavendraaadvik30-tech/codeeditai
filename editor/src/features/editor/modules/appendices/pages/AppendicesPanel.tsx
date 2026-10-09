@@ -125,7 +125,7 @@ export default function AppendicesPanel() {
   return (
     <div className="p-4 space-y-3 select-none">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+        <span className="text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
           INSERT APPENDICES
         </span>
         <span className="text-xs text-muted-foreground dark:text-muted-foreground">

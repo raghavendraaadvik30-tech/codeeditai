@@ -578,7 +578,7 @@ export default function DocumentIconRenderer({
       {isSelected && (
         <div
           data-editor-ui="true"
-          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-foreground/95 text-primary-foreground p-1.5 rounded-xl shadow-xl text-[11px] backdrop-blur-xs z-50 whitespace-nowrap"
+          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-foreground/95 text-primary-foreground p-1.5 rounded-xl shadow-xl text-11px backdrop-blur-xs z-50 whitespace-nowrap"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -591,7 +591,7 @@ export default function DocumentIconRenderer({
           >
             -
           </button>
-          <span className="text-[10px] text-muted-foreground">{width}px</span>
+          <span className="text-10px text-muted-foreground">{width}px</span>
           <button
             type="button"
             title="Increase size"

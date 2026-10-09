@@ -577,8 +577,8 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       onClick={(e) => handleNodeClick(e, node.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl text-primary-foreground shadow-md cursor-pointer transition-all ${
                         isNodeSelected
-                          ? 'ring-3 ring-primary scale-[1.02] z-10'
-                          : 'hover:scale-[1.01]'
+                          ? 'ring-3 ring-primary scale-102 z-10'
+                          : 'hover:scale-101'
                       } ${smartArt.style === 'outline' ? 'text-foreground' : ''}`}
                       style={styleObj}
                     >
@@ -615,7 +615,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                             onFocus={() => setSelectedNodeId(node.id)}
                             data-smartart-text-editor="true"
                             placeholder="Description..."
-                            className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
+                            className={`w-full text-11px bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
                               smartArt.style === 'outline' ? 'text-secondary-foreground dark:text-muted-foreground' : 'text-primary-foreground/80'
                             }`}
                           />
@@ -658,8 +658,8 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     style={styleObj}
                   >
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${
-                        smartArt.style === 'outline' ? 'text-muted0' : 'opacity-80'
+                      className={`text-10px font-bold uppercase tracking-widest mb-1 ${
+                        smartArt.style === 'outline' ? 'text-muted-foreground' : 'opacity-80'
                       }`}
                     >
                       Step {origIndex + 1}
@@ -689,7 +689,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         onFocus={() => setSelectedNodeId(node.id)}
                         data-smartart-text-editor="true"
                         placeholder="Description..."
-                        className={`w-full text-center bg-transparent border-none text-[11px] mt-1 focus:outline-none focus:bg-card/20 rounded px-1 ${
+                        className={`w-full text-center bg-transparent border-none text-11px mt-1 focus:outline-none focus:bg-card/20 rounded px-1 ${
                           smartArt.style === 'outline' ? 'text-secondary-foreground dark:text-muted-foreground' : 'text-primary-foreground/80'
                         }`}
                       />
@@ -738,7 +738,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     paddingRight: i > 0 && isRtl ? '1.5rem' : '1rem',
                   }}
                 >
-                  <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest mb-1">
+                  <span className="text-10px font-bold opacity-80 uppercase tracking-widest mb-1">
                     Step {origIndex + 1}
                   </span>
                   <input
@@ -764,7 +764,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       onFocus={() => setSelectedNodeId(node.id)}
                       data-smartart-text-editor="true"
                       placeholder="Description..."
-                      className="w-full text-center bg-transparent border-none text-primary-foreground/80 text-[11px] mt-1 focus:outline-none focus:bg-card/20 rounded px-1"
+                      className="w-full text-center bg-transparent border-none text-primary-foreground/80 text-11px mt-1 focus:outline-none focus:bg-card/20 rounded px-1"
                     />
                   )}
                 </div>
@@ -796,7 +796,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   style={styleObj}
                 >
                   <div
-                    className="w-6 h-6 rounded-full bg-card/25 text-primary-foreground font-bold text-[11px] flex items-center justify-center mb-1.5"
+                    className="w-6 h-6 rounded-full bg-card/25 text-primary-foreground font-bold text-11px flex items-center justify-center mb-1.5"
                     style={smartArt.style === 'outline' ? { backgroundColor: bg } : {}}
                   >
                     {origIndex + 1}
@@ -826,7 +826,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       onFocus={() => setSelectedNodeId(node.id)}
                       data-smartart-text-editor="true"
                       placeholder="Description..."
-                      className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
+                      className={`w-full text-11px bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
                         smartArt.style === 'outline' ? 'text-secondary-foreground dark:text-muted-foreground' : 'text-primary-foreground/80'
                       }`}
                     />
@@ -853,7 +853,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   <div
                     onClick={(e) => handleNodeClick(e, node.id)}
                     className={`w-full max-w-md p-3 rounded-xl text-primary-foreground shadow-sm flex items-center gap-3 transition-all cursor-pointer ${
-                      isNodeSelected ? 'ring-3 ring-primary scale-[1.01]' : 'hover:scale-[1.005]'
+                      isNodeSelected ? 'ring-3 ring-primary scale-101' : 'hover:scale-[1.005]'
                     }`}
                     style={styleObj}
                   >
@@ -889,7 +889,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                           onFocus={() => setSelectedNodeId(node.id)}
                           data-smartart-text-editor="true"
                           placeholder="Description..."
-                          className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
+                          className={`w-full text-11px bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
                             smartArt.style === 'outline' ? 'text-secondary-foreground dark:text-muted-foreground' : 'text-primary-foreground/80'
                           }`}
                         />
@@ -960,7 +960,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                           onFocus={() => setSelectedNodeId(node.id)}
                           data-smartart-text-editor="true"
                           placeholder="Description..."
-                          className={`w-full text-center text-[10px] bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
+                          className={`w-full text-center text-10px bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-0.5 ${
                             smartArt.style === 'outline' ? 'text-secondary-foreground dark:text-muted-foreground' : 'text-primary-foreground/80'
                           }`}
                         />
@@ -994,7 +994,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     }`}
                     style={{ backgroundColor: bg }}
                   >
-                    <span className="text-[10px] font-bold opacity-80 uppercase">
+                    <span className="text-10px font-bold opacity-80 uppercase">
                       {origIndex + 1}
                     </span>
                   </div>
@@ -1023,7 +1023,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         onFocus={() => setSelectedNodeId(node.id)}
                         data-smartart-text-editor="true"
                         placeholder="Description..."
-                        className="w-full text-center text-[11px] text-muted0 dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-muted dark:focus:bg-muted rounded px-1"
+                        className="w-full text-center text-11px text-muted-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-muted dark:focus:bg-muted rounded px-1"
                       />
                     )}
                   </div>
@@ -1083,7 +1083,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       onFocus={() => setSelectedNodeId(node.id)}
                       data-smartart-text-editor="true"
                       placeholder="Description..."
-                      className={`w-full text-[11px] bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-1 ${
+                      className={`w-full text-11px bg-transparent border-none focus:outline-none focus:bg-card/20 rounded px-1 mt-1 ${
                         smartArt.style === 'outline' ? 'text-secondary-foreground dark:text-muted-foreground' : 'text-primary-foreground/80'
                       }`}
                     />
@@ -1160,7 +1160,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         onFocus={() => setSelectedNodeId(node.id)}
                         data-smartart-text-editor="true"
                         placeholder="Point details..."
-                        className="w-full text-[11px] text-secondary-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-card/40 dark:focus:bg-muted rounded px-1 mt-0.5"
+                        className="w-full text-11px text-secondary-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-card/40 dark:focus:bg-muted rounded px-1 mt-0.5"
                       />
                     )}
                   </div>
@@ -1222,7 +1222,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         onFocus={() => setSelectedNodeId(node.id)}
                         data-smartart-text-editor="true"
                         placeholder="Description..."
-                        className="w-full text-[11px] text-muted0 dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-primary/10 dark:focus:bg-muted rounded px-1 mt-0.5"
+                        className="w-full text-11px text-muted-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-primary/10 dark:focus:bg-muted rounded px-1 mt-0.5"
                       />
                     )}
                   </div>
@@ -1255,7 +1255,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     className="p-2.5 text-primary-foreground font-semibold text-xs text-center flex items-center justify-center gap-1.5"
                     style={styleObj}
                   >
-                    <span className="w-5 h-5 rounded-full bg-card/25 flex items-center justify-center text-[10px] font-bold">
+                    <span className="w-5 h-5 rounded-full bg-card/25 flex items-center justify-center text-10px font-bold">
                       {origIndex + 1}
                     </span>
                     <input
@@ -1314,7 +1314,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     className="w-36 shrink-0 p-3 rounded-lg text-primary-foreground shadow-xs flex flex-col justify-center items-center text-center"
                     style={styleObj}
                   >
-                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-80 mb-0.5">
+                    <span className="text-10px font-bold uppercase tracking-wider opacity-80 mb-0.5">
                       Group {origIndex + 1}
                     </span>
                     <input
@@ -1400,7 +1400,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         onFocus={() => setSelectedNodeId(node.id)}
                         data-smartart-text-editor="true"
                         placeholder="Layer description..."
-                        className="w-full text-[11px] text-secondary-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-card/60 dark:focus:bg-muted rounded px-1 mt-0.5"
+                        className="w-full text-11px text-secondary-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-card/60 dark:focus:bg-muted rounded px-1 mt-0.5"
                       />
                     )}
                   </div>
@@ -1460,7 +1460,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       onFocus={() => setSelectedNodeId(node.id)}
                       data-smartart-text-editor="true"
                       placeholder="Priority description..."
-                      className="w-full text-[11px] text-muted0 dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-primary/10 dark:focus:bg-muted rounded px-1 mt-0.5"
+                      className="w-full text-11px text-muted-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-primary/10 dark:focus:bg-muted rounded px-1 mt-0.5"
                     />
                   )}
                 </div>
@@ -1514,7 +1514,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 }`}
                 style={getStyleClass(colors[0])}
               >
-                <span className="text-[9px] font-bold uppercase tracking-wider opacity-80 mb-0.5">
+                <span className="text-9px font-bold uppercase tracking-wider opacity-80 mb-0.5">
                   Core Hub
                 </span>
                 <input
@@ -1563,7 +1563,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     onFocus={() => setSelectedNodeId(node.id)}
                     data-smartart-text-editor="true"
                     placeholder="Satellite..."
-                    className="w-full text-center bg-transparent border-none text-primary-foreground font-bold text-[11px] focus:outline-none focus:bg-card/20 rounded px-1 truncate"
+                    className="w-full text-center bg-transparent border-none text-primary-foreground font-bold text-11px focus:outline-none focus:bg-card/20 rounded px-1 truncate"
                   />
                 </div>
               );
@@ -1602,7 +1602,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   ...styleObj,
                 }}
               >
-                <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest">
+                <span className="text-10px font-bold opacity-80 uppercase tracking-widest">
                   Stage {origIndex + 1}
                 </span>
                 <input
@@ -1645,7 +1645,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   }`}
                   style={getStyleClass(colors[0])}
                 >
-                  <span className="text-[10px] font-bold opacity-80 uppercase tracking-wider block mb-0.5">
+                  <span className="text-10px font-bold opacity-80 uppercase tracking-wider block mb-0.5">
                     Parent Origin
                   </span>
                   <input
@@ -1731,7 +1731,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 }`}
                 style={getStyleClass(colors[0])}
               >
-                <span className="text-[10px] font-bold opacity-80 uppercase tracking-wider block mb-0.5">
+                <span className="text-10px font-bold opacity-80 uppercase tracking-wider block mb-0.5">
                   {layId === 'organizationHierarchy' ? 'Executive Director' : 'Top Level'}
                 </span>
                 <input
@@ -1775,7 +1775,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     <div
                       onClick={(e) => handleNodeClick(e, child.id)}
                       className={`w-full p-2.5 rounded-xl text-primary-foreground shadow-xs text-center cursor-pointer transition-all ${
-                        isNodeSelected ? 'ring-3 ring-primary scale-105' : 'hover:scale-[1.02]'
+                        isNodeSelected ? 'ring-3 ring-primary scale-105' : 'hover:scale-102'
                       }`}
                       style={styleObj}
                     >
@@ -1802,7 +1802,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                           onFocus={() => setSelectedNodeId(child.id)}
                           data-smartart-text-editor="true"
                           placeholder="Subtitle..."
-                          className="w-full text-center bg-transparent border-none text-primary-foreground/80 text-[10px] mt-0.5 focus:outline-none focus:bg-card/20 rounded truncate"
+                          className="w-full text-center bg-transparent border-none text-primary-foreground/80 text-10px mt-0.5 focus:outline-none focus:bg-card/20 rounded truncate"
                         />
                       )}
                     </div>
@@ -1833,7 +1833,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   key={node.id}
                   onClick={(e) => handleNodeClick(e, node.id)}
                   className={`rounded-xl p-3 flex flex-col justify-between shadow-xs border transition-all cursor-pointer ${
-                    isNodeSelected ? 'ring-3 ring-primary shadow-md' : 'hover:scale-[1.01]'
+                    isNodeSelected ? 'ring-3 ring-primary shadow-md' : 'hover:scale-101'
                   }`}
                   style={{
                     backgroundColor: `${bg}12`,
@@ -1842,7 +1842,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span
-                      className="px-2 py-0.5 rounded text-[10px] font-bold text-primary-foreground uppercase tracking-wider"
+                      className="px-2 py-0.5 rounded text-10px font-bold text-primary-foreground uppercase tracking-wider"
                       style={{ backgroundColor: bg }}
                     >
                       {quadrantLabel}
@@ -1871,7 +1871,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       onFocus={() => setSelectedNodeId(node.id)}
                       data-smartart-text-editor="true"
                       placeholder="Quadrant details..."
-                      className="w-full text-[11px] text-secondary-foreground dark:text-muted-foreground bg-transparent border-none resize-none focus:outline-none focus:bg-card/40 rounded p-1 mt-0.5"
+                      className="w-full text-11px text-secondary-foreground dark:text-muted-foreground bg-transparent border-none resize-none focus:outline-none focus:bg-card/40 rounded p-1 mt-0.5"
                     />
                   </div>
                 </div>
@@ -1913,7 +1913,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                       backgroundColor: bg,
                     }}
                   >
-                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-10px font-bold uppercase tracking-wider">
                       L{count - i}
                     </span>
                   </div>
@@ -1960,7 +1960,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         onFocus={() => setSelectedNodeId(node.id)}
                         data-smartart-text-editor="true"
                         placeholder="Details..."
-                        className="w-full text-[11px] text-muted0 dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-muted rounded px-1 mt-0.5"
+                        className="w-full text-11px text-muted-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-muted rounded px-1 mt-0.5"
                       />
                     )}
                   </div>
@@ -1986,14 +1986,14 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 key={node.id}
                 onClick={(e) => handleNodeClick(e, node.id)}
                 className={`h-12 rounded-xl text-primary-foreground shadow-sm flex items-center justify-center px-4 transition-all cursor-pointer ${
-                  isNodeSelected ? 'ring-3 ring-primary scale-[1.02] z-10' : 'hover:brightness-105'
+                  isNodeSelected ? 'ring-3 ring-primary scale-102 z-10' : 'hover:brightness-105'
                 }`}
                 style={{
                   width: `${widthPercent}%`,
                   ...styleObj,
                 }}
               >
-                <span className="text-[10px] font-bold opacity-80 mr-2 uppercase tracking-wider shrink-0">
+                <span className="text-10px font-bold opacity-80 mr-2 uppercase tracking-wider shrink-0">
                   L{count - i}
                 </span>
                 <input
@@ -2116,7 +2116,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                   onFocus={() => setSelectedNodeId(node.id)}
                   data-smartart-text-editor="true"
                   placeholder="Metric Label..."
-                  className="w-full text-center text-[11px] font-semibold text-muted0 dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-muted rounded mt-1"
+                  className="w-full text-center text-11px font-semibold text-muted-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none focus:bg-muted rounded mt-1"
                 />
               </div>
             );
@@ -2171,7 +2171,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     onFocus={() => setSelectedNodeId(node.id)}
                     data-smartart-text-editor="true"
                     placeholder="Description details..."
-                    className="w-full text-[11px] text-secondary-foreground dark:text-muted-foreground bg-transparent border-none resize-none focus:outline-none focus:bg-muted dark:focus:bg-muted rounded p-1"
+                    className="w-full text-11px text-secondary-foreground dark:text-muted-foreground bg-transparent border-none resize-none focus:outline-none focus:bg-muted dark:focus:bg-muted rounded p-1"
                   />
                 </div>
               </div>
@@ -2200,7 +2200,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
             >
               <div className="flex items-center justify-between mb-2">
                 <span
-                  className="w-6 h-6 rounded-full text-primary-foreground font-bold text-[10px] flex items-center justify-center shadow-xs"
+                  className="w-6 h-6 rounded-full text-primary-foreground font-bold text-10px flex items-center justify-center shadow-xs"
                   style={{ backgroundColor: bg }}
                 >
                   {origIndex + 1}
@@ -2228,7 +2228,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                 onFocus={() => setSelectedNodeId(node.id)}
                 data-smartart-text-editor="true"
                 placeholder="Card summary statement..."
-                className="w-full text-[11px] text-muted0 dark:text-muted-foreground bg-transparent border-none resize-none focus:outline-none focus:bg-muted dark:focus:bg-muted rounded p-1 mt-1"
+                className="w-full text-11px text-muted-foreground dark:text-muted-foreground bg-transparent border-none resize-none focus:outline-none focus:bg-muted dark:focus:bg-muted rounded p-1 mt-1"
               />
             </div>
           );
@@ -2314,7 +2314,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     }`}
                   >
                     <div className="flex items-center gap-1.5 w-full">
-                      <span className="w-5 text-center text-[11px] font-semibold text-muted0 dark:text-muted-foreground shrink-0 select-none">
+                      <span className="w-5 text-center text-11px font-semibold text-muted-foreground dark:text-muted-foreground shrink-0 select-none">
                         {i + 1}.
                       </span>
                       <input
@@ -2351,7 +2351,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                         onClick={(e) => e.stopPropagation()}
                         data-smartart-text-editor="true"
                         placeholder="Description..."
-                        className="w-full text-[11px] text-muted0 dark:text-muted-foreground bg-transparent border-none focus:outline-none pl-6"
+                        className="w-full text-11px text-muted-foreground dark:text-muted-foreground bg-transparent border-none focus:outline-none pl-6"
                       />
                     )}
                   </div>
@@ -2561,7 +2561,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
 
             {showColorDropdown && (
               <div className={`absolute ${toolbarPos.isBelow && toolbarPos.top + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 w-52 p-1.5 bg-card border border-secondary rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-muted z-50 animate-in fade-in zoom-in-95`}>
-                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                <span className="px-2 py-1 text-10px font-bold uppercase tracking-wider text-muted-foreground block">
                   Color Themes
                 </span>
                 {SMARTART_COLOR_SCHEMES.map((scheme) => (
@@ -2615,7 +2615,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
                     : 'top-full mt-1'
                 } left-0 min-w-45 w-48 p-1.5 bg-card border border-secondary rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-muted z-50 animate-in fade-in zoom-in-95 flex flex-col gap-0.5 whitespace-normal`}
               >
-                <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-muted dark:border-muted/80 mb-0.5">
+                <span className="px-2.5 py-1 text-10px font-bold uppercase tracking-wider text-muted-foreground block border-b border-muted dark:border-muted/80 mb-0.5">
                   SmartArt Style
                 </span>
                 {(['flat', 'outline'] as SmartArtStyle[]).map((st) => (
@@ -2659,7 +2659,7 @@ export const DocumentSmartArtRenderer: React.FC<DocumentSmartArtRendererProps> =
 
             {showLayoutDropdown && (
               <div className={`absolute ${toolbarPos.isBelow && toolbarPos.top + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 w-56 max-h-60 overflow-y-auto p-1.5 bg-card border border-secondary rounded-lg shadow-2xl dark:bg-[#111D29] dark:border-muted z-50 animate-in fade-in zoom-in-95`}>
-                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                <span className="px-2 py-1 text-10px font-bold uppercase tracking-wider text-muted-foreground block">
                   {smartArt.category} Layouts
                 </span>
                 {categoryLayouts.map((l) => (

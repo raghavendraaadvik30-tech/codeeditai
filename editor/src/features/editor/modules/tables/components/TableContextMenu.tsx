@@ -419,9 +419,9 @@ export function TableContextMenu({
             onClick={handleCut}
             className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
-            <Scissors className="h-3.5 w-3.5 text-muted0" />
+            <Scissors className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="flex-1">Cut</span>
-            <span className="text-[10px] text-muted-foreground font-mono">Ctrl+X</span>
+            <span className="text-10px text-muted-foreground font-mono">Ctrl+X</span>
           </button>
 
           <button
@@ -429,9 +429,9 @@ export function TableContextMenu({
             onClick={handleCopy}
             className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
-            <Copy className="h-3.5 w-3.5 text-muted0" />
+            <Copy className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="flex-1">Copy</span>
-            <span className="text-[10px] text-muted-foreground font-mono">Ctrl+C</span>
+            <span className="text-10px text-muted-foreground font-mono">Ctrl+C</span>
           </button>
 
           {/* Paste Options Submenu */}
@@ -444,7 +444,7 @@ export function TableContextMenu({
               className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <ClipboardPaste className="h-3.5 w-3.5 text-muted0" />
+                <ClipboardPaste className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>Paste Options</span>
               </div>
               <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -725,7 +725,7 @@ export function TableContextMenu({
             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <AlignCenter className="h-3.5 w-3.5 text-muted0" />
+              <AlignCenter className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Cell Alignment</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -734,7 +734,7 @@ export function TableContextMenu({
           {renderSubmenu(
             "alignment",
             <div className="p-1.5 space-y-1.5 text-xs">
-              <div className="text-[10px] font-semibold text-muted-foreground px-1 uppercase tracking-wider">
+              <div className="text-10px font-semibold text-muted-foreground px-1 uppercase tracking-wider">
                 Alignment Grid
               </div>
               {/* 3x3 Alignment Matrix */}
@@ -934,7 +934,7 @@ export function TableContextMenu({
             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <List className="h-3.5 w-3.5 text-muted0" />
+              <List className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Bullets</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -981,7 +981,7 @@ export function TableContextMenu({
             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <ListOrdered className="h-3.5 w-3.5 text-muted0" />
+              <ListOrdered className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Numbering</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1061,7 +1061,7 @@ export function TableContextMenu({
             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-muted dark:hover:bg-muted/80 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <MoreHorizontal className="h-3.5 w-3.5 text-muted0" />
+              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Additional Actions</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />

@@ -55,7 +55,7 @@ export function LinkBadge({ type, severity, label, className, icon }: LinkBadgeP
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold select-none',
+        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-10px font-semibold select-none',
         badgeStyles,
         className
       )}

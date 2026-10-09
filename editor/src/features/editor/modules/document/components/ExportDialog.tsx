@@ -42,7 +42,7 @@ export function ExportDialog({
             className="rounded-lg border border-secondary p-2.5 hover:bg-muted dark:border-secondary-foreground dark:hover:bg-muted font-medium text-left"
           >
             <div className="font-semibold text-foreground dark:text-muted">Word (.docx)</div>
-            <div className="text-[10px] text-muted-foreground">Microsoft Word document</div>
+            <div className="text-10px text-muted-foreground">Microsoft Word document</div>
           </button>
           <button
             type="button"
@@ -54,7 +54,7 @@ export function ExportDialog({
             className="rounded-lg border border-secondary p-2.5 hover:bg-muted dark:border-secondary-foreground dark:hover:bg-muted font-medium text-left"
           >
             <div className="font-semibold text-foreground dark:text-muted">PDF Document</div>
-            <div className="text-[10px] text-muted-foreground">Print to PDF format</div>
+            <div className="text-10px text-muted-foreground">Print to PDF format</div>
           </button>
           <button
             type="button"
@@ -66,7 +66,7 @@ export function ExportDialog({
             className="rounded-lg border border-secondary p-2.5 hover:bg-muted dark:border-secondary-foreground dark:hover:bg-muted font-medium text-left"
           >
             <div className="font-semibold text-foreground dark:text-muted">HTML File</div>
-            <div className="text-[10px] text-muted-foreground">Web page format</div>
+            <div className="text-10px text-muted-foreground">Web page format</div>
           </button>
           <button
             type="button"
@@ -78,7 +78,7 @@ export function ExportDialog({
             className="rounded-lg border border-secondary p-2.5 hover:bg-muted dark:border-secondary-foreground dark:hover:bg-muted font-medium text-left"
           >
             <div className="font-semibold text-foreground dark:text-muted">Plain Text (.txt)</div>
-            <div className="text-[10px] text-muted-foreground">Unformatted text</div>
+            <div className="text-10px text-muted-foreground">Unformatted text</div>
           </button>
         </div>
         <div className="mt-4 flex justify-end">

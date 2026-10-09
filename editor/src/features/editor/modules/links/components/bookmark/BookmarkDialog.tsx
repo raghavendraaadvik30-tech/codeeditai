@@ -84,12 +84,12 @@ export function BookmarkDialog({ open, onOpenChange, onSuccess }: BookmarkDialog
             />
           </div>
 
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-11px text-muted-foreground">
             Bookmarks allow you to create jump targets in your document without altering visible content. If text is currently selected, it will be wrapped in this bookmark.
           </p>
 
           {error && (
-            <div className="flex items-center gap-1.5 text-[11px] text-destructive font-medium">
+            <div className="flex items-center gap-1.5 text-11px text-destructive font-medium">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <span>{error}</span>
             </div>

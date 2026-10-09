@@ -62,7 +62,7 @@ export const ChartSection: React.FC = () => {
               <h4 className="text-sm font-semibold text-foreground dark:text-muted-foreground">
                 Chart
               </h4>
-              <p className="text-xs text-muted0 dark:text-muted-foreground">
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                 Chart
               </p>
             </div>
@@ -73,7 +73,7 @@ export const ChartSection: React.FC = () => {
             <DropdownMenuTrigger render={<button
                 type="button"
                 onPointerDown={captureSelection}
-                className="flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-brand-deep focus:outline-none"
+                className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-all hover:bg-primary/90 active:bg-primary focus:outline-none"
               >
                 <span>Insert</span>
                 <ChevronDown className="h-3.5 w-3.5" />

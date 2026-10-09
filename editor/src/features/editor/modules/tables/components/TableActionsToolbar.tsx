@@ -56,7 +56,7 @@ export function TableActionsToolbar() {
 
   return (
     <div className="rounded-xl border border-secondary/80 bg-card p-3 shadow-sm dark:border-muted/80 dark:bg-[#091524] space-y-3">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+      <div className="text-10px font-bold uppercase tracking-wider text-muted-foreground">
         Table Actions (Active Selection)
       </div>
 
@@ -166,13 +166,13 @@ export function TableActionsToolbar() {
           CELL ALIGNMENT & ORIENTATION CONTROLS (Word-style)
           ----------------------------------------------------------- */}
       <div className="border-t border-muted pt-2.5 dark:border-muted space-y-2.5">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="text-10px font-bold uppercase tracking-wider text-muted-foreground">
           Cell Alignment & Orientation
         </div>
 
         {/* Horizontal Alignment */}
         <div className="space-y-1">
-          <div className="text-[10px] font-medium text-muted0 dark:text-muted-foreground">Horizontal Align</div>
+          <div className="text-10px font-medium text-muted-foreground dark:text-muted-foreground">Horizontal Align</div>
           <div className="grid grid-cols-3 gap-1">
             <button
               type="button"
@@ -224,7 +224,7 @@ export function TableActionsToolbar() {
 
         {/* Vertical Alignment */}
         <div className="space-y-1">
-          <div className="text-[10px] font-medium text-muted0 dark:text-muted-foreground">Vertical Align</div>
+          <div className="text-10px font-medium text-muted-foreground dark:text-muted-foreground">Vertical Align</div>
           <div className="grid grid-cols-3 gap-1">
             <button
               type="button"
@@ -305,7 +305,7 @@ export function TableActionsToolbar() {
           TABLE SIZING & AUTOFIT CONTROLS (Word-style)
           ----------------------------------------------------------- */}
       <div className="border-t border-muted pt-2.5 dark:border-muted space-y-2">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="text-10px font-bold uppercase tracking-wider text-muted-foreground">
           Table Sizing & AutoFit
         </div>
 

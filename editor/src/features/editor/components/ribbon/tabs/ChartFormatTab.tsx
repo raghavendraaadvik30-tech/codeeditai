@@ -54,7 +54,7 @@ export default function ChartFormatTab() {
           </button>} />
 
         <DropdownMenuContent align="start" className="w-48 p-2">
-          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 px-1">
+          <div className="text-10px font-bold text-muted-foreground uppercase tracking-wider mb-1 px-1">
             Background Colors
           </div>
           <div className="grid grid-cols-5 gap-1.5 p-1">
@@ -129,7 +129,7 @@ export default function ChartFormatTab() {
 
         {/* Width stepper */}
         <div className="flex items-center gap-1">
-          <span className="text-[11px] text-muted-foreground font-medium">W:</span>
+          <span className="text-11px text-muted-foreground font-medium">W:</span>
           <button
             type="button"
             onClick={() => handleWidthChange(-40)}
@@ -151,7 +151,7 @@ export default function ChartFormatTab() {
 
         {/* Height stepper */}
         <div className="flex items-center gap-1 ml-1">
-          <span className="text-[11px] text-muted-foreground font-medium">H:</span>
+          <span className="text-11px text-muted-foreground font-medium">H:</span>
           <button
             type="button"
             onClick={() => handleHeightChange(-30)}

@@ -154,7 +154,7 @@ export default function LeftOverlay() {
           items-center
           justify-between
           border-b
-          border-secondary
+          border-sidebar-border
           bg-card
           px-5
           dark:border-muted
@@ -185,7 +185,7 @@ export default function LeftOverlay() {
           <div>
             <h2
               className="
-                text-sm
+                text-xs
                 font-semibold
                 text-foreground
                 dark:text-primary-foreground
@@ -196,7 +196,7 @@ export default function LeftOverlay() {
 
             <p
               className="
-                text-xs
+                text-10px
                 text-muted-foreground
                 dark:text-muted-foreground
               "
@@ -258,7 +258,7 @@ export default function LeftOverlay() {
                       gap-3
                       rounded-lg
                       border
-                      border-secondary
+                      border-sidebar-border
                       bg-card
                       p-3
                       text-left

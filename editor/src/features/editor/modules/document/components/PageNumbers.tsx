@@ -26,7 +26,7 @@ export function PageNumbers() {
             {model.pages.length || 1}
           </span>
         </div>
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-11px text-muted-foreground">
           Page numbering updates dynamically as content expands.
         </p>
       </div>

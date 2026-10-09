@@ -63,7 +63,7 @@ export function CrossReferenceList({ items, onNavigate }: CrossReferenceListProp
                     </span>
                     <LinkBadge type="cross_ref" label={item.targetType} />
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground truncate">
+                  <div className="flex items-center gap-1.5 text-10px text-muted-foreground truncate">
                     <span>Target: #{item.targetId}</span>
                     {item.pageNumber && <span>· Page {item.pageNumber}</span>}
                   </div>

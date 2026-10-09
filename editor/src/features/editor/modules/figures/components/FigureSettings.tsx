@@ -22,7 +22,7 @@ export const FigureSettings: React.FC<FigureSettingsProps> = ({
 }) => {
   return (
     <div className="space-y-4 rounded-xl border border-secondary bg-card p-4 dark:border-muted dark:bg-[#111D29]">
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted0">
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         Figure Appearance Settings
       </h4>
 

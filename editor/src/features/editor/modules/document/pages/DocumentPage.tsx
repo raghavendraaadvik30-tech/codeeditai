@@ -512,7 +512,7 @@ export default function DocumentPage() {
       {/* 1. TOP HEADER: DOCUMENT MANAGER & NEW BUTTON */}
       <div className="border-b border-secondary/80 p-3.5 space-y-3 dark:border-muted/80">
         <div className="flex items-center justify-between">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
+          <h3 className="text-10px font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
             Document Manager
           </h3>
           <div className="flex items-center gap-1.5">
@@ -545,10 +545,10 @@ export default function DocumentPage() {
         {/* ALL DOCUMENTS */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
+            <h3 className="text-10px font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
               All Documents
             </h3>
-            <span className="rounded-full bg-secondary/70 px-1.5 py-0.5 text-[10px] font-semibold text-secondary-foreground dark:bg-muted dark:text-muted-foreground">
+            <span className="rounded-full bg-secondary/70 px-1.5 py-0.5 text-10px font-semibold text-secondary-foreground dark:bg-muted dark:text-muted-foreground">
               {filteredDocs.length}
             </span>
           </div>
@@ -595,7 +595,7 @@ export default function DocumentPage() {
                         >
                           {doc.title}
                         </div>
-                        <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+                        <div className="mt-0.5 flex items-center gap-1.5 text-10px font-medium text-muted-foreground">
                           <span>
                             {doc.pagesCount}{" "}
                             {doc.pagesCount === 1 ? "page" : "pages"}
@@ -614,12 +614,12 @@ export default function DocumentPage() {
                       </div>
                     </div>
 
-                    {/* Delete Button matching screenshot */}
+                    {/* Delete Button */}
                     <button
                       type="button"
                       onClick={(e) => handleDeleteDoc(e, doc)}
                       title="Delete Document"
-                      className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/80 text-destructive hover:bg-destructive/20 hover:text-destructive dark:bg-destructive/60 dark:text-destructive dark:hover:bg-destructive/80 transition-colors"
+                      className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:bg-muted/40 dark:text-muted-foreground dark:hover:bg-destructive/20 dark:hover:text-destructive transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -637,7 +637,7 @@ export default function DocumentPage() {
             <button
               type="button"
               onClick={() => toggleSection("breaks")}
-              className="flex w-full items-center gap-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider text-secondary-foreground transition-colors hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-primary-foreground"
+              className="flex w-full items-center gap-1.5 py-1 text-left text-11px font-bold uppercase tracking-wider text-secondary-foreground transition-colors hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-primary-foreground"
             >
               <ChevronRight
                 className={cn(
@@ -694,7 +694,7 @@ export default function DocumentPage() {
             <button
               type="button"
               onClick={() => toggleSection("navigation")}
-              className="flex w-full items-center gap-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider text-secondary-foreground transition-colors hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-primary-foreground"
+              className="flex w-full items-center gap-1.5 py-1 text-left text-11px font-bold uppercase tracking-wider text-secondary-foreground transition-colors hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-primary-foreground"
             >
               <ChevronRight
                 className={cn(
@@ -756,7 +756,7 @@ export default function DocumentPage() {
                   {/* Input Fields */}
                   <div className="space-y-2">
                     <div>
-                      <label className="block text-[10px] font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
+                      <label className="block text-10px font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
                         Find what:
                       </label>
                       <input
@@ -783,7 +783,7 @@ export default function DocumentPage() {
 
                     {navTab === "replace" && (
                       <div>
-                        <label className="block text-[10px] font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
+                        <label className="block text-10px font-medium text-muted-foreground dark:text-muted-foreground mb-0.5">
                           Replace with:
                         </label>
                         <input
@@ -805,7 +805,7 @@ export default function DocumentPage() {
 
                   {/* Search / Replace Feedback Message */}
                   {searchStatus && (
-                    <div className="text-[11px] text-primary dark:text-primary italic px-0.5">
+                    <div className="text-11px text-primary dark:text-primary italic px-0.5">
                       {searchStatus}
                     </div>
                   )}
@@ -818,7 +818,7 @@ export default function DocumentPage() {
                         onClick={handleReplace}
                         disabled={!findText.trim()}
                         className={cn(
-                          "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none",
+                          "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none",
                           !findText.trim()
                             ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                             : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -831,7 +831,7 @@ export default function DocumentPage() {
                         onClick={handleReplaceAll}
                         disabled={!findText.trim()}
                         className={cn(
-                          "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
+                          "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none whitespace-nowrap",
                           !findText.trim()
                             ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                             : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -844,7 +844,7 @@ export default function DocumentPage() {
                         onClick={handleFindNext}
                         disabled={!findText.trim()}
                         className={cn(
-                          "rounded-[3px] border py-1 px-1 text-center text-[11px] transition-colors font-normal select-none whitespace-nowrap",
+                          "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none whitespace-nowrap",
                           !findText.trim()
                             ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                             : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -855,7 +855,7 @@ export default function DocumentPage() {
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="rounded-[3px] border border-primary/80 bg-card py-1 px-1 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
+                        className="rounded-[3px] border border-primary/80 bg-card py-1 px-1 text-center text-11px font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
                       >
                         Cancel
                       </button>
@@ -867,7 +867,7 @@ export default function DocumentPage() {
                         onClick={handleFindNext}
                         disabled={!findText.trim()}
                         className={cn(
-                          "flex-1 rounded-[3px] border py-1 text-center text-[11px] font-normal transition-colors select-none",
+                          "flex-1 rounded-[3px] border py-1 text-center text-11px font-normal transition-colors select-none",
                           !findText.trim()
                             ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
                             : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
@@ -878,7 +878,7 @@ export default function DocumentPage() {
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="flex-1 rounded-[3px] border border-primary/80 bg-card py-1 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
+                        className="flex-1 rounded-[3px] border border-primary/80 bg-card py-1 text-center text-11px font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
                       >
                         Cancel
                       </button>
@@ -894,7 +894,7 @@ export default function DocumentPage() {
             <button
               type="button"
               onClick={() => toggleSection("utilities")}
-              className="flex w-full items-center gap-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider text-secondary-foreground transition-colors hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-primary-foreground"
+              className="flex w-full items-center gap-1.5 py-1 text-left text-11px font-bold uppercase tracking-wider text-secondary-foreground transition-colors hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-primary-foreground"
             >
               <ChevronRight
                 className={cn(
@@ -908,11 +908,11 @@ export default function DocumentPage() {
               <div className="mt-2 space-y-2.5 pl-5">
                 {/* Statistics Card */}
                 <div className="rounded-lg border border-secondary bg-card p-2.5 space-y-2 text-xs dark:border-muted dark:bg-[#0E1A29]">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
                     Word & Document Statistics
                   </div>
-                  <div className="grid grid-cols-2 gap-2 border-b border-muted pb-2 text-[11px] dark:border-muted">
+                  <div className="grid grid-cols-2 gap-2 border-b border-muted pb-2 text-11px dark:border-muted">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Words:</span>
                       <span className="font-bold text-foreground dark:text-primary-foreground">
@@ -938,7 +938,7 @@ export default function DocumentPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-11px">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Pages:</span>
                       <span className="font-bold text-foreground dark:text-primary-foreground">
@@ -1062,7 +1062,7 @@ export default function DocumentPage() {
 
       {/* Floating Microsoft Word-Style Find & Replace Dialog */}
       {isFindReplaceDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-[0.5px]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-3xs">
           <div className="w-125 rounded-lg border border-border bg-card shadow-2xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden animate-in fade-in zoom-in-95 duration-100">
             {/* Window Title Bar */}
             <div className="flex items-center justify-between border-b border-secondary bg-muted px-3.5 py-1.5 dark:border-muted dark:bg-[#07131E]">

@@ -487,6 +487,7 @@ function storeOptionalDocumentSnapshot(doc: DocumentModel): void {
 
 interface DocumentContextType {
   model: DocumentModel;
+  setModel: React.Dispatch<React.SetStateAction<DocumentModel>>;
   activePage: string | null;
   history: HistoryEntry[];
   savedDocuments: DocumentModel[];
@@ -1777,6 +1778,7 @@ export function DocumentModelProvider({
     <DocumentContext.Provider
       value={{
         model,
+        setModel,
         activePage,
         history,
         savedDocuments,

@@ -38,7 +38,7 @@ export function SettingsModal({
               <h3 className="text-sm font-semibold text-foreground dark:text-primary-foreground">
                 Editor Preferences
               </h3>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-11px text-muted-foreground">
                 Configure your writing environment and document settings
               </p>
             </div>
@@ -75,7 +75,7 @@ export function SettingsModal({
           {activeTab === "general" && (
             <div className="space-y-3">
               <div>
-                <label className="block text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+                <label className="block text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
                   Theme
                 </label>
                 <div className="mt-1.5 grid grid-cols-3 gap-2">
@@ -104,7 +104,7 @@ export function SettingsModal({
               <div className="flex items-center justify-between pt-2">
                 <div>
                   <div className="font-medium text-secondary-foreground dark:text-muted-foreground">Auto-Save</div>
-                  <div className="text-[11px] text-muted-foreground">Automatically save document changes</div>
+                  <div className="text-11px text-muted-foreground">Automatically save document changes</div>
                 </div>
                 <input
                   type="checkbox"
@@ -117,7 +117,7 @@ export function SettingsModal({
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium text-secondary-foreground dark:text-muted-foreground">AI Writing Assistant</div>
-                  <div className="text-[11px] text-muted-foreground">Enable real-time AI suggestions and tools</div>
+                  <div className="text-11px text-muted-foreground">Enable real-time AI suggestions and tools</div>
                 </div>
                 <input
                   type="checkbox"
@@ -132,7 +132,7 @@ export function SettingsModal({
           {activeTab === "editor" && (
             <div className="space-y-3">
               <div>
-                <label className="block text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+                <label className="block text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
                   Default Font Family
                 </label>
                 <select
@@ -150,7 +150,7 @@ export function SettingsModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+                  <label className="block text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
                     Font Size (pt)
                   </label>
                   <input
@@ -163,7 +163,7 @@ export function SettingsModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+                  <label className="block text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
                     Target Word Count
                   </label>
                   <input
@@ -192,7 +192,7 @@ export function SettingsModal({
           {activeTab === "layout" && (
             <div className="space-y-3">
               <div>
-                <label className="block text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground">
+                <label className="block text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
                   Default Page Size
                 </label>
                 <select

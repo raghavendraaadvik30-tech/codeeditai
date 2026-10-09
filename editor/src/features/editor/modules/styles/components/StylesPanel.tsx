@@ -605,7 +605,7 @@ export function StylesPanel() {
               className="
                 px-1
                 py-2
-                text-[11px]
+                text-11px
                 italic
                 text-muted-foreground
               "
@@ -628,7 +628,7 @@ export function StylesPanel() {
               className="
                 mb-2
                 px-1
-                text-[10px]
+                text-10px
                 font-semibold
                 uppercase
                 tracking-wider
@@ -673,7 +673,7 @@ export function StylesPanel() {
                         )
                       }
                       className="
-                        text-[10px]
+                        text-10px
                         text-primary
                         hover:underline
                       "

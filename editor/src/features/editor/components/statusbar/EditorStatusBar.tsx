@@ -71,13 +71,13 @@ export default function EditorStatusBar() {
         justify-between
         px-3
         border-t
-        border-secondary
-        bg-[#F0F4F9]
-        text-secondary-foreground
+        border-sidebar-border
+        bg-card
+        text-muted-foreground
         dark:border-muted
         dark:bg-[#07111C]
         dark:text-muted-foreground
-        text-[11px]
+        text-11px
         font-sans
         select-none
         z-30
@@ -107,7 +107,7 @@ export default function EditorStatusBar() {
             setLeftPanelOpen(true);
           }}
           className={`
-            flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors
+            flex items-center gap-1 px-1.5 py-0.5 rounded text-10px font-medium transition-colors
             ${
               trackChanges
                 ? "bg-primary/15 text-primary/90 hover:bg-primary/30 dark:bg-navy-950/60 dark:text-navy-300"
@@ -119,7 +119,7 @@ export default function EditorStatusBar() {
           <GitCompare className="h-3 w-3" />
           <span>Track Changes: {trackChanges ? "ON" : "OFF"}</span>
           {pendingChanges > 0 && (
-            <span className="ml-0.5 rounded-full bg-warning-500 text-primary-foreground px-1 text-[9px] font-bold">
+            <span className="ml-0.5 rounded-full bg-warning-500 text-primary-foreground px-1 text-9px font-bold">
               {pendingChanges}
             </span>
           )}
@@ -258,7 +258,7 @@ export default function EditorStatusBar() {
               py-0.5
               text-right
               font-medium
-              text-[11px]
+              text-11px
               text-secondary-foreground
               hover:bg-secondary/70
               rounded-xs

@@ -136,7 +136,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
     <div
 
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-2xs"
 
       onMouseDown={(event) => {
 
@@ -639,7 +639,7 @@ export const DashboardLayout: React.FC = () => {
 
                   <span className="text-sm font-extrabold">SYSTEM</span>
 
-                  <span className="block text-[9px] font-bold uppercase tracking-wider text-primary">
+                  <span className="block text-9px font-bold uppercase tracking-wider text-primary">
 
                     ADMIN PORTAL
 
@@ -751,7 +751,7 @@ export const DashboardLayout: React.FC = () => {
 
                   </p>
 
-                  <p className="truncate text-[10px] text-muted-foreground">
+                  <p className="truncate text-10px text-muted-foreground">
 
                     {user?.email || "admin@gmail.com"}
 

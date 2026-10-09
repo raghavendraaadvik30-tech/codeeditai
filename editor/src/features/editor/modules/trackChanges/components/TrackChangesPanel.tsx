@@ -70,7 +70,7 @@ export function TrackChangesPanel() {
 
       {/* 3. Section Title: CHANGES LIST (N) */}
       <div className="flex items-center justify-between pt-1 border-t border-secondary dark:border-muted">
-        <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+        <h4 className="text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
           CHANGES LIST ({pendingTrackedChanges.length})
         </h4>
       </div>

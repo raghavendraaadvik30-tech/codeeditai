@@ -40,7 +40,7 @@ export default function IconPicker({
             }`}
           >
             <Icon icon={item.svg} className="h-6 w-6 shrink-0" />
-            <span className="text-[10px] font-medium truncate max-w-full leading-none">
+            <span className="text-10px font-medium truncate max-w-full leading-none">
               {item.name}
             </span>
           </button>

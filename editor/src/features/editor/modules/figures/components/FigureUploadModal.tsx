@@ -176,7 +176,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
                 />
               </label>
             </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">
+            <p className="mt-1 text-10px text-muted-foreground">
               PNG, JPG, SVG, WebP up to 10MB
             </p>
           </div>

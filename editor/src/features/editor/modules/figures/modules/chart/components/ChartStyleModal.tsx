@@ -36,7 +36,7 @@ export const ChartStyleModal: React.FC<ChartStyleModalProps> = ({
             <h2 className="text-base font-semibold text-foreground dark:text-primary-foreground">
               Chart Styles
             </h2>
-            <p className="text-xs text-muted0 dark:text-muted-foreground">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               Select a visual layout style for your chart.
             </p>
           </div>
@@ -80,7 +80,7 @@ export const ChartStyleModal: React.FC<ChartStyleModalProps> = ({
 
                   {/* Visual Preview Box */}
                   <div
-                    className="flex flex-col items-center justify-center w-full h-24 mb-2 rounded-lg border p-2 overflow-hidden transition-transform group-hover:scale-[1.02]"
+                    className="flex flex-col items-center justify-center w-full h-24 mb-2 rounded-lg border p-2 overflow-hidden transition-transform group-hover:scale-102"
                     style={{
                       backgroundColor: style.previewBg,
                       borderColor: style.borderColor,
@@ -101,7 +101,7 @@ export const ChartStyleModal: React.FC<ChartStyleModalProps> = ({
                   >
                     {style.name}
                   </span>
-                  <span className="text-[10px] text-muted0 dark:text-muted-foreground line-clamp-1 mt-0.5">
+                  <span className="text-10px text-muted-foreground dark:text-muted-foreground line-clamp-1 mt-0.5">
                     {style.description}
                   </span>
                 </button>

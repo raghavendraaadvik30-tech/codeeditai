@@ -63,13 +63,13 @@ export function BookmarkList({ bookmarks, onNavigate, onDelete }: BookmarkListPr
                       {bm.name}
                     </span>
                     {bm.pageNumber && (
-                      <span className="rounded bg-muted px-1 py-[0.8px] text-[9px] font-medium text-muted-foreground dark:bg-muted dark:text-muted-foreground">
+                      <span className="rounded bg-muted px-1 py-[0.8px] text-9px font-medium text-muted-foreground dark:bg-muted dark:text-muted-foreground">
                         Page {bm.pageNumber}
                       </span>
                     )}
                   </div>
                   {bm.text && (
-                    <p className="truncate text-[10px] text-muted-foreground">
+                    <p className="truncate text-10px text-muted-foreground">
                       "{bm.text}"
                     </p>
                   )}

@@ -59,7 +59,7 @@ export function InternalRefColumn({
               type="button"
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 py-1 rounded text-[11px] font-semibold transition-all select-none',
+                'flex-1 flex items-center justify-center gap-1.5 py-1 rounded text-10px font-medium transition-all select-none',
                 isActive
                   ? 'bg-card text-primary shadow-xs dark:bg-[#1B2A3A] dark:text-primary'
                   : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground'

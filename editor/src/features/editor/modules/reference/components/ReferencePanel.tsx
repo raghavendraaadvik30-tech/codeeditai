@@ -40,7 +40,7 @@ export function ReferencePanel() {
     <div className="flex h-full flex-col overflow-y-auto p-4 space-y-4 text-xs select-none dark:bg-[#07131E] dark:text-muted">
       {/* STATUS TOAST */}
       {insertedNotice && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success-50 text-success-700 dark:bg-success-950/50 dark:text-success-300 border border-success-200 dark:border-success-800 text-[11px] font-medium transition-all">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success-50 text-success-700 dark:bg-success-950/50 dark:text-success-300 border border-success-200 dark:border-success-800 text-11px font-medium transition-all">
           <Check className="h-3.5 w-3.5 text-success-600 dark:text-success-400" />
           {insertedNotice}
         </div>
@@ -83,7 +83,7 @@ export function ReferencePanel() {
       {/* REGISTERED SOURCES LIST */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+          <span className="text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
             REGISTERED SOURCES
           </span>
           <span className="text-xs text-muted-foreground font-medium">
@@ -96,7 +96,7 @@ export function ReferencePanel() {
           {refs.sources.length === 0 ? (
             <div className="rounded-xl border border-dashed border-secondary p-6 text-center text-muted-foreground dark:border-muted">
               <p className="font-semibold text-xs text-secondary-foreground dark:text-muted-foreground">No sources registered</p>
-              <p className="text-[11px] text-muted-foreground dark:text-muted-foreground mt-1">
+              <p className="text-11px text-muted-foreground dark:text-muted-foreground mt-1">
                 Click "+ Add Source" above to add your first citation source.
               </p>
             </div>
@@ -121,15 +121,15 @@ export function ReferencePanel() {
                       <p className="font-bold text-foreground dark:text-primary-foreground text-xs truncate">
                         {author || "Unknown Author"}
                       </p>
-                      <p className="text-[11px] text-muted-foreground dark:text-muted-foreground truncate mt-0.5">
+                      <p className="text-11px text-muted-foreground dark:text-muted-foreground truncate mt-0.5">
                         {source.title || "(Untitled)"}
                       </p>
-                      <p className="text-[11px] text-muted-foreground dark:text-muted-foreground mt-1">
+                      <p className="text-11px text-muted-foreground dark:text-muted-foreground mt-1">
                         {source.year ? `${source.year} · ` : ""}click to cite
                       </p>
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-1 rounded-full border border-success-200/80 bg-success-50 px-2 py-0.5 text-[10px] font-medium text-success-600 dark:border-success-900/60 dark:bg-success-950/60 dark:text-success-400">
+                    <div className="shrink-0 flex items-center gap-1 rounded-full border border-success-200/80 bg-success-50 px-2 py-0.5 text-10px font-medium text-success-600 dark:border-success-900/60 dark:bg-success-950/60 dark:text-success-400">
                       <Check className="h-3 w-3 stroke-[2.5]" />
                       Valid
                     </div>
@@ -143,7 +143,7 @@ export function ReferencePanel() {
 
       {/* QUICK INSERT BIBLIOGRAPHY */}
       <div className="space-y-2 pt-2 border-t border-muted dark:border-muted/80">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+        <span className="text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
           QUICK INSERT BIBLIOGRAPHY
         </span>
         <div className="grid grid-cols-2 gap-2">

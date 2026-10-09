@@ -186,7 +186,7 @@ export function TableBordersShadingDialog({
             className={`px-4 py-1.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
               activeTab === "borders"
                 ? "border-primary text-primary dark:border-primary dark:text-primary"
-                : "border-transparent text-muted0 hover:text-foreground dark:text-muted-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground"
             }`}
           >
             Borders
@@ -197,7 +197,7 @@ export function TableBordersShadingDialog({
             className={`px-4 py-1.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
               activeTab === "shading"
                 ? "border-primary text-primary dark:border-primary dark:text-primary"
-                : "border-transparent text-muted0 hover:text-foreground dark:text-muted-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground"
             }`}
           >
             Shading
@@ -335,7 +335,7 @@ export function TableBordersShadingDialog({
                         className="h-4 w-4 rounded-xs border border-border dark:border-secondary-foreground shrink-0"
                         style={{ backgroundColor: c.hex }}
                       />
-                      <span className="text-[11px] truncate text-secondary-foreground dark:text-muted-foreground">
+                      <span className="text-11px truncate text-secondary-foreground dark:text-muted-foreground">
                         {c.name}
                       </span>
                     </button>
@@ -343,7 +343,7 @@ export function TableBordersShadingDialog({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Label className="text-[11px] text-muted0">Custom Color:</Label>
+                  <Label className="text-11px text-muted-foreground">Custom Color:</Label>
                   <input
                     type="color"
                     value={shadingColor === "transparent" ? "#ffffff" : shadingColor}
@@ -353,7 +353,7 @@ export function TableBordersShadingDialog({
                   <button
                     type="button"
                     onClick={() => setShadingColor("transparent")}
-                    className="h-7 px-2.5 rounded border border-secondary dark:border-secondary-foreground text-[11px] text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
+                    className="h-7 px-2.5 rounded border border-secondary dark:border-secondary-foreground text-11px text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                   >
                     Clear Fill
                   </button>

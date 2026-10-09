@@ -61,7 +61,7 @@ export default function CaseSection({
                 border
                 px-1
                 transition-all
-                active:scale-[0.98]
+                active:scale-98
 
                 ${
                   isActive
@@ -85,7 +85,7 @@ export default function CaseSection({
             >
               <span
                 className={`
-                  text-[17px]
+                  text-17px
                   font-bold
                   leading-none
 
@@ -103,7 +103,7 @@ export default function CaseSection({
                 className={`
                   mt-2
                   text-center
-                  text-[10px]
+                  text-10px
                   font-medium
                   leading-3
 

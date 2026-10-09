@@ -31,7 +31,7 @@ export function TableTemplateList() {
                 <div className="text-xs font-semibold text-foreground dark:text-muted">
                   {tpl.title}
                 </div>
-                <div className="text-[10px] text-muted-foreground">
+                <div className="text-10px text-muted-foreground">
                   {tpl.rows} × {tpl.cols} · {tpl.style}
                 </div>
               </div>
@@ -40,14 +40,14 @@ export function TableTemplateList() {
             <button
               type="button"
               onClick={() => insertTemplate(tpl)}
-              className="flex h-6 items-center gap-1 rounded-md bg-brand/10 px-2 text-[11px] font-medium text-brand hover:bg-brand hover:text-primary-foreground transition-colors"
+              className="flex h-6 items-center gap-1 rounded-md bg-brand/10 px-2 text-11px font-medium text-brand hover:bg-brand hover:text-primary-foreground transition-colors"
             >
               <Plus className="h-3 w-3" />
               Insert
             </button>
           </div>
 
-          <p className="mt-2 text-[11px] leading-relaxed text-muted0 dark:text-muted-foreground">
+          <p className="mt-2 text-11px leading-relaxed text-muted-foreground dark:text-muted-foreground">
             {tpl.description}
           </p>
         </div>

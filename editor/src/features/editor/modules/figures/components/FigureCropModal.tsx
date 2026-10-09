@@ -107,7 +107,7 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
           <button
             type="button"
             onClick={() => setScale(100)}
-            className="flex items-center gap-1 text-xs text-muted0 hover:text-foreground dark:hover:text-primary-foreground"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground dark:hover:text-primary-foreground"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Reset</span>

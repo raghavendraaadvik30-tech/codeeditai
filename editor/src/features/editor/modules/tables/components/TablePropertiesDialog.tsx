@@ -211,7 +211,7 @@ export function TablePropertiesDialog({
 
               {widthMode === "custom" && (
                 <div className="flex items-center gap-2 pt-1">
-                  <span className="text-[11px] text-muted0">Width (px):</span>
+                  <span className="text-11px text-muted-foreground">Width (px):</span>
                   <input
                     type="number"
                     min={100}
@@ -239,14 +239,14 @@ export function TablePropertiesDialog({
                 onChange={(e) => setCellPadding(parseInt(e.target.value, 10))}
                 className="flex-1 accent-primary cursor-pointer"
               />
-              <span className="w-12 text-right font-mono text-[11px] text-secondary-foreground dark:text-muted-foreground">
+              <span className="w-12 text-right font-mono text-11px text-secondary-foreground dark:text-muted-foreground">
                 {cellPadding} px
               </span>
             </div>
           </div>
 
           {/* Table Summary Info */}
-          <div className="rounded-lg border border-muted dark:border-muted bg-muted/70 dark:bg-secondary/50 p-2.5 flex items-center justify-between text-[11px] text-muted0 dark:text-muted-foreground">
+          <div className="rounded-lg border border-muted dark:border-muted bg-muted/70 dark:bg-secondary/50 p-2.5 flex items-center justify-between text-11px text-muted-foreground dark:text-muted-foreground">
             <span>Rows: <strong className="text-secondary-foreground dark:text-muted-foreground">{rowCount}</strong></span>
             <span>Columns: <strong className="text-secondary-foreground dark:text-muted-foreground">{colCount}</strong></span>
             <span>Layout: <strong className="text-secondary-foreground dark:text-muted-foreground">{table?.style.tableLayout || "fixed"}</strong></span>

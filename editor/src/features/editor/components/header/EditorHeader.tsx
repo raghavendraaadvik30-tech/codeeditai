@@ -43,9 +43,9 @@ export default function EditorHeader() {
       className="
         h-14.5
         border-b
-        bg-card
+        bg-sidebar
         dark:bg-[#0B1620]
-        border-secondary
+        border-sidebar-border
         dark:border-muted
         flex
         items-center

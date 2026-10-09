@@ -108,11 +108,11 @@
 //         <div className="flex items-center shrink-0 border-l border-border/50">
 
 //           <div className="px-1.5 text-right leading-none">
-//             <div className="text-[8px] text-muted-foreground/60 truncate max-w-[50px]">
+//             <div className="text-8px text-muted-foreground/60 truncate max-w-[50px]">
 //               {token.font}
 //             </div>
 
-//             <div className="text-[8px] text-muted-foreground/60">
+//             <div className="text-8px text-muted-foreground/60">
 //               {token.size}pt
 //             </div>
 //           </div>
@@ -223,7 +223,8 @@ export function StyleCard({
           rounded-lg
           border
           border-border
-          bg-background
+          bg-card
+          dark:bg-card
           transition
           hover:border-primary/40
           ${open ? "border-primary" : ""}
@@ -251,7 +252,7 @@ export function StyleCard({
                   ? "underline"
                   : "none",
             }}
-            className="truncate"
+            className="truncate text-foreground dark:text-foreground"
           >
             {token.name}
           </div>
@@ -274,9 +275,10 @@ export function StyleCard({
               items-end
               justify-center
               px-2
-              text-[10px]
+              text-10px
               leading-tight
               text-muted-foreground
+              dark:text-muted-foreground
             "
           >
             <span>
@@ -299,6 +301,8 @@ export function StyleCard({
               justify-center
               text-muted-foreground
               hover:text-foreground
+              dark:text-muted-foreground
+              dark:hover:text-foreground
             "
           >
             {open ? (

@@ -132,7 +132,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
     <div className="space-y-3 pt-1">
       {/* Select Document */}
       <div>
-        <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
+        <label className="block text-11px font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
           Select Document
         </label>
         {documents.length === 0 ? (
@@ -158,7 +158,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
 
       {/* Link Text */}
       <div>
-        <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
+        <label className="block text-11px font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
           Link Text
         </label>
         <input
@@ -174,11 +174,11 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
       {selectedDoc && (
         <div className="flex items-center gap-2 p-2 rounded-md bg-muted border border-secondary dark:bg-[#111D29] dark:border-secondary-foreground">
           <FileText className="h-4 w-4 text-primary shrink-0" />
-          <div className="min-w-0 text-[11px]">
+          <div className="min-w-0 text-11px">
             <p className="font-semibold text-foreground dark:text-muted-foreground truncate">
               {selectedDoc.name}
             </p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-10px text-muted-foreground">
               Updated: {selectedDoc.updatedAt}
             </p>
           </div>
@@ -187,14 +187,14 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
 
       {/* Feedback Messages */}
       {error && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-[11px] dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
+        <div className="flex items-center gap-1.5 p-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-11px dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-center gap-1.5 p-2 rounded-md bg-success-50 border border-success-200 text-success-700 text-[11px] dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
+        <div className="flex items-center gap-1.5 p-2 rounded-md bg-success-50 border border-success-200 text-success-700 text-11px dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
           <span>{successMsg}</span>
         </div>
@@ -206,7 +206,7 @@ export function DocumentRefTab({ onLinkInserted }: DocumentRefTabProps) {
         disabled={documents.length === 0}
         onMouseDown={(e) => e.preventDefault()}
         onClick={handleInsert}
-        className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-[0.99]"
+        className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-99"
       >
         <span>Insert Document Reference</span>
         <ArrowRight className="h-3.5 w-3.5" />

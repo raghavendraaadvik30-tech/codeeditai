@@ -54,7 +54,7 @@ export default function WritingSearch({
           bg-card
           px-1.5
           py-0.5
-          text-[9px]
+          text-9px
           text-muted-foreground
           sm:block
         "

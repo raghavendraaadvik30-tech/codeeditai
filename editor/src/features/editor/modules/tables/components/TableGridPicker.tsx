@@ -32,7 +32,7 @@ export function TableGridPicker() {
         <span className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
           Quick Grid
         </span>
-        <span className="text-[11px] font-medium text-brand">
+        <span className="text-11px font-medium text-brand">
           {hoveredRow > 0 && hoveredCol > 0
             ? `${hoveredRow} × ${hoveredCol} Table`
             : "Hover to select"}

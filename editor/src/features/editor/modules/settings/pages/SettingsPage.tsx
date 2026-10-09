@@ -161,7 +161,7 @@ function SettingsPageContent() {
           <div className="rounded-2xl border border-secondary/90 bg-card p-5 shadow-sm dark:border-muted dark:bg-[#111D29]">
             {/* Top-Right Status Badge */}
             <div className="flex justify-end">
-              <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[11px] font-semibold text-success-700 dark:bg-success-950/60 dark:text-success-400 border border-success-200/60 dark:border-success-800/60">
+              <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-11px font-semibold text-success-700 dark:bg-success-950/60 dark:text-success-400 border border-success-200/60 dark:border-success-800/60">
                 <span className="h-1.5 w-1.5 rounded-full bg-success-600" />
                 Active
               </span>
@@ -203,7 +203,7 @@ function SettingsPageContent() {
               </div>
 
               {/* Action Links below Avatar */}
-              <div className="mt-2 flex items-center justify-center gap-2 text-[11px]">
+              <div className="mt-2 flex items-center justify-center gap-2 text-11px">
                 {settings.avatarUrl ? (
                   <>
                     <button
@@ -274,7 +274,7 @@ function SettingsPageContent() {
 
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground dark:text-muted-foreground">Role</span>
-                <span className="inline-flex items-center rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-[11px] font-semibold text-brand dark:bg-navy-950/80 dark:text-navy-300">
+                <span className="inline-flex items-center rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-11px font-semibold text-brand dark:bg-navy-950/80 dark:text-navy-300">
                   {userRole}
                 </span>
               </div>
@@ -354,7 +354,7 @@ function SettingsPageContent() {
                     )}
                   </div>
                   <span
-                    className={`flex items-center gap-1 text-[11px] font-semibold ${
+                    className={`flex items-center gap-1 text-11px font-semibold ${
                       settings.theme === "light"
                         ? "text-brand"
                         : "text-secondary-foreground dark:text-muted-foreground"
@@ -391,7 +391,7 @@ function SettingsPageContent() {
                     )}
                   </div>
                   <span
-                    className={`flex items-center gap-1 text-[11px] font-semibold ${
+                    className={`flex items-center gap-1 text-11px font-semibold ${
                       settings.theme === "dark"
                         ? "text-brand"
                         : "text-secondary-foreground dark:text-muted-foreground"
@@ -428,7 +428,7 @@ function SettingsPageContent() {
                     )}
                   </div>
                   <span
-                    className={`flex items-center gap-1 text-[11px] font-semibold ${
+                    className={`flex items-center gap-1 text-11px font-semibold ${
                       settings.theme === "system"
                         ? "text-brand"
                         : "text-secondary-foreground dark:text-muted-foreground"
@@ -449,7 +449,7 @@ function SettingsPageContent() {
                   <span className="block text-xs font-semibold text-foreground dark:text-muted-foreground">
                     Enable Auto Save
                   </span>
-                  <span className="block text-[11px] text-muted-foreground dark:text-muted-foreground">
+                  <span className="block text-11px text-muted-foreground dark:text-muted-foreground">
                     Auto-commits local revisions to history snapshot.
                   </span>
                 </div>
@@ -484,7 +484,7 @@ function SettingsPageContent() {
                   <span className="block text-xs font-semibold text-foreground dark:text-muted-foreground">
                     Enable Notifications
                   </span>
-                  <span className="block text-[11px] text-muted-foreground dark:text-muted-foreground">
+                  <span className="block text-11px text-muted-foreground dark:text-muted-foreground">
                     Notify when backups complete or templates apply.
                   </span>
                 </div>
@@ -525,7 +525,7 @@ function SettingsPageContent() {
                   <span className="block text-xs font-semibold text-foreground dark:text-muted-foreground">
                     Track Changes by Default
                   </span>
-                  <span className="block text-[11px] text-muted-foreground dark:text-muted-foreground">
+                  <span className="block text-11px text-muted-foreground dark:text-muted-foreground">
                     Toggle default log-edits mode for new sections.
                   </span>
                 </div>
@@ -566,7 +566,7 @@ function SettingsPageContent() {
                   <span className="block text-xs font-semibold text-foreground dark:text-muted-foreground">
                     Enable AI Content Suggestions
                   </span>
-                  <span className="block text-[11px] text-muted-foreground dark:text-muted-foreground">
+                  <span className="block text-11px text-muted-foreground dark:text-muted-foreground">
                     AI content and real-time writing assistance.
                   </span>
                 </div>
@@ -682,7 +682,7 @@ function SettingsPageContent() {
                     <button
                       type="button"
                       onClick={() => avatarInputRef.current?.click()}
-                      className="text-[11px] font-semibold text-brand hover:underline"
+                      className="text-11px font-semibold text-brand hover:underline"
                     >
                       Upload New
                     </button>
@@ -695,7 +695,7 @@ function SettingsPageContent() {
                             updateSettings({ avatarUrl: "" });
                             showToast("Profile photo removed");
                           }}
-                          className="text-[11px] font-semibold text-destructive hover:underline"
+                          className="text-11px font-semibold text-destructive hover:underline"
                         >
                           Remove
                         </button>
@@ -708,7 +708,7 @@ function SettingsPageContent() {
               {/* Row 1: First Name & Last Name (Non-editable) */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-1">
                     First Name
                   </label>
                   <input
@@ -720,7 +720,7 @@ function SettingsPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-1">
                     Last Name
                   </label>
                   <input
@@ -736,7 +736,7 @@ function SettingsPageContent() {
               {/* Row 2: Employee ID & Role */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Employee ID
                   </label>
                   <input
@@ -747,7 +747,7 @@ function SettingsPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Role
                   </label>
                   <input
@@ -762,7 +762,7 @@ function SettingsPageContent() {
               {/* Row 3: Designation & Department */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Designation
                   </label>
                   <input
@@ -773,7 +773,7 @@ function SettingsPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Department
                   </label>
                   <input
@@ -787,7 +787,7 @@ function SettingsPageContent() {
 
               {/* Row 4: Email (Non-editable) */}
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-1">
+                <label className="block text-11px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-1">
                   Email
                 </label>
                 <input
@@ -803,7 +803,7 @@ function SettingsPageContent() {
               {/* Row 5: Phone Number & Location */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Phone Number
                   </label>
                   <input
@@ -813,7 +813,7 @@ function SettingsPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Location
                   </label>
                   <input
@@ -827,7 +827,7 @@ function SettingsPageContent() {
               {/* Row 6: Time Zone & Language */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Time Zone
                   </label>
                   <input
@@ -837,7 +837,7 @@ function SettingsPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
+                  <label className="block text-11px font-bold uppercase tracking-wider text-secondary-foreground dark:text-muted-foreground mb-1">
                     Language
                   </label>
                   <input

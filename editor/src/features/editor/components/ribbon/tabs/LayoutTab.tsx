@@ -474,7 +474,7 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Normal</div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Left: 1", Right: 1"
               </div>
             </div>
@@ -488,7 +488,7 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Narrow</div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-10px text-muted-foreground">
                 Top: 0.5", Bottom: 0.5", Left: 0.5", Right: 0.5"
               </div>
             </div>
@@ -502,7 +502,7 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Moderate</div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Left: 0.75", Right: 0.75"
               </div>
             </div>
@@ -516,7 +516,7 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Wide</div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Left: 2", Right: 2"
               </div>
             </div>
@@ -530,7 +530,7 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Mirrored</div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Inside: 1.25", Outside: 1"
               </div>
             </div>
@@ -647,7 +647,7 @@ export default function LayoutTab() {
 
           {/* APPLY TO */}
           <div className="space-y-2">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+            <div className="text-11px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
               APPLY TO
             </div>
             <div className="space-y-2">
@@ -761,7 +761,7 @@ export default function LayoutTab() {
                 >
                   <div>
                     <div className="font-semibold">{ps.name}</div>
-                    <div className="text-[10px] text-muted-foreground">{ps.dimText}</div>
+                    <div className="text-10px text-muted-foreground">{ps.dimText}</div>
                   </div>
                   {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
                 </DropdownMenuItem>
@@ -842,7 +842,7 @@ export default function LayoutTab() {
             className="flex items-center justify-between cursor-pointer text-secondary-foreground dark:text-muted-foreground"
           >
             <span>Column Break</span>
-            <span className="text-[10px] text-muted-foreground">Ctrl+Shift+Enter</span>
+            <span className="text-10px text-muted-foreground">Ctrl+Shift+Enter</span>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -963,7 +963,7 @@ export default function LayoutTab() {
             <ChevronDown className="h-3 w-3 text-muted-foreground" />
           </button>} />
         <DropdownMenuContent align="start" className="w-56 p-2 text-xs">
-          <DropdownMenuLabel className="text-[11px] text-muted-foreground font-semibold mb-2">
+          <DropdownMenuLabel className="text-11px text-muted-foreground font-semibold mb-2">
             Page Background Color
           </DropdownMenuLabel>
           <div className="grid grid-cols-5 gap-1.5 mb-2">
@@ -993,7 +993,7 @@ export default function LayoutTab() {
           </div>
 
           <div className="flex items-center gap-2 pt-1 border-t border-muted dark:border-muted">
-            <Label className="text-[11px] text-muted-foreground">Custom:</Label>
+            <Label className="text-11px text-muted-foreground">Custom:</Label>
             <input
               type="color"
               value={activeSection?.pageColor || "#ffffff"}
@@ -1535,7 +1535,7 @@ export default function LayoutTab() {
                           onChange={(e) => setWmColor(e.target.value)}
                           className="h-7 w-10 cursor-pointer rounded border border-border"
                         />
-                        <span className="font-mono text-[11px] text-muted-foreground">
+                        <span className="font-mono text-11px text-muted-foreground">
                           {wmColor}
                         </span>
                       </div>
@@ -1681,7 +1681,7 @@ export default function LayoutTab() {
                 className="w-full h-full min-h-87.5 rounded-xl border border-secondary-foreground/60 p-5 flex flex-col items-center justify-center shadow-lg relative select-none"
                 style={{ backgroundColor: "#0c1421" }}
               >
-                <div className="text-[11px] uppercase font-bold tracking-[0.2em] text-muted-foreground mb-5 text-center">
+                <div className="text-11px uppercase font-bold tracking-[0.2em] text-muted-foreground mb-5 text-center">
                   LIVE PREVIEW
                 </div>
 
@@ -1769,7 +1769,7 @@ export default function LayoutTab() {
                         }}
                       />
                     ) : (
-                      <span className="text-[11px] text-muted-foreground font-medium">No image chosen</span>
+                      <span className="text-11px text-muted-foreground font-medium">No image chosen</span>
                     )}
                   </div>
                 </div>
@@ -1998,7 +1998,7 @@ export default function LayoutTab() {
 
                 {/* Distance Options (Word Distance from Page Edge) */}
                 <div className="rounded-lg border border-secondary dark:border-muted p-2.5 bg-muted/70 dark:bg-secondary/50">
-                  <div className="text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-2">
+                  <div className="text-11px font-semibold text-secondary-foreground dark:text-muted-foreground mb-2">
                     Distance from Edge (px)
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -2082,7 +2082,7 @@ export default function LayoutTab() {
 
               {/* Column 3: PREVIEW Card */}
               <div className="w-62.5 flex-shrink-0 bg-[#F2F7FC] dark:bg-[#0c1421] rounded-2xl p-4 border border-[#E1EDF8] dark:border-muted flex flex-col items-center justify-between shadow-xs">
-                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-secondary-foreground dark:text-muted-foreground text-center mb-2">
+                <div className="text-11px font-bold uppercase tracking-[0.2em] text-secondary-foreground dark:text-muted-foreground text-center mb-2">
                   PREVIEW
                 </div>
 

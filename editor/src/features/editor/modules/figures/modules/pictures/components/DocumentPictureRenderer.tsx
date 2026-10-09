@@ -541,7 +541,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
       {isSelected && (
         <div
           data-editor-ui="true"
-          className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-card dark:bg-secondary border border-secondary dark:border-muted p-1 rounded-lg shadow-lg text-[11px] backdrop-blur-md z-50 whitespace-nowrap text-foreground dark:text-muted"
+          className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-card dark:bg-secondary border border-secondary dark:border-muted p-1 rounded-lg shadow-lg text-11px backdrop-blur-md z-50 whitespace-nowrap text-foreground dark:text-muted"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -555,7 +555,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="text-[10px] font-mono px-1 text-secondary-foreground dark:text-muted-foreground tabular-nums">
+            <span className="text-10px font-mono px-1 text-secondary-foreground dark:text-muted-foreground tabular-nums">
               {width}×{height}
             </span>
             <button
@@ -584,7 +584,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
 
       {/* Stitch Dimension Watermark in lower right corner when selected */}
       {isSelected && (
-        <div className="absolute bottom-1 right-1 bg-foreground/80 text-primary-foreground backdrop-blur-xs px-1.5 py-0.5 rounded text-[9px] font-mono shadow-xs pointer-events-none z-30">
+        <div className="absolute bottom-1 right-1 bg-foreground/80 text-primary-foreground backdrop-blur-xs px-1.5 py-0.5 rounded text-9px font-mono shadow-xs pointer-events-none z-30">
           {width} × {height} px
         </div>
       )}

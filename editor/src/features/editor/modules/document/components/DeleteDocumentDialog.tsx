@@ -40,7 +40,7 @@ export function DeleteDocumentDialog({
             <h3 className="text-sm font-semibold text-foreground dark:text-primary-foreground">
               Delete Document
             </h3>
-            <p className="text-[11px] text-muted-foreground dark:text-muted-foreground">
+            <p className="text-11px text-muted-foreground dark:text-muted-foreground">
               Permanent action warning
             </p>
           </div>

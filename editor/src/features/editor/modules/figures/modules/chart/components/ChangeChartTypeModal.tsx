@@ -40,7 +40,7 @@ export const ChangeChartTypeModal: React.FC<ChangeChartTypeModalProps> = ({
             <h2 className="text-base font-semibold text-foreground dark:text-primary-foreground">
               Change Chart Type
             </h2>
-            <p className="text-xs text-muted0 dark:text-muted-foreground">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               Select a new visualization. Your existing data will be preserved.
             </p>
           </div>

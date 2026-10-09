@@ -937,6 +937,23 @@ function DocumentPage({
     [section, isLinked, sectionIndex, docModel.sections, footerKind, docUpdateSection]
   );
 
+  const handleHFKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      exitHeaderFooterMode();
+    } else if ((e.ctrlKey || e.metaKey) && (e.code === "KeyA" || e.key === "a" || e.key === "A")) {
+      e.preventDefault();
+      e.stopPropagation();
+      const range = document.createRange();
+      range.selectNodeContents(e.currentTarget);
+      const sel = window.getSelection();
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+  }, [exitHeaderFooterMode]);
+
   /*
    * Keep dynamic page number fields inside document content synchronized
    * with current pageNumber, totalPages, and format across all pages.
@@ -1375,19 +1392,46 @@ function DocumentPage({
 
     // ------------------------------------------------------------------
     // Select the complete document body, including content on other pages.
+    // Exclude header and footer text unless focused inside header/footer.
     // ------------------------------------------------------------------
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "a" || e.key === "A")) {
-      e.preventDefault();
+      const activeEl = document.activeElement as HTMLElement | null;
       const sel = window.getSelection();
+      const activeNode = sel?.anchorNode;
+      const activeNodeEl = activeNode?.nodeType === Node.ELEMENT_NODE
+        ? (activeNode as HTMLElement)
+        : activeNode?.parentElement;
+
+      // If user is currently editing inside a header or footer box, preserve isolated native selection inside header/footer
+      if (activeNodeEl?.closest("[data-hf-container]") || activeNodeEl?.hasAttribute("data-hf-type") || activeEl?.closest("[data-hf-container]")) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+
       const pageEditors = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-editor-page]")
-      ).filter((pageEditor) => pageEditor.isContentEditable);
+        document.querySelectorAll<HTMLElement>("[data-editor-page][contenteditable='true']")
+      ).filter((pageEditor) => !pageEditor.hasAttribute("data-hf-type") && !pageEditor.closest("[data-hf-container]"));
+
       if (sel && pageEditors.length > 0) {
         const range = document.createRange();
-        const firstPage = pageEditors[0];
-        const lastPage = pageEditors[pageEditors.length - 1];
-        range.setStart(firstPage, 0);
-        range.setEnd(lastPage, lastPage.childNodes.length);
+        const firstEl = pageEditors[0];
+        const lastEl = pageEditors[pageEditors.length - 1];
+
+        let firstNode: Node = firstEl.firstChild || firstEl;
+        while (firstNode.firstChild) firstNode = firstNode.firstChild;
+
+        let lastNode: Node = lastEl.lastChild || lastEl;
+        while (lastNode.lastChild) lastNode = lastNode.lastChild;
+
+        const lastOffset =
+          lastNode.nodeType === Node.TEXT_NODE
+            ? (lastNode.textContent?.length || 0)
+            : lastNode.childNodes.length;
+
+        range.setStart(firstNode, 0);
+        range.setEnd(lastNode, lastOffset);
         sel.removeAllRanges();
         sel.addRange(range);
       }
@@ -1556,6 +1600,17 @@ function DocumentPage({
     consecutiveEnterRef.current = false;
     const element = localEditorRef.current;
     if (!element) return;
+
+    element.querySelectorAll("ul[data-custom-bullet]").forEach((ul) => {
+      const bulletChar = ul.getAttribute("data-custom-bullet") || "•";
+      ul.querySelectorAll(":scope > li").forEach((li) => {
+        if (!li.getAttribute("data-custom-bullet")) {
+          li.setAttribute("data-custom-bullet", bulletChar);
+          (li as HTMLElement).style.listStyleType = "none";
+        }
+      });
+    });
+
     const currentHtml = cleanChartMountsForHtml(element.innerHTML);
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
@@ -2112,7 +2167,7 @@ function DocumentPage({
           -left-12
           top-2
           select-none
-          text-[10px]
+          text-10px
           text-muted-foreground
         "
         >
@@ -2139,9 +2194,10 @@ function DocumentPage({
             className={`
           relative
           box-border
-          text-[10px]
+          text-10px
           text-muted-foreground
           transition-all
+          ${!isHeaderFooterActive ? "select-none" : "select-text"}
           ${isHeaderFooterActive
                 ? "border-b border-dashed border-brand bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
                 : "border-b border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
@@ -2154,17 +2210,19 @@ function DocumentPage({
               paddingBottom: `${headerPaddingBottom}px`,
               minHeight: `${headerHeight}px`,
               zIndex: 10,
+              userSelect: isHeaderFooterActive ? "text" : "none",
+              WebkitUserSelect: isHeaderFooterActive ? "text" : "none",
             }}
           >
             {/* Editor-only Header Section Label */}
             {isHeaderFooterActive && (
               <div
                 data-editor-ui="true"
-                className="absolute -top-3 left-4 px-2 py-0.5 bg-brand text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+                className="absolute -top-3 left-4 px-2 py-0.5 bg-brand text-primary-foreground text-9px font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
               >
                 <span>{headerLabel}</span>
                 {isLinked && (
-                  <span className="opacity-80 font-normal text-[8px]">(Same as Previous)</span>
+                  <span className="opacity-80 font-normal text-8px">(Same as Previous)</span>
                 )}
               </div>
             )}
@@ -2185,18 +2243,13 @@ function DocumentPage({
                           contentEditable
                           suppressContentEditableWarning
                           onFocus={() => setActiveHFType("header")}
-                          onKeyDown={(e) => {
-                            if (e.key === "Escape") {
-                              e.preventDefault();
-                              exitHeaderFooterMode();
-                            }
-                          }}
+                          onKeyDown={handleHFKeyDown}
                           onInput={(e) => {
                             isEditingHeaderRef.current = true;
                             handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                         />
                       ) : effectiveHeaderHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2214,18 +2267,13 @@ function DocumentPage({
                           contentEditable
                           suppressContentEditableWarning
                           onFocus={() => setActiveHFType("header")}
-                          onKeyDown={(e) => {
-                            if (e.key === "Escape") {
-                              e.preventDefault();
-                              exitHeaderFooterMode();
-                            }
-                          }}
+                          onKeyDown={handleHFKeyDown}
                           onInput={(e) => {
                             isEditingHeaderRef.current = true;
                             handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                         />
                       ) : effectiveHeaderHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2247,18 +2295,13 @@ function DocumentPage({
                           contentEditable
                           suppressContentEditableWarning
                           onFocus={() => setActiveHFType("header")}
-                          onKeyDown={(e) => {
-                            if (e.key === "Escape") {
-                              e.preventDefault();
-                              exitHeaderFooterMode();
-                            }
-                          }}
+                          onKeyDown={handleHFKeyDown}
                           onInput={(e) => {
                             isEditingHeaderRef.current = true;
                             handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                         />
                       ) : effectiveHeaderHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2280,18 +2323,13 @@ function DocumentPage({
                     contentEditable
                     suppressContentEditableWarning
                     onFocus={() => setActiveHFType("header")}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") {
-                        e.preventDefault();
-                        exitHeaderFooterMode();
-                      }
-                    }}
+                    onKeyDown={handleHFKeyDown}
                     onInput={(e) => {
                       isEditingHeaderRef.current = true;
                       handleHeaderUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                       setTimeout(() => { isEditingHeaderRef.current = false; }, 300);
                     }}
-                    className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                    className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                   />
                 ) : effectiveHeaderHtml ? (
                   <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveHeaderHtml }} />
@@ -2477,9 +2515,10 @@ function DocumentPage({
             className={`
           relative
           box-border
-          text-[10px]
+          text-10px
           text-muted-foreground
           transition-all
+          ${!isHeaderFooterActive ? "select-none" : "select-text"}
           ${isHeaderFooterActive
                 ? "border-t border-dashed border-brand bg-primary/20 ring-1 ring-navy-300/40 dark:border-primary dark:bg-navy-950/20"
                 : "border-t border-muted hover:bg-primary/15 cursor-pointer dark:border-muted"
@@ -2492,17 +2531,19 @@ function DocumentPage({
               paddingBottom: `${Math.max(8, (section?.footerBottomDistance ?? 48) - 34)}px`,
               minHeight: `${footerHeight}px`,
               zIndex: 10,
+              userSelect: isHeaderFooterActive ? "text" : "none",
+              WebkitUserSelect: isHeaderFooterActive ? "text" : "none",
             }}
           >
             {/* Editor-only Footer Section Label */}
             {isHeaderFooterActive && (
               <div
                 data-editor-ui="true"
-                className="absolute -top-3 left-4 px-2 py-0.5 bg-brand text-primary-foreground text-[9px] font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
+                className="absolute -top-3 left-4 px-2 py-0.5 bg-brand text-primary-foreground text-9px font-bold uppercase tracking-wider rounded shadow-xs print:hidden select-none pointer-events-none z-20 flex items-center gap-1.5"
               >
                 <span>{footerLabel}</span>
                 {isLinked && (
-                  <span className="opacity-80 font-normal text-[8px]">(Same as Previous)</span>
+                  <span className="opacity-80 font-normal text-8px">(Same as Previous)</span>
                 )}
               </div>
             )}
@@ -2523,18 +2564,13 @@ function DocumentPage({
                           contentEditable
                           suppressContentEditableWarning
                           onFocus={() => setActiveHFType("footer")}
-                          onKeyDown={(e) => {
-                            if (e.key === "Escape") {
-                              e.preventDefault();
-                              exitHeaderFooterMode();
-                            }
-                          }}
+                          onKeyDown={handleHFKeyDown}
                           onInput={(e) => {
                             isEditingFooterRef.current = true;
                             handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                         />
                       ) : effectiveFooterHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
@@ -2552,18 +2588,13 @@ function DocumentPage({
                           contentEditable
                           suppressContentEditableWarning
                           onFocus={() => setActiveHFType("footer")}
-                          onKeyDown={(e) => {
-                            if (e.key === "Escape") {
-                              e.preventDefault();
-                              exitHeaderFooterMode();
-                            }
-                          }}
+                          onKeyDown={handleHFKeyDown}
                           onInput={(e) => {
                             isEditingFooterRef.current = true;
                             handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                         />
                       ) : effectiveFooterHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
@@ -2585,18 +2616,13 @@ function DocumentPage({
                           contentEditable
                           suppressContentEditableWarning
                           onFocus={() => setActiveHFType("footer")}
-                          onKeyDown={(e) => {
-                            if (e.key === "Escape") {
-                              e.preventDefault();
-                              exitHeaderFooterMode();
-                            }
-                          }}
+                          onKeyDown={handleHFKeyDown}
                           onInput={(e) => {
                             isEditingFooterRef.current = true;
                             handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                             setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                           }}
-                          className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                          className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                         />
                       ) : effectiveFooterHtml ? (
                         <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
@@ -2618,18 +2644,13 @@ function DocumentPage({
                     contentEditable
                     suppressContentEditableWarning
                     onFocus={() => setActiveHFType("footer")}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") {
-                        e.preventDefault();
-                        exitHeaderFooterMode();
-                      }
-                    }}
+                    onKeyDown={handleHFKeyDown}
                     onInput={(e) => {
                       isEditingFooterRef.current = true;
                       handleFooterUpdate(e.currentTarget.innerText, e.currentTarget.innerHTML);
                       setTimeout(() => { isEditingFooterRef.current = false; }, 300);
                     }}
-                    className="w-full min-h-5.5 outline-none text-[10px] cursor-text select-text"
+                    className="w-full min-h-5.5 outline-none text-10px cursor-text select-text"
                   />
                 ) : effectiveFooterHtml ? (
                   <div className="w-full" dangerouslySetInnerHTML={{ __html: effectiveFooterHtml }} />
@@ -2736,14 +2757,14 @@ function renderPageNumberContent(
 
     case "accent-bar":
       return (
-        <span className="inline-flex items-center border-b-2 border-sky-500 pb-0.5 font-bold tracking-wider text-[10px] text-foreground dark:text-muted">
+        <span className="inline-flex items-center border-b-2 border-sky-500 pb-0.5 font-bold tracking-wider text-10px text-foreground dark:text-muted">
           PAGE {formattedNum}
         </span>
       );
 
     case "circle":
       return (
-        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-primary-foreground text-[10px] font-bold shadow-xs">
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-primary-foreground text-10px font-bold shadow-xs">
           {formattedNum}
         </span>
       );
@@ -2751,7 +2772,7 @@ function renderPageNumberContent(
     case "modern":
       return (
         <span className="inline-flex items-center gap-1.5">
-          <span className="text-[9px] font-bold tracking-widest text-muted-foreground dark:text-muted-foreground uppercase">
+          <span className="text-9px font-bold tracking-widest text-muted-foreground dark:text-muted-foreground uppercase">
             CONFIDENTIAL
           </span>
           <span className="text-muted-foreground dark:text-secondary-foreground font-normal">|</span>

@@ -28,7 +28,7 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
         <h4 className="text-xs font-semibold text-success-800 dark:text-success-300">
           All References Valid
         </h4>
-        <p className="text-[11px] text-success-600 dark:text-success-400 mt-0.5">
+        <p className="text-11px text-success-600 dark:text-success-400 mt-0.5">
           No broken links, invalid targets, or protocol security issues found.
         </p>
       </div>
@@ -55,7 +55,7 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
                 <p className="text-xs font-semibold text-foreground dark:text-primary-foreground leading-tight">
                   {issue.message}
                 </p>
-                <p className="text-[10px] text-muted-foreground truncate mt-0.5">
+                <p className="text-10px text-muted-foreground truncate mt-0.5">
                   Target: {issue.target} {issue.pageNumber && `· Page ${issue.pageNumber}`}
                 </p>
               </div>
@@ -64,13 +64,13 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
           </div>
 
           {issue.fixSuggestion && (
-            <div className="rounded bg-muted p-1.5 text-[10px] text-secondary-foreground dark:bg-muted/80 dark:text-muted-foreground flex items-center justify-between gap-2">
+            <div className="rounded bg-muted p-1.5 text-10px text-secondary-foreground dark:bg-muted/80 dark:text-muted-foreground flex items-center justify-between gap-2">
               <span className="truncate">💡 {issue.fixSuggestion}</span>
               {onAutoFix && (
                 <button
                   type="button"
                   onClick={() => onAutoFix(issue)}
-                  className="flex items-center gap-1 rounded bg-brand px-2 py-0.5 text-[10px] font-semibold text-primary-foreground hover:bg-brand-deep shrink-0"
+                  className="flex items-center gap-1 rounded bg-brand px-2 py-0.5 text-10px font-semibold text-primary-foreground hover:bg-brand-deep shrink-0"
                 >
                   <Wrench className="h-2.5 w-2.5" /> Fix
                 </button>
@@ -83,7 +83,7 @@ export function BrokenLinksReport({ issues, onAutoFix, onNavigate }: BrokenLinks
               <button
                 type="button"
                 onClick={() => onNavigate(issue)}
-                className="flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline"
+                className="flex items-center gap-1 text-10px font-semibold text-brand hover:underline"
               >
                 <ExternalLink className="h-2.5 w-2.5" /> Locate in document
               </button>

@@ -16,7 +16,7 @@ export default function IconCategoryBar({ value, onChange }: IconCategoryBarProp
             key={cat}
             type="button"
             onClick={() => onChange(cat)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors border ${
+            className={`px-2.5 py-1 rounded-full text-11px font-medium whitespace-nowrap transition-colors border ${
               active
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-muted dark:bg-muted text-secondary-foreground dark:text-muted-foreground border-secondary dark:border-secondary-foreground hover:bg-muted dark:hover:bg-secondary-foreground"

@@ -552,7 +552,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
 
           <div className="border-t border-muted dark:border-muted pt-3">
             <div className="mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+              <span className="text-11px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
                 BIBLIOGRAPHY FIELDS FOR APA
               </span>
             </div>
@@ -679,7 +679,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
               {showAllFields && (
                 <div className="space-y-3 p-3 bg-muted dark:bg-[#111D29]/50 rounded-lg border border-secondary dark:border-muted animate-in slide-in-from-top-1 duration-150">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">Volume</label>
+                    <label className="text-11px font-semibold text-secondary-foreground dark:text-muted-foreground">Volume</label>
                     <input
                       type="text"
                       value={volume}
@@ -689,7 +689,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">Pages</label>
+                    <label className="text-11px font-semibold text-secondary-foreground dark:text-muted-foreground">Pages</label>
                     <input
                       type="text"
                       value={pages}
@@ -699,7 +699,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground">Edition</label>
+                    <label className="text-11px font-semibold text-secondary-foreground dark:text-muted-foreground">Edition</label>
                     <input
                       type="text"
                       value={edition}
@@ -840,7 +840,7 @@ function SourceManagerDialog({ onClose }: ModalProps) {
         <div className="flex-1 overflow-hidden flex min-h-0">
           {/* Master List (All registered sources) */}
           <div className="flex-1 overflow-y-auto p-5 thin-scroll">
-            <span className="text-[10px] font-bold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider block mb-3">
+            <span className="text-10px font-bold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider block mb-3">
               Sources Available ({filteredSources.length})
             </span>
             
@@ -861,17 +861,17 @@ function SourceManagerDialog({ onClose }: ModalProps) {
                         <span className="text-xs font-bold text-foreground dark:text-primary-foreground truncate max-w-[80%]">
                           {author || "Unknown Author"}
                         </span>
-                        <span className="text-[10px] font-mono bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-navy-300 px-2 py-0.5 rounded font-medium">
+                        <span className="text-10px font-mono bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-navy-300 px-2 py-0.5 rounded font-medium">
                           {s.tag}
                         </span>
                       </div>
                       
                       {s.isPlaceholder ? (
-                        <span className="text-[11px] text-warning-600 dark:text-warning-400 italic font-medium">Placeholder Citation</span>
+                        <span className="text-11px text-warning-600 dark:text-warning-400 italic font-medium">Placeholder Citation</span>
                       ) : (
                         <>
                           <span className="text-xs text-muted-foreground dark:text-muted-foreground line-clamp-1 italic">{s.title || "(Untitled)"}</span>
-                          <span className="text-[10px] text-muted-foreground dark:text-muted-foreground mt-0.5">
+                          <span className="text-10px text-muted-foreground dark:text-muted-foreground mt-0.5">
                             {s.type} · {s.year || "n.d."} {s.publisher ? `· ${s.publisher}` : ""}
                           </span>
                         </>
@@ -885,14 +885,14 @@ function SourceManagerDialog({ onClose }: ModalProps) {
                             refs.setEditingSource(s);
                             refs.setIsOpenCreateSource(true);
                           }}
-                          className="text-[11px] font-medium text-primary hover:underline"
+                          className="text-11px font-medium text-primary hover:underline"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => refs.deleteSource(s.id)}
-                          className="text-[11px] font-medium text-destructive hover:underline"
+                          className="text-11px font-medium text-destructive hover:underline"
                         >
                           Delete
                         </button>
@@ -902,7 +902,7 @@ function SourceManagerDialog({ onClose }: ModalProps) {
                             refs.insertCitation(s.id);
                             onClose();
                           }}
-                          className="text-[11px] font-medium text-success-600 hover:underline ml-auto"
+                          className="text-11px font-medium text-success-600 hover:underline ml-auto"
                         >
                           Insert Citation
                         </button>

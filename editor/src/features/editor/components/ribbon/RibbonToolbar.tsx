@@ -63,8 +63,7 @@ export default function RibbonToolbar() {
     <div
       className="
         border-b
-        border-secondary
-        dark:border-muted
+        border-sidebar-border
         bg-card
         dark:bg-[#0B1620]
       "
@@ -91,8 +90,8 @@ export default function RibbonToolbar() {
                 transition-colors
                 ${
                   active
-                    ? "bg-primary/10 text-primary/90 border border-b-0 border-secondary dark:bg-navy-950/60 dark:text-navy-300 dark:border-secondary-foreground"
-                    : "text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted"
+                    ? "bg-secondary text-primary font-semibold border-b-2 border-primary dark:bg-navy-950/60 dark:text-navy-300 dark:border-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-primary-foreground"
                 }
               `}
             >

@@ -15,7 +15,10 @@ import { loadGoogleFont } from "../modules/document/api/fontapi";
 
 interface SavedSelectionData {
   range: Range;
-  pageId: string;
+  pageId?: string;
+  startPageId?: string;
+  endPageId?: string;
+  hfType?: "header" | "footer" | null;
   startContainer: Node;
   startOffset: number;
   endContainer: Node;
@@ -24,17 +27,16 @@ interface SavedSelectionData {
   endTextOffset?: number;
 }
 
-function getSelectionCharacterOffsets(element: HTMLElement, range: Range) {
+function getCharacterOffsetInContainer(container: HTMLElement, targetNode: Node, targetOffset: number): number | null {
   try {
-    if (!element.contains(range.startContainer) || !element.contains(range.endContainer)) return null;
-    const startRange = range.cloneRange();
-    startRange.selectNodeContents(element);
-    startRange.setEnd(range.startContainer, range.startOffset);
-    const endRange = range.cloneRange();
-    endRange.selectNodeContents(element);
-    endRange.setEnd(range.endContainer, range.endOffset);
-    return { startOffset: startRange.toString().length, endOffset: endRange.toString().length };
-  } catch { return null; }
+    if (!container.contains(targetNode)) return null;
+    const range = document.createRange();
+    range.selectNodeContents(container);
+    range.setEnd(targetNode, targetOffset);
+    return range.toString().length;
+  } catch {
+    return null;
+  }
 }
 
 function getTextPointAtOffset(root: HTMLElement, targetOffset: number): { node: Text; offset: number } | null {
@@ -56,19 +58,121 @@ function getTextPointAtOffset(root: HTMLElement, targetOffset: number): { node: 
   return lastText ? { node: lastText, offset: lastText.data.length } : null;
 }
 
-function saveSelectionData(pageEl: HTMLElement, range: Range): SavedSelectionData | null {
-  const offsets = getSelectionCharacterOffsets(pageEl, range);
-  if (!offsets) return null;
+function saveSelectionData(
+  startPageEl: HTMLElement,
+  endPageElOrRange: HTMLElement | Range,
+  rangeParam?: Range
+): SavedSelectionData | null {
+  const endPageEl = endPageElOrRange instanceof Range ? startPageEl : endPageElOrRange;
+  const range = endPageElOrRange instanceof Range ? endPageElOrRange : rangeParam!;
+  if (!range) return null;
+
+  const startOffset = getCharacterOffsetInContainer(startPageEl, range.startContainer, range.startOffset);
+  const endOffset = getCharacterOffsetInContainer(endPageEl, range.endContainer, range.endOffset);
+  const startPageId = startPageEl.getAttribute("data-page-id") || "";
+  const endPageId = endPageEl.getAttribute("data-page-id") || "";
+  const hfType = (startPageEl.getAttribute("data-hf-type") as "header" | "footer" | null) ||
+                 (startPageEl.closest("[data-hf-type]")?.getAttribute("data-hf-type") as "header" | "footer" | null) ||
+                 null;
+
   return {
     range: range.cloneRange(),
-    pageId: pageEl.getAttribute("data-page-id") || "",
+    pageId: startPageId,
+    startPageId,
+    endPageId,
+    hfType,
     startContainer: range.startContainer,
     startOffset: range.startOffset,
     endContainer: range.endContainer,
     endOffset: range.endOffset,
-    startTextOffset: offsets.startOffset,
-    endTextOffset: offsets.endOffset,
+    startTextOffset: startOffset !== null ? startOffset : undefined,
+    endTextOffset: endOffset !== null ? endOffset : undefined,
   };
+}
+
+function getPagesInSelection(
+  startPageEl: HTMLElement,
+  endPageEl: HTMLElement
+): HTMLElement[] {
+  if (startPageEl === endPageEl) {
+    return [startPageEl];
+  }
+
+  const isHf = startPageEl.hasAttribute("data-hf-type");
+  if (isHf) {
+    return [startPageEl];
+  }
+
+  const allPages = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      "[data-editor-page][contenteditable='true'], [contenteditable='true'][data-page-id]:not([data-hf-type])"
+    )
+  ).filter((el) => !el.hasAttribute("data-hf-type") && !el.closest("[data-hf-container]"));
+
+  const uniquePages = Array.from(new Set(allPages));
+
+  const startIdx = uniquePages.indexOf(startPageEl);
+  const endIdx = uniquePages.indexOf(endPageEl);
+
+  if (startIdx !== -1 && endIdx !== -1) {
+    const min = Math.min(startIdx, endIdx);
+    const max = Math.max(startIdx, endIdx);
+    return uniquePages.slice(min, max + 1);
+  }
+
+  return [startPageEl];
+}
+
+function createPageSubRange(
+  pEl: HTMLElement,
+  fullRange: Range,
+  startPageEl: HTMLElement,
+  endPageEl: HTMLElement
+): Range {
+  const subRange = document.createRange();
+
+  const isStart = pEl === startPageEl;
+  const isEnd = pEl === endPageEl;
+
+  if (isStart && isEnd) {
+    subRange.setStart(fullRange.startContainer, fullRange.startOffset);
+    subRange.setEnd(fullRange.endContainer, fullRange.endOffset);
+    return subRange;
+  }
+
+  if (isStart) {
+    subRange.setStart(fullRange.startContainer, fullRange.startOffset);
+    let lastNode: Node = pEl.lastChild || pEl;
+    while (lastNode.lastChild) lastNode = lastNode.lastChild;
+    const lastOffset =
+      lastNode.nodeType === Node.TEXT_NODE
+        ? (lastNode.textContent?.length || 0)
+        : lastNode.childNodes.length;
+    subRange.setEnd(lastNode, lastOffset);
+    return subRange;
+  }
+
+  if (isEnd) {
+    let firstNode: Node = pEl.firstChild || pEl;
+    while (firstNode.firstChild) firstNode = firstNode.firstChild;
+    subRange.setStart(firstNode, 0);
+    subRange.setEnd(fullRange.endContainer, fullRange.endOffset);
+    return subRange;
+  }
+
+  // Intermediate page
+  let firstNode: Node = pEl.firstChild || pEl;
+  while (firstNode.firstChild) firstNode = firstNode.firstChild;
+  let lastNode: Node = pEl.lastChild || pEl;
+  while (lastNode.lastChild) lastNode = lastNode.lastChild;
+  const lastOffset =
+    lastNode.nodeType === Node.TEXT_NODE
+      ? (lastNode.textContent?.length || 0)
+      : lastNode.childNodes.length;
+
+  subRange.setStart(firstNode, 0);
+  subRange.setEnd(lastNode, lastOffset);
+  return subRange;
 }
 
 export function getCaretCharacterOffsetWithin(element: HTMLElement): number {
@@ -241,13 +345,22 @@ export interface PageBreakHistoryData {
   caretOffsetBefore: number;
 }
 
+export interface DocumentClearHistoryData {
+  pagesBefore: any[];
+  pageHtmlBefore: Record<string, string>;
+  activePageBefore: string | null;
+}
+
 export interface HistorySnapshot {
   pageId: string;
   html: string;
+  allPagesHtml?: Record<string, string>;
+  pages?: any[];
   caretOffset: number;
   label?: string;
-  actionType?: "edit" | "page-break";
+  actionType?: "edit" | "page-break" | "document-clear";
   pageBreakData?: PageBreakHistoryData;
+  documentData?: DocumentClearHistoryData;
 }
 
 export function extractPlainText(html: string): string {
@@ -494,213 +607,196 @@ useEffect(() => {
 
     const range = sel.getRangeAt(0);
 
-    const ancestor = range.commonAncestorContainer;
+    const startAnc = range.startContainer.nodeType === Node.ELEMENT_NODE
+      ? (range.startContainer as HTMLElement)
+      : range.startContainer.parentElement;
+    const endAnc = range.endContainer.nodeType === Node.ELEMENT_NODE
+      ? (range.endContainer as HTMLElement)
+      : range.endContainer.parentElement;
 
-    const el =
-      ancestor.nodeType === Node.ELEMENT_NODE
-        ? (ancestor as HTMLElement)
-        : ancestor.parentElement;
+    // 1. Check if selection is within Header or Footer editable container
+    const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+    const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
 
-    const pageEl =
-      el?.closest<HTMLElement>(
-        '[contenteditable="true"][data-page-id]'
-      );
-
-    if (!pageEl) {
-      /*
-       * Selection moved to toolbar/ribbon.
-       * KEEP the previous editor selection.
-       */
+    if (startHf && endHf && startHf === endHf) {
+      const saved = saveSelectionData(startHf, endHf, range);
+      if (saved) {
+        savedSelectionRef.current = saved;
+      }
       return;
     }
 
-    const saved = saveSelectionData(
-      pageEl,
-      range
-    );
+    // 2. Check if selection is within Body page editable container
+    const startPageEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])');
+    const endPageEl = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
 
+    if (!startPageEl || !endPageEl) {
+      return;
+    }
+
+    if (startPageEl.closest("[data-hf-container]") && !startPageEl.hasAttribute("data-hf-type")) {
+      return;
+    }
+
+    const saved = saveSelectionData(startPageEl, endPageEl, range);
     if (saved) {
       savedSelectionRef.current = saved;
     }
   };
 
-  document.addEventListener(
-    "selectionchange",
-    handleSelectionChange
-  );
+  document.addEventListener("selectionchange", handleSelectionChange);
 
   return () => {
-    document.removeEventListener(
-      "selectionchange",
-      handleSelectionChange
-    );
+    document.removeEventListener("selectionchange", handleSelectionChange);
   };
 }, []);
+
   const restoreEditorSelection = useCallback((): boolean => {
   const sel = window.getSelection();
   if (!sel) return false;
 
-  /*
-   * IMPORTANT:
-   * Do NOT overwrite savedSelectionRef here.
-   *
-   * When the user clicks RED / BLUE / GREEN,
-   * the browser may move the selection to the toolbar.
-   *
-   * The selection saved before clicking the toolbar
-   * must remain the source of truth.
-   */
-
   const saved = savedSelectionRef.current;
 
   if (!saved) {
-    /*
-     * No saved selection yet.
-     * Use the current editor selection only as a fallback.
-     */
     if (sel.rangeCount > 0) {
       const currentRange = sel.getRangeAt(0);
 
-      const ancestor = currentRange.commonAncestorContainer;
+      const startAnc = currentRange.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (currentRange.startContainer as HTMLElement)
+        : currentRange.startContainer.parentElement;
+      const endAnc = currentRange.endContainer.nodeType === Node.ELEMENT_NODE
+        ? (currentRange.endContainer as HTMLElement)
+        : currentRange.endContainer.parentElement;
 
-      const el =
-        ancestor.nodeType === Node.ELEMENT_NODE
-          ? (ancestor as HTMLElement)
-          : ancestor.parentElement;
-
-      const pageEl = el?.closest<HTMLElement>(
-        '[contenteditable="true"][data-page-id]'
-      );
-
-      if (pageEl && !currentRange.collapsed) {
-        const currentSaved = saveSelectionData(
-          pageEl,
-          currentRange
-        );
-
+      const hfEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+      if (hfEl && !currentRange.collapsed) {
+        const currentSaved = saveSelectionData(hfEl, hfEl, currentRange);
         if (currentSaved) {
           savedSelectionRef.current = currentSaved;
         }
+        return true;
+      }
 
+      const startPageEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])');
+      const endPageEl = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+
+      if (startPageEl && endPageEl && !currentRange.collapsed) {
+        const currentSaved = saveSelectionData(startPageEl, endPageEl, currentRange);
+        if (currentSaved) {
+          savedSelectionRef.current = currentSaved;
+        }
         return true;
       }
     }
 
     if (editorRef.current) {
-      editorRef.current.focus({
-        preventScroll: true,
-      });
-
+      editorRef.current.focus({ preventScroll: true });
       return true;
     }
 
     return false;
   }
 
-  /*
-   * Find the SAME page where the user originally
-   * selected the text.
-   */
-  const targetPage =
-    document.querySelector<HTMLElement>(
-      `[contenteditable="true"][data-page-id="${saved.pageId}"]`
-    ) || editorRef.current;
+  // 1. Header or Footer selection restoration
+  if (saved.hfType) {
+    const hfEl = document.querySelector<HTMLElement>(
+      `[contenteditable="true"][data-hf-type="${saved.hfType}"][data-page-id="${saved.pageId || saved.startPageId}"]`
+    ) || document.querySelector<HTMLElement>(
+      `[contenteditable="true"][data-hf-type="${saved.hfType}"]`
+    );
 
-  if (!targetPage) {
-    return false;
-  }
+    if (!hfEl) return false;
 
-  /*
-   * Focus the editor without changing our saved
-   * character offsets.
-   */
-  targetPage.focus({
-    preventScroll: true,
-  });
+    hfEl.focus({ preventScroll: true });
 
-  try {
-    /*
-     * BEST METHOD:
-     * Restore using character offsets.
-     *
-     * This survives DOM changes caused by
-     * execCommand("foreColor").
-     */
-    if (
-      saved.startTextOffset !== undefined &&
-      saved.endTextOffset !== undefined
-    ) {
-      const startPoint = getTextPointAtOffset(
-        targetPage,
-        saved.startTextOffset
-      );
+    try {
+      if (saved.startTextOffset !== undefined && saved.endTextOffset !== undefined) {
+        const startPoint = getTextPointAtOffset(hfEl, saved.startTextOffset);
+        const endPoint = getTextPointAtOffset(hfEl, saved.endTextOffset);
 
-      const endPoint = getTextPointAtOffset(
-        targetPage,
-        saved.endTextOffset
-      );
+        if (startPoint && endPoint) {
+          const newRange = document.createRange();
+          newRange.setStart(startPoint.node, startPoint.offset);
+          newRange.setEnd(endPoint.node, endPoint.offset);
 
-      if (startPoint && endPoint) {
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+          return true;
+        }
+      }
+
+      if (hfEl.contains(saved.startContainer) && hfEl.contains(saved.endContainer)) {
         const newRange = document.createRange();
-
-        newRange.setStart(
-          startPoint.node,
-          startPoint.offset
-        );
-
-        newRange.setEnd(
-          endPoint.node,
-          endPoint.offset
-        );
+        newRange.setStart(saved.startContainer, saved.startOffset);
+        newRange.setEnd(saved.endContainer, saved.endOffset);
 
         sel.removeAllRanges();
         sel.addRange(newRange);
+        return true;
+      }
 
+      if (saved.range) {
+        sel.removeAllRanges();
+        sel.addRange(saved.range);
+        return true;
+      }
+    } catch (err) {
+      console.warn("Failed to restore header/footer selection:", err);
+    }
+    return false;
+  }
+
+  // 2. Body selection restoration
+  const startPage = document.querySelector<HTMLElement>(
+    `[contenteditable="true"][data-editor-page="${saved.startPageId}"], [contenteditable="true"][data-page-id="${saved.startPageId}"]:not([data-hf-type])`
+  ) || editorRef.current;
+
+  const endPage = document.querySelector<HTMLElement>(
+    `[contenteditable="true"][data-editor-page="${saved.endPageId}"], [contenteditable="true"][data-page-id="${saved.endPageId}"]:not([data-hf-type])`
+  ) || startPage;
+
+  if (!startPage || !endPage) {
+    return false;
+  }
+
+  startPage.focus({ preventScroll: true });
+
+  try {
+    if (saved.startTextOffset !== undefined && saved.endTextOffset !== undefined) {
+      const startPoint = getTextPointAtOffset(startPage, saved.startTextOffset);
+      const endPoint = getTextPointAtOffset(endPage, saved.endTextOffset);
+
+      if (startPoint && endPoint) {
+        const newRange = document.createRange();
+        newRange.setStart(startPoint.node, startPoint.offset);
+        newRange.setEnd(endPoint.node, endPoint.offset);
+
+        sel.removeAllRanges();
+        sel.addRange(newRange);
         return true;
       }
     }
 
-    /*
-     * FALLBACK:
-     * Use the original DOM nodes if they still exist.
-     */
     if (
-      targetPage.contains(saved.startContainer) &&
-      targetPage.contains(saved.endContainer)
+      startPage.contains(saved.startContainer) &&
+      endPage.contains(saved.endContainer)
     ) {
       const newRange = document.createRange();
-
-      newRange.setStart(
-        saved.startContainer,
-        saved.startOffset
-      );
-
-      newRange.setEnd(
-        saved.endContainer,
-        saved.endOffset
-      );
+      newRange.setStart(saved.startContainer, saved.startOffset);
+      newRange.setEnd(saved.endContainer, saved.endOffset);
 
       sel.removeAllRanges();
       sel.addRange(newRange);
-
       return true;
     }
 
-    /*
-     * LAST FALLBACK:
-     * Use the stored Range.
-     */
     if (saved.range) {
       sel.removeAllRanges();
       sel.addRange(saved.range);
-
       return true;
     }
   } catch (error) {
-    console.warn(
-      "Failed to restore editor selection:",
-      error
-    );
+    console.warn("Failed to restore editor selection:", error);
   }
 
   return false;
@@ -719,25 +815,123 @@ useEffect(() => {
     return savedSelectionRef.current?.range || null;
   }, []);
 
+  const docModel = useDocumentModel();
+
+  const historyStackRef = useRef<HistorySnapshot[]>([]);
+  const historyIndexRef = useRef<number>(-1);
+  const isUndoingRedoingRef = useRef<boolean>(false);
+  const isAllPagesSelectedRef = useRef<boolean>(false);
+  const [, setHistoryVersion] = useState(0);
+
+  const activeDocId = docModel?.model?.id;
+  const prevDocIdRef = useRef<string | undefined>(activeDocId);
+
+  useEffect(() => {
+    if (activeDocId && activeDocId !== prevDocIdRef.current) {
+      prevDocIdRef.current = activeDocId;
+      historyStackRef.current = [];
+      historyIndexRef.current = -1;
+      setHistoryVersion((v) => v + 1);
+    }
+  }, [activeDocId]);
+
+  const initHistory = useCallback((pageId: string, html: string) => {
+    if (historyStackRef.current.length === 0) {
+      const allPagesHtml = docModel ? { ...docModel.model.pageHtml } : { [pageId]: html };
+      const pages = docModel ? [...docModel.model.pages] : undefined;
+      historyStackRef.current = [{
+        pageId,
+        html: html || "<p><br></p>",
+        allPagesHtml,
+        pages,
+        caretOffset: 0,
+        label: "Initial",
+      }];
+      historyIndexRef.current = 0;
+      setHistoryVersion((v) => v + 1);
+    }
+  }, [docModel]);
+
+  const recordSnapshot = useCallback(
+    (pageId: string, html: string, caretOffset?: number, customLabel?: string) => {
+      if (isUndoingRedoingRef.current) return;
+      const stack = historyStackRef.current;
+      const idx = historyIndexRef.current;
+
+      const offset =
+        caretOffset !== undefined
+          ? caretOffset
+          : editorRef.current
+          ? getCaretCharacterOffsetWithin(editorRef.current)
+          : 0;
+
+      // Avoid recording if identical to current snapshot
+      if (idx >= 0 && stack[idx] && stack[idx].pageId === pageId && stack[idx].html === html) {
+        return;
+      }
+
+      const prevHtml = idx >= 0 && stack[idx] ? stack[idx].html : (docModel?.model.pageHtml[pageId] || "");
+      const label = customLabel || getActionLabel(prevHtml, html);
+
+      const allPagesHtml = docModel ? { ...docModel.model.pageHtml, [pageId]: html } : { [pageId]: html };
+      const pages = docModel ? [...docModel.model.pages] : undefined;
+
+      let newStack: HistorySnapshot[];
+      if (idx < 0 || stack.length === 0) {
+        const initialHtml = prevHtml || docModel?.model.pageHtml[pageId] || html;
+        const initialAllHtml = docModel ? { ...docModel.model.pageHtml, [pageId]: initialHtml } : { [pageId]: initialHtml };
+        newStack = [
+          { pageId, html: initialHtml, allPagesHtml: initialAllHtml, pages, caretOffset: 0, label: "Initial" },
+          { pageId, html, allPagesHtml, pages, caretOffset: offset, label },
+        ];
+      } else {
+        newStack = stack.slice(0, idx + 1);
+        newStack.push({ pageId, html, allPagesHtml, pages, caretOffset: offset, label });
+      }
+
+      if (newStack.length > 2000) {
+        newStack.shift();
+      }
+
+      historyStackRef.current = newStack;
+      historyIndexRef.current = newStack.length - 1;
+      setHistoryVersion((v) => v + 1);
+    },
+    [docModel, editorRef]
+  );
+
   const applyFontSize = useCallback((size: string | number) => {
     restoreEditorSelection();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
+    const fullRange = sel.getRangeAt(0);
 
-    const anc = range.commonAncestorContainer;
-    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
-    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
-    if (!pageEl) return;
+    const startAnc = fullRange.startContainer.nodeType === Node.ELEMENT_NODE
+      ? (fullRange.startContainer as HTMLElement)
+      : fullRange.startContainer.parentElement;
+    const endAnc = fullRange.endContainer.nodeType === Node.ELEMENT_NODE
+      ? (fullRange.endContainer as HTMLElement)
+      : fullRange.endContainer.parentElement;
+
+    const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+    const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
+
+    const startPageEl = startHf || startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || editorRef.current;
+    const endPageEl = endHf || endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+
+    if (!startPageEl || !endPageEl) return;
+
+    const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
+    if (saved) savedSelectionRef.current = saved;
 
     const sizePt = `${size}pt`;
 
-    // 1. Collapsed selection (caret only, no text selected)
-    if (range.collapsed) {
+    // Collapsed selection on single page
+    if (fullRange.collapsed) {
       const span = document.createElement("span");
       span.style.fontSize = sizePt;
-      span.innerHTML = "&#8203;"; // Zero-width space placeholder
-      range.insertNode(span);
+      span.innerHTML = "&#8203;";
+      fullRange.insertNode(span);
 
       const newRange = document.createRange();
       newRange.setStart(span.firstChild || span, 1);
@@ -745,91 +939,100 @@ useEffect(() => {
       sel.removeAllRanges();
       sel.addRange(newRange);
 
-      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+      startPageEl.dispatchEvent(new Event("input", { bubbles: true }));
       return;
     }
 
-    // 2. Text is selected:
-    // Sentinel fontSize "7" accurately wraps all selected text nodes across inline tags and blocks
-    document.execCommand("styleWithCSS", false, "false");
-    document.execCommand("fontSize", false, "7");
+    preserveSelectionRef.current = true;
+    const pagesToFormat = getPagesInSelection(startPageEl, endPageEl);
 
-    const fontElements = Array.from(
-      pageEl.querySelectorAll<HTMLElement>('font[size="7"], span[style*="xxx-large"]')
-    );
-    const createdSpans: HTMLElement[] = [];
+    pagesToFormat.forEach((pEl) => {
+      const subRange = createPageSubRange(pEl, fullRange, startPageEl!, endPageEl!);
+      sel.removeAllRanges();
+      sel.addRange(subRange);
 
-    if (fontElements.length > 0) {
-      fontElements.forEach((el) => {
-        if (el.tagName === "FONT") {
-          const span = document.createElement("span");
-          span.style.fontSize = sizePt;
-          while (el.firstChild) {
-            span.appendChild(el.firstChild);
+      document.execCommand("styleWithCSS", false, "false");
+      document.execCommand("fontSize", false, "7");
+
+      const fontElements = Array.from(
+        pEl.querySelectorAll<HTMLElement>('font[size="7"], span[style*="xxx-large"]')
+      );
+      if (fontElements.length > 0) {
+        fontElements.forEach((el) => {
+          if (el.tagName === "FONT") {
+            const span = document.createElement("span");
+            span.style.fontSize = sizePt;
+            while (el.firstChild) {
+              span.appendChild(el.firstChild);
+            }
+            span.querySelectorAll<HTMLElement>("span[style*='font-size']").forEach((inner) => {
+              inner.style.fontSize = "";
+            });
+            el.parentNode?.replaceChild(span, el);
+          } else {
+            el.style.fontSize = sizePt;
           }
-          span.querySelectorAll<HTMLElement>("span[style*='font-size']").forEach((inner) => {
-            inner.style.fontSize = "";
-          });
-          el.parentNode?.replaceChild(span, el);
-          createdSpans.push(span);
-        } else {
-          el.style.fontSize = sizePt;
-          createdSpans.push(el);
+        });
+      }
+
+      pEl.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const isHeaderOrFooter = startPageEl.hasAttribute("data-hf-type");
+    if (!isHeaderOrFooter && docModel) {
+      const allPageEls = document.querySelectorAll<HTMLElement>("[data-editor-page][contenteditable='true']");
+      allPageEls.forEach((p) => {
+        const pid = p.getAttribute("data-page-id") || p.getAttribute("data-editor-page");
+        if (pid) {
+          docModel.setPageHtml(pid, p.innerHTML);
         }
       });
-    } else {
-      const existingSpan = parentEl?.closest<HTMLElement>("span[style*='font-size']");
-      if (existingSpan && existingSpan.textContent?.trim() === sel.toString().trim()) {
-        existingSpan.style.fontSize = sizePt;
-        createdSpans.push(existingSpan);
-      } else {
-        try {
-          const span = document.createElement("span");
-          span.style.fontSize = sizePt;
-          range.surroundContents(span);
-          createdSpans.push(span);
-        } catch {
-          // Cross-block selection fallback
-        }
+      const pageId = startPageEl.getAttribute("data-page-id") || "";
+      if (pageId) {
+        recordSnapshot(pageId, startPageEl.innerHTML, undefined, `Font Size: ${sizePt}`);
       }
     }
 
-    // Reselect formatted contents to keep selection highlighted and active
-    if (createdSpans.length > 0) {
-      const newRange = document.createRange();
-      const first = createdSpans[0];
-      const last = createdSpans[createdSpans.length - 1];
-      newRange.setStartBefore(first.firstChild || first);
-      newRange.setEndAfter(last.lastChild || last);
-      sel.removeAllRanges();
-      sel.addRange(newRange);
-
-      const saved = saveSelectionData(pageEl, newRange);
-      if (saved) savedSelectionRef.current = saved;
-    }
-
-    pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-  }, [restoreEditorSelection, editorRef]);
+    requestAnimationFrame(() => {
+      restoreEditorSelection();
+      setTimeout(() => {
+        preserveSelectionRef.current = false;
+      }, 0);
+    });
+  }, [restoreEditorSelection, editorRef, docModel, recordSnapshot]);
 
   const applyFontFamily = useCallback((font: string) => {
     loadGoogleFont(font);
     restoreEditorSelection();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
+    const fullRange = sel.getRangeAt(0);
 
-    const anc = range.commonAncestorContainer;
-    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
-    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
-    if (!pageEl) return;
+    const startAnc = fullRange.startContainer.nodeType === Node.ELEMENT_NODE
+      ? (fullRange.startContainer as HTMLElement)
+      : fullRange.startContainer.parentElement;
+    const endAnc = fullRange.endContainer.nodeType === Node.ELEMENT_NODE
+      ? (fullRange.endContainer as HTMLElement)
+      : fullRange.endContainer.parentElement;
+
+    const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+    const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
+
+    const startPageEl = startHf || startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || editorRef.current;
+    const endPageEl = endHf || endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+
+    if (!startPageEl || !endPageEl) return;
+
+    const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
+    if (saved) savedSelectionRef.current = saved;
 
     const fontCss = `${font}, Calibri, sans-serif`;
 
-    if (range.collapsed) {
+    if (fullRange.collapsed) {
       const span = document.createElement("span");
       span.style.fontFamily = fontCss;
       span.innerHTML = "&#8203;";
-      range.insertNode(span);
+      fullRange.insertNode(span);
 
       const newRange = document.createRange();
       newRange.setStart(span.firstChild || span, 1);
@@ -837,288 +1040,196 @@ useEffect(() => {
       sel.removeAllRanges();
       sel.addRange(newRange);
 
-      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
+      startPageEl.dispatchEvent(new Event("input", { bubbles: true }));
       return;
     }
 
-    document.execCommand("fontName", false, font);
+    preserveSelectionRef.current = true;
+    const pagesToFormat = getPagesInSelection(startPageEl, endPageEl);
 
-    const fontElements = Array.from(
-      pageEl.querySelectorAll<HTMLElement>(`font[face="${font}"], font[face*="${font}"]`)
-    );
-    const createdSpans: HTMLElement[] = [];
-
-    if (fontElements.length > 0) {
-      fontElements.forEach((el) => {
-        const span = document.createElement("span");
-        span.style.fontFamily = fontCss;
-        while (el.firstChild) {
-          span.appendChild(el.firstChild);
-        }
-        el.parentNode?.replaceChild(span, el);
-        createdSpans.push(span);
-      });
-    }
-
-    if (createdSpans.length > 0) {
-      const newRange = document.createRange();
-      const first = createdSpans[0];
-      const last = createdSpans[createdSpans.length - 1];
-      newRange.setStartBefore(first.firstChild || first);
-      newRange.setEndAfter(last.lastChild || last);
+    pagesToFormat.forEach((pEl) => {
+      const subRange = createPageSubRange(pEl, fullRange, startPageEl!, endPageEl!);
       sel.removeAllRanges();
-      sel.addRange(newRange);
+      sel.addRange(subRange);
 
-      const saved = saveSelectionData(pageEl, newRange);
-      if (saved) savedSelectionRef.current = saved;
+      document.execCommand("fontName", false, font);
+
+      const fontElements = Array.from(
+        pEl.querySelectorAll<HTMLElement>(`font[face="${font}"], font[face*="${font}"]`)
+      );
+      if (fontElements.length > 0) {
+        fontElements.forEach((el) => {
+          const span = document.createElement("span");
+          span.style.fontFamily = fontCss;
+          while (el.firstChild) {
+            span.appendChild(el.firstChild);
+          }
+          el.parentNode?.replaceChild(span, el);
+        });
+      }
+
+      pEl.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const isHeaderOrFooter = startPageEl.hasAttribute("data-hf-type");
+    if (!isHeaderOrFooter && docModel) {
+      const allPageEls = document.querySelectorAll<HTMLElement>("[data-editor-page][contenteditable='true']");
+      allPageEls.forEach((p) => {
+        const pid = p.getAttribute("data-page-id") || p.getAttribute("data-editor-page");
+        if (pid) {
+          docModel.setPageHtml(pid, p.innerHTML);
+        }
+      });
+      const pageId = startPageEl.getAttribute("data-page-id") || "";
+      if (pageId) {
+        recordSnapshot(pageId, startPageEl.innerHTML, undefined, `Font: ${font}`);
+      }
     }
 
-    pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-  }, [restoreEditorSelection, editorRef]);
+    requestAnimationFrame(() => {
+      restoreEditorSelection();
+      setTimeout(() => {
+        preserveSelectionRef.current = false;
+      }, 0);
+    });
+  }, [restoreEditorSelection, editorRef, docModel, recordSnapshot]);
 
   const applyFormatCommand = useCallback(
-  (command: string, value?: string) => {
-    /*
-     * ============================================================
-     * STEP 1
-     * Restore the ORIGINAL editor selection.
-     * ============================================================
-     */
-    const restored = restoreEditorSelection();
+    (command: string, value?: string) => {
+      const restored = restoreEditorSelection();
+      if (!restored) return;
 
-    if (!restored) {
-      return;
-    }
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const fullRange = sel.getRangeAt(0);
 
-    const sel = window.getSelection();
+      const startAnc = fullRange.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.startContainer as HTMLElement)
+        : fullRange.startContainer.parentElement;
+      const endAnc = fullRange.endContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.endContainer as HTMLElement)
+        : fullRange.endContainer.parentElement;
 
-    if (!sel || sel.rangeCount === 0) {
-      return;
-    }
+      const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+      const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
 
-    const range = sel.getRangeAt(0);
+      const startPageEl = startHf || startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || editorRef.current;
+      const endPageEl = endHf || endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
 
-    /*
-     * We need an actual text selection.
-     */
-    if (range.collapsed) {
-      return;
-    }
+      if (!startPageEl || !endPageEl) return;
 
-    /*
-     * ============================================================
-     * STEP 2
-     * Find the editor page.
-     * ============================================================
-     */
-    const ancestor = range.commonAncestorContainer;
+      const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
+      if (saved) savedSelectionRef.current = saved;
 
-    const el =
-      ancestor.nodeType === Node.ELEMENT_NODE
-        ? (ancestor as HTMLElement)
-        : ancestor.parentElement;
+      preserveSelectionRef.current = true;
+      const pagesToFormat = getPagesInSelection(startPageEl, endPageEl);
 
-    const pageEl =
-      el?.closest<HTMLElement>(
-        '[contenteditable="true"][data-page-id]'
-      ) || editorRef.current;
+      try {
+        pagesToFormat.forEach((pEl) => {
+          const subRange = createPageSubRange(pEl, fullRange, startPageEl!, endPageEl!);
+          sel.removeAllRanges();
+          sel.addRange(subRange);
+          try {
+            document.execCommand(command, false, value);
+          } catch (e) {
+            console.warn("Formatting failed on page:", pEl, e);
+          }
+          pEl.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      } catch (error) {
+        console.warn("Formatting command failed:", error);
+      }
 
-    if (!pageEl) {
-      return;
-    }
+      const isHeaderOrFooter = startPageEl.hasAttribute("data-hf-type");
+      if (!isHeaderOrFooter && docModel) {
+        const allPageEls = document.querySelectorAll<HTMLElement>("[data-editor-page][contenteditable='true']");
+        allPageEls.forEach((p) => {
+          const pid = p.getAttribute("data-page-id") || p.getAttribute("data-editor-page");
+          if (pid) {
+            docModel.setPageHtml(pid, p.innerHTML);
+          }
+        });
+        const pageId = startPageEl.getAttribute("data-page-id") || "";
+        if (pageId) {
+          recordSnapshot(pageId, startPageEl.innerHTML, undefined, command);
+        }
+      }
 
-    /*
-     * ============================================================
-     * STEP 3
-     * SAVE THE EXACT CURRENT SELECTION
-     *
-     * This becomes the permanent selection we restore
-     * after RED / BLUE / GREEN.
-     * ============================================================
-     */
-    const saved = saveSelectionData(
-      pageEl,
-      range
-    );
-
-    if (!saved) {
-      return;
-    }
-
-    savedSelectionRef.current = saved;
-
-    /*
-     * ============================================================
-     * STEP 4
-     * LOCK selection tracking.
-     *
-     * Browser may fire selectionchange while execCommand
-     * modifies the DOM.
-     * ============================================================
-     */
-    preserveSelectionRef.current = true;
-
-    /*
-     * ============================================================
-     * STEP 5
-     * APPLY FORMAT
-     * ============================================================
-     */
-    try {
-      document.execCommand(
-        command,
-        false,
-        value
-      );
-    } catch (error) {
-      console.warn(
-        "Formatting command failed:",
-        error
-      );
-
-      preserveSelectionRef.current = false;
-      return;
-    }
-
-    /*
-     * ============================================================
-     * STEP 6
-     * Tell the editor that the HTML changed.
-     * ============================================================
-     */
-    pageEl.dispatchEvent(
-      new Event("input", {
-        bubbles: true,
-      })
-    );
-
-    /*
-     * ============================================================
-     * STEP 7
-     * Restore the SAME selection after DOM changes.
-     * ============================================================
-     */
-    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        preserveSelectionRef.current = true;
-
-        /*
-         * IMPORTANT:
-         * restoreEditorSelection() will now ONLY restore
-         * savedSelectionRef.current.
-         *
-         * It will NOT overwrite it with the toolbar selection.
-         */
-        const restoredAgain =
+        requestAnimationFrame(() => {
+          preserveSelectionRef.current = true;
           restoreEditorSelection();
 
-        if (!restoredAgain) {
-          console.warn(
-            "Could not restore formatted text selection."
-          );
-        }
+          const finalSel = window.getSelection();
+          if (finalSel && finalSel.rangeCount > 0) {
+            const finalRange = finalSel.getRangeAt(0);
+            if (!finalRange.collapsed) {
+              const finalStartAnc = finalRange.startContainer.nodeType === Node.ELEMENT_NODE
+                ? (finalRange.startContainer as HTMLElement)
+                : finalRange.startContainer.parentElement;
+              const finalEndAnc = finalRange.endContainer.nodeType === Node.ELEMENT_NODE
+                ? (finalRange.endContainer as HTMLElement)
+                : finalRange.endContainer.parentElement;
 
-        /*
-         * ========================================================
-         * STEP 8
-         * Keep the selection saved for the NEXT color click.
-         *
-         * Example:
-         *
-         * RED
-         *  ↓
-         * restore Hello World
-         *  ↓
-         * apply RED
-         *  ↓
-         * restore Hello World
-         *  ↓
-         * save SAME selection
-         * ========================================================
-         */
-        const finalSel = window.getSelection();
+              const finalStart = finalStartAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || startPageEl;
+              const finalEnd = finalEndAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || endPageEl;
 
-        if (
-          finalSel &&
-          finalSel.rangeCount > 0
-        ) {
-          const finalRange =
-            finalSel.getRangeAt(0);
-
-          if (!finalRange.collapsed) {
-            const finalAncestor =
-              finalRange.commonAncestorContainer;
-
-            const finalEl =
-              finalAncestor.nodeType === Node.ELEMENT_NODE
-                ? (finalAncestor as HTMLElement)
-                : finalAncestor.parentElement;
-
-            const finalPage =
-              finalEl?.closest<HTMLElement>(
-                '[contenteditable="true"][data-page-id]'
-              ) || pageEl;
-
-            if (finalPage) {
-              const finalSaved =
-                saveSelectionData(
-                  finalPage,
-                  finalRange
-                );
-
-              if (finalSaved) {
-                savedSelectionRef.current =
-                  finalSaved;
+              if (finalStart && finalEnd) {
+                const finalSaved = saveSelectionData(finalStart, finalEnd, finalRange);
+                if (finalSaved) {
+                  savedSelectionRef.current = finalSaved;
+                }
               }
             }
           }
-        }
 
-        /*
-         * Unlock selection tracking only after
-         * everything has been restored and saved.
-         */
-        setTimeout(() => {
-          preserveSelectionRef.current = false;
-        }, 0);
+          setTimeout(() => {
+            preserveSelectionRef.current = false;
+          }, 0);
+        });
       });
-    });
-  },
-  [
-    restoreEditorSelection,
-    editorRef,
-  ]
-);
+    },
+    [restoreEditorSelection, editorRef, docModel, recordSnapshot]
+  );
 
   const applyBlockStyle = useCallback((tag: string) => {
     restoreEditorSelection();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
+    const fullRange = sel.getRangeAt(0);
 
-    const anc = range.commonAncestorContainer;
-    const parentEl = anc.nodeType === Node.ELEMENT_NODE ? (anc as HTMLElement) : anc.parentElement;
-    const pageEl = parentEl?.closest<HTMLElement>('[contenteditable="true"][data-page-id]') || editorRef.current;
+    const startAnc = fullRange.startContainer.nodeType === Node.ELEMENT_NODE
+      ? (fullRange.startContainer as HTMLElement)
+      : fullRange.startContainer.parentElement;
+    const endAnc = fullRange.endContainer.nodeType === Node.ELEMENT_NODE
+      ? (fullRange.endContainer as HTMLElement)
+      : fullRange.endContainer.parentElement;
+
+    const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+    const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
+
+    const startPageEl = startHf || startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || editorRef.current;
+    const endPageEl = endHf || endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+
+    if (!startPageEl || !endPageEl) return;
+
+    const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
+    if (saved) savedSelectionRef.current = saved;
 
     const blockTag = tag.toLowerCase() === "p" ? "<p>" : `<${tag.toUpperCase()}>`;
-    document.execCommand("formatBlock", false, blockTag);
+    const pagesToFormat = getPagesInSelection(startPageEl, endPageEl);
 
-    if (pageEl) {
-      pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-      const currentSel = window.getSelection();
-      if (currentSel && currentSel.rangeCount > 0) {
-        const r = currentSel.getRangeAt(0);
-        const pageId = pageEl.getAttribute("data-page-id") || "";
-        savedSelectionRef.current = {
-          range: r.cloneRange(),
-          pageId,
-          startContainer: r.startContainer,
-          startOffset: r.startOffset,
-          endContainer: r.endContainer,
-          endOffset: r.endOffset,
-        };
-      }
-    }
+    pagesToFormat.forEach((pEl) => {
+      const subRange = createPageSubRange(pEl, fullRange, startPageEl!, endPageEl!);
+      sel.removeAllRanges();
+      sel.addRange(subRange);
+      document.execCommand("formatBlock", false, blockTag);
+      pEl.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    requestAnimationFrame(() => {
+      restoreEditorSelection();
+    });
   }, [restoreEditorSelection, editorRef]);
 
   const applyStyleToken = useCallback((token: StyleToken) => {
@@ -1192,68 +1303,7 @@ useEffect(() => {
     }
   };
 
-  let docModel: ReturnType<typeof useDocumentModel> | null = null;
-  try {
-    docModel = useDocumentModel();
-  } catch {
-    docModel = null;
-  }
 
-  const historyStackRef = useRef<HistorySnapshot[]>([]);
-  const historyIndexRef = useRef<number>(-1);
-  const isUndoingRedoingRef = useRef<boolean>(false);
-  const [, setHistoryVersion] = useState(0);
-
-  const initHistory = useCallback((pageId: string, html: string) => {
-    if (historyStackRef.current.length === 0) {
-      historyStackRef.current = [{ pageId, html: html || "<p><br></p>", caretOffset: 0 }];
-      historyIndexRef.current = 0;
-      setHistoryVersion((v) => v + 1);
-    }
-  }, []);
-
-  const recordSnapshot = useCallback(
-    (pageId: string, html: string, caretOffset?: number, customLabel?: string) => {
-      if (isUndoingRedoingRef.current) return;
-      const stack = historyStackRef.current;
-      const idx = historyIndexRef.current;
-
-      const offset =
-        caretOffset !== undefined
-          ? caretOffset
-          : editorRef.current
-          ? getCaretCharacterOffsetWithin(editorRef.current)
-          : 0;
-
-      // Avoid recording if identical to current snapshot
-      if (idx >= 0 && stack[idx] && stack[idx].pageId === pageId && stack[idx].html === html) {
-        return;
-      }
-
-      const prevHtml = idx >= 0 && stack[idx] ? stack[idx].html : "";
-      const label = customLabel || getActionLabel(prevHtml, html);
-
-      let newStack: HistorySnapshot[];
-      if (idx < 0 || stack.length === 0) {
-        newStack = [
-          { pageId, html: "<p><br></p>", caretOffset: 0, label: "Initial" },
-          { pageId, html, caretOffset: offset, label },
-        ];
-      } else {
-        newStack = stack.slice(0, idx + 1);
-        newStack.push({ pageId, html, caretOffset: offset, label });
-      }
-
-      if (newStack.length > 2000) {
-        newStack.shift();
-      }
-
-      historyStackRef.current = newStack;
-      historyIndexRef.current = newStack.length - 1;
-      setHistoryVersion((v) => v + 1);
-    },
-    []
-  );
 
   const insertPageBreak = useCallback(() => {
     // 1. Locate current contenteditable page and caret range
@@ -1925,8 +1975,55 @@ useEffect(() => {
       return;
     }
 
-    // Check if the current action being undone is a page-break
     const currentAction = stack[idx];
+
+    // Undo document-clear action (Ctrl+A -> Backspace)
+    if (currentAction?.actionType === "document-clear" && currentAction.documentData) {
+      const data = currentAction.documentData;
+      const targetIdx = Math.max(0, idx - count);
+      historyIndexRef.current = targetIdx;
+      setHistoryVersion((v) => v + 1);
+      isUndoingRedoingRef.current = true;
+
+      if (docModel) {
+        docModel.setModel((prev) => ({
+          ...prev,
+          pages: data.pagesBefore,
+          pageHtml: data.pageHtmlBefore,
+        }));
+        if (data.activePageBefore) {
+          docModel.setActivePage(data.activePageBefore);
+        }
+
+        const restoreDom = () => {
+          Object.entries(data.pageHtmlBefore).forEach(([pId, html]) => {
+            const pageEl = document.querySelector<HTMLDivElement>(
+              `[contenteditable="true"][data-page-id="${pId}"]`
+            );
+            if (pageEl && pageEl.innerHTML !== html) {
+              pageEl.innerHTML = html;
+            }
+          });
+          const firstId = data.activePageBefore || data.pagesBefore[0]?.id || "";
+          if (firstId) {
+            focusPageInDom(firstId, "start");
+          }
+        };
+
+        restoreDom();
+        setTimeout(restoreDom, 30);
+        setTimeout(restoreDom, 120);
+        setTimeout(restoreDom, 250);
+        setTimeout(() => {
+          isUndoingRedoingRef.current = false;
+        }, 400);
+      } else {
+        isUndoingRedoingRef.current = false;
+      }
+      return;
+    }
+
+    // Check if the current action being undone is a page-break
     if (currentAction?.actionType === "page-break" && currentAction.pageBreakData) {
       const data = currentAction.pageBreakData;
       const targetIdx = Math.max(0, idx - count);
@@ -1971,33 +2068,60 @@ useEffect(() => {
 
     isUndoingRedoingRef.current = true;
 
-    let el = editorRef.current;
-    if (!el || el.getAttribute("data-page-id") !== snapshot.pageId) {
-      const pageEl = document.querySelector<HTMLDivElement>(
-        `[data-editor-page="${snapshot.pageId}"]`
-      );
-      if (pageEl) {
-        el = pageEl;
-        (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = pageEl;
-      }
-    }
-
-    if (el) {
-      el.innerHTML = snapshot.html || "<p><br></p>";
-      setCaretCharacterOffsetWithin(el, snapshot.caretOffset);
-    }
-
-    if (docModel) {
-      docModel.setPageHtml(snapshot.pageId, snapshot.html || "<p><br></p>");
+    if (snapshot.allPagesHtml && snapshot.pages && docModel) {
+      docModel.setModel((prev) => ({
+        ...prev,
+        pages: snapshot.pages || prev.pages,
+        pageHtml: snapshot.allPagesHtml || prev.pageHtml,
+      }));
+      Object.entries(snapshot.allPagesHtml).forEach(([pId, pHtml]) => {
+        const pageNode = document.querySelector<HTMLDivElement>(
+          `[contenteditable="true"][data-page-id="${pId}"]`
+        );
+        if (pageNode && pageNode.innerHTML !== pHtml) {
+          pageNode.innerHTML = pHtml;
+        }
+      });
       if (docModel.activePage !== snapshot.pageId) {
         docModel.setActivePage(snapshot.pageId);
       }
+    } else {
+      let el = editorRef.current;
+      if (!el || el.getAttribute("data-page-id") !== snapshot.pageId) {
+        const pageEl = document.querySelector<HTMLDivElement>(
+          `[data-editor-page="${snapshot.pageId}"],[contenteditable="true"][data-page-id="${snapshot.pageId}"]`
+        );
+        if (pageEl) {
+          el = pageEl;
+          (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = pageEl;
+        }
+      }
+
+      if (el) {
+        el.innerHTML = snapshot.html || "<p><br></p>";
+      }
+
+      if (docModel) {
+        docModel.setPageHtml(snapshot.pageId, snapshot.html || "<p><br></p>");
+        if (docModel.activePage !== snapshot.pageId) {
+          docModel.setActivePage(snapshot.pageId);
+        }
+      }
+    }
+
+    const activeEl = document.querySelector<HTMLDivElement>(
+      `[contenteditable="true"][data-page-id="${snapshot.pageId}"]`
+    ) || editorRef.current;
+
+    if (activeEl) {
+      try { activeEl.focus({ preventScroll: true }); } catch { /* ignore */ }
+      setCaretCharacterOffsetWithin(activeEl, snapshot.caretOffset);
     }
 
     setTimeout(() => {
       isUndoingRedoingRef.current = false;
-    }, 10);
-  }, [docModel]);
+    }, 40);
+  }, [docModel, editorRef]);
 
   const redoMultiple = useCallback((count: number) => {
     if (count <= 0) return;
@@ -2010,6 +2134,38 @@ useEffect(() => {
     const targetIdx = Math.min(stack.length - 1, idx + count);
     const targetAction = stack[targetIdx];
     if (!targetAction) return;
+
+    if (targetAction.actionType === "document-clear" && targetAction.documentData) {
+      const data = targetAction.documentData;
+      historyIndexRef.current = targetIdx;
+      setHistoryVersion((v) => v + 1);
+      isUndoingRedoingRef.current = true;
+
+      if (docModel) {
+        const firstId = data.pagesBefore[0]?.id || "p1";
+        const sectionId = docModel.model.sections[0]?.id || "section_1";
+
+        docModel.setModel((prev) => ({
+          ...prev,
+          pages: [{ id: firstId, sectionId }],
+          pageHtml: { [firstId]: "<p><br></p>" },
+        }));
+        docModel.setActivePage(firstId);
+        setTimeout(() => {
+          const firstEl = document.querySelector<HTMLDivElement>(
+            `[contenteditable="true"][data-page-id="${firstId}"]`
+          );
+          if (firstEl) {
+            firstEl.innerHTML = "<p><br></p>";
+          }
+          focusPageInDom(firstId, "start");
+          isUndoingRedoingRef.current = false;
+        }, 50);
+      } else {
+        isUndoingRedoingRef.current = false;
+      }
+      return;
+    }
 
     if (targetAction.actionType === "page-break" && targetAction.pageBreakData) {
       const data = targetAction.pageBreakData;
@@ -2048,33 +2204,60 @@ useEffect(() => {
 
     isUndoingRedoingRef.current = true;
 
-    let el = editorRef.current;
-    if (!el || el.getAttribute("data-page-id") !== snapshot.pageId) {
-      const pageEl = document.querySelector<HTMLDivElement>(
-        `[data-editor-page="${snapshot.pageId}"]`
-      );
-      if (pageEl) {
-        el = pageEl;
-        (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = pageEl;
-      }
-    }
-
-    if (el) {
-      el.innerHTML = snapshot.html || "<p><br></p>";
-      setCaretCharacterOffsetWithin(el, snapshot.caretOffset);
-    }
-
-    if (docModel) {
-      docModel.setPageHtml(snapshot.pageId, snapshot.html || "<p><br></p>");
+    if (snapshot.allPagesHtml && snapshot.pages && docModel) {
+      docModel.setModel((prev) => ({
+        ...prev,
+        pages: snapshot.pages || prev.pages,
+        pageHtml: snapshot.allPagesHtml || prev.pageHtml,
+      }));
+      Object.entries(snapshot.allPagesHtml).forEach(([pId, pHtml]) => {
+        const pageNode = document.querySelector<HTMLDivElement>(
+          `[contenteditable="true"][data-page-id="${pId}"]`
+        );
+        if (pageNode && pageNode.innerHTML !== pHtml) {
+          pageNode.innerHTML = pHtml;
+        }
+      });
       if (docModel.activePage !== snapshot.pageId) {
         docModel.setActivePage(snapshot.pageId);
       }
+    } else {
+      let el = editorRef.current;
+      if (!el || el.getAttribute("data-page-id") !== snapshot.pageId) {
+        const pageEl = document.querySelector<HTMLDivElement>(
+          `[data-editor-page="${snapshot.pageId}"],[contenteditable="true"][data-page-id="${snapshot.pageId}"]`
+        );
+        if (pageEl) {
+          el = pageEl;
+          (editorRef as React.MutableRefObject<HTMLDivElement | null>).current = pageEl;
+        }
+      }
+
+      if (el) {
+        el.innerHTML = snapshot.html || "<p><br></p>";
+      }
+
+      if (docModel) {
+        docModel.setPageHtml(snapshot.pageId, snapshot.html || "<p><br></p>");
+        if (docModel.activePage !== snapshot.pageId) {
+          docModel.setActivePage(snapshot.pageId);
+        }
+      }
+    }
+
+    const activeEl = document.querySelector<HTMLDivElement>(
+      `[contenteditable="true"][data-page-id="${snapshot.pageId}"]`
+    ) || editorRef.current;
+
+    if (activeEl) {
+      try { activeEl.focus({ preventScroll: true }); } catch { /* ignore */ }
+      setCaretCharacterOffsetWithin(activeEl, snapshot.caretOffset);
     }
 
     setTimeout(() => {
       isUndoingRedoingRef.current = false;
-    }, 10);
-  }, [docModel]);
+    }, 40);
+  }, [docModel, editorRef]);
 
   const undo = useCallback(() => {
     undoMultiple(1);
@@ -2117,18 +2300,336 @@ useEffect(() => {
         return;
       }
 
-      // Undo: Ctrl+Z or Cmd+Z (without Shift)
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "z" || e.key === "Z")) {
+      const activeEl = document.activeElement as HTMLElement | null;
+
+      const isInsideEditorPage = Boolean(
+        target?.closest("[data-editor-page]") ||
+        target?.closest("[contenteditable='true']") ||
+        activeEl?.closest("[data-editor-page]") ||
+        activeEl?.closest("[contenteditable='true']") ||
+        document.querySelector("[data-editor-page]")
+      );
+
+      const isCtrlA = (e.ctrlKey || e.metaKey) && (e.code === "KeyA" || e.key === "a" || e.key === "A");
+      const isCtrlX = (e.ctrlKey || e.metaKey) && (e.code === "KeyX" || e.key === "x" || e.key === "X");
+      const isBackspaceOrDelete = e.key === "Backspace" || e.key === "Delete" || e.code === "Backspace" || e.code === "Delete";
+      const isPrintableChar = !e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1;
+
+      // Unique writing page elements query (excluding header and footer)
+      const pageElements = Array.from(
+        new Set(
+          Array.from(
+            document.querySelectorAll<HTMLElement>(
+              "[data-editor-page][contenteditable='true'], [contenteditable='true'][data-page-id]"
+            )
+          ).filter((el) => !el.hasAttribute("data-hf-type") && !el.closest("[data-hf-container]"))
+        )
+      );
+
+      // 1. Ctrl+A / Cmd+A: Select All across all document writing pages (excluding header/footer)
+      if (isCtrlA && isInsideEditorPage) {
+        const sel = window.getSelection();
+
+        // If focus is currently inside a header or footer box, preserve isolated native selection inside header/footer
+        const activeNode = sel?.anchorNode;
+        const activeNodeEl = activeNode?.nodeType === Node.ELEMENT_NODE
+          ? (activeNode as HTMLElement)
+          : activeNode?.parentElement;
+        if (activeNodeEl?.closest("[data-hf-container]") || activeNodeEl?.hasAttribute("data-hf-type")) {
+          return;
+        }
+
+        if (pageElements.length > 0) {
+
+          // Table double Ctrl+A check: if inside cell and not yet selected cell, select cell first
+          if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            const anchor = range.startContainer.nodeType === Node.ELEMENT_NODE
+              ? (range.startContainer as HTMLElement)
+              : range.startContainer.parentElement;
+            const cell = anchor?.closest("td, th");
+            if (cell && !isAllPagesSelectedRef.current) {
+              const cellText = (cell.textContent || "").trim();
+              const selText = range.toString().trim();
+              if (selText.length < cellText.length) {
+                // First Ctrl+A inside cell selects cell content
+                e.preventDefault();
+                e.stopPropagation();
+                const cellRange = document.createRange();
+                cellRange.selectNodeContents(cell);
+                sel.removeAllRanges();
+                sel.addRange(cellRange);
+                return;
+              }
+            }
+          }
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          const range = document.createRange();
+          const firstEl = pageElements[0];
+          const lastEl = pageElements[pageElements.length - 1];
+
+          let firstNode: Node = firstEl.firstChild || firstEl;
+          while (firstNode.firstChild) firstNode = firstNode.firstChild;
+
+          let lastNode: Node = lastEl.lastChild || lastEl;
+          while (lastNode.lastChild) lastNode = lastNode.lastChild;
+
+          const lastOffset =
+            lastNode.nodeType === Node.TEXT_NODE
+              ? (lastNode.textContent?.length || 0)
+              : lastNode.childNodes.length;
+
+          range.setStart(firstNode, 0);
+          range.setEnd(lastNode, lastOffset);
+
+          if (sel) {
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+          isAllPagesSelectedRef.current = true;
+          return;
+        }
+      }
+
+      // Resolve active selection & check multi-page coverage
+      const sel = window.getSelection();
+      let isMultiPageSelection = false;
+      let startPageId = "";
+      let endPageId = "";
+      let startPageEl: HTMLElement | null = null;
+      let endPageEl: HTMLElement | null = null;
+      let currentRange: Range | null = null;
+
+      if (sel && sel.rangeCount > 0 && pageElements.length > 0) {
+        currentRange = sel.getRangeAt(0);
+        const startAnc = currentRange.startContainer.nodeType === Node.ELEMENT_NODE
+          ? (currentRange.startContainer as HTMLElement)
+          : currentRange.startContainer.parentElement;
+        const endAnc = currentRange.endContainer.nodeType === Node.ELEMENT_NODE
+          ? (currentRange.endContainer as HTMLElement)
+          : currentRange.endContainer.parentElement;
+
+        startPageEl = startAnc?.closest<HTMLElement>("[contenteditable='true'][data-page-id]") || null;
+        endPageEl = endAnc?.closest<HTMLElement>("[contenteditable='true'][data-page-id]") || null;
+
+        startPageId = startPageEl?.getAttribute("data-page-id") || "";
+        endPageId = endPageEl?.getAttribute("data-page-id") || "";
+
+        if (startPageEl && endPageEl && startPageEl !== endPageEl) {
+          isMultiPageSelection = true;
+        } else if (pageElements.length === 1 && currentRange) {
+          const selText = currentRange.toString().trim();
+          const containerText = (pageElements[0].textContent || "").trim();
+          if (containerText.length > 0 && selText.length >= containerText.length * 0.85) {
+            isMultiPageSelection = true;
+          }
+        }
+      }
+
+      const isFullDocumentSelection =
+        isAllPagesSelectedRef.current ||
+        (isMultiPageSelection &&
+          startPageEl === pageElements[0] &&
+          endPageEl === pageElements[pageElements.length - 1]);
+
+      const shouldInterceptAction =
+        (isFullDocumentSelection || isMultiPageSelection || isAllPagesSelectedRef.current) &&
+        (isBackspaceOrDelete || isCtrlX || isPrintableChar);
+
+      if (shouldInterceptAction && docModel && docModel.model.pages.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        isAllPagesSelectedRef.current = false;
+
+        const allPages = [...docModel.model.pages];
+        const pageHtmlBefore = { ...docModel.model.pageHtml };
+        const activePageBefore = docModel.activePage;
+
+        const actionType = isCtrlX ? "cut" : isPrintableChar ? "type" : "delete";
+        const insertedText = isPrintableChar ? e.key : "";
+
+        if (actionType === "cut") {
+          let selectedText = currentRange?.toString() || "";
+          if (!selectedText || isFullDocumentSelection) {
+            selectedText = pageElements.map((el) => el.innerText || el.textContent || "").join("\n");
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(selectedText).catch(() => {});
+          }
+        }
+
+        const startIdx = allPages.findIndex((p) => p.id === startPageId);
+        const endIdx = allPages.findIndex((p) => p.id === endPageId);
+
+        if (
+          isFullDocumentSelection ||
+          startIdx === -1 ||
+          endIdx === -1 ||
+          (startIdx === 0 && endIdx === allPages.length - 1)
+        ) {
+          // FULL DOCUMENT CLEAR
+          const firstPageId = allPages[0].id;
+          const sectionId = docModel.model.sections[0]?.id || "section_1";
+          const newHtml = insertedText ? `<p>${insertedText}</p>` : "<p><br></p>";
+
+          // Instantly clear ALL page DOM elements so non-first pages disappear immediately
+          pageElements.forEach((el, idx) => {
+            if (idx === 0) {
+              el.innerHTML = newHtml;
+            } else {
+              el.innerHTML = "";
+            }
+          });
+
+          const stack = historyStackRef.current;
+          const idx = historyIndexRef.current;
+          const newStack = idx >= 0 ? stack.slice(0, idx + 1) : [];
+
+          newStack.push({
+            pageId: firstPageId,
+            html: newHtml,
+            caretOffset: insertedText ? insertedText.length : 0,
+            label: actionType === "cut" ? "Cut All Pages" : actionType === "type" ? `Type "${insertedText}"` : "Delete All Pages",
+            actionType: "document-clear",
+            documentData: {
+              pagesBefore: allPages,
+              pageHtmlBefore,
+              activePageBefore,
+            },
+          });
+
+          isUndoingRedoingRef.current = true;
+          historyStackRef.current = newStack;
+          historyIndexRef.current = newStack.length - 1;
+          setHistoryVersion((v) => v + 1);
+
+          docModel.setModel((prev) => ({
+            ...prev,
+            pages: [{ id: firstPageId, sectionId }],
+            pageHtml: { [firstPageId]: newHtml },
+          }));
+          docModel.setActivePage(firstPageId);
+
+          setTimeout(() => {
+            focusPageInDom(firstPageId, "start");
+            if (insertedText && pageElements[0]) {
+              setCaretCharacterOffsetWithin(pageElements[0], insertedText.length);
+            }
+            isUndoingRedoingRef.current = false;
+          }, 100);
+          return;
+        } else {
+          // PARTIAL MULTI-PAGE DELETE (e.g. Page 2 to Page 5)
+          let startPrefixHtml = "";
+          if (startPageEl && currentRange) {
+            try {
+              const prefixRange = document.createRange();
+              prefixRange.selectNodeContents(startPageEl);
+              prefixRange.setEnd(currentRange.startContainer, currentRange.startOffset);
+              const fragment = prefixRange.cloneContents();
+              const div = document.createElement("div");
+              div.appendChild(fragment);
+              startPrefixHtml = div.innerHTML;
+            } catch {
+              startPrefixHtml = "<p><br></p>";
+            }
+          }
+
+          let endSuffixHtml = "";
+          if (endPageEl && currentRange) {
+            try {
+              const suffixRange = document.createRange();
+              suffixRange.selectNodeContents(endPageEl);
+              suffixRange.setStart(currentRange.endContainer, currentRange.endOffset);
+              const fragment = suffixRange.cloneContents();
+              const div = document.createElement("div");
+              div.appendChild(fragment);
+              endSuffixHtml = div.innerHTML;
+            } catch {
+              endSuffixHtml = "";
+            }
+          }
+
+          let mergedHtml = (startPrefixHtml + (insertedText ? insertedText : "") + endSuffixHtml).trim();
+          if (!mergedHtml || mergedHtml === "<br>" || mergedHtml === "<p></p>") {
+            mergedHtml = "<p><br></p>";
+          }
+
+          const remainingPages = allPages.filter((_, i) => i <= startIdx || i > endIdx);
+          const newPageHtml: Record<string, string> = { ...pageHtmlBefore };
+          newPageHtml[startPageId] = mergedHtml;
+
+          for (let i = startIdx + 1; i <= endIdx; i++) {
+            delete newPageHtml[allPages[i].id];
+          }
+
+          if (startPageEl) {
+            startPageEl.innerHTML = mergedHtml;
+          }
+
+          const stack = historyStackRef.current;
+          const idx = historyIndexRef.current;
+          const newStack = idx >= 0 ? stack.slice(0, idx + 1) : [];
+
+          newStack.push({
+            pageId: startPageId,
+            html: mergedHtml,
+            caretOffset: insertedText.length,
+            label: actionType === "cut" ? "Cut Multi-Page Selection" : actionType === "type" ? "Type over Multi-Page Selection" : "Delete Multi-Page Selection",
+            actionType: "document-clear",
+            documentData: {
+              pagesBefore: allPages,
+              pageHtmlBefore,
+              activePageBefore,
+            },
+          });
+
+          isUndoingRedoingRef.current = true;
+          historyStackRef.current = newStack;
+          historyIndexRef.current = newStack.length - 1;
+          setHistoryVersion((v) => v + 1);
+
+          docModel.setModel((prev) => ({
+            ...prev,
+            pages: remainingPages,
+            pageHtml: newPageHtml,
+          }));
+          docModel.setActivePage(startPageId);
+
+          setTimeout(() => {
+            focusPageInDom(startPageId, "start");
+            isUndoingRedoingRef.current = false;
+          }, 100);
+          return;
+        }
+      }
+
+      // Reset selection flag on navigation keys
+      if (
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight" ||
+        e.key === "ArrowUp" ||
+        e.key === "ArrowDown" ||
+        e.key === "Escape"
+      ) {
+        isAllPagesSelectedRef.current = false;
+      }
+
+      // 3. Undo: Ctrl+Z or Cmd+Z (without Shift)
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "z" || e.key === "Z" || e.code === "KeyZ")) {
         e.preventDefault();
         e.stopPropagation();
         undo();
         return;
       }
 
-      // Redo: Ctrl+Y / Cmd+Y or Ctrl+Shift+Z / Cmd+Shift+Z
+      // 4. Redo: Ctrl+Y / Cmd+Y or Ctrl+Shift+Z / Cmd+Shift+Z
       if (
-        ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "Y")) ||
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "z" || e.key === "Z"))
+        ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "Y" || e.code === "KeyY")) ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "z" || e.key === "Z" || e.code === "KeyZ"))
       ) {
         e.preventDefault();
         e.stopPropagation();
@@ -2139,219 +2640,282 @@ useEffect(() => {
 
     window.addEventListener("keydown", handleGlobalKeyDown, true);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown, true);
-  }, [undo, redo]);
+  }, [undo, redo, docModel]);
 
   const canUndo = historyIndexRef.current > 0;
   const canRedo = historyIndexRef.current < historyStackRef.current.length - 1;
-const applyBulletStyle = useCallback(
-  (
-    bulletChar: string,
-    styleType: string
-  ) => {
-    const restored =
-      restoreEditorSelection();
-
-    if (!restored) {
-      return;
-    }
-
-    const editor = editorRef.current;
-
-    if (!editor) {
-      return;
-    }
-
-    const selection =
-      window.getSelection();
-
-    if (
-      !selection ||
-      selection.rangeCount === 0
-    ) {
-      return;
-    }
-
-    /*
-     * Find the current list.
-     */
-    const range =
-      selection.getRangeAt(0);
-
-    let currentList:
-      | HTMLUListElement
-      | null = null;
-
-    let node: Node | null =
-      range.startContainer;
-
-    while (
-      node &&
-      node !== editor
-    ) {
-      if (
-        node instanceof
-        HTMLUListElement
-      ) {
-        currentList = node;
-        break;
+  const applyBulletStyle = useCallback(
+    (
+      bulletCharOrStyle: string,
+      styleType?: string
+    ) => {
+      const restored = restoreEditorSelection();
+      if (!restored) {
+        return;
       }
 
-      node = node.parentNode;
-    }
-
-    /*
-     * NONE
-     *
-     * Remove the list completely.
-     */
-    if (styleType === "none") {
-      if (currentList) {
-        document.execCommand(
-          "insertUnorderedList"
-        );
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        return;
       }
 
-      editor.dispatchEvent(
-        new Event("input", {
-          bubbles: true,
-        })
-      );
+      const fullRange = selection.getRangeAt(0);
+      const startAnc = fullRange.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.startContainer as HTMLElement)
+        : fullRange.startContainer.parentElement;
+      const endAnc = fullRange.endContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.endContainer as HTMLElement)
+        : fullRange.endContainer.parentElement;
 
-      return;
-    }
+      const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+      const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
 
-    /*
-     * If we are not already inside
-     * a bullet list, create one.
-     */
-    if (!currentList) {
-      document.execCommand(
-        "insertUnorderedList"
-      );
+      const startPageEl = startHf || startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || editorRef.current;
+      const endPageEl = endHf || endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
 
-      /*
-       * Browser changes the DOM after
-       * insertUnorderedList, so get the
-       * list again.
-       */
-      const newSelection =
-        window.getSelection();
+      if (!startPageEl || !endPageEl) {
+        return;
+      }
 
-      if (
-        newSelection &&
-        newSelection.rangeCount > 0
-      ) {
-        const newRange =
-          newSelection.getRangeAt(0);
+      const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
+      if (saved) {
+        savedSelectionRef.current = saved;
+      }
 
-        let newNode: Node | null =
-          newRange.startContainer;
+      let effectiveType = styleType || "disc";
+      let effectiveChar = bulletCharOrStyle || "";
 
-        while (
-          newNode &&
-          newNode !== editor
-        ) {
-          if (
-            newNode instanceof
-            HTMLUListElement
-          ) {
-            currentList = newNode;
+      if (bulletCharOrStyle && bulletCharOrStyle.startsWith("custom:")) {
+        effectiveType = "custom";
+        effectiveChar = bulletCharOrStyle.substring(7);
+      } else if (["disc", "circle", "square", "none"].includes(bulletCharOrStyle)) {
+        effectiveType = bulletCharOrStyle;
+        effectiveChar = "";
+      }
+
+      preserveSelectionRef.current = true;
+      const pagesToFormat = getPagesInSelection(startPageEl, endPageEl);
+
+      pagesToFormat.forEach((pEl) => {
+        const subRange = createPageSubRange(pEl, fullRange, startPageEl, endPageEl);
+        selection.removeAllRanges();
+        selection.addRange(subRange);
+
+        let currentList: HTMLUListElement | null = null;
+        let node: Node | null = subRange.startContainer;
+
+        while (node && node !== pEl) {
+          if (node instanceof HTMLUListElement) {
+            currentList = node;
             break;
           }
+          node = node.parentNode;
+        }
 
-          newNode =
-            newNode.parentNode;
+        if (effectiveType === "none") {
+          if (currentList) {
+            document.execCommand("insertUnorderedList");
+          }
+          pEl.dispatchEvent(new Event("input", { bubbles: true }));
+          return;
+        }
+
+        if (!currentList) {
+          document.execCommand("insertUnorderedList");
+
+          const newSelection = window.getSelection();
+          if (newSelection && newSelection.rangeCount > 0) {
+            const newRange = newSelection.getRangeAt(0);
+            let newNode: Node | null = newRange.startContainer;
+
+            while (newNode && newNode !== pEl) {
+              if (newNode instanceof HTMLUListElement) {
+                currentList = newNode;
+                break;
+              }
+              newNode = newNode.parentNode;
+            }
+          }
+        }
+
+        if (currentList) {
+          if (
+            effectiveType === "disc" ||
+            effectiveType === "circle" ||
+            effectiveType === "square"
+          ) {
+            currentList.style.listStyleType = effectiveType;
+            currentList.removeAttribute("data-custom-bullet");
+
+            currentList.querySelectorAll(":scope > li").forEach((li) => {
+              li.removeAttribute("data-custom-bullet");
+              (li as HTMLElement).style.listStyleType = effectiveType;
+            });
+          } else if (effectiveType === "custom" || effectiveChar) {
+            currentList.style.listStyleType = "none";
+            currentList.setAttribute("data-custom-bullet", effectiveChar);
+
+            currentList.querySelectorAll(":scope > li").forEach((li) => {
+              li.setAttribute("data-custom-bullet", effectiveChar);
+              (li as HTMLElement).style.listStyleType = "none";
+            });
+          }
+        }
+
+        pEl.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+
+      const isHeaderOrFooter = startPageEl.hasAttribute("data-hf-type");
+      if (!isHeaderOrFooter && docModel) {
+        const allPageEls = document.querySelectorAll<HTMLElement>("[data-editor-page][contenteditable='true']");
+        allPageEls.forEach((p) => {
+          const pid = p.getAttribute("data-page-id") || p.getAttribute("data-editor-page");
+          if (pid) {
+            docModel.setPageHtml(pid, p.innerHTML);
+          }
+        });
+        const pageId = startPageEl.getAttribute("data-page-id") || "";
+        if (pageId) {
+          recordSnapshot(pageId, startPageEl.innerHTML, undefined, `Bullet List: ${effectiveType}`);
         }
       }
-    }
 
-    if (!currentList) {
-      return;
-    }
+      requestAnimationFrame(() => {
+        restoreEditorSelection();
+        setTimeout(() => {
+          preserveSelectionRef.current = false;
+        }, 0);
+      });
+    },
+    [restoreEditorSelection, editorRef, docModel, recordSnapshot]
+  );
 
-    /*
-     * NORMAL BULLETS
-     */
-    if (
-      styleType === "disc" ||
-      styleType === "circle" ||
-      styleType === "square"
-    ) {
-      currentList.style.listStyleType =
-        styleType;
+  const applyNumberingStyle = useCallback(
+    (styleType: string = "decimal") => {
+      const restored = restoreEditorSelection();
+      if (!restored) {
+        return;
+      }
 
-      currentList.removeAttribute(
-        "data-custom-bullet"
-      );
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        return;
+      }
 
-      currentList
-        .querySelectorAll(":scope > li")
-        .forEach((li) => {
-          li.removeAttribute(
-            "data-custom-bullet"
-          );
+      const fullRange = selection.getRangeAt(0);
+      const startAnc = fullRange.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.startContainer as HTMLElement)
+        : fullRange.startContainer.parentElement;
+      const endAnc = fullRange.endContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.endContainer as HTMLElement)
+        : fullRange.endContainer.parentElement;
 
-          (
-            li as HTMLElement
-          ).style.listStyleType =
-            styleType;
+      const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+      const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
+
+      const startPageEl = startHf || startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || editorRef.current;
+      const endPageEl = endHf || endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+
+      if (!startPageEl || !endPageEl) {
+        return;
+      }
+
+      const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
+      if (saved) {
+        savedSelectionRef.current = saved;
+      }
+
+      preserveSelectionRef.current = true;
+      const pagesToFormat = getPagesInSelection(startPageEl, endPageEl);
+
+      pagesToFormat.forEach((pEl) => {
+        const subRange = createPageSubRange(pEl, fullRange, startPageEl, endPageEl);
+        selection.removeAllRanges();
+        selection.addRange(subRange);
+
+        let currentList: HTMLOListElement | null = null;
+        let node: Node | null = subRange.startContainer;
+
+        while (node && node !== pEl) {
+          if (node instanceof HTMLOListElement) {
+            currentList = node;
+            break;
+          }
+          node = node.parentNode;
+        }
+
+        if (styleType === "none") {
+          if (currentList) {
+            document.execCommand("insertOrderedList");
+          }
+          pEl.dispatchEvent(new Event("input", { bubbles: true }));
+          return;
+        }
+
+        if (!currentList) {
+          document.execCommand("insertOrderedList");
+
+          const newSelection = window.getSelection();
+          if (newSelection && newSelection.rangeCount > 0) {
+            const newRange = newSelection.getRangeAt(0);
+            let newNode: Node | null = newRange.startContainer;
+
+            while (newNode && newNode !== pEl) {
+              if (newNode instanceof HTMLOListElement) {
+                currentList = newNode;
+                break;
+              }
+              newNode = newNode.parentNode;
+            }
+          }
+        }
+
+        if (currentList) {
+          currentList.style.listStyleType = styleType;
+          const htmlType =
+            styleType === "lower-alpha"
+              ? "a"
+              : styleType === "upper-alpha"
+              ? "A"
+              : styleType === "lower-roman"
+              ? "i"
+              : styleType === "upper-roman"
+              ? "I"
+              : "1";
+          currentList.setAttribute("type", htmlType);
+
+          currentList.querySelectorAll(":scope > li").forEach((li) => {
+            (li as HTMLElement).style.listStyleType = styleType;
+          });
+        }
+
+        pEl.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+
+      const isHeaderOrFooter = startPageEl.hasAttribute("data-hf-type");
+      if (!isHeaderOrFooter && docModel) {
+        const allPageEls = document.querySelectorAll<HTMLElement>("[data-editor-page][contenteditable='true']");
+        allPageEls.forEach((p) => {
+          const pid = p.getAttribute("data-page-id") || p.getAttribute("data-editor-page");
+          if (pid) {
+            docModel.setPageHtml(pid, p.innerHTML);
+          }
         });
-    }
+        const pageId = startPageEl.getAttribute("data-page-id") || "";
+        if (pageId) {
+          recordSnapshot(pageId, startPageEl.innerHTML, undefined, `Numbered List: ${styleType}`);
+        }
+      }
 
-    /*
-     * CUSTOM BULLETS
-     *
-     * ★
-     * ✓
-     * ◆
-     * ➤
-     * ☆
-     * ✚
-     */
-    else if (
-      styleType === "custom"
-    ) {
-      currentList.style.listStyleType =
-        "none";
-
-      currentList.setAttribute(
-        "data-custom-bullet",
-        bulletChar
-      );
-
-      currentList
-        .querySelectorAll(":scope > li")
-        .forEach((li) => {
-          li.setAttribute(
-            "data-custom-bullet",
-            bulletChar
-          );
-
-          (
-            li as HTMLElement
-          ).style.listStyleType =
-            "none";
-        });
-    }
-
-    /*
-     * Update editor.
-     */
-    editor.dispatchEvent(
-      new Event("input", {
-        bubbles: true,
-      })
-    );
-
-    setTimeout(() => {
-      restoreEditorSelection();
-    }, 0);
-  },
-  [
-    restoreEditorSelection,
-    editorRef,
-  ]
-);
+      requestAnimationFrame(() => {
+        restoreEditorSelection();
+        setTimeout(() => {
+          preserveSelectionRef.current = false;
+        }, 0);
+      });
+    },
+    [restoreEditorSelection, editorRef, docModel, recordSnapshot]
+  );
 
 
   const value: EditorContextType = {
@@ -2397,8 +2961,8 @@ const applyBulletStyle = useCallback(
 
    exec: applyFormatCommand,
 
-applyBulletStyle,
-    applyNumberingStyle: (style?: string) => applyFormatCommand("insertOrderedList", style),
+    applyBulletStyle,
+    applyNumberingStyle,
     applyMultilevelStyle: (style?: string) => applyFormatCommand("insertOrderedList", style),
     toggleMultilevelList: (type?: string) => applyFormatCommand("insertOrderedList", type),
 

@@ -121,7 +121,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
               <div className="p-3 mb-2.5 bg-muted rounded-full dark:bg-muted text-muted-foreground">
                 <Search className="w-6 h-6" />
               </div>
-              <p className="text-[15px] font-semibold text-secondary-foreground dark:text-muted-foreground">
+              <p className="text-15px font-semibold text-secondary-foreground dark:text-muted-foreground">
                 No charts found
               </p>
               <p className="text-xs text-muted-foreground mt-1">

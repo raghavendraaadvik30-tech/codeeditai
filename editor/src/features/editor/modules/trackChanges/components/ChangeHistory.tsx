@@ -32,7 +32,7 @@ export function ChangeHistory() {
               key={s}
               type="button"
               onClick={() => setFilter(s)}
-              className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider transition-colors ${
+              className={`rounded px-1.5 py-0.5 text-9px font-semibold uppercase tracking-wider transition-colors ${
                 filter === s
                   ? "bg-brand text-primary-foreground"
                   : "bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground"
@@ -63,13 +63,13 @@ export function ChangeHistory() {
                   <div className="font-semibold text-foreground dark:text-muted-foreground truncate max-w-37.5">
                     {item.label || `${item.type.toUpperCase()}`}
                   </div>
-                  <div className="text-[10px] text-muted-foreground truncate">
+                  <div className="text-10px text-muted-foreground truncate">
                     by {item.author} · {new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
               </div>
               <span
-                className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                className={`rounded px-1.5 py-0.5 text-9px font-bold uppercase ${
                   item.status === "accepted"
                     ? "bg-success-50 text-success-700 dark:bg-success-950/40 dark:text-success-400"
                     : item.status === "rejected"

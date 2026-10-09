@@ -457,7 +457,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
             <button
               type="button"
               onClick={onOpenChangeType}
-              className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium bg-success-700/80 hover:bg-success-700 text-primary-foreground rounded transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-0.5 text-11px font-medium bg-success-700/80 hover:bg-success-700 text-primary-foreground rounded transition-colors cursor-pointer"
               title="Change chart type"
             >
               <BarChart2 className="w-3 h-3 text-success-100" />
@@ -468,7 +468,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold bg-success-800 hover:bg-success-900 text-primary-foreground rounded transition-colors shadow-xs cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-0.5 text-11px font-semibold bg-success-800 hover:bg-success-900 text-primary-foreground rounded transition-colors shadow-xs cursor-pointer"
             title="Close spreadsheet data editor"
           >
             <X className="w-3 h-3" />
@@ -478,7 +478,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
       </div>
 
       {/* 2. COMPACT LIVE SYNC NOTIFICATION BAR */}
-      <div className="flex items-center gap-1.5 px-3 py-1 bg-success-50 text-[11px] text-success-800 font-medium border-b border-success-100">
+      <div className="flex items-center gap-1.5 px-3 py-1 bg-success-50 text-11px text-success-800 font-medium border-b border-success-100">
         <Check className="w-3.5 h-3.5 text-success-600 stroke-[2.5] shrink-0" />
         <span>Live sync active — changes apply instantly to the chart below</span>
       </div>
@@ -488,7 +488,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
         <table className="w-full border-collapse text-xs font-mono">
           {/* COLUMN LETTERS ROW (A, B, C, D...) */}
           <thead>
-            <tr className="bg-muted text-muted0 border-b border-secondary text-center text-[10px] font-semibold">
+            <tr className="bg-muted text-muted-foreground border-b border-secondary text-center text-10px font-semibold">
               <th className="w-9 border-r border-secondary p-1 bg-secondary/60 font-sans">#</th>
               <th className="min-w-27.5 border-r border-secondary p-1">A</th>
               {chart.series.map((_, sIdx) => (
@@ -501,11 +501,11 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
 
             {/* HEADER ROW WITH SERIES NAMES */}
             <tr className="bg-muted border-b border-secondary">
-              <td className="w-9 text-center p-1 bg-muted font-sans text-[10px] text-muted-foreground border-r border-secondary font-semibold">
+              <td className="w-9 text-center p-1 bg-muted font-sans text-10px text-muted-foreground border-r border-secondary font-semibold">
                 1
               </td>
               {/* Category label header */}
-              <td className="p-1 border-r border-secondary bg-muted/70 font-sans text-[11px] font-semibold text-secondary-foreground px-2">
+              <td className="p-1 border-r border-secondary bg-muted/70 font-sans text-11px font-semibold text-secondary-foreground px-2">
                 Category
               </td>
               {/* Editable series headers */}
@@ -557,7 +557,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 {/* Row Number */}
                 <td
                   onContextMenu={(e) => handleCellContextMenu(e, catIdx, undefined)}
-                  className="w-9 text-center p-1 bg-muted font-sans text-[10px] text-muted0 border-r border-secondary font-semibold cursor-default"
+                  className="w-9 text-center p-1 bg-muted font-sans text-10px text-muted-foreground border-r border-secondary font-semibold cursor-default"
                 >
                   {catIdx + 2}
                 </td>

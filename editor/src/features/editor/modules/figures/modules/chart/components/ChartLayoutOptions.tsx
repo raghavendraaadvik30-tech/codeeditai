@@ -213,7 +213,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
 
       {/* Header */}
       <div className="flex items-center justify-between pb-1 border-b border-[#383838]">
-        <h4 className="text-[13px] font-medium text-primary tracking-wide">
+        <h4 className="text-13px font-medium text-primary tracking-wide">
           Layout Options
         </h4>
         <button
@@ -228,7 +228,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
 
       {/* Section 1: In Line with Text */}
       <div className="mt-2.5">
-        <p className="text-[11px] font-bold text-primary-foreground mb-1.5">
+        <p className="text-11px font-bold text-primary-foreground mb-1.5">
           In Line with Text
         </p>
         <button
@@ -254,7 +254,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
 
       {/* Section 2: With Text Wrapping */}
       <div className="mt-3">
-        <p className="text-[11px] font-bold text-primary-foreground mb-1.5">
+        <p className="text-11px font-bold text-primary-foreground mb-1.5">
           With Text Wrapping
         </p>
         <div className="grid grid-cols-3 gap-1.5">
@@ -320,7 +320,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
       </div>
 
       {/* Section 3: Radio Options */}
-      <div className="mt-3.5 space-y-2 text-[11px] text-muted-foreground">
+      <div className="mt-3.5 space-y-2 text-11px text-muted-foreground">
         <label className="flex items-center gap-2 cursor-pointer group">
           <input
             type="radio"
@@ -332,7 +332,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           <span className="group-hover:text-primary-foreground flex-1">
             <span className="underline">M</span>ove with text
           </span>
-          <span className="text-[10px] text-muted-foreground border border-secondary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
+          <span className="text-10px text-muted-foreground border border-secondary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
             i
           </span>
         </label>
@@ -347,7 +347,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
           <span className="group-hover:text-primary-foreground flex-1">
             Fix positio<span className="underline">n</span> on page
           </span>
-          <span className="text-[10px] text-muted-foreground border border-secondary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
+          <span className="text-10px text-muted-foreground border border-secondary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center font-serif">
             i
           </span>
         </label>
@@ -362,7 +362,7 @@ export const ChartLayoutOptions: React.FC<ChartLayoutOptionsProps> = ({
               onSeeMore();
             }
           }}
-          className="text-[11px] text-primary hover:underline cursor-pointer"
+          className="text-11px text-primary hover:underline cursor-pointer"
         >
           See more...
         </button>

@@ -62,7 +62,7 @@ export default function ShapePickerModal({
 
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-3 bg-muted dark:bg-secondary/50 border-t border-muted dark:border-muted">
-          <span className="text-xs text-muted0">
+          <span className="text-xs text-muted-foreground">
             {selectedShape ? `Selected: ${selectedShape.label}` : "Select a shape to insert"}
           </span>
           <div className="flex gap-2">

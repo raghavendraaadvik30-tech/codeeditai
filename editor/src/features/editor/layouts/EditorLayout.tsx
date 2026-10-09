@@ -82,7 +82,7 @@ export default function EditorLayout() {
               min-h-0
               overflow-hidden
               border-r
-              border-secondary
+              border-sidebar-border
               bg-card
               dark:border-muted
               dark:bg-[#0d1117]
@@ -118,7 +118,7 @@ export default function EditorLayout() {
               min-h-0
               overflow-hidden
               border-l
-              border-secondary
+              border-sidebar-border
               bg-card
               dark:border-muted
               dark:bg-[#0d1117]

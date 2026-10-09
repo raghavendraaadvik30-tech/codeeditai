@@ -29,7 +29,7 @@ function SaveDialogContent({ onClose }: { onClose: () => void }) {
         </div>
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+            <label className="block text-11px font-medium text-muted-foreground mb-1">
               Document Name
             </label>
             <input

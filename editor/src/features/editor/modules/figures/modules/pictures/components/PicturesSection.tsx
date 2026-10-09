@@ -118,7 +118,7 @@ export const PicturesSection: React.FC = () => {
             <h4 className="text-sm font-semibold text-foreground dark:text-muted-foreground">
               Pictures
             </h4>
-            <p className="text-xs text-muted0 dark:text-muted-foreground">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               Insert &amp; manage images
             </p>
           </div>
@@ -146,7 +146,7 @@ export const PicturesSection: React.FC = () => {
                   onClick={insertPictureAndTitle}
                   className="cursor-pointer text-xs text-secondary-foreground dark:text-muted-foreground flex items-center gap-2"
                 >
-                  <FileImage className="h-3.5 w-3.5 text-muted0" />
+                  <FileImage className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Insert image with title</span>
                 </DropdownMenuItem>
 
@@ -154,7 +154,7 @@ export const PicturesSection: React.FC = () => {
                   onClick={insertPictureOnly}
                   className="cursor-pointer text-xs text-secondary-foreground dark:text-muted-foreground flex items-center gap-2"
                 >
-                  <ImageIcon className="h-3.5 w-3.5 text-muted0" />
+                  <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Insert image without title</span>
                 </DropdownMenuItem>
 

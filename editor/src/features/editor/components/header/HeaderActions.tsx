@@ -350,23 +350,27 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-9
-          gap-2
+          h-8.5
+          gap-1.5
           px-3
-          text-sm
-
-          text-secondary-foreground
+          text-xs
+          font-medium
+          rounded-lg
+          border
+          border-sidebar-border
+          bg-card
+          text-foreground
+          shadow-2xs
           hover:bg-muted
-          hover:text-foreground
-
-          dark:text-muted-foreground
+          dark:border-muted
+          dark:bg-[#111D29]
+          dark:text-primary-foreground
           dark:hover:bg-muted
-          dark:hover:text-primary-foreground
         "
         onClick={doSave}
         title="Save"
       >
-        <Save className="h-3.5 w-3.5" />
+        <Save className="h-3.5 w-3.5 text-primary dark:text-primary" />
 
         <span>Save</span>
 
@@ -403,22 +407,26 @@ export default function HeaderActions() {
             variant="ghost"
             size="sm"
             className="
-              h-9
-              gap-2
+              h-8.5
+              gap-1.5
               px-3
-              text-sm
-
-              text-secondary-foreground
+              text-xs
+              font-medium
+              rounded-lg
+              border
+              border-sidebar-border
+              bg-card
+              text-foreground
+              shadow-2xs
               hover:bg-muted
-              hover:text-foreground
-
-              dark:text-muted-foreground
+              dark:border-muted
+              dark:bg-[#111D29]
+              dark:text-primary-foreground
               dark:hover:bg-muted
-              dark:hover:text-primary-foreground
             "
             title="Save As"
           >
-            <FilePlus2 className="h-4 w-4" />
+            <FilePlus2 className="h-3.5 w-3.5 text-primary dark:text-primary" />
 
             <span>Save As</span>
           </Button>
@@ -513,23 +521,27 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-9
-          gap-2
+          h-8.5
+          gap-1.5
           px-3
-          text-sm
-
-          text-secondary-foreground
+          text-xs
+          font-medium
+          rounded-lg
+          border
+          border-sidebar-border
+          bg-card
+          text-foreground
+          shadow-2xs
           hover:bg-muted
-          hover:text-foreground
-
-          dark:text-muted-foreground
+          dark:border-muted
+          dark:bg-[#111D29]
+          dark:text-primary-foreground
           dark:hover:bg-muted
-          dark:hover:text-primary-foreground
         "
         onClick={handleExportDocx}
         title="Export DOCX"
       >
-        <FileText className="h-3.5 w-3.5" />
+        <FileText className="h-3.5 w-3.5 text-primary dark:text-primary" />
 
         <span>DOCX</span>
       </Button>
@@ -542,24 +554,28 @@ export default function HeaderActions() {
       <Button
         variant="ghost"
         size="sm"
-         className="
-          h-9
-          gap-2
+        className="
+          h-8.5
+          gap-1.5
           px-3
-          text-sm
-
-          text-secondary-foreground
+          text-xs
+          font-medium
+          rounded-lg
+          border
+          border-sidebar-border
+          bg-card
+          text-foreground
+          shadow-2xs
           hover:bg-muted
-          hover:text-foreground
-
-          dark:text-muted-foreground
+          dark:border-muted
+          dark:bg-[#111D29]
+          dark:text-primary-foreground
           dark:hover:bg-muted
-          dark:hover:text-primary-foreground
         "
         onClick={handleExportPdf}
         title="Export PDF"
       >
-        <FileDown className="h-3.5 w-3.5" />
+        <FileDown className="h-3.5 w-3.5 text-primary dark:text-primary" />
 
         <span>PDF</span>
       </Button>
@@ -581,19 +597,23 @@ export default function HeaderActions() {
       <Button
         variant="ghost"
         size="sm"
-         className="
-          h-9
-          gap-2
+        className="
+          h-8.5
+          gap-1.5
           px-3
-          text-sm
-
-          text-secondary-foreground
+          text-xs
+          font-medium
+          rounded-lg
+          border
+          border-sidebar-border
+          bg-card
+          text-foreground
+          shadow-2xs
           hover:bg-muted
-          hover:text-foreground
-
-          dark:text-muted-foreground
+          dark:border-muted
+          dark:bg-[#111D29]
+          dark:text-primary-foreground
           dark:hover:bg-muted
-          dark:hover:text-white
         "
         onClick={handleUploadClick}
         title="Upload Document from File Manager"

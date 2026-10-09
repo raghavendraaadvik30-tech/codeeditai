@@ -177,7 +177,7 @@ export function EmailComposeModal({
           {/* Blue Info Callout Box */}
           <div className="flex items-start gap-2.5 p-3 rounded-lg bg-primary/10 dark:bg-[#112233] border border-primary/30 dark:border-primary text-navy-900 dark:text-navy-300">
             <Info className="h-4 w-4 text-primary dark:text-primary shrink-0 mt-0.5" />
-            <p className="text-[11px] leading-relaxed font-medium">
+            <p className="text-11px leading-relaxed font-medium">
               The current document will be converted to PDF and attached to the email.
             </p>
           </div>
@@ -206,7 +206,7 @@ export function EmailComposeModal({
                 <span>Email sent with PDF attached — PDF also downloaded to your browser.</span>
               </div>
               {previewUrl && isEthereal && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-primary/10 border border-primary/30 text-primary dark:bg-[#112233] dark:border-primary dark:text-navy-300 text-[11px]">
+                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-primary/10 border border-primary/30 text-primary dark:bg-[#112233] dark:border-primary dark:text-navy-300 text-11px">
                   <Mail className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
                   <span>
                     <span className="font-semibold">Test mode (no Gmail configured):</span>{' '}
@@ -245,7 +245,7 @@ export function EmailComposeModal({
           <div className="space-y-3">
             {/* Recipient */}
             <div>
-              <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
+              <label className="block text-11px font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
                 Recipient
               </label>
               <div className="w-full h-8 px-3 flex items-center rounded-md border border-secondary bg-muted dark:border-secondary-foreground dark:bg-[#111D29] text-foreground dark:text-muted-foreground font-medium">
@@ -255,7 +255,7 @@ export function EmailComposeModal({
 
             {/* Subject */}
             <div>
-              <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
+              <label className="block text-11px font-semibold text-secondary-foreground dark:text-muted-foreground mb-1">
                 Subject
               </label>
               <div className="w-full h-8 px-3 flex items-center rounded-md border border-secondary bg-muted dark:border-secondary-foreground dark:bg-[#111D29] text-foreground dark:text-muted-foreground font-medium truncate">
@@ -266,13 +266,13 @@ export function EmailComposeModal({
 
           {/* Attachment (Current Document) Card */}
           <div>
-            <label className="block text-[11px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5">
+            <label className="block text-11px font-semibold text-secondary-foreground dark:text-muted-foreground mb-1.5">
               Attachment (Current Document)
             </label>
             <div className="flex items-center justify-between p-3 rounded-lg border border-secondary dark:border-muted bg-muted dark:bg-[#132232] hover:bg-secondary/60 transition">
               <div className="flex items-center gap-3 min-w-0">
                 {/* PDF Icon Badge */}
-                <div className={`w-9 h-9 rounded-md flex items-center justify-center font-bold text-[10px] tracking-widest shrink-0 shadow-xs ${
+                <div className={`w-9 h-9 rounded-md flex items-center justify-center font-bold text-10px tracking-widest shrink-0 shadow-xs ${
                   pdfError ? 'bg-muted-foreground text-primary-foreground' : 'bg-destructive text-primary-foreground'
                 }`}>
                   PDF
@@ -281,7 +281,7 @@ export function EmailComposeModal({
                   <p className="font-bold text-foreground dark:text-muted truncate text-xs">
                     {fileName}
                   </p>
-                  <p className="text-[10px] text-muted-foreground dark:text-muted-foreground">
+                  <p className="text-10px text-muted-foreground dark:text-muted-foreground">
                     {isGeneratingPdf
                       ? 'Generating PDF from document...'
                       : pdfError
@@ -295,7 +295,7 @@ export function EmailComposeModal({
                 onClick={handleDownloadPdf}
                 disabled={!generatedPdf}
                 title="Download PDF"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-secondary dark:border-secondary-foreground bg-card dark:bg-[#182635] text-secondary-foreground dark:text-muted-foreground text-[11px] font-semibold hover:bg-muted dark:hover:bg-muted transition shrink-0 shadow-2xs disabled:opacity-40"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-secondary dark:border-secondary-foreground bg-card dark:bg-[#182635] text-secondary-foreground dark:text-muted-foreground text-11px font-semibold hover:bg-muted dark:hover:bg-muted transition shrink-0 shadow-2xs disabled:opacity-40"
               >
                 {isGeneratingPdf ? (
                   <Loader2 className="h-3.5 w-3.5 text-primary animate-spin" />
@@ -332,7 +332,7 @@ export function EmailComposeModal({
             type="button"
             onClick={handleSendToGmail}
             disabled={!canSend}
-            className="px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs flex items-center gap-2 transition shadow-md active:scale-[0.99] disabled:opacity-40"
+            className="px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs flex items-center gap-2 transition shadow-md active:scale-99 disabled:opacity-40"
           >
             {isGeneratingPdf || isSending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -63,7 +63,7 @@ export function CrossReference() {
   return (
     <div className="space-y-3.5">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
+        <span className="text-10px font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
           Cross References
         </span>
         <button
@@ -88,7 +88,7 @@ export function CrossReference() {
                   key={type}
                   type="button"
                   onClick={() => handleTypeChange(type)}
-                  className={`h-7 px-2 text-[11px] font-semibold rounded-md border text-center truncate transition-all ${
+                  className={`h-7 px-2 text-11px font-semibold rounded-md border text-center truncate transition-all ${
                     selectedType === type
                       ? 'border-brand bg-brand/10 text-brand dark:border-primary'
                       : 'border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-[#091524] dark:text-muted-foreground'
@@ -129,7 +129,7 @@ export function CrossReference() {
                       <Check className="h-3.5 w-3.5 shrink-0" />
                     ) : (
                       target.pageNumber && (
-                        <span className="text-[10px] text-muted-foreground shrink-0">
+                        <span className="text-10px text-muted-foreground shrink-0">
                           Pg {target.pageNumber}
                         </span>
                       )

@@ -20,6 +20,7 @@ export default function HighlightSection({
           <button
             key={color.name}
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => onApply(color.value)}
             title={color.name}
             aria-label={`Apply ${color.name} highlight`}
@@ -32,6 +33,7 @@ export default function HighlightSection({
 
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onClear}
           title="Remove highlight"
           className="rounded-md border border-secondary px-2 py-1 text-xs text-secondary-foreground transition hover:bg-muted"

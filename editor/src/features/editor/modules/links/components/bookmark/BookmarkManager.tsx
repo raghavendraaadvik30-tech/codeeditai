@@ -45,7 +45,7 @@ export function BookmarkManager() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
+        <span className="text-10px font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
           Bookmarks ({bookmarks.length})
         </span>
         <div className="flex items-center gap-1">
@@ -60,7 +60,7 @@ export function BookmarkManager() {
           <button
             type="button"
             onClick={() => setDialogOpen(true)}
-            className="flex h-6 items-center gap-1 rounded bg-warning-500 px-2 text-[11px] font-semibold text-primary-foreground hover:bg-warning-600 transition-colors"
+            className="flex h-6 items-center gap-1 rounded bg-warning-500 px-2 text-11px font-semibold text-primary-foreground hover:bg-warning-600 transition-colors"
           >
             <Plus className="h-3 w-3" /> Add Bookmark
           </button>

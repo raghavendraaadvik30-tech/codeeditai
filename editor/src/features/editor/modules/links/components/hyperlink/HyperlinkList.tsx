@@ -66,7 +66,7 @@ export function HyperlinkList({ links, onNavigate, onRemove }: HyperlinkListProp
                     </span>
                     <LinkBadge type={link.type} />
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground truncate">
+                  <div className="flex items-center gap-1.5 text-10px text-muted-foreground truncate">
                     <span className="truncate">{link.target}</span>
                     {link.pageNumber && <span>· Page {link.pageNumber}</span>}
                   </div>

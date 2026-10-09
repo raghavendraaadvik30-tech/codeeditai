@@ -85,6 +85,7 @@ export default function FormattingSection({
           <button
             key={tool.name}
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => onApply(tool)}
             className="
               flex
@@ -102,7 +103,7 @@ export default function FormattingSection({
               transition-all
               hover:border-navy-300
               hover:bg-primary/10
-              active:scale-[0.98]
+              active:scale-98
             "
           >
             {/* Icon */}
@@ -115,7 +116,7 @@ export default function FormattingSection({
               className="
                 mt-1
                 text-center
-                text-[10px]
+                text-10px
                 font-medium
                 leading-tight
                 text-secondary-foreground
@@ -130,7 +131,7 @@ export default function FormattingSection({
                 className="
                   mt-1
                   whitespace-nowrap
-                  text-[8px]
+                  text-8px
                   leading-none
                   text-muted-foreground
                 "

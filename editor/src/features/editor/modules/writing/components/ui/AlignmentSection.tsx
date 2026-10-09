@@ -24,6 +24,7 @@ export default function AlignmentSection({
           <button
             key={tool.cmd}
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => onApply(tool)}
             title={tool.name}
             aria-label={tool.name}

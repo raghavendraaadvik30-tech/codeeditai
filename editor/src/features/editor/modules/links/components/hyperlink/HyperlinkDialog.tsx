@@ -197,11 +197,11 @@ export function HyperlinkDialog({
                 {url && (
                   <div className="pt-1">
                     {urlValidation.isValid ? (
-                      <p className="flex items-center gap-1 text-[11px] text-success-600 dark:text-success-400">
+                      <p className="flex items-center gap-1 text-11px text-success-600 dark:text-success-400">
                         <ShieldCheck className="h-3 w-3" /> Valid {urlValidation.isSecure ? 'Secure HTTPS' : 'HTTP'} link
                       </p>
                     ) : (
-                      <p className="flex items-center gap-1 text-[11px] text-destructive">
+                      <p className="flex items-center gap-1 text-11px text-destructive">
                         <AlertCircle className="h-3 w-3" /> {urlValidation.error}
                       </p>
                     )}
@@ -303,14 +303,14 @@ export function HyperlinkDialog({
                 <button
                   type="button"
                   onClick={handleDirectSendEmail}
-                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-secondary bg-muted text-[11px] font-semibold text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground"
+                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-secondary bg-muted text-11px font-semibold text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground"
                 >
                   <Mail className="h-3 w-3" /> Open Email Client
                 </button>
                 <button
                   type="button"
                   onClick={handlePdfAndEmail}
-                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-secondary bg-muted text-[11px] font-semibold text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground"
+                  className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded border border-secondary bg-muted text-11px font-semibold text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground"
                 >
                   <FileDown className="h-3 w-3" /> PDF + Email
                 </button>

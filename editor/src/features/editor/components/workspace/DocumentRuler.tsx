@@ -466,7 +466,7 @@ export default function DocumentRuler({
               bg-foreground/95
               px-2.5
               py-0.5
-              text-[11px]
+              text-11px
               font-semibold
               text-primary-foreground
               shadow-lg

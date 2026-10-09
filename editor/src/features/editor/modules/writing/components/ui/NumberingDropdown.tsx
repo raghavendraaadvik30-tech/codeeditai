@@ -4,6 +4,11 @@ interface NumberingDropdownProps {
 
 const NUMBERING_STYLES = [
   {
+    name: "None",
+    value: "none",
+    preview: "None",
+  },
+  {
     name: "1, 2, 3",
     value: "decimal",
     preview: "1.",

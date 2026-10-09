@@ -58,7 +58,7 @@ export default function ShapePicker({
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => setSelectedCategory("All")}
-          className={`px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors border ${
+          className={`px-2.5 py-1 rounded-full text-11px font-medium whitespace-nowrap transition-colors border ${
             selectedCategory === "All"
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-muted dark:bg-muted text-secondary-foreground dark:text-muted-foreground border-secondary dark:border-secondary-foreground hover:bg-muted"
@@ -72,7 +72,7 @@ export default function ShapePicker({
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => setSelectedCategory(cat)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors border ${
+            className={`px-2.5 py-1 rounded-full text-11px font-medium whitespace-nowrap transition-colors border ${
               selectedCategory === cat
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-muted dark:bg-muted text-secondary-foreground dark:text-muted-foreground border-secondary dark:border-secondary-foreground hover:bg-muted"
@@ -101,7 +101,7 @@ export default function ShapePicker({
 
           return (
             <div key={cat} className="space-y-1.5">
-              <div className="text-[10px] font-bold tracking-wider text-muted0 uppercase dark:text-muted-foreground">
+              <div className="text-10px font-bold tracking-wider text-muted-foreground uppercase dark:text-muted-foreground">
                 {cat}
               </div>
               <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5">

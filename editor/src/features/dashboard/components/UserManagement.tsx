@@ -1664,7 +1664,7 @@ Please use the credentials above to access the secure portal.`
 
                           rounded-full
 
-                          text-[10px]
+                          text-10px
 
                           font-bold
 
@@ -1726,7 +1726,7 @@ Please use the credentials above to access the secure portal.`
 
                           rounded-full
 
-                          text-[10px]
+                          text-10px
 
                           font-bold
 
@@ -1853,9 +1853,9 @@ Please use the credentials above to access the secure portal.`
 
                           font-bold
 
-                          text-[10px]
+                          text-10px
 
-                          sm:text-[11px]
+                          sm:text-11px
 
                           flex
 
@@ -2229,7 +2229,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsAdd.fullName && (
 
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2277,7 +2277,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsAdd.email && (
 
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2333,7 +2333,7 @@ Please use the credentials above to access the secure portal.`
               </div>
 
               {errorsAdd.password && (
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
                   {errorsAdd.password.message}
                 </p>
@@ -2419,7 +2419,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsAdd.role && (
 
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2613,7 +2613,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsEdit.fullName && (
 
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2661,7 +2661,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsEdit.email && (
 
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2712,7 +2712,7 @@ Please use the credentials above to access the secure portal.`
               </div>
 
               {errorsEdit.password && (
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
                   {errorsEdit.password.message}
                 </p>
@@ -2796,7 +2796,7 @@ Please use the credentials above to access the secure portal.`
 
               {errorsEdit.role && (
 
-                <p className="text-[11px] text-destructive flex items-center gap-1">
+                <p className="text-11px text-destructive flex items-center gap-1">
 
                   <AlertCircle className="h-3 w-3" />
 
@@ -2983,7 +2983,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <span className="text-[10px] text-muted-foreground font-semibold font-mono">
+                <span className="text-10px text-muted-foreground font-semibold font-mono">
 
                   USER ACCOUNT {selectedUser?.id}
 
@@ -3065,7 +3065,7 @@ Please use the credentials above to access the secure portal.`
 
                   rounded
 
-                  text-[10px]
+                  text-10px
 
                   font-bold
 
@@ -3117,7 +3117,7 @@ Please use the credentials above to access the secure portal.`
 
                   rounded-full
 
-                  text-[10px]
+                  text-10px
 
                   font-bold
 
@@ -3363,7 +3363,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                <span className="text-[10px] text-destructive font-semibold">
+                <span className="text-10px text-destructive font-semibold">
 
                   ACTION CANNOT BE UNDONE
 
@@ -3411,7 +3411,7 @@ Please use the credentials above to access the secure portal.`
 
                 text-muted-foreground
 
-                text-[11px]
+                text-11px
 
                 leading-relaxed
 
@@ -3733,7 +3733,7 @@ Please use the credentials above to access the secure portal.`
 
                         text-primary
 
-                        text-[10px]
+                        text-10px
 
                         font-bold
 
@@ -3871,7 +3871,7 @@ Please use the credentials above to access the secure portal.`
 
                       space-y-2
 
-                      text-[11px]
+                      text-11px
 
                     "
 
@@ -3909,7 +3909,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-9px block">
 
                           Secure Portal Link
 
@@ -4023,7 +4023,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-9px block">
 
                           Registered Email
 
@@ -4102,7 +4102,7 @@ Please use the credentials above to access the secure portal.`
                       className="flex items-center justify-between gap-3 pb-1.5 border-b border-muted"
                     >
                       <div className="overflow-hidden min-w-0">
-                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-9px block">
                           Password
                         </span>
                         <span
@@ -4164,7 +4164,7 @@ Please use the credentials above to access the secure portal.`
 
 
 
-                        <span className="text-muted-foreground font-medium uppercase text-[9px] block">
+                        <span className="text-muted-foreground font-medium uppercase text-9px block">
 
                           Role Type
 

@@ -26,7 +26,7 @@ export function DocumentCanvas() {
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Document ID:</span>
-          <span className="font-mono text-[10px] text-muted-foreground truncate max-w-40">
+          <span className="font-mono text-10px text-muted-foreground truncate max-w-40">
             {model.id}
           </span>
         </div>

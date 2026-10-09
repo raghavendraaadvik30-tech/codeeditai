@@ -149,7 +149,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
               <DialogTitle className="text-sm font-semibold text-foreground dark:text-primary-foreground">
                 Online Picture
               </DialogTitle>
-              <p className="text-[11px] text-muted0 dark:text-muted-foreground">
+              <p className="text-11px text-muted-foreground dark:text-muted-foreground">
                 Search Google Images &amp; paste the image address
               </p>
             </div>
@@ -180,7 +180,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
                 <p className="font-medium text-foreground dark:text-muted-foreground">
                   Google Images opened in a new tab.
                 </p>
-                <p className="mt-0.5 text-[11px] text-muted0 dark:text-muted-foreground">
+                <p className="mt-0.5 text-11px text-muted-foreground dark:text-muted-foreground">
                   Search &amp; select an image, right-click and choose <strong>"Copy image address"</strong>, then paste it here.
                 </p>
               </div>
@@ -226,7 +226,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
                 <button
                   type="button"
                   onClick={handlePasteClipboard}
-                  className="flex items-center gap-1 text-[11px] text-primary dark:text-primary hover:underline font-medium"
+                  className="flex items-center gap-1 text-11px text-primary dark:text-primary hover:underline font-medium"
                 >
                   <ClipboardPaste className="h-3 w-3" />
                   <span>Paste</span>
@@ -258,7 +258,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
             {/* Image Preview Box */}
             <div className="rounded-lg border border-secondary dark:border-muted bg-muted dark:bg-secondary/50 p-2.5 min-h-30 flex flex-col items-center justify-center">
               {imageState.status === 'loading' && (
-                <div className="flex flex-col items-center gap-1.5 text-muted0 dark:text-muted-foreground py-3">
+                <div className="flex flex-col items-center gap-1.5 text-muted-foreground dark:text-muted-foreground py-3">
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                   <span className="text-xs">Validating image preview...</span>
                 </div>
@@ -273,7 +273,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
                       className="max-h-32 max-w-full object-contain rounded"
                     />
                   </div>
-                  <div className="mt-1.5 flex items-center justify-between w-full px-1 text-[11px] text-muted0 dark:text-muted-foreground">
+                  <div className="mt-1.5 flex items-center justify-between w-full px-1 text-11px text-muted-foreground dark:text-muted-foreground">
                     <span className="flex items-center gap-1 text-success-600 dark:text-success-400 font-medium">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Ready to insert</span>
@@ -288,7 +288,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
               )}
 
               {(imageState.status === 'idle' || imageState.status === 'error') && (
-                <div className="text-center py-2 text-muted-foreground dark:text-muted0">
+                <div className="text-center py-2 text-muted-foreground dark:text-muted-foreground">
                   <ImageIcon className="h-6 w-6 mx-auto mb-1 opacity-50" />
                   <p className="text-xs">
                     {imageState.status === 'error'

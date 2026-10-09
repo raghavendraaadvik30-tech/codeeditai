@@ -103,7 +103,7 @@ export function HeaderGallery({
       />
 
       <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-foreground">
-        <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+        <DropdownMenuLabel className="text-11px font-semibold uppercase tracking-wider text-muted-foreground pb-1">
           Built-In Headers
         </DropdownMenuLabel>
 
@@ -116,7 +116,7 @@ export function HeaderGallery({
               onClick={() => handleSelectTemplate(tmpl)}
               className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
             >
-              <div className="text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
+              <div className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
                 {tmpl.name}
               </div>
               <div
@@ -233,7 +233,7 @@ export function FooterGallery({
       />
 
       <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-foreground">
-        <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+        <DropdownMenuLabel className="text-11px font-semibold uppercase tracking-wider text-muted-foreground pb-1">
           Built-In Footers
         </DropdownMenuLabel>
 
@@ -246,7 +246,7 @@ export function FooterGallery({
               onClick={() => handleSelectTemplate(tmpl)}
               className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
             >
-              <div className="text-[11px] font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
+              <div className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
                 {tmpl.name}
               </div>
               <div
