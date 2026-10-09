@@ -24,7 +24,6 @@ export type ModuleId =
   | "symbols"
   | "appendices"
   | "trackChanges"
-  | "templates"
   | "settings";
 
 export const WORKSPACE_MODULES = [
@@ -77,11 +76,6 @@ export const WORKSPACE_MODULES = [
     id: "trackChanges",
     label: "Track Changes",
     description: "Review document changes",
-  },
-  {
-    id: "templates",
-    label: "Templates",
-    description: "Document templates",
   },
   {
     id: "settings",

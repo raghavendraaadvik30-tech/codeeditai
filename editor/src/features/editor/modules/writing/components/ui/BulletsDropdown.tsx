@@ -105,7 +105,7 @@ export default function BulletsDropdown({
         top-full
         z-50
         mt-1
-        w-[390px]
+        w-97.5
         overflow-hidden
         rounded-md
         border

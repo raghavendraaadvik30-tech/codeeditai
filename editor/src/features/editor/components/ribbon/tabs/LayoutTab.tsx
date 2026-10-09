@@ -59,12 +59,12 @@ const triggerClass = `
   px-2.5
   text-xs
   font-medium
-  text-slate-700
-  hover:bg-slate-100
-  hover:text-slate-900
-  dark:text-slate-200
-  dark:hover:bg-slate-800
-  dark:hover:text-white
+  text-secondary-foreground
+  hover:bg-muted
+  hover:text-foreground
+  dark:text-muted-foreground
+  dark:hover:bg-muted
+  dark:hover:text-primary-foreground
   rounded-md
   inline-flex
   items-center
@@ -135,7 +135,7 @@ export default function LayoutTab() {
   // Orientation Popover
   const [orientationOpen, setOrientationOpen] = useState(false);
   const [tempOrientation, setTempOrientation] = useState<"portrait" | "landscape">("portrait");
-  const [applyTarget, setApplyTarget] = useState<"all" | "page" | "section">("all");
+  const [applyTarget, setApplyTarget] = useState<"all" | "page">("all");
 
   const handleOpenOrientationChange = (open: boolean) => {
     if (open) {
@@ -151,10 +151,8 @@ export default function LayoutTab() {
   const handleApplyOrientation = () => {
     if (applyTarget === "all") {
       applyToAllSections({ orientation: tempOrientation });
-    } else if (applyTarget === "page") {
-      applyToThisPage({ orientation: tempOrientation });
     } else {
-      applyToSection({ orientation: tempOrientation });
+      applyToThisPage({ orientation: tempOrientation });
     }
     setOrientationOpen(false);
   };
@@ -434,7 +432,7 @@ export default function LayoutTab() {
 
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto py-0.5 text-slate-700 dark:text-slate-200">
+    <div className="flex items-center gap-1 overflow-x-auto py-0.5 text-secondary-foreground dark:text-muted-foreground">
       {/* =======================================================
           GROUP 1: HEADER, FOOTER, PAGE NUMBER
       ======================================================= */}
@@ -455,10 +453,9 @@ export default function LayoutTab() {
 
       {/* MARGINS */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Margins">
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Margins">
             <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
+              className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -468,9 +465,8 @@ export default function LayoutTab() {
               <path d="M9 4v16M15 4v16M4 9h16M4 15h16" strokeDasharray="2 2" />
             </svg>
             <span>Margins</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>} />
         <DropdownMenuContent align="start" className="w-64 text-xs">
           <DropdownMenuItem
             onClick={handleApplyNormalMargins}
@@ -478,12 +474,12 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Normal</div>
-              <div className="text-[10px] text-slate-400">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Left: 1", Right: 1"
               </div>
             </div>
             {(!activeSection?.marginPreset || activeSection?.marginPreset === "normal") && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -492,12 +488,12 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Narrow</div>
-              <div className="text-[10px] text-slate-400">
+              <div className="text-10px text-muted-foreground">
                 Top: 0.5", Bottom: 0.5", Left: 0.5", Right: 0.5"
               </div>
             </div>
             {activeSection?.marginPreset === "narrow" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -506,12 +502,12 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Moderate</div>
-              <div className="text-[10px] text-slate-400">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Left: 0.75", Right: 0.75"
               </div>
             </div>
             {activeSection?.marginPreset === "moderate" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -520,12 +516,12 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Wide</div>
-              <div className="text-[10px] text-slate-400">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Left: 2", Right: 2"
               </div>
             </div>
             {activeSection?.marginPreset === "wide" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -534,18 +530,18 @@ export default function LayoutTab() {
           >
             <div>
               <div className="font-semibold">Mirrored</div>
-              <div className="text-[10px] text-slate-400">
+              <div className="text-10px text-muted-foreground">
                 Top: 1", Bottom: 1", Inside: 1.25", Outside: 1"
               </div>
             </div>
             {activeSection?.marginPreset === "mirrored" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={openCustomMarginsDialog}
-            className="text-blue-600 font-medium cursor-pointer"
+            className="text-primary font-medium cursor-pointer"
           >
             Custom Margins...
           </DropdownMenuItem>
@@ -554,10 +550,9 @@ export default function LayoutTab() {
 
       {/* ORIENTATION */}
       <Popover open={orientationOpen} onOpenChange={handleOpenOrientationChange}>
-        <PopoverTrigger asChild>
-          <button type="button" className={triggerClass} title="Orientation">
+        <PopoverTrigger render={<button type="button" className={triggerClass} title="Orientation">
             <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
+              className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -567,12 +562,11 @@ export default function LayoutTab() {
               <path d="M12 7v10M9 14l3 3 3-3" />
             </svg>
             <span>Orientation</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </PopoverTrigger>
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>} />
         <PopoverContent
           align="start"
-          className="w-[260px] p-3 rounded-xl border border-slate-200/90 bg-white shadow-xl dark:border-slate-800 dark:bg-[#0c1827] text-slate-900 dark:text-slate-100"
+          className="w-65 p-3 rounded-xl border border-secondary/90 bg-card shadow-xl dark:border-muted dark:bg-[#0c1827] text-foreground dark:text-muted"
         >
           {/* Orientation Cards */}
           <div className="space-y-1.5">
@@ -583,32 +577,32 @@ export default function LayoutTab() {
               className={cn(
                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors border",
                 tempOrientation === "portrait"
-                  ? "border-blue-300 bg-[#edf5fc] dark:border-blue-600 dark:bg-blue-950/50"
-                  : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-slate-800/80"
+                  ? "border-navy-300 bg-[#edf5fc] dark:border-primary dark:bg-navy-950/50"
+                  : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-muted/80"
               )}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "h-6 w-4.5 rounded-[2px] border-2 transition-colors",
+                    "h-6 w-4.5 rounded-xs border-2 transition-colors",
                     tempOrientation === "portrait"
-                      ? "border-[#0078d4]"
-                      : "border-slate-800 dark:border-slate-300"
+                      ? "border-brand"
+                      : "border-foreground dark:border-border"
                   )}
                 />
                 <span
                   className={cn(
                     "text-xs font-semibold",
                     tempOrientation === "portrait"
-                      ? "text-[#0078d4]"
-                      : "text-slate-800 dark:text-slate-200"
+                      ? "text-brand"
+                      : "text-foreground dark:text-muted-foreground"
                   )}
                 >
                   Portrait
                 </span>
               </div>
               {tempOrientation === "portrait" && (
-                <Check className="h-4 w-4 text-[#0078d4] stroke-[2.5]" />
+                <Check className="h-4 w-4 text-brand stroke-[2.5]" />
               )}
             </button>
 
@@ -619,41 +613,41 @@ export default function LayoutTab() {
               className={cn(
                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors border",
                 tempOrientation === "landscape"
-                  ? "border-blue-300 bg-[#edf5fc] dark:border-blue-600 dark:bg-blue-950/50"
-                  : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-slate-800/80"
+                  ? "border-navy-300 bg-[#edf5fc] dark:border-primary dark:bg-navy-950/50"
+                  : "border-transparent bg-transparent hover:bg-[#e1f0fb] dark:hover:bg-muted/80"
               )}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "h-4.5 w-6 rounded-[2px] border-2 transition-colors",
+                    "h-4.5 w-6 rounded-xs border-2 transition-colors",
                     tempOrientation === "landscape"
-                      ? "border-[#0078d4]"
-                      : "border-slate-800 dark:border-slate-300"
+                      ? "border-brand"
+                      : "border-foreground dark:border-border"
                   )}
                 />
                 <span
                   className={cn(
                     "text-xs font-semibold",
                     tempOrientation === "landscape"
-                      ? "text-[#0078d4]"
-                      : "text-slate-800 dark:text-slate-200"
+                      ? "text-brand"
+                      : "text-foreground dark:text-muted-foreground"
                   )}
                 >
                   Landscape
                 </span>
               </div>
               {tempOrientation === "landscape" && (
-                <Check className="h-4 w-4 text-[#0078d4] stroke-[2.5]" />
+                <Check className="h-4 w-4 text-brand stroke-[2.5]" />
               )}
             </button>
           </div>
 
-          <div className="border-t border-slate-200/80 dark:border-slate-800 my-2.5" />
+          <div className="border-t border-secondary/80 dark:border-muted my-2.5" />
 
           {/* APPLY TO */}
           <div className="space-y-2">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <div className="text-11px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
               APPLY TO
             </div>
             <div className="space-y-2">
@@ -666,15 +660,15 @@ export default function LayoutTab() {
                   className={cn(
                     "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
                     applyTarget === "all"
-                      ? "border-[#0078d4] bg-white dark:bg-slate-900 border-2"
-                      : "border-slate-400 group-hover:border-slate-600 dark:border-slate-500"
+                      ? "border-brand bg-card dark:bg-secondary border-2"
+                      : "border-muted-foreground group-hover:border-secondary-foreground dark:border-muted-foreground"
                   )}
                 >
                   {applyTarget === "all" && (
-                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                    <div className="h-2 w-2 rounded-full bg-brand" />
                   )}
                 </div>
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-medium text-foreground dark:text-muted-foreground">
                   Whole Document
                 </span>
               </div>
@@ -688,58 +682,36 @@ export default function LayoutTab() {
                   className={cn(
                     "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
                     applyTarget === "page"
-                      ? "border-[#0078d4] bg-white dark:bg-slate-900 border-2"
-                      : "border-slate-400 group-hover:border-slate-600 dark:border-slate-500"
+                      ? "border-brand bg-card dark:bg-secondary border-2"
+                      : "border-muted-foreground group-hover:border-secondary-foreground dark:border-muted-foreground"
                   )}
                 >
                   {applyTarget === "page" && (
-                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
+                    <div className="h-2 w-2 rounded-full bg-brand" />
                   )}
                 </div>
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-medium text-foreground dark:text-muted-foreground">
                   This Page
-                </span>
-              </div>
-
-              {/* Current Section */}
-              <div
-                onClick={() => setApplyTarget("section")}
-                className="flex items-center gap-2.5 cursor-pointer py-0.5 select-none group"
-              >
-                <div
-                  className={cn(
-                    "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
-                    applyTarget === "section"
-                      ? "border-[#0078d4] bg-white dark:bg-slate-900 border-2"
-                      : "border-slate-400 group-hover:border-slate-600 dark:border-slate-500"
-                  )}
-                >
-                  {applyTarget === "section" && (
-                    <div className="h-2 w-2 rounded-full bg-[#0078d4]" />
-                  )}
-                </div>
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
-                  Current Section
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-slate-200/80 dark:border-slate-800 my-2.5" />
+          <div className="border-t border-secondary/80 dark:border-muted my-2.5" />
 
           {/* Footer Actions */}
           <div className="flex items-center justify-end gap-2 pt-0.5">
             <button
               type="button"
               onClick={handleCancelOrientation}
-              className="h-7 px-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+              className="h-7 px-3 rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-muted text-xs font-medium text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-secondary-foreground/60 transition-colors"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleApplyOrientation}
-              className="h-7 px-4 rounded-md bg-[#0078d4] text-xs font-semibold text-white hover:bg-[#006abc] shadow-xs transition-colors"
+              className="h-7 px-4 rounded-md bg-brand text-xs font-semibold text-primary-foreground hover:bg-brand shadow-xs transition-colors"
             >
               Apply
             </button>
@@ -749,24 +721,22 @@ export default function LayoutTab() {
 
       {/* SIZE */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Paper Size">
-            <FileText className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Paper Size">
+            <FileText className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground" />
             <span>Size</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>} />
         <DropdownMenuContent align="start" className="w-64 text-xs">
           {/* Search Filter Box */}
-          <div className="p-1.5 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800">
-              <Search className="h-3 w-3 text-slate-400" />
+          <div className="p-1.5 border-b border-muted dark:border-muted">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-muted dark:bg-secondary rounded border border-secondary dark:border-muted">
+              <Search className="h-3 w-3 text-muted-foreground" />
               <input
                 type="text"
                 value={sizeSearch}
                 onChange={(e) => setSizeSearch(e.target.value)}
                 placeholder="Search paper size..."
-                className="w-full bg-transparent text-xs outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                className="w-full bg-transparent text-xs outline-none text-secondary-foreground dark:text-muted-foreground placeholder:text-muted-foreground"
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => e.stopPropagation()}
               />
@@ -791,9 +761,9 @@ export default function LayoutTab() {
                 >
                   <div>
                     <div className="font-semibold">{ps.name}</div>
-                    <div className="text-[10px] text-slate-400">{ps.dimText}</div>
+                    <div className="text-10px text-muted-foreground">{ps.dimText}</div>
                   </div>
-                  {isSelected && <Check className="h-3.5 w-3.5 text-blue-600" />}
+                  {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
                 </DropdownMenuItem>
               );
             })}
@@ -803,7 +773,7 @@ export default function LayoutTab() {
 
           <DropdownMenuItem
             onClick={() => setCustomSizeDialogOpen(true)}
-            className="text-blue-600 font-medium cursor-pointer"
+            className="text-primary font-medium cursor-pointer"
           >
             Custom Page Size...
           </DropdownMenuItem>
@@ -812,13 +782,11 @@ export default function LayoutTab() {
 
       {/* COLUMNS */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Columns">
-            <Columns2 className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Columns">
+            <Columns2 className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground" />
             <span>Columns</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>} />
         <DropdownMenuContent align="start" className="w-48 text-xs">
           <DropdownMenuItem
             onClick={() => applyToAllSections({ columns: { type: "one", count: 1 } })}
@@ -826,7 +794,7 @@ export default function LayoutTab() {
           >
             <span>One</span>
             {(!activeSection?.columns || activeSection?.columns?.type === "one" || activeSection?.columns?.count === 1) && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -835,7 +803,7 @@ export default function LayoutTab() {
           >
             <span>Two</span>
             {(activeSection?.columns?.type === "two" || (activeSection?.columns?.count === 2 && activeSection?.columns?.type !== "left" && activeSection?.columns?.type !== "right")) && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -844,7 +812,7 @@ export default function LayoutTab() {
           >
             <span>Three</span>
             {(activeSection?.columns?.type === "three" || activeSection?.columns?.count === 3) && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -853,7 +821,7 @@ export default function LayoutTab() {
           >
             <span>Left (Narrow Left)</span>
             {activeSection?.columns?.type === "left" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -862,7 +830,7 @@ export default function LayoutTab() {
           >
             <span>Right (Narrow Right)</span>
             {activeSection?.columns?.type === "right" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
 
@@ -871,17 +839,17 @@ export default function LayoutTab() {
           {/* Microsoft Word-Style Column Break Option */}
           <DropdownMenuItem
             onClick={() => insertColumnBreak()}
-            className="flex items-center justify-between cursor-pointer text-slate-700 dark:text-slate-200"
+            className="flex items-center justify-between cursor-pointer text-secondary-foreground dark:text-muted-foreground"
           >
             <span>Column Break</span>
-            <span className="text-[10px] text-slate-400">Ctrl+Shift+Enter</span>
+            <span className="text-10px text-muted-foreground">Ctrl+Shift+Enter</span>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
             onClick={openCustomColumnsDialog}
-            className="text-blue-600 font-medium cursor-pointer"
+            className="text-primary font-medium cursor-pointer"
           >
             More Columns...
           </DropdownMenuItem>
@@ -896,10 +864,9 @@ export default function LayoutTab() {
 
       {/* WATERMARK */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Watermark">
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Watermark">
             <svg
-              className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
+              className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -909,9 +876,8 @@ export default function LayoutTab() {
               <path d="M9 12h6M12 9v6" strokeDasharray="2 2" />
             </svg>
             <span>Watermark</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>} />
         <DropdownMenuContent align="start" className="w-52 text-xs">
           <DropdownMenuItem
             onClick={() =>
@@ -923,7 +889,7 @@ export default function LayoutTab() {
           >
             <span>CONFIDENTIAL</span>
             {activeSection?.watermark?.text === "CONFIDENTIAL" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -936,7 +902,7 @@ export default function LayoutTab() {
           >
             <span>DO NOT COPY</span>
             {activeSection?.watermark?.text === "DO NOT COPY" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -949,20 +915,7 @@ export default function LayoutTab() {
           >
             <span>DRAFT</span>
             {activeSection?.watermark?.text === "DRAFT" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              applyToSection({
-                watermark: { text: "URGENT", opacity: 0.12, rotation: "diagonal" },
-              })
-            }
-            className="flex justify-between items-center cursor-pointer"
-          >
-            <span>URGENT</span>
-            {activeSection?.watermark?.text === "URGENT" && (
-              <Check className="h-3.5 w-3.5 text-blue-600" />
+              <Check className="h-3.5 w-3.5 text-primary" />
             )}
           </DropdownMenuItem>
 
@@ -989,13 +942,13 @@ export default function LayoutTab() {
               }
               setWatermarkDialogOpen(true);
             }}
-            className="text-blue-600 font-medium cursor-pointer"
+            className="text-primary font-medium cursor-pointer"
           >
             Custom Watermark...
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => applyToSection({ watermark: undefined })}
-            className="text-red-600 cursor-pointer"
+            className="text-destructive cursor-pointer"
           >
             Remove Watermark
           </DropdownMenuItem>
@@ -1004,15 +957,13 @@ export default function LayoutTab() {
 
       {/* PAGE COLOR */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={triggerClass} title="Page Color">
-            <Palette className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
+        <DropdownMenuTrigger render={<button type="button" className={triggerClass} title="Page Color">
+            <Palette className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground" />
             <span>Page Color</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>} />
         <DropdownMenuContent align="start" className="w-56 p-2 text-xs">
-          <DropdownMenuLabel className="text-[11px] text-slate-500 font-semibold mb-2">
+          <DropdownMenuLabel className="text-11px text-muted-foreground font-semibold mb-2">
             Page Background Color
           </DropdownMenuLabel>
           <div className="grid grid-cols-5 gap-1.5 mb-2">
@@ -1034,20 +985,20 @@ export default function LayoutTab() {
                 title={label}
                 onClick={() => applyToSection({ pageColor: color })}
                 className={`h-6 w-6 rounded border shadow-xs transition-transform hover:scale-110 cursor-pointer ${
-                  activeSection?.pageColor === color ? "ring-2 ring-blue-500" : "border-slate-300"
+                  activeSection?.pageColor === color ? "ring-2 ring-primary" : "border-border"
                 }`}
                 style={{ backgroundColor: color }}
               />
             ))}
           </div>
 
-          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
-            <Label className="text-[11px] text-slate-500">Custom:</Label>
+          <div className="flex items-center gap-2 pt-1 border-t border-muted dark:border-muted">
+            <Label className="text-11px text-muted-foreground">Custom:</Label>
             <input
               type="color"
               value={activeSection?.pageColor || "#ffffff"}
               onChange={(e) => applyToSection({ pageColor: e.target.value })}
-              className="h-6 w-8 cursor-pointer rounded border border-slate-300"
+              className="h-6 w-8 cursor-pointer rounded border border-border"
             />
           </div>
 
@@ -1055,7 +1006,7 @@ export default function LayoutTab() {
 
           <DropdownMenuItem
             onClick={() => applyToSection({ pageColor: "#ffffff" })}
-            className="text-slate-600 font-medium cursor-pointer"
+            className="text-secondary-foreground font-medium cursor-pointer"
           >
             No Color (Default White)
           </DropdownMenuItem>
@@ -1154,7 +1105,7 @@ export default function LayoutTab() {
         title="Page Borders"
       >
         <svg
-          className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300"
+          className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -1263,7 +1214,7 @@ export default function LayoutTab() {
                 onChange={(e) =>
                   setFormatChoice(e.target.value as "1" | "a" | "A" | "i" | "I")
                 }
-                className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                className="w-full h-8 px-2 rounded border border-border dark:border-secondary-foreground bg-card dark:bg-secondary text-xs"
               >
                 <option value="1">1, 2, 3, ...</option>
                 <option value="a">a, b, c, ...</option>
@@ -1273,7 +1224,7 @@ export default function LayoutTab() {
               </select>
             </div>
 
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+            <div className="border-t border-muted dark:border-muted pt-3">
               <Label className="text-xs font-semibold mb-2 block">Page Numbering:</Label>
               <div className="space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1282,7 +1233,7 @@ export default function LayoutTab() {
                     name="pageNumbering"
                     checked={numberingMode === "continue"}
                     onChange={() => setNumberingMode("continue")}
-                    className="text-blue-600"
+                    className="text-primary"
                   />
                   <span>Continue from previous section</span>
                 </label>
@@ -1292,7 +1243,7 @@ export default function LayoutTab() {
                     name="pageNumbering"
                     checked={numberingMode === "startAt"}
                     onChange={() => setNumberingMode("startAt")}
-                    className="text-blue-600"
+                    className="text-primary"
                   />
                   <span>Start at:</span>
                   <input
@@ -1303,7 +1254,7 @@ export default function LayoutTab() {
                       setStartAtValue(Math.max(1, parseInt(e.target.value, 10) || 1))
                     }
                     disabled={numberingMode !== "startAt"}
-                    className="w-16 h-7 px-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 disabled:opacity-50"
+                    className="w-16 h-7 px-1.5 text-xs rounded border border-border dark:border-secondary-foreground disabled:opacity-50"
                   />
                 </label>
               </div>
@@ -1494,7 +1445,7 @@ export default function LayoutTab() {
       {/* 7. Custom Watermark Dialog */}
       <Dialog open={watermarkDialogOpen} onOpenChange={setWatermarkDialogOpen}>
         <DialogContent
-          className="!max-w-[760px] !w-[760px] max-h-[90vh] overflow-y-auto"
+          className="!max-w-190 !w-190 max-h-[90vh] overflow-y-auto"
           style={{ maxWidth: "760px", width: "95vw" }}
         >
           <DialogHeader>
@@ -1504,16 +1455,16 @@ export default function LayoutTab() {
           </DialogHeader>
           <div className="flex flex-col sm:flex-row gap-6 py-2 text-xs items-stretch">
             {/* Left: Configuration Controls */}
-            <div className="w-full sm:w-[380px] flex-shrink-0 space-y-4">
+            <div className="w-full sm:w-95 flex-shrink-0 space-y-4">
               {/* Tabs for Text vs Image */}
-              <div className="flex rounded-md bg-slate-100 dark:bg-slate-800 p-1">
+              <div className="flex rounded-md bg-muted dark:bg-muted p-1">
                 <button
                   type="button"
                   onClick={() => setWatermarkType("text")}
                   className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
                     watermarkType === "text"
-                      ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
-                      : "text-slate-600 dark:text-slate-400"
+                      ? "bg-card dark:bg-secondary shadow-xs text-primary font-semibold"
+                      : "text-secondary-foreground dark:text-muted-foreground"
                   }`}
                 >
                   Text Watermark
@@ -1523,8 +1474,8 @@ export default function LayoutTab() {
                   onClick={() => setWatermarkType("image")}
                   className={`flex-1 py-1.5 text-center font-medium rounded transition-colors ${
                     watermarkType === "image"
-                      ? "bg-white dark:bg-slate-900 shadow-xs text-blue-600 font-semibold"
-                      : "text-slate-600 dark:text-slate-400"
+                      ? "bg-card dark:bg-secondary shadow-xs text-primary font-semibold"
+                      : "text-secondary-foreground dark:text-muted-foreground"
                   }`}
                 >
                   Picture Watermark
@@ -1548,7 +1499,7 @@ export default function LayoutTab() {
                       <select
                         value={wmFont}
                         onChange={(e) => setWmFont(e.target.value)}
-                        className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                        className="w-full h-8 px-2 rounded border border-border dark:border-secondary-foreground bg-card dark:bg-secondary text-xs"
                       >
                         <option value="Calibri">Calibri</option>
                         <option value="Arial">Arial</option>
@@ -1562,7 +1513,7 @@ export default function LayoutTab() {
                       <select
                         value={wmFontSize}
                         onChange={(e) => setWmFontSize(e.target.value)}
-                        className="w-full h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                        className="w-full h-8 px-2 rounded border border-border dark:border-secondary-foreground bg-card dark:bg-secondary text-xs"
                       >
                         <option value="auto">Auto</option>
                         <option value="36">36 pt</option>
@@ -1582,9 +1533,9 @@ export default function LayoutTab() {
                           type="color"
                           value={wmColor}
                           onChange={(e) => setWmColor(e.target.value)}
-                          className="h-7 w-10 cursor-pointer rounded border border-slate-300"
+                          className="h-7 w-10 cursor-pointer rounded border border-border"
                         />
-                        <span className="font-mono text-[11px] text-slate-500">
+                        <span className="font-mono text-11px text-muted-foreground">
                           {wmColor}
                         </span>
                       </div>
@@ -1613,7 +1564,7 @@ export default function LayoutTab() {
                           name="wmRot"
                           checked={wmRotation === "diagonal"}
                           onChange={() => setWmRotation("diagonal")}
-                          className="text-blue-600"
+                          className="text-primary"
                         />
                         <span>Diagonal (-35°)</span>
                       </label>
@@ -1623,7 +1574,7 @@ export default function LayoutTab() {
                           name="wmRot"
                           checked={wmRotation === "horizontal"}
                           onChange={() => setWmRotation("horizontal")}
-                          className="text-blue-600"
+                          className="text-primary"
                         />
                         <span>Horizontal (0°)</span>
                       </label>
@@ -1649,11 +1600,11 @@ export default function LayoutTab() {
                         type="button"
                         size="sm"
                         onClick={() => fileInputRef.current?.click()}
-                        className="h-8 px-3.5 text-xs font-medium bg-[#1d8cd7] hover:bg-[#157bbd] text-white cursor-pointer rounded shadow-xs"
+                        className="h-8 px-3.5 text-xs font-medium bg-brand hover:bg-brand-deep text-primary-foreground cursor-pointer rounded shadow-xs"
                       >
                         Choose File
                       </Button>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+                      <span className="text-xs text-muted-foreground truncate max-w-50">
                         {wmFileName || "No file chosen"}
                       </span>
                     </div>
@@ -1675,7 +1626,7 @@ export default function LayoutTab() {
                           onChange={(e) => setWmImageRotation(parseInt(e.target.value, 10))}
                           className="w-full cursor-pointer accent-sky-500"
                         />
-                        <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-8 text-right">
+                        <span className="text-xs font-mono text-secondary-foreground dark:text-muted-foreground w-8 text-right">
                           {wmImageRotation}°
                         </span>
                       </div>
@@ -1688,7 +1639,7 @@ export default function LayoutTab() {
                       <select
                         value={wmImageScale}
                         onChange={(e) => setWmImageScale(e.target.value)}
-                        className="w-full h-8 px-2.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-200"
+                        className="w-full h-8 px-2.5 rounded border border-border dark:border-secondary-foreground bg-card dark:bg-secondary text-xs text-foreground dark:text-muted-foreground"
                       >
                         <option value="auto">Auto</option>
                         <option value="500">500%</option>
@@ -1701,7 +1652,7 @@ export default function LayoutTab() {
                   </div>
 
                   {/* 3. Opacity / Transparency Card */}
-                  <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/60 dark:bg-slate-900/40 space-y-2">
+                  <div className="rounded-lg border border-secondary dark:border-muted p-3 bg-muted/60 dark:bg-secondary/40 space-y-2">
                     <Label className="text-xs font-semibold block">
                       Opacity / Transparency
                     </Label>
@@ -1715,7 +1666,7 @@ export default function LayoutTab() {
                         onChange={(e) => setWmOpacity(parseInt(e.target.value, 10))}
                         className="w-full cursor-pointer accent-sky-500"
                       />
-                      <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-8 text-right">
+                      <span className="text-xs font-mono text-secondary-foreground dark:text-muted-foreground w-8 text-right">
                         {wmOpacity}%
                       </span>
                     </div>
@@ -1725,12 +1676,12 @@ export default function LayoutTab() {
             </div>
 
             {/* Right: Live Preview Box */}
-            <div className="flex-1 min-w-[260px] flex flex-col items-center justify-center">
+            <div className="flex-1 min-w-65 flex flex-col items-center justify-center">
               <div
-                className="w-full h-full min-h-[350px] rounded-xl border border-slate-700/60 p-5 flex flex-col items-center justify-center shadow-lg relative select-none"
+                className="w-full h-full min-h-87.5 rounded-xl border border-secondary-foreground/60 p-5 flex flex-col items-center justify-center shadow-lg relative select-none"
                 style={{ backgroundColor: "#0c1421" }}
               >
-                <div className="text-[11px] uppercase font-bold tracking-[0.2em] text-slate-400 mb-5 text-center">
+                <div className="text-11px uppercase font-bold tracking-[0.2em] text-muted-foreground mb-5 text-center">
                   LIVE PREVIEW
                 </div>
 
@@ -1772,12 +1723,12 @@ export default function LayoutTab() {
                 >
                   {/* Skeleton Document Lines */}
                   <div className="space-y-2 pointer-events-none select-none z-10 w-full">
-                    <div className="h-3 w-20 bg-slate-200/90 rounded-full mb-3" />
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full" />
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full" />
-                    <div className="h-1.5 w-[72%] bg-slate-100 rounded-full" />
-                    <div className="h-1.5 w-[94%] bg-slate-100 rounded-full" />
-                    <div className="h-1.5 w-[60%] bg-slate-100 rounded-full" />
+                    <div className="h-3 w-20 bg-secondary/90 rounded-full mb-3" />
+                    <div className="h-1.5 w-full bg-muted rounded-full" />
+                    <div className="h-1.5 w-full bg-muted rounded-full" />
+                    <div className="h-1.5 w-[72%] bg-muted rounded-full" />
+                    <div className="h-1.5 w-[94%] bg-muted rounded-full" />
+                    <div className="h-1.5 w-[60%] bg-muted rounded-full" />
                   </div>
 
                   {/* Watermark Overlay on Document Page */}
@@ -1818,7 +1769,7 @@ export default function LayoutTab() {
                         }}
                       />
                     ) : (
-                      <span className="text-[11px] text-slate-400 font-medium">No image chosen</span>
+                      <span className="text-11px text-muted-foreground font-medium">No image chosen</span>
                     )}
                   </div>
                 </div>
@@ -1843,13 +1794,13 @@ export default function LayoutTab() {
       {/* 8. Page Borders Dialog */}
       <Dialog open={bordersDialogOpen} onOpenChange={setBordersDialogOpen}>
         <DialogContent
-          className="!max-w-[820px] !w-[820px] sm:!max-w-[820px] sm:!w-[820px] max-h-[92vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800"
+          className="!max-w-205 !w-205 sm:!max-w-205 sm:!w-205 max-h-[92vh] flex flex-col p-0 overflow-hidden bg-card dark:bg-secondary rounded-2xl shadow-2xl border border-secondary dark:border-muted"
           style={{ maxWidth: "820px", width: "95vw" }}
         >
-          <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between">
-            <DialogTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <DialogHeader className="px-6 py-4 border-b border-secondary dark:border-muted flex flex-row items-center justify-between">
+            <DialogTitle className="text-sm font-bold text-foreground dark:text-muted flex items-center gap-2">
               <svg
-                className="h-4 w-4 text-blue-600"
+                className="h-4 w-4 text-primary"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -1865,8 +1816,8 @@ export default function LayoutTab() {
           <div className="flex-1 overflow-y-auto px-6 pt-4 pb-4 min-h-0">
             <div className="flex flex-row gap-5 text-xs items-stretch">
               {/* Column 1: SETTING */}
-              <div className="w-[125px] flex-shrink-0 border-r border-slate-200/90 dark:border-slate-800 pr-4">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+              <div className="w-31.25 flex-shrink-0 border-r border-secondary/90 dark:border-muted pr-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground mb-3">
                   Setting
                 </div>
                 <div className="space-y-1.5">
@@ -1907,8 +1858,8 @@ export default function LayoutTab() {
                         }}
                         className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-[#E1F0FF] border border-[#0078D4] text-slate-900 font-semibold shadow-xs dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-500"
-                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                            ? "bg-[#E1F0FF] border border-brand text-foreground font-semibold shadow-xs dark:bg-navy-950/60 dark:text-primary/30 dark:border-primary"
+                            : "text-secondary-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-primary-foreground hover:bg-muted dark:hover:bg-muted/60"
                         }`}
                       >
                         {label}
@@ -1919,10 +1870,10 @@ export default function LayoutTab() {
               </div>
 
               {/* Column 2: Controls */}
-              <div className="flex-1 min-w-[240px] px-1 space-y-3">
+              <div className="flex-1 min-w-60 px-1 space-y-3">
                 {/* Style */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
                     Style
                   </label>
                   <div className="relative">
@@ -1939,7 +1890,7 @@ export default function LayoutTab() {
                           setBorderRight(true);
                         }
                       }}
-                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                     >
                       <option value="solid">───── Solid</option>
                       <option value="dashed">- - - - - - Dashed</option>
@@ -1948,13 +1899,13 @@ export default function LayoutTab() {
                       <option value="dash-dot">─ · ─ · ─ Dash-Dot</option>
                       <option value="thick-solid">━━━━━━ Thick Solid</option>
                     </select>
-                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
 
                 {/* Color with Word Preset Palette */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
                     Color
                   </label>
                   <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
@@ -1974,15 +1925,15 @@ export default function LayoutTab() {
                         onClick={() => setBorderColor(c.hex)}
                         className={`h-5 w-5 rounded-full border transition-transform hover:scale-110 cursor-pointer ${
                           borderColor.toLowerCase() === c.hex.toLowerCase()
-                            ? "ring-2 ring-blue-500 scale-110"
-                            : "border-slate-300 dark:border-slate-600"
+                            ? "ring-2 ring-primary scale-110"
+                            : "border-border dark:border-secondary-foreground"
                         }`}
                         style={{ backgroundColor: c.hex }}
                       />
                     ))}
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="relative w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden flex-shrink-0 cursor-pointer flex items-center justify-center p-0.5 shadow-xs">
+                    <div className="relative w-8 h-8 rounded-lg border border-border dark:border-secondary-foreground overflow-hidden flex-shrink-0 cursor-pointer flex items-center justify-center p-0.5 shadow-xs">
                       <input
                         type="color"
                         value={borderColor}
@@ -1998,7 +1949,7 @@ export default function LayoutTab() {
                       type="text"
                       value={borderColor}
                       onChange={(e) => setBorderColor(e.target.value)}
-                      className="w-full h-8 px-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-mono uppercase bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-[#0078D4]"
+                      className="w-full h-8 px-2 rounded-lg border border-secondary dark:border-secondary-foreground text-xs font-mono uppercase bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-brand"
                     />
                   </div>
                 </div>
@@ -2006,14 +1957,14 @@ export default function LayoutTab() {
                 {/* Width & Art */}
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
                       Width
                     </label>
                     <div className="relative">
                       <select
                         value={borderWidth}
                         onChange={(e) => setBorderWidth(parseFloat(e.target.value))}
-                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                       >
                         <option value={1}>0.5 pt</option>
                         <option value={1.5}>0.75 pt</option>
@@ -2024,75 +1975,75 @@ export default function LayoutTab() {
                         <option value={8}>4.5 pt</option>
                         <option value={10}>6 pt</option>
                       </select>
-                      <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                    <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
                       Art
                     </label>
                     <div className="relative">
                       <select
                         value={artBorder}
                         onChange={(e) => setArtBorder(e.target.value)}
-                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                        className="w-full h-8 px-2.5 pr-7 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                       >
                         <option value="none">None</option>
                       </select>
-                      <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
                 {/* Distance Options (Word Distance from Page Edge) */}
-                <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-2.5 bg-slate-50/70 dark:bg-slate-900/50">
-                  <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                <div className="rounded-lg border border-secondary dark:border-muted p-2.5 bg-muted/70 dark:bg-secondary/50">
+                  <div className="text-11px font-semibold text-secondary-foreground dark:text-muted-foreground mb-2">
                     Distance from Edge (px)
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-[10.5px] text-slate-500">Top:</span>
+                      <span className="text-[10.5px] text-muted-foreground">Top:</span>
                       <input
                         type="number"
                         min={0}
                         max={100}
                         value={borderDistanceTop}
                         onChange={(e) => setBorderDistanceTop(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                        className="w-16 h-7 px-1.5 text-right rounded border border-border dark:border-secondary-foreground bg-card dark:bg-muted text-xs text-foreground dark:text-muted-foreground"
                       />
                     </div>
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-[10.5px] text-slate-500">Bottom:</span>
+                      <span className="text-[10.5px] text-muted-foreground">Bottom:</span>
                       <input
                         type="number"
                         min={0}
                         max={100}
                         value={borderDistanceBottom}
                         onChange={(e) => setBorderDistanceBottom(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                        className="w-16 h-7 px-1.5 text-right rounded border border-border dark:border-secondary-foreground bg-card dark:bg-muted text-xs text-foreground dark:text-muted-foreground"
                       />
                     </div>
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-[10.5px] text-slate-500">Left:</span>
+                      <span className="text-[10.5px] text-muted-foreground">Left:</span>
                       <input
                         type="number"
                         min={0}
                         max={100}
                         value={borderDistanceLeft}
                         onChange={(e) => setBorderDistanceLeft(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                        className="w-16 h-7 px-1.5 text-right rounded border border-border dark:border-secondary-foreground bg-card dark:bg-muted text-xs text-foreground dark:text-muted-foreground"
                       />
                     </div>
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-[10.5px] text-slate-500">Right:</span>
+                      <span className="text-[10.5px] text-muted-foreground">Right:</span>
                       <input
                         type="number"
                         min={0}
                         max={100}
                         value={borderDistanceRight}
                         onChange={(e) => setBorderDistanceRight(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                        className="w-16 h-7 px-1.5 text-right rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+                        className="w-16 h-7 px-1.5 text-right rounded border border-border dark:border-secondary-foreground bg-card dark:bg-muted text-xs text-foreground dark:text-muted-foreground"
                       />
                     </div>
                   </div>
@@ -2100,7 +2051,7 @@ export default function LayoutTab() {
 
                 {/* Apply To */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                  <label className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground mb-1 block">
                     Apply To
                   </label>
                   <div className="relative">
@@ -2116,7 +2067,7 @@ export default function LayoutTab() {
                             | "exceptFirstPage"
                         )
                       }
-                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none appearance-none cursor-pointer focus:border-[#0078D4]"
+                      className="w-full h-8 px-2.5 pr-8 rounded-lg border border-secondary dark:border-secondary-foreground bg-card dark:bg-secondary text-xs font-medium text-foreground dark:text-muted-foreground outline-none appearance-none cursor-pointer focus:border-brand"
                     >
                       <option value="document">Whole Document</option>
                       <option value="section">Current Section</option>
@@ -2124,14 +2075,14 @@ export default function LayoutTab() {
                       <option value="firstPage">This section - First page only</option>
                       <option value="exceptFirstPage">This section - All except first page</option>
                     </select>
-                    <ChevronDown className="h-4 w-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
               </div>
 
               {/* Column 3: PREVIEW Card */}
-              <div className="w-[250px] flex-shrink-0 bg-[#F2F7FC] dark:bg-[#0c1421] rounded-2xl p-4 border border-[#E1EDF8] dark:border-slate-800 flex flex-col items-center justify-between shadow-xs">
-                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 text-center mb-2">
+              <div className="w-62.5 flex-shrink-0 bg-[#F2F7FC] dark:bg-[#0c1421] rounded-2xl p-4 border border-[#E1EDF8] dark:border-muted flex flex-col items-center justify-between shadow-xs">
+                <div className="text-11px font-bold uppercase tracking-[0.2em] text-secondary-foreground dark:text-muted-foreground text-center mb-2">
                   PREVIEW
                 </div>
 
@@ -2153,8 +2104,8 @@ export default function LayoutTab() {
                     }}
                     className={`absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderTop && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
-                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
                     T
@@ -2177,8 +2128,8 @@ export default function LayoutTab() {
                     }}
                     className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderBottom && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
-                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
                     B
@@ -2201,8 +2152,8 @@ export default function LayoutTab() {
                     }}
                     className={`absolute top-1/2 -left-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderLeft && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
-                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
                     L
@@ -2225,8 +2176,8 @@ export default function LayoutTab() {
                     }}
                     className={`absolute top-1/2 -right-3 -translate-y-1/2 z-30 w-6 h-6 rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs transition-colors ${
                       borderRight && borderSetting !== "none"
-                        ? "bg-[#0078D4] text-white hover:bg-[#006CBD]"
-                        : "bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400"
+                        ? "bg-brand text-primary-foreground hover:bg-brand"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary dark:bg-secondary-foreground dark:text-muted-foreground"
                     }`}
                   >
                     R
@@ -2234,7 +2185,7 @@ export default function LayoutTab() {
 
                   {/* Miniature Document Sheet with Interactive Clickable Sides */}
                   <div
-                    className="w-36 h-48 rounded-xs bg-white dark:bg-slate-900 relative overflow-hidden flex flex-col pt-3.5 px-3 pb-3 transition-all select-none cursor-pointer"
+                    className="w-36 h-48 rounded-xs bg-card dark:bg-secondary relative overflow-hidden flex flex-col pt-3.5 px-3 pb-3 transition-all select-none cursor-pointer"
                     style={{
                       boxSizing: "border-box",
                       borderTop:
@@ -2261,37 +2212,37 @@ export default function LayoutTab() {
                   >
                     {/* Clickable side hotspots */}
                     <div
-                      className="absolute top-0 left-0 right-0 h-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      className="absolute top-0 left-0 right-0 h-4 cursor-pointer hover:bg-primary/15 transition-colors z-20"
                       title="Click to toggle Top border"
                       onClick={() => setBorderTop(!borderTop)}
                     />
                     <div
-                      className="absolute bottom-0 left-0 right-0 h-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      className="absolute bottom-0 left-0 right-0 h-4 cursor-pointer hover:bg-primary/15 transition-colors z-20"
                       title="Click to toggle Bottom border"
                       onClick={() => setBorderBottom(!borderBottom)}
                     />
                     <div
-                      className="absolute top-0 bottom-0 left-0 w-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      className="absolute top-0 bottom-0 left-0 w-4 cursor-pointer hover:bg-primary/15 transition-colors z-20"
                       title="Click to toggle Left border"
                       onClick={() => setBorderLeft(!borderLeft)}
                     />
                     <div
-                      className="absolute top-0 bottom-0 right-0 w-4 cursor-pointer hover:bg-blue-500/15 transition-colors z-20"
+                      className="absolute top-0 bottom-0 right-0 w-4 cursor-pointer hover:bg-primary/15 transition-colors z-20"
                       title="Click to toggle Right border"
                       onClick={() => setBorderRight(!borderRight)}
                     />
 
                     {/* Skeleton text lines */}
                     <div className="space-y-1.5 pointer-events-none select-none w-full">
-                      <div className="h-1.5 w-[65%] bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
-                      <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full" />
-                      <div className="h-1.5 w-[85%] bg-slate-100 dark:bg-slate-800 rounded-full" />
-                      <div className="h-1.5 w-[70%] bg-slate-100 dark:bg-slate-800 rounded-full" />
+                      <div className="h-1.5 w-[65%] bg-secondary dark:bg-secondary-foreground rounded-full mb-2" />
+                      <div className="h-1.5 w-full bg-muted dark:bg-muted rounded-full" />
+                      <div className="h-1.5 w-[85%] bg-muted dark:bg-muted rounded-full" />
+                      <div className="h-1.5 w-[70%] bg-muted dark:bg-muted rounded-full" />
                     </div>
                   </div>
                 </div>
 
-                <div className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-2 text-center select-none font-normal">
+                <div className="text-[10.5px] text-muted-foreground dark:text-muted-foreground mt-2 text-center select-none font-normal">
                   Click sides or T/B/L/R to toggle
                 </div>
               </div>
@@ -2299,18 +2250,18 @@ export default function LayoutTab() {
           </div>
 
           {/* Sticky Non-Scrolling Edge-to-Edge Footer - ALWAYS VISIBLE */}
-          <div className="border-t border-slate-200 dark:border-slate-800 px-6 py-3.5 bg-slate-50/80 dark:bg-slate-900/90 flex items-center justify-end gap-3 shrink-0 rounded-b-2xl">
+          <div className="border-t border-secondary dark:border-muted px-6 py-3.5 bg-muted/80 dark:bg-secondary/90 flex items-center justify-end gap-3 shrink-0 rounded-b-2xl">
             <button
               type="button"
               onClick={() => setBordersDialogOpen(false)}
-              className="px-5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium transition-colors cursor-pointer shadow-xs"
+              className="px-5 py-2 rounded-lg border border-border dark:border-secondary-foreground bg-card dark:bg-muted text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-secondary-foreground text-xs font-medium transition-colors cursor-pointer shadow-xs"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleApplyBorders}
-              className="px-6 py-2 rounded-lg bg-[#0078D4] hover:bg-[#006CBD] active:bg-[#005A9E] text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+              className="px-6 py-2 rounded-lg bg-brand hover:bg-brand active:bg-brand-deep text-primary-foreground text-xs font-semibold shadow-sm transition-colors cursor-pointer"
             >
               OK
             </button>

@@ -50,30 +50,28 @@ export default function ChartDesignTab() {
 
   if (!activeChart) {
     return (
-      <div className="flex items-center h-9 px-3 text-xs text-slate-400">
+      <div className="flex items-center h-9 px-3 text-xs text-muted-foreground">
         Select a chart in the document to configure design and layouts.
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 text-slate-700 dark:text-slate-200">
+    <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 text-secondary-foreground dark:text-muted-foreground">
       {/* --------------------------------------------------------
           1. CHART LAYOUTS GROUP
           -------------------------------------------------------- */}
       <div className="flex items-center gap-1">
         {/* ADD CHART ELEMENT DROPDOWN */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
-              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground"
             >
-              <PlusCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <PlusCircle className="h-4 w-4 text-primary dark:text-primary" />
               <span>Add Element</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-          </DropdownMenuTrigger>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>} />
 
           <DropdownMenuContent align="start" className="w-52">
             {/* Chart Title Submenu */}
@@ -87,14 +85,14 @@ export default function ChartDesignTab() {
                   className="text-xs justify-between"
                 >
                   <span>None</span>
-                  {!activeChart.showTitle && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  {!activeChart.showTitle && <Check className="w-3.5 h-3.5 text-primary" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => updateActiveChart({ showTitle: true, titleAlignment: 'center' })}
                   className="text-xs justify-between"
                 >
                   <span>Above Chart</span>
-                  {activeChart.showTitle && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  {activeChart.showTitle && <Check className="w-3.5 h-3.5 text-primary" />}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -112,7 +110,7 @@ export default function ChartDesignTab() {
                   className="text-xs justify-between"
                 >
                   <span>Primary Horizontal</span>
-                  {activeChart.showXAxisTitle && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  {activeChart.showXAxisTitle && <Check className="w-3.5 h-3.5 text-primary" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
@@ -121,7 +119,7 @@ export default function ChartDesignTab() {
                   className="text-xs justify-between"
                 >
                   <span>Primary Vertical</span>
-                  {activeChart.showYAxisTitle && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  {activeChart.showYAxisTitle && <Check className="w-3.5 h-3.5 text-primary" />}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -137,7 +135,7 @@ export default function ChartDesignTab() {
                   className="text-xs justify-between"
                 >
                   <span>None</span>
-                  {!activeChart.showLegend && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  {!activeChart.showLegend && <Check className="w-3.5 h-3.5 text-primary" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => updateActiveChart({ showLegend: true, legendPosition: 'right' })}
@@ -145,7 +143,7 @@ export default function ChartDesignTab() {
                 >
                   <span>Right</span>
                   {activeChart.showLegend && activeChart.legendPosition === 'right' && (
-                    <Check className="w-3.5 h-3.5 text-blue-600" />
+                    <Check className="w-3.5 h-3.5 text-primary" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -154,7 +152,7 @@ export default function ChartDesignTab() {
                 >
                   <span>Top</span>
                   {activeChart.showLegend && activeChart.legendPosition === 'top' && (
-                    <Check className="w-3.5 h-3.5 text-blue-600" />
+                    <Check className="w-3.5 h-3.5 text-primary" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -163,7 +161,7 @@ export default function ChartDesignTab() {
                 >
                   <span>Bottom</span>
                   {activeChart.showLegend && activeChart.legendPosition === 'bottom' && (
-                    <Check className="w-3.5 h-3.5 text-blue-600" />
+                    <Check className="w-3.5 h-3.5 text-primary" />
                   )}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
@@ -180,7 +178,7 @@ export default function ChartDesignTab() {
                   className="text-xs justify-between"
                 >
                   <span>None</span>
-                  {!activeChart.showDataLabels && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  {!activeChart.showDataLabels && <Check className="w-3.5 h-3.5 text-primary" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => updateActiveChart({ showDataLabels: true, dataLabelPosition: 'center' })}
@@ -188,7 +186,7 @@ export default function ChartDesignTab() {
                 >
                   <span>Center</span>
                   {activeChart.showDataLabels && activeChart.dataLabelPosition === 'center' && (
-                    <Check className="w-3.5 h-3.5 text-blue-600" />
+                    <Check className="w-3.5 h-3.5 text-primary" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -197,7 +195,7 @@ export default function ChartDesignTab() {
                 >
                   <span>Outside End</span>
                   {activeChart.showDataLabels && activeChart.dataLabelPosition === 'outsideEnd' && (
-                    <Check className="w-3.5 h-3.5 text-blue-600" />
+                    <Check className="w-3.5 h-3.5 text-primary" />
                   )}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
@@ -214,7 +212,7 @@ export default function ChartDesignTab() {
                   className="text-xs justify-between"
                 >
                   <span>Major Gridlines</span>
-                  {activeChart.showGridlines && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  {activeChart.showGridlines && <Check className="w-3.5 h-3.5 text-primary" />}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -223,16 +221,14 @@ export default function ChartDesignTab() {
 
         {/* QUICK LAYOUT DROPDOWN */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
-              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground"
             >
-              <LayoutGrid className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+              <LayoutGrid className="h-4 w-4 text-secondary-foreground dark:text-muted-foreground" />
               <span>Quick Layout</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-          </DropdownMenuTrigger>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>} />
 
           <DropdownMenuContent align="start" className="w-60">
             {QUICK_LAYOUTS.map((layout: { id: string; name: string; description: string }) => (
@@ -241,8 +237,8 @@ export default function ChartDesignTab() {
                 onClick={() => applyQuickLayout(layout.id)}
                 className="flex flex-col items-start p-2 cursor-pointer text-xs"
               >
-                <span className="font-semibold text-slate-800">{layout.name}</span>
-                <span className="text-[11px] text-slate-500">{layout.description}</span>
+                <span className="font-semibold text-foreground">{layout.name}</span>
+                <span className="text-11px text-muted-foreground">{layout.description}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -257,16 +253,14 @@ export default function ChartDesignTab() {
       <div className="flex items-center gap-1">
         {/* CHANGE COLORS DROPDOWN */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
-              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground"
             >
-              <Palette className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <Palette className="h-4 w-4 text-success-600 dark:text-success-400" />
               <span>Change Colors</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-          </DropdownMenuTrigger>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>} />
 
           <DropdownMenuContent align="start" className="w-56 p-1.5 space-y-1">
             {COLOR_SCHEMES.map((scheme: { id: string; name: string; colors: string[] }) => (
@@ -277,9 +271,9 @@ export default function ChartDesignTab() {
               >
                 <div className="space-y-1 w-full">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-slate-700">{scheme.name}</span>
+                    <span className="font-medium text-secondary-foreground">{scheme.name}</span>
                     {activeChart.colorScheme === scheme.id && (
-                      <Check className="w-3.5 h-3.5 text-blue-600" />
+                      <Check className="w-3.5 h-3.5 text-primary" />
                     )}
                   </div>
                   <div className="flex items-center gap-1">
@@ -311,18 +305,18 @@ export default function ChartDesignTab() {
                   flex flex-col items-center justify-center w-14 h-8 rounded border px-1 transition-all text-center
                   ${
                     isSelected
-                      ? 'border-blue-600 bg-blue-50/60 shadow-xs'
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-primary bg-primary/60 shadow-xs'
+                      : 'border-secondary hover:border-border hover:bg-muted'
                   }
                 `}
                 title={`${style.name}: ${style.description}`}
               >
                 <div className="flex items-end gap-0.5 h-3.5 w-8 justify-center">
-                  <div className="w-1.5 h-2.5 bg-blue-500 rounded-2xs" />
-                  <div className="w-1.5 h-3.5 bg-blue-600 rounded-2xs" />
-                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-2xs" />
+                  <div className="w-1.5 h-2.5 bg-primary rounded-xs" />
+                  <div className="w-1.5 h-3.5 bg-primary rounded-xs" />
+                  <div className="w-1.5 h-1.5 bg-primary rounded-xs" />
                 </div>
-                <span className="text-[9px] font-medium text-slate-600 leading-none mt-0.5">
+                <span className="text-9px font-medium text-secondary-foreground leading-none mt-0.5">
                   {style.name}
                 </span>
               </button>
@@ -345,7 +339,7 @@ export default function ChartDesignTab() {
         </RibbonButton>
 
         <RibbonButton
-          icon={<Table className="h-4 w-4 text-slate-600 dark:text-slate-400" />}
+          icon={<Table className="h-4 w-4 text-secondary-foreground dark:text-muted-foreground" />}
           onClick={() => setIsSelectDataModalOpen(true)}
         >
           Select Data
@@ -359,18 +353,18 @@ export default function ChartDesignTab() {
             inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-semibold transition-all
             ${
               isSpreadsheetOpen
-                ? 'bg-emerald-700 text-white shadow-xs'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs'
+                ? 'bg-success-700 text-primary-foreground shadow-xs'
+                : 'bg-success-600 hover:bg-success-700 text-primary-foreground shadow-2xs'
             }
           `}
           title="Toggle live spreadsheet editor above chart"
         >
-          <FileSpreadsheet className="h-4 w-4 text-white" />
+          <FileSpreadsheet className="h-4 w-4 text-primary-foreground" />
           <span>Edit Data</span>
         </button>
 
         <RibbonButton
-          icon={<RefreshCw className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />}
+          icon={<RefreshCw className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />}
           onClick={refreshActiveChart}
         >
           Refresh
@@ -383,7 +377,7 @@ export default function ChartDesignTab() {
           4. TYPE GROUP
           -------------------------------------------------------- */}
       <RibbonButton
-        icon={<BarChart3 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />}
+        icon={<BarChart3 className="h-4 w-4 text-primary dark:text-primary" />}
         onClick={() => setIsChangeTypeModalOpen(true)}
       >
         Change Type

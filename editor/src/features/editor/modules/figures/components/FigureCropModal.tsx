@@ -36,25 +36,25 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#111D29]">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl border border-secondary bg-card p-6 shadow-2xl dark:border-muted dark:bg-[#111D29]">
+        <div className="flex items-center justify-between pb-4 border-b border-muted dark:border-muted">
           <div className="flex items-center gap-2">
-            <Crop className="h-5 w-5 text-blue-500" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+            <Crop className="h-5 w-5 text-primary" />
+            <h3 className="text-base font-semibold text-foreground dark:text-primary-foreground">
               Crop & Scale Figure
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted dark:hover:bg-muted"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Image Preview Box */}
-        <div className="mt-4 flex aspect-video items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-900">
+        <div className="mt-4 flex aspect-video items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-muted p-2 dark:border-secondary-foreground dark:bg-secondary">
           <img
             src={figure.src}
             alt={figure.altText || figure.title}
@@ -66,7 +66,7 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
         {/* Adjustments */}
         <div className="mt-4 space-y-3">
           <div>
-            <div className="flex justify-between text-xs font-medium text-slate-700 dark:text-slate-300">
+            <div className="flex justify-between text-xs font-medium text-secondary-foreground dark:text-muted-foreground">
               <span>Scale Zoom</span>
               <span>{scale}%</span>
             </div>
@@ -76,12 +76,12 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
               max={200}
               value={scale}
               onChange={(e) => setScale(Number(e.target.value))}
-              className="mt-1.5 w-full accent-blue-600"
+              className="mt-1.5 w-full accent-primary"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-medium text-secondary-foreground dark:text-muted-foreground">
               Aspect Ratio Preset
             </label>
             <div className="mt-1 flex gap-2">
@@ -92,8 +92,8 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
                   onClick={() => setAspectRatio(ratio)}
                   className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition ${
                     aspectRatio === ratio
-                      ? 'border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                      ? 'border-primary bg-primary/10 text-primary dark:bg-navy-950/50 dark:text-primary'
+                      : 'border-secondary text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:text-muted-foreground dark:hover:bg-muted'
                   }`}
                 >
                   {ratio}
@@ -107,7 +107,7 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
           <button
             type="button"
             onClick={() => setScale(100)}
-            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground dark:hover:text-primary-foreground"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Reset</span>
@@ -116,14 +116,14 @@ export const FigureCropModal: React.FC<FigureCropModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="rounded-xl border border-secondary px-4 py-2 text-xs font-medium text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:text-muted-foreground dark:hover:bg-muted"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleApply}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-700"
+              className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90"
             >
               <Check className="h-4 w-4" />
               <span>Apply Crop</span>

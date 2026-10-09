@@ -69,7 +69,7 @@ export default function EditorLayout() {
       <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
 
         {/* LEFT ICON SIDEBAR */}
-        <aside className="w-[60px] shrink-0 min-h-0 overflow-visible">
+        <aside className="w-15 shrink-0 min-h-0 overflow-visible">
           <IconSidebar />
         </aside>
 
@@ -77,14 +77,14 @@ export default function EditorLayout() {
         {leftPanelOpen && (
           <aside
             className="
-              w-[380px]
+              w-95
               shrink-0
               min-h-0
               overflow-hidden
               border-r
-              border-slate-200
-              bg-white
-              dark:border-slate-800
+              border-sidebar-border
+              bg-card
+              dark:border-muted
               dark:bg-[#0d1117]
             "
           >
@@ -112,15 +112,15 @@ export default function EditorLayout() {
         {aiPanelOpen && (
           <aside
             className="
-              w-[360px]
+              w-90
               shrink-0
               min-w-0
               min-h-0
               overflow-hidden
               border-l
-              border-slate-200
-              bg-white
-              dark:border-slate-800
+              border-sidebar-border
+              bg-card
+              dark:border-muted
               dark:bg-[#0d1117]
             "
           >

@@ -76,7 +76,7 @@ export default function FormattingSection({
 
   return (
     <section className="mb-5">
-      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Text Formatting
       </h3>
 
@@ -85,28 +85,29 @@ export default function FormattingSection({
           <button
             key={tool.name}
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => onApply(tool)}
             className="
               flex
-              h-[84px]
+              h-21
               min-w-0
               flex-col
               items-center
               justify-center
               rounded-xl
               border
-              border-slate-200
-              bg-white
+              border-secondary
+              bg-card
               px-1
               shadow-sm
               transition-all
-              hover:border-blue-300
-              hover:bg-blue-50
-              active:scale-[0.98]
+              hover:border-navy-300
+              hover:bg-primary/10
+              active:scale-98
             "
           >
             {/* Icon */}
-            <span className="flex h-7 items-center justify-center text-slate-900">
+            <span className="flex h-7 items-center justify-center text-foreground">
               {FORMAT_ICONS[tool.name]}
             </span>
 
@@ -115,10 +116,10 @@ export default function FormattingSection({
               className="
                 mt-1
                 text-center
-                text-[10px]
+                text-10px
                 font-medium
                 leading-tight
-                text-slate-700
+                text-secondary-foreground
               "
             >
               {FORMAT_LABELS[tool.name] ?? tool.name}
@@ -130,9 +131,9 @@ export default function FormattingSection({
                 className="
                   mt-1
                   whitespace-nowrap
-                  text-[8px]
+                  text-8px
                   leading-none
-                  text-slate-400
+                  text-muted-foreground
                 "
               >
                 {tool.shortcut}

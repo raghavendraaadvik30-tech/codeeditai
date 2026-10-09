@@ -55,30 +55,30 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#111D29]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-2xl border border-secondary bg-card p-6 shadow-2xl dark:border-muted dark:bg-[#111D29]">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+        <div className="flex items-center justify-between pb-4 border-b border-muted dark:border-muted">
+          <h3 className="text-base font-semibold text-foreground dark:text-primary-foreground">
             Add New Figure
           </h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted dark:hover:bg-muted"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Tab Selection */}
-        <div className="mt-4 flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+        <div className="mt-4 flex rounded-xl bg-muted p-1 dark:bg-muted">
           <button
             type="button"
             onClick={() => setTab('upload')}
             className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition ${
               tab === 'upload'
-                ? 'bg-white text-blue-600 shadow-sm dark:bg-slate-900 dark:text-blue-400'
-                : 'text-slate-600 dark:text-slate-400'
+                ? 'bg-card text-primary shadow-sm dark:bg-secondary dark:text-primary'
+                : 'text-secondary-foreground dark:text-muted-foreground'
             }`}
           >
             <UploadCloud className="h-4 w-4" />
@@ -89,8 +89,8 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
             onClick={() => setTab('url')}
             className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition ${
               tab === 'url'
-                ? 'bg-white text-blue-600 shadow-sm dark:bg-slate-900 dark:text-blue-400'
-                : 'text-slate-600 dark:text-slate-400'
+                ? 'bg-card text-primary shadow-sm dark:bg-secondary dark:text-primary'
+                : 'text-secondary-foreground dark:text-muted-foreground'
             }`}
           >
             <LinkIcon className="h-4 w-4" />
@@ -101,7 +101,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
         {/* Shared Metadata Fields */}
         <div className="mt-4 space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
               Figure Title
             </label>
             <input
@@ -109,18 +109,18 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Workflow Diagram"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
               Category
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             >
               {FIGURE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -131,7 +131,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
               Caption
             </label>
             <input
@@ -139,7 +139,7 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="e.g. Figure 1: Architectural diagram."
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
         </div>
@@ -159,14 +159,14 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
             }}
             className={`mt-4 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
               dragOver
-                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20'
-                : 'border-slate-300 dark:border-slate-700'
+                ? 'border-primary bg-primary/50 dark:bg-navy-950/20'
+                : 'border-border dark:border-secondary-foreground'
             }`}
           >
-            <UploadCloud className="h-10 w-10 text-blue-500" />
-            <p className="mt-2 text-xs font-medium text-slate-700 dark:text-slate-300">
+            <UploadCloud className="h-10 w-10 text-primary" />
+            <p className="mt-2 text-xs font-medium text-secondary-foreground dark:text-muted-foreground">
               Drag & drop an image here, or{' '}
-              <label className="cursor-pointer text-blue-600 hover:underline">
+              <label className="cursor-pointer text-primary hover:underline">
                 browse files
                 <input
                   type="file"
@@ -176,14 +176,14 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
                 />
               </label>
             </p>
-            <p className="mt-1 text-[10px] text-slate-400">
+            <p className="mt-1 text-10px text-muted-foreground">
               PNG, JPG, SVG, WebP up to 10MB
             </p>
           </div>
         ) : (
           <form onSubmit={handleUrlSubmit} className="mt-4 space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label className="block text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
                 Direct Image Link (HTTPS)
               </label>
               <input
@@ -192,20 +192,20 @@ export const FigureUploadModal: React.FC<FigureUploadModalProps> = ({
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://example.com/image.png"
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="rounded-xl border border-secondary px-4 py-2 text-xs font-medium text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:text-muted-foreground dark:hover:bg-muted"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-700"
+                className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90"
               >
                 <Check className="h-4 w-4" />
                 <span>Add Figure</span>

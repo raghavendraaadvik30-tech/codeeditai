@@ -32,7 +32,7 @@ export default function WritingPanel() {
      } = useWriting();
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-card">
 
       {/* SEARCH */}
       <div className="shrink-0 px-4 pb-3 pt-4">
@@ -51,7 +51,7 @@ export default function WritingPanel() {
           px-4
           pb-20
           scrollbar-thin
-          scrollbar-thumb-slate-300
+          scrollbar-thumb-secondary
         "
       >
 
@@ -101,13 +101,13 @@ export default function WritingPanel() {
         className="
           shrink-0
           border-t
-          border-slate-200
-          bg-white
+          border-secondary
+          bg-card
           px-4
           py-2.5
         "
       >
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Tip: Select text first, then choose a
           writing tool.
         </p>

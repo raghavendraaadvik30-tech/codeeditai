@@ -192,7 +192,7 @@ const [fontsLoading, setFontsLoading] =
   }, [fonts]);
 
   return (
-    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 select-none">
+    <div className="flex items-center gap-2 text-secondary-foreground dark:text-muted-foreground select-none">
       {/* =====================================================
           Font Family
       ====================================================== */}
@@ -231,15 +231,15 @@ const [fontsLoading, setFontsLoading] =
       {/* =====================================================
           Undo / Redo with MS Word-Style Action History Dropdown
       ====================================================== */}
-      <div className="relative inline-flex items-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 shadow-2xs">
+      <div className="relative inline-flex items-center rounded-md border border-secondary bg-card hover:bg-muted dark:border-secondary-foreground dark:bg-secondary dark:hover:bg-muted shadow-2xs">
         <button
           type="button"
           onMouseDown={preventFocusLoss}
           onClick={() => undo()}
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
-          className={`flex h-7 w-7 items-center justify-center rounded-l-md hover:bg-blue-50/70 dark:hover:bg-slate-800 transition-colors ${
-            !canUndo ? "opacity-35 cursor-not-allowed" : "text-slate-700 dark:text-slate-200 cursor-pointer"
+          className={`flex h-7 w-7 items-center justify-center rounded-l-md hover:bg-primary/70 dark:hover:bg-muted transition-colors ${
+            !canUndo ? "opacity-35 cursor-not-allowed" : "text-secondary-foreground dark:text-muted-foreground cursor-pointer"
           }`}
         >
           <Undo2 className="h-4 w-4" />
@@ -258,8 +258,8 @@ const [fontsLoading, setFontsLoading] =
           }}
           disabled={!canUndo}
           title="Undo History"
-          className={`flex h-7 w-4 items-center justify-center rounded-r-md hover:bg-blue-50/70 dark:hover:bg-slate-800 border-l border-slate-200 dark:border-slate-700 transition-colors ${
-            !canUndo ? "opacity-35 cursor-not-allowed" : "text-slate-600 dark:text-slate-300 cursor-pointer"
+          className={`flex h-7 w-4 items-center justify-center rounded-r-md hover:bg-primary/70 dark:hover:bg-muted border-l border-secondary dark:border-secondary-foreground transition-colors ${
+            !canUndo ? "opacity-35 cursor-not-allowed" : "text-secondary-foreground dark:text-muted-foreground cursor-pointer"
           }`}
         >
           <ChevronDown className="h-2.5 w-2.5" />
@@ -269,7 +269,7 @@ const [fontsLoading, setFontsLoading] =
           <div
             ref={undoDropdownRef}
             onMouseDown={preventFocusLoss}
-            className="absolute left-0 top-full z-50 mt-1 min-w-[170px] w-48 border border-slate-400/90 bg-white shadow-xl dark:border-slate-600 dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
+            className="absolute left-0 top-full z-50 mt-1 min-w-42.5 w-48 border border-muted-foreground/90 bg-card shadow-xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
           >
             <div
               className="max-h-56 overflow-y-auto py-0.5"
@@ -289,8 +289,8 @@ const [fontsLoading, setFontsLoading] =
                       }}
                       className={`px-3 py-1 text-xs cursor-pointer transition-colors ${
                         isHighlighted
-                          ? "bg-[#0078d4] text-white font-medium"
-                          : "text-slate-900 dark:text-slate-100"
+                          ? "bg-brand text-primary-foreground font-medium"
+                          : "text-foreground dark:text-muted"
                       }`}
                     >
                       {action}
@@ -298,13 +298,13 @@ const [fontsLoading, setFontsLoading] =
                   );
                 })
               ) : (
-                <div className="px-3 py-2 text-xs text-slate-400 text-center italic">
+                <div className="px-3 py-2 text-xs text-muted-foreground text-center italic">
                   No actions
                 </div>
               )}
             </div>
 
-            <div className="border-t border-slate-300 dark:border-slate-700">
+            <div className="border-t border-border dark:border-secondary-foreground">
               <button
                 type="button"
                 onMouseDown={preventFocusLoss}
@@ -314,7 +314,7 @@ const [fontsLoading, setFontsLoading] =
                   setIsUndoDropdownOpen(false);
                   setUndoHoverIndex(null);
                 }}
-                className="w-full border-b border-slate-300 bg-[#ececec] py-1.5 text-center text-xs font-medium text-slate-800 hover:bg-[#e0e0e0] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="w-full border-b border-border bg-secondary py-1.5 text-center text-xs font-medium text-foreground hover:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors cursor-pointer"
               >
                 Undo {undoHoverIndex !== null ? undoHoverIndex + 1 : 1} Action
                 {(undoHoverIndex !== null ? undoHoverIndex + 1 : 1) > 1 ? "s" : ""}
@@ -327,7 +327,7 @@ const [fontsLoading, setFontsLoading] =
                   setIsUndoDropdownOpen(false);
                   setUndoHoverIndex(null);
                 }}
-                className="w-full bg-[#ececec] py-1.5 text-center text-xs font-medium text-slate-800 hover:bg-[#e0e0e0] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="w-full bg-secondary py-1.5 text-center text-xs font-medium text-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -336,15 +336,15 @@ const [fontsLoading, setFontsLoading] =
         )}
       </div>
 
-      <div className="relative inline-flex items-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 shadow-2xs">
+      <div className="relative inline-flex items-center rounded-md border border-secondary bg-card hover:bg-muted dark:border-secondary-foreground dark:bg-secondary dark:hover:bg-muted shadow-2xs">
         <button
           type="button"
           onMouseDown={preventFocusLoss}
           onClick={() => redo()}
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
-          className={`flex h-7 w-7 items-center justify-center rounded-l-md hover:bg-blue-50/70 dark:hover:bg-slate-800 transition-colors ${
-            !canRedo ? "opacity-35 cursor-not-allowed" : "text-slate-700 dark:text-slate-200 cursor-pointer"
+          className={`flex h-7 w-7 items-center justify-center rounded-l-md hover:bg-primary/70 dark:hover:bg-muted transition-colors ${
+            !canRedo ? "opacity-35 cursor-not-allowed" : "text-secondary-foreground dark:text-muted-foreground cursor-pointer"
           }`}
         >
           <Redo2 className="h-4 w-4" />
@@ -363,8 +363,8 @@ const [fontsLoading, setFontsLoading] =
           }}
           disabled={!canRedo}
           title="Redo History"
-          className={`flex h-7 w-4 items-center justify-center rounded-r-md hover:bg-blue-50/70 dark:hover:bg-slate-800 border-l border-slate-200 dark:border-slate-700 transition-colors ${
-            !canRedo ? "opacity-35 cursor-not-allowed" : "text-slate-600 dark:text-slate-300 cursor-pointer"
+          className={`flex h-7 w-4 items-center justify-center rounded-r-md hover:bg-primary/70 dark:hover:bg-muted border-l border-secondary dark:border-secondary-foreground transition-colors ${
+            !canRedo ? "opacity-35 cursor-not-allowed" : "text-secondary-foreground dark:text-muted-foreground cursor-pointer"
           }`}
         >
           <ChevronDown className="h-2.5 w-2.5" />
@@ -374,7 +374,7 @@ const [fontsLoading, setFontsLoading] =
           <div
             ref={redoDropdownRef}
             onMouseDown={preventFocusLoss}
-            className="absolute left-0 top-full z-50 mt-1 min-w-[170px] w-48 border border-slate-400/90 bg-white shadow-xl dark:border-slate-600 dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
+            className="absolute left-0 top-full z-50 mt-1 min-w-42.5 w-48 border border-muted-foreground/90 bg-card shadow-xl dark:border-secondary-foreground dark:bg-[#111D29] overflow-hidden select-none animate-in fade-in zoom-in-95 duration-100"
           >
             <div
               className="max-h-56 overflow-y-auto py-0.5"
@@ -394,8 +394,8 @@ const [fontsLoading, setFontsLoading] =
                       }}
                       className={`px-3 py-1 text-xs cursor-pointer transition-colors ${
                         isHighlighted
-                          ? "bg-[#0078d4] text-white font-medium"
-                          : "text-slate-900 dark:text-slate-100"
+                          ? "bg-brand text-primary-foreground font-medium"
+                          : "text-foreground dark:text-muted"
                       }`}
                     >
                       {action}
@@ -403,13 +403,13 @@ const [fontsLoading, setFontsLoading] =
                   );
                 })
               ) : (
-                <div className="px-3 py-2 text-xs text-slate-400 text-center italic">
+                <div className="px-3 py-2 text-xs text-muted-foreground text-center italic">
                   No actions
                 </div>
               )}
             </div>
 
-            <div className="border-t border-slate-300 dark:border-slate-700">
+            <div className="border-t border-border dark:border-secondary-foreground">
               <button
                 type="button"
                 onMouseDown={preventFocusLoss}
@@ -419,7 +419,7 @@ const [fontsLoading, setFontsLoading] =
                   setIsRedoDropdownOpen(false);
                   setRedoHoverIndex(null);
                 }}
-                className="w-full border-b border-slate-300 bg-[#ececec] py-1.5 text-center text-xs font-medium text-slate-800 hover:bg-[#e0e0e0] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="w-full border-b border-border bg-secondary py-1.5 text-center text-xs font-medium text-foreground hover:bg-secondary dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors cursor-pointer"
               >
                 Redo {redoHoverIndex !== null ? redoHoverIndex + 1 : 1} Action
                 {(redoHoverIndex !== null ? redoHoverIndex + 1 : 1) > 1 ? "s" : ""}
@@ -432,7 +432,7 @@ const [fontsLoading, setFontsLoading] =
                   setIsRedoDropdownOpen(false);
                   setRedoHoverIndex(null);
                 }}
-                className="w-full bg-[#ececec] py-1.5 text-center text-xs font-medium text-slate-800 hover:bg-[#e0e0e0] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="w-full bg-secondary py-1.5 text-center text-xs font-medium text-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground transition-colors cursor-pointer"
               >
                 Cancel
               </button>

@@ -125,8 +125,8 @@ export const SmartArtHydration: React.FC = () => {
           }
 
           // Attach interactive inline editing listeners once
-          if (!(captionEl as any).__captionEditingAttached) {
-            (captionEl as any).__captionEditingAttached = true;
+          if (!(captionEl as HTMLElement & { __captionEditingAttached?: boolean }).__captionEditingAttached) {
+            (captionEl as HTMLElement & { __captionEditingAttached?: boolean }).__captionEditingAttached = true;
 
             const enterEditMode = (clickEvent?: MouseEvent) => {
               // If already in edit mode, do nothing
@@ -150,8 +150,8 @@ export const SmartArtHydration: React.FC = () => {
                   if (range && range.startOffset !== undefined) {
                     charOffset = range.startOffset;
                   }
-                } else if ((document as any).caretPositionFromPoint) {
-                  const pos = (document as any).caretPositionFromPoint(
+                } else if ((document as unknown as Document & { caretPositionFromPoint?: (x: number, y: number) => { offset: number } | null }).caretPositionFromPoint) {
+                  const pos = (document as unknown as Document & { caretPositionFromPoint?: (x: number, y: number) => { offset: number } | null }).caretPositionFromPoint(
                     clickEvent.clientX,
                     clickEvent.clientY
                   );
@@ -418,7 +418,10 @@ export const SmartArtHydration: React.FC = () => {
         !target.closest('.editor-smartart-figure') &&
         !target.closest('[role="dialog"]') &&
         !target.closest('[role="toolbar"]') &&
-        !target.closest('[data-radix-popper-content-wrapper]')
+        !target.closest('[data-slot="dropdown-menu-content"]') &&
+        !target.closest('[data-slot="popover-content"]') &&
+        !target.closest('[role="menu"]') &&
+        !target.closest('[role="listbox"]')
       ) {
         setActiveSmartArt(null);
       }

@@ -56,7 +56,7 @@ export function ReferenceValidation() {
   return (
     <div className="space-y-3.5">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">
+        <span className="text-10px font-bold text-muted-foreground uppercase tracking-wider dark:text-muted-foreground">
           Reference Health & Validation
         </span>
         <button
@@ -64,7 +64,7 @@ export function ReferenceValidation() {
           onClick={handleScan}
           disabled={isValidating}
           title="Run health check"
-          className="flex h-6 items-center gap-1 rounded bg-[#0078d4] px-2 text-[11px] font-semibold text-white hover:bg-[#005a9e] disabled:opacity-50 transition-colors"
+          className="flex h-6 items-center gap-1 rounded bg-brand px-2 text-11px font-semibold text-primary-foreground hover:bg-brand-deep disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`h-3 w-3 ${isValidating ? 'animate-spin' : ''}`} />
           {isValidating ? 'Scanning...' : 'Scan Now'}
@@ -73,27 +73,27 @@ export function ReferenceValidation() {
 
       {/* Summary Score Card */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-lg border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-[#091524]">
-          <p className="text-[10px] text-slate-400 font-medium">Total Links</p>
-          <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+        <div className="rounded-lg border border-secondary bg-card p-2 text-center dark:border-muted dark:bg-[#091524]">
+          <p className="text-10px text-muted-foreground font-medium">Total Links</p>
+          <p className="text-sm font-bold text-foreground dark:text-primary-foreground mt-0.5">
             {report.totalLinks}
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-[#091524]">
-          <p className="text-[10px] text-emerald-500 font-medium flex items-center justify-center gap-0.5">
+        <div className="rounded-lg border border-secondary bg-card p-2 text-center dark:border-muted dark:bg-[#091524]">
+          <p className="text-10px text-success-500 font-medium flex items-center justify-center gap-0.5">
             <CheckCircle2 className="h-3 w-3" /> Valid
           </p>
-          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+          <p className="text-sm font-bold text-success-600 dark:text-success-400 mt-0.5">
             {report.validLinks}
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-[#091524]">
-          <p className="text-[10px] text-red-500 font-medium flex items-center justify-center gap-0.5">
+        <div className="rounded-lg border border-secondary bg-card p-2 text-center dark:border-muted dark:bg-[#091524]">
+          <p className="text-10px text-destructive font-medium flex items-center justify-center gap-0.5">
             <AlertOctagon className="h-3 w-3" /> Issues
           </p>
-          <p className="text-sm font-bold text-red-600 dark:text-red-400 mt-0.5">
+          <p className="text-sm font-bold text-destructive dark:text-destructive mt-0.5">
             {errorCount + warningCount}
           </p>
         </div>

@@ -422,7 +422,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
 
   return (
     <div
-      className="chart-data-editor-container w-full rounded-lg border border-emerald-600/40 bg-white shadow-md overflow-hidden select-none animate-in fade-in slide-in-from-top-1 duration-150"
+      className="chart-data-editor-container w-full rounded-lg border border-success-600/40 bg-card shadow-md overflow-hidden select-none animate-in fade-in slide-in-from-top-1 duration-150"
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -444,9 +444,9 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
       `}</style>
 
       {/* 1. COMPACT EXCEL WINDOW HEADER */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#107c41] text-white">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-success-700 text-primary-foreground">
         <div className="flex items-center gap-2">
-          <FileSpreadsheet className="w-4 h-4 text-emerald-100 shrink-0" />
+          <FileSpreadsheet className="w-4 h-4 text-success-100 shrink-0" />
           <span className="text-xs font-semibold tracking-wide">
             📊 Chart in Document — Data Editor
           </span>
@@ -457,10 +457,10 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
             <button
               type="button"
               onClick={onOpenChangeType}
-              className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium bg-emerald-700/80 hover:bg-emerald-700 text-white rounded transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-0.5 text-11px font-medium bg-success-700/80 hover:bg-success-700 text-primary-foreground rounded transition-colors cursor-pointer"
               title="Change chart type"
             >
-              <BarChart2 className="w-3 h-3 text-emerald-100" />
+              <BarChart2 className="w-3 h-3 text-success-100" />
               <span>Type</span>
             </button>
           )}
@@ -468,7 +468,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-800 hover:bg-emerald-900 text-white rounded transition-colors shadow-xs cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-0.5 text-11px font-semibold bg-success-800 hover:bg-success-900 text-primary-foreground rounded transition-colors shadow-xs cursor-pointer"
             title="Close spreadsheet data editor"
           >
             <X className="w-3 h-3" />
@@ -478,21 +478,21 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
       </div>
 
       {/* 2. COMPACT LIVE SYNC NOTIFICATION BAR */}
-      <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-[11px] text-emerald-800 font-medium border-b border-emerald-100">
-        <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5] shrink-0" />
+      <div className="flex items-center gap-1.5 px-3 py-1 bg-success-50 text-11px text-success-800 font-medium border-b border-success-100">
+        <Check className="w-3.5 h-3.5 text-success-600 stroke-[2.5] shrink-0" />
         <span>Live sync active — changes apply instantly to the chart below</span>
       </div>
 
       {/* SPREADSHEET GRID CONTAINER (Horizontal & Vertical Scrollable, Controlled Height) */}
-      <div ref={tableContainerRef} className="data-editor-table-container max-h-[190px] overflow-x-auto overflow-y-auto border-b border-slate-200">
+      <div ref={tableContainerRef} className="data-editor-table-container max-h-47.5 overflow-x-auto overflow-y-auto border-b border-secondary">
         <table className="w-full border-collapse text-xs font-mono">
           {/* COLUMN LETTERS ROW (A, B, C, D...) */}
           <thead>
-            <tr className="bg-slate-100 text-slate-500 border-b border-slate-200 text-center text-[10px] font-semibold">
-              <th className="w-9 border-r border-slate-200 p-1 bg-slate-200/60 font-sans">#</th>
-              <th className="min-w-[110px] border-r border-slate-200 p-1">A</th>
+            <tr className="bg-muted text-muted-foreground border-b border-secondary text-center text-10px font-semibold">
+              <th className="w-9 border-r border-secondary p-1 bg-secondary/60 font-sans">#</th>
+              <th className="min-w-27.5 border-r border-secondary p-1">A</th>
               {chart.series.map((_, sIdx) => (
-                <th key={sIdx} className="min-w-[90px] border-r border-slate-200 p-1">
+                <th key={sIdx} className="min-w-22.5 border-r border-secondary p-1">
                   {getColLetter(sIdx + 1)}
                 </th>
               ))}
@@ -500,12 +500,12 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
             </tr>
 
             {/* HEADER ROW WITH SERIES NAMES */}
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <td className="w-9 text-center p-1 bg-slate-100 font-sans text-[10px] text-slate-400 border-r border-slate-200 font-semibold">
+            <tr className="bg-muted border-b border-secondary">
+              <td className="w-9 text-center p-1 bg-muted font-sans text-10px text-muted-foreground border-r border-secondary font-semibold">
                 1
               </td>
               {/* Category label header */}
-              <td className="p-1 border-r border-slate-200 bg-slate-100/70 font-sans text-[11px] font-semibold text-slate-600 px-2">
+              <td className="p-1 border-r border-secondary bg-muted/70 font-sans text-11px font-semibold text-secondary-foreground px-2">
                 Category
               </td>
               {/* Editable series headers */}
@@ -513,9 +513,9 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 <td
                   key={series.id}
                   onContextMenu={(e) => handleCellContextMenu(e, undefined, sIdx)}
-                  className={`relative p-0 border-r border-slate-200 group ${
+                  className={`relative p-0 border-r border-secondary group ${
                     activeCell?.row === 0 && activeCell?.col === sIdx + 1
-                      ? 'ring-2 ring-emerald-500 z-10'
+                      ? 'ring-2 ring-success-500 z-10'
                       : ''
                   }`}
                 >
@@ -531,13 +531,13 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                       onDoubleClick={() => setIsEditing(true)}
                       onFocus={() => setActiveCell({ row: 0, col: sIdx + 1 })}
                       onKeyDown={(e) => handleCellKeyDown(e, 0, sIdx + 1)}
-                      className="w-full h-6 text-xs font-semibold text-blue-700 bg-transparent outline-none font-sans"
+                      className="w-full h-6 text-xs font-semibold text-primary/90 bg-transparent outline-none font-sans"
                     />
                     {chart.series.length > 1 && (
                       <button
                         type="button"
                         onClick={() => handleRemoveSeries(sIdx)}
-                        className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 p-0.5 text-muted-foreground hover:text-destructive transition-opacity"
                         title="Delete series"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -551,13 +551,13 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
           </thead>
 
           {/* DATA ROWS */}
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-muted">
             {chart.categories.map((cat, catIdx) => (
-              <tr key={catIdx} className="hover:bg-slate-50/60 group">
+              <tr key={catIdx} className="hover:bg-muted/60 group">
                 {/* Row Number */}
                 <td
                   onContextMenu={(e) => handleCellContextMenu(e, catIdx, undefined)}
-                  className="w-9 text-center p-1 bg-slate-100 font-sans text-[10px] text-slate-500 border-r border-slate-200 font-semibold cursor-default"
+                  className="w-9 text-center p-1 bg-muted font-sans text-10px text-muted-foreground border-r border-secondary font-semibold cursor-default"
                 >
                   {catIdx + 2}
                 </td>
@@ -565,9 +565,9 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 {/* Editable Category Name (Column A) */}
                 <td
                   onContextMenu={(e) => handleCellContextMenu(e, catIdx, 0)}
-                  className={`p-0 border-r border-slate-200 ${
+                  className={`p-0 border-r border-secondary ${
                     activeCell?.row === catIdx + 1 && activeCell?.col === 0
-                      ? 'ring-2 ring-emerald-500 z-10'
+                      ? 'ring-2 ring-success-500 z-10'
                       : ''
                   }`}
                 >
@@ -582,7 +582,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                     onDoubleClick={() => setIsEditing(true)}
                     onFocus={() => setActiveCell({ row: catIdx + 1, col: 0 })}
                     onKeyDown={(e) => handleCellKeyDown(e, catIdx + 1, 0)}
-                    className="w-full h-7 px-2 text-xs font-medium text-slate-800 bg-transparent outline-none font-sans"
+                    className="w-full h-7 px-2 text-xs font-medium text-foreground bg-transparent outline-none font-sans"
                   />
                 </td>
 
@@ -597,8 +597,8 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                     <td
                       key={s.id}
                       onContextMenu={(e) => handleCellContextMenu(e, catIdx, sIdx)}
-                      className={`p-0 border-r border-slate-200 ${
-                        isSelected ? 'ring-2 ring-emerald-500 z-10 bg-emerald-50/30' : ''
+                      className={`p-0 border-r border-secondary ${
+                        isSelected ? 'ring-2 ring-success-500 z-10 bg-success-50/30' : ''
                       }`}
                     >
                       <input
@@ -613,7 +613,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                         onDoubleClick={() => setIsEditing(true)}
                         onFocus={() => setActiveCell({ row: catIdx + 1, col: sIdx + 1 })}
                         onKeyDown={(e) => handleCellKeyDown(e, catIdx + 1, sIdx + 1)}
-                        className="w-full h-7 px-2 text-xs text-right text-slate-900 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full h-7 px-2 text-xs text-right text-foreground bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </td>
                   );
@@ -625,7 +625,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveCategory(catIdx)}
-                      className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 p-0.5 text-muted-foreground hover:text-destructive transition-opacity"
                       title="Delete row"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -639,25 +639,25 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
       </div>
 
       {/* SPREADSHEET FOOTER ACTION BAR */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-50 text-xs font-sans border-t border-slate-200">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-muted text-xs font-sans border-t border-secondary">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleAddCategory}
-            className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-400 rounded transition-colors shadow-2xs cursor-pointer select-none"
+            className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-secondary-foreground bg-card border border-border hover:bg-success-50 hover:text-success-700 hover:border-success-400 rounded transition-colors shadow-2xs cursor-pointer select-none"
             title="Add a new category row with default 0 values"
           >
-            <Plus className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
+            <Plus className="w-3.5 h-3.5 text-success-600 stroke-[2.5]" />
             <span>+ Row</span>
           </button>
 
           <button
             type="button"
             onClick={handleAddSeries}
-            className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-400 rounded transition-colors shadow-2xs cursor-pointer select-none"
+            className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-secondary-foreground bg-card border border-border hover:bg-success-50 hover:text-success-700 hover:border-success-400 rounded transition-colors shadow-2xs cursor-pointer select-none"
             title="Add a new series column with default 0 values"
           >
-            <Plus className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
+            <Plus className="w-3.5 h-3.5 text-success-600 stroke-[2.5]" />
             <span>+ Series</span>
           </button>
         </div>
@@ -669,10 +669,10 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
             e.stopPropagation();
             onClose();
           }}
-          className="flex items-center gap-1.5 px-3.5 py-1 text-xs font-semibold text-emerald-800 bg-emerald-100/80 hover:bg-emerald-200/90 rounded transition-colors cursor-pointer select-none"
+          className="flex items-center gap-1.5 px-3.5 py-1 text-xs font-semibold text-success-800 bg-success-100/80 hover:bg-success-200/90 rounded transition-colors cursor-pointer select-none"
           title="Finish editing data"
         >
-          <Check className="w-3.5 h-3.5 text-emerald-700 stroke-[2.5]" />
+          <Check className="w-3.5 h-3.5 text-success-700 stroke-[2.5]" />
           <span>Done Editing</span>
         </button>
       </div>
@@ -682,7 +682,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
         ReactDOM.createPortal(
           <div
             ref={contextMenuRef}
-            className="fixed z-[99999] w-[210px] rounded-lg border border-slate-200 bg-white/98 backdrop-blur-md p-1 shadow-xl text-slate-800 animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-slate-800 dark:text-slate-200"
+            className="fixed z-[99999] w-52.5 rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
             style={{
               top: `${Math.min(contextMenuPos.y, window.innerHeight - 230)}px`,
               left: `${Math.min(contextMenuPos.x, window.innerWidth - 220)}px`,
@@ -703,9 +703,9 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 }
                 setContextMenuPos(null);
               }}
-              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-600" />
+              <Plus className="w-3.5 h-3.5 text-success-600" />
               <span>Insert Row Above</span>
             </button>
 
@@ -719,9 +719,9 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 }
                 setContextMenuPos(null);
               }}
-              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-600" />
+              <Plus className="w-3.5 h-3.5 text-success-600" />
               <span>Insert Row Below</span>
             </button>
 
@@ -736,15 +736,15 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
               }}
               className={`flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left ${
                 chart.categories.length <= 1
-                  ? 'text-slate-400 cursor-not-allowed'
-                  : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer'
+                  ? 'text-muted-foreground cursor-not-allowed'
+                  : 'text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/40 cursor-pointer'
               }`}
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete Row</span>
             </button>
 
-            <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
+            <div className="my-1 h-px bg-muted dark:bg-muted" />
 
             <button
               type="button"
@@ -752,9 +752,9 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 handleAddSeries();
                 setContextMenuPos(null);
               }}
-              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-600" />
+              <Plus className="w-3.5 h-3.5 text-success-600" />
               <span>Insert Series (Column)</span>
             </button>
 
@@ -769,8 +769,8 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
               }}
               className={`flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left ${
                 chart.series.length <= 1 || contextMenuPos.seriesIdx === undefined
-                  ? 'text-slate-400 cursor-not-allowed'
-                  : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer'
+                  ? 'text-muted-foreground cursor-not-allowed'
+                  : 'text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/40 cursor-pointer'
               }`}
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -779,22 +779,22 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
 
             {contextMenuPos.catIdx !== undefined && contextMenuPos.seriesIdx !== undefined && (
               <>
-                <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
+                <div className="my-1 h-px bg-muted dark:bg-muted" />
                 <button
                   type="button"
                   onClick={() => {
                     handleClearCell(contextMenuPos.catIdx!, contextMenuPos.seriesIdx!);
                     setContextMenuPos(null);
                   }}
-                  className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer"
                 >
-                  <Eraser className="w-3.5 h-3.5 text-amber-500" />
+                  <Eraser className="w-3.5 h-3.5 text-warning-500" />
                   <span>Clear Cell Value</span>
                 </button>
               </>
             )}
 
-            <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
+            <div className="my-1 h-px bg-muted dark:bg-muted" />
 
             <button
               type="button"
@@ -802,7 +802,7 @@ export const ChartSpreadsheetEditor: React.FC<ChartSpreadsheetEditorProps> = ({
                 setContextMenuPos(null);
                 onClose();
               }}
-              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left font-semibold text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40 cursor-pointer"
+              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-left font-semibold text-success-700 hover:bg-success-50 dark:text-success-300 dark:hover:bg-success-950/40 cursor-pointer"
             >
               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Done Editing</span>

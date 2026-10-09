@@ -219,28 +219,28 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-4xl rounded-xl border border-slate-200 bg-white shadow-2xl overflow-hidden dark:border-slate-800 dark:bg-[#0c1929] flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
+      <div className="w-full max-w-4xl rounded-xl border border-secondary bg-card shadow-2xl overflow-hidden dark:border-muted dark:bg-[#0c1929] flex flex-col max-h-[90vh]">
         {/* Main Grid: Left Settings (5 cols) & Right Preview (7 cols) */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 overflow-y-auto">
           {/* Settings Panel (Left Column) */}
           <div className="md:col-span-5 space-y-4">
             <div className="pb-1">
-              <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-foreground dark:text-muted uppercase tracking-wider">
                 TABLE SETTINGS
               </h3>
             </div>
 
             {/* Heading Size */}
             <div className="space-y-1">
-              <Label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <Label className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                 Heading Size
               </Label>
               <div className="relative">
                 <select
                   value={headingSize}
                   onChange={(e) => setHeadingSize(e.target.value)}
-                  className="w-full h-9 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 pr-8 text-slate-800 dark:text-slate-200 shadow-sm outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4] appearance-none cursor-pointer"
+                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none cursor-pointer"
                 >
                   <option value="auto">Auto (Recommended)</option>
                   <option value="8pt">8pt</option>
@@ -250,20 +250,20 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                   <option value="12pt">12pt</option>
                   <option value="14pt">14pt</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
 
             {/* Text Size */}
             <div className="space-y-1">
-              <Label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <Label className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                 Text Size
               </Label>
               <div className="relative">
                 <select
                   value={textSize}
                   onChange={(e) => setTextSize(e.target.value)}
-                  className="w-full h-9 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 pr-8 text-slate-800 dark:text-slate-200 shadow-sm outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4] appearance-none cursor-pointer"
+                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none cursor-pointer"
                 >
                   <option value="auto">Auto (Recommended)</option>
                   <option value="8pt">8pt</option>
@@ -272,13 +272,13 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                   <option value="11pt">11pt</option>
                   <option value="12pt">12pt</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
 
             {/* Title Option */}
             <div className="space-y-1">
-              <Label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <Label className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                 Title Option
               </Label>
               <div className="relative">
@@ -287,32 +287,32 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                   onChange={(e) =>
                     setTitleOption(e.target.value as "with" | "without" | "only")
                   }
-                  className="w-full h-9 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 pr-8 text-slate-800 dark:text-slate-200 shadow-sm outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4] appearance-none cursor-pointer"
+                  className="w-full h-9 text-xs rounded-md border border-border dark:border-secondary-foreground bg-card dark:bg-secondary px-3 pr-8 text-foreground dark:text-muted-foreground shadow-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none cursor-pointer"
                 >
                   <option value="with">With Title</option>
                   <option value="without">Without Title</option>
                   <option value="only">Title Only</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
 
             {/* Rows Stepper */}
-            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+            <div className="flex items-center justify-between border-t border-muted dark:border-muted pt-3">
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                   Rows
                 </span>
-                <span className="text-[10px] text-slate-500">Range: 1 – 100</span>
+                <span className="text-10px text-muted-foreground">Range: 1 – 100</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => adjustRows(-1)}
                   disabled={rows <= 1}
-                  className="h-8 w-8 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 rounded-full border border-border dark:border-secondary-foreground bg-card dark:bg-muted hover:bg-muted dark:hover:bg-secondary-foreground disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  <Minus className="h-3.5 w-3.5 text-slate-700 dark:text-slate-300" />
+                  <Minus className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground" />
                 </button>
                 <input
                   type="text"
@@ -332,35 +332,35 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                       e.currentTarget.blur();
                     }
                   }}
-                  className="w-12 h-8 text-xs text-center font-semibold border border-slate-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
+                  className="w-12 h-8 text-xs text-center font-semibold border border-border dark:border-secondary-foreground rounded-md bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                 />
                 <button
                   type="button"
                   onClick={() => adjustRows(1)}
                   disabled={rows >= 100}
-                  className="h-8 w-8 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 rounded-full border border-border dark:border-secondary-foreground bg-card dark:bg-muted hover:bg-muted dark:hover:bg-secondary-foreground disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  <Plus className="h-3.5 w-3.5 text-slate-700 dark:text-slate-300" />
+                  <Plus className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground" />
                 </button>
               </div>
             </div>
 
             {/* Columns Stepper */}
-            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+            <div className="flex items-center justify-between border-t border-muted dark:border-muted pt-3">
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                   Columns
                 </span>
-                <span className="text-[10px] text-slate-500">Range: 1 – 20</span>
+                <span className="text-10px text-muted-foreground">Range: 1 – 20</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => adjustColumns(-1)}
                   disabled={columns <= 1}
-                  className="h-8 w-8 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 rounded-full border border-border dark:border-secondary-foreground bg-card dark:bg-muted hover:bg-muted dark:hover:bg-secondary-foreground disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  <Minus className="h-3.5 w-3.5 text-slate-700 dark:text-slate-300" />
+                  <Minus className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground" />
                 </button>
                 <input
                   type="text"
@@ -380,33 +380,33 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                       e.currentTarget.blur();
                     }
                   }}
-                  className="w-12 h-8 text-xs text-center font-semibold border border-slate-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
+                  className="w-12 h-8 text-xs text-center font-semibold border border-border dark:border-secondary-foreground rounded-md bg-card dark:bg-secondary text-foreground dark:text-muted-foreground outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                 />
                 <button
                   type="button"
                   onClick={() => adjustColumns(1)}
                   disabled={columns >= 20}
-                  className="h-8 w-8 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 rounded-full border border-border dark:border-secondary-foreground bg-card dark:bg-muted hover:bg-muted dark:hover:bg-secondary-foreground disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  <Plus className="h-3.5 w-3.5 text-slate-700 dark:text-slate-300" />
+                  <Plus className="h-3.5 w-3.5 text-secondary-foreground dark:text-muted-foreground" />
                 </button>
               </div>
             </div>
 
             {/* Auto Fit to Page Width */}
-            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+            <div className="flex items-center justify-between border-t border-muted dark:border-muted pt-3">
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-semibold text-foreground dark:text-muted-foreground">
                   Auto Fit to Page Width
                 </span>
-                <span className="text-[10px] text-slate-500">
+                <span className="text-10px text-muted-foreground">
                   Stretch table fully to margins
                 </span>
               </div>
               <Switch
                 checked={autoFit}
                 onCheckedChange={setAutoFit}
-                className="data-[state=checked]:bg-[#0078d4]"
+                className="data-[state=checked]:bg-brand"
               />
             </div>
           </div>
@@ -414,18 +414,18 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
           {/* Live Preview Panel (Right Column) */}
           <div className="md:col-span-7 flex flex-col">
             <div className="pb-1 mb-2">
-              <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[#e81123]" />
+              <h3 className="text-xs font-bold text-foreground dark:text-muted uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-destructive" />
                 <span>PREVIEW</span>
               </h3>
             </div>
 
             {/* Page Sheet Container */}
-            <div className="flex-1 bg-[#f3f2f1] dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-lg p-6 flex items-center justify-center min-h-[340px] select-none">
-              <div className="w-full bg-white dark:bg-slate-800 shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-slate-200 dark:border-slate-700 p-6 rounded-md min-h-[240px] flex flex-col justify-start">
+            <div className="flex-1 bg-muted dark:bg-secondary/60 border border-secondary dark:border-muted rounded-lg p-6 flex items-center justify-center min-h-85 select-none">
+              <div className="w-full bg-card dark:bg-muted shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-secondary dark:border-secondary-foreground p-6 rounded-md min-h-60 flex flex-col justify-start">
                 {/* Caption Preview */}
                 {(titleOption === "with" || titleOption === "only") && (
-                  <p className="font-bold text-xs text-slate-900 dark:text-white leading-tight mb-3">
+                  <p className="font-bold text-xs text-foreground dark:text-primary-foreground leading-tight mb-3">
                     Table 1: Table Title
                   </p>
                 )}
@@ -434,7 +434,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                 {titleOption !== "only" && (
                   <div className="overflow-x-auto w-full">
                     <table
-                      className="border-collapse text-slate-800 dark:text-slate-200 font-sans"
+                      className="border-collapse text-foreground dark:text-muted-foreground font-sans"
                       style={{
                         width: autoFit ? "100%" : "auto",
                         minWidth: autoFit ? "100%" : "60%",
@@ -445,7 +445,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                           {Array.from({ length: columns }).map((_, i) => (
                             <th
                               key={i}
-                              className="border border-[#8a8886] bg-[#f3f2f1] dark:bg-slate-700/60 px-2.5 py-2 text-left font-bold text-slate-800 dark:text-slate-100"
+                              className="border border-[#8a8886] bg-muted dark:bg-secondary-foreground/60 px-2.5 py-2 text-left font-bold text-foreground dark:text-muted"
                               style={{
                                 fontSize: getFontSizeStyle(headingSize),
                                 width: `${100 / columns}%`,
@@ -460,7 +460,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                             {Array.from({ length: columns }).map((_, cIdx) => (
                               <td
                                 key={cIdx}
-                                className="border border-[#a19f9d] dark:border-slate-600 px-2.5 py-2.5 text-slate-600 dark:text-slate-300"
+                                className="border border-[#a19f9d] dark:border-secondary-foreground px-2.5 py-2.5 text-secondary-foreground dark:text-muted-foreground"
                                 style={{
                                   fontSize: getFontSizeStyle(textSize),
                                   width: `${100 / columns}%`,
@@ -474,7 +474,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
                       </tbody>
                     </table>
                     {rows > 5 && (
-                      <div className="text-[10px] text-center text-slate-400 italic mt-2.5">
+                      <div className="text-10px text-center text-muted-foreground italic mt-2.5">
                         ... and {rows - 5} more row(s)
                       </div>
                     )}
@@ -486,19 +486,19 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-3 bg-[#f3f2f1] dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-end gap-3 px-6 py-3 bg-muted dark:bg-secondary border-t border-secondary dark:border-muted">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="h-8 px-4 text-xs font-semibold border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-md transition-colors"
+            className="h-8 px-4 text-xs font-semibold border-border dark:border-secondary-foreground bg-card dark:bg-muted hover:bg-muted dark:hover:bg-secondary-foreground text-secondary-foreground dark:text-muted-foreground rounded-md transition-colors"
           >
             Cancel
           </Button>
           <Button
             type="button"
             onClick={handleInsert}
-            className="h-8 px-5 text-xs font-semibold bg-[#0078d4] hover:bg-[#106ebe] active:bg-[#005a9e] text-white rounded-md transition-colors shadow-sm"
+            className="h-8 px-5 text-xs font-semibold bg-brand hover:bg-brand active:bg-brand-deep text-primary-foreground rounded-md transition-colors shadow-sm"
           >
             Insert Table
           </Button>

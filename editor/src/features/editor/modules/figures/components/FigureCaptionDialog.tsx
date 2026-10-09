@@ -37,15 +37,15 @@ export const FigureCaptionDialog: React.FC<FigureCaptionDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#111D29]">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl border border-secondary bg-card p-6 shadow-2xl dark:border-muted dark:bg-[#111D29]">
+        <div className="flex items-center justify-between pb-4 border-b border-muted dark:border-muted">
+          <h3 className="text-base font-semibold text-foreground dark:text-primary-foreground">
             Edit Figure Caption & Accessibility
           </h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-secondary-foreground dark:hover:bg-muted"
           >
             <X className="h-5 w-5" />
           </button>
@@ -53,7 +53,7 @@ export const FigureCaptionDialog: React.FC<FigureCaptionDialogProps> = ({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
               Figure Caption
             </label>
             <textarea
@@ -61,12 +61,12 @@ export const FigureCaptionDialog: React.FC<FigureCaptionDialogProps> = ({
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="e.g. Figure 1: System Architecture Diagram overviewing the backend pipeline."
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-3 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
               Alt Text (Screen Readers)
             </label>
             <input
@@ -74,7 +74,7 @@ export const FigureCaptionDialog: React.FC<FigureCaptionDialogProps> = ({
               value={altText}
               onChange={(e) => setAltText(e.target.value)}
               placeholder="Brief description of the image content for accessibility"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-secondary bg-muted p-2.5 text-xs outline-none focus:border-primary focus:bg-card dark:border-secondary-foreground dark:bg-secondary dark:text-primary-foreground"
             />
           </div>
 
@@ -82,13 +82,13 @@ export const FigureCaptionDialog: React.FC<FigureCaptionDialogProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="rounded-xl border border-secondary px-4 py-2 text-xs font-medium text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:text-muted-foreground dark:hover:bg-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-700"
+              className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90"
             >
               <Check className="h-4 w-4" />
               <span>Save Changes</span>

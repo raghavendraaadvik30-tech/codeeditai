@@ -46,7 +46,6 @@ const PANEL_TITLES: Partial<Record<PanelType, string>> = {
   figures: "Figures",
   references: "References",
   symbols: "Symbols",
-  templates: "Templates",
   document: "Documents",
   settings: "Settings",
   trackChanges: "Track Changes",
@@ -65,7 +64,6 @@ const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
   figures: "Images and figures",
   references: "References and citations",
   symbols: "Greek, math & regulatory",
-  templates: "Document templates",
   document: "Manage clinical documents & records",
   settings: "Editor settings",
   trackChanges: "Review and tracking",
@@ -88,7 +86,6 @@ const PANEL_ICONS: Partial<Record<PanelType, typeof FileText>> = {
   references: Bookmark,
   appendices: Files,
   tables: FileText,
-  templates: FileText,
 };
 
 /* --------------------------------
@@ -108,7 +105,6 @@ const panelMap: Partial<
   trackChanges: Panel,
   references: Panel,
   appendices: Panel,
-  templates: Panel,
 
   symbols: ({ moduleId }) => {
     void moduleId;
@@ -146,22 +142,22 @@ export default function LeftOverlay() {
     PANEL_ICONS[panelKey] ?? FileText;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white text-slate-900 dark:bg-[#07131E] dark:text-slate-100">
+    <div className="flex h-full min-h-0 flex-col bg-card text-foreground dark:bg-[#07131E] dark:text-muted">
 
       {/* HEADER */}
 
       <div
         className="
           flex
-          h-[74px]
+          h-18.5
           shrink-0
           items-center
           justify-between
           border-b
-          border-slate-200
-          bg-white
+          border-sidebar-border
+          bg-card
           px-5
-          dark:border-slate-800
+          dark:border-muted
           dark:bg-[#07131E]
         "
       >
@@ -177,10 +173,10 @@ export default function LeftOverlay() {
               items-center
               justify-center
               rounded-xl
-              bg-blue-600/10
-              text-blue-500
-              dark:bg-[#0078d4]/20
-              dark:text-[#0078d4]
+              bg-primary/10
+              text-primary
+              dark:bg-brand/20
+              dark:text-brand
             "
           >
             <HeaderIcon className="h-5 w-5" />
@@ -189,10 +185,10 @@ export default function LeftOverlay() {
           <div>
             <h2
               className="
-                text-sm
+                text-xs
                 font-semibold
-                text-slate-900
-                dark:text-white
+                text-foreground
+                dark:text-primary-foreground
               "
             >
               {title}
@@ -200,9 +196,9 @@ export default function LeftOverlay() {
 
             <p
               className="
-                text-xs
-                text-slate-500
-                dark:text-slate-400
+                text-10px
+                text-muted-foreground
+                dark:text-muted-foreground
               "
             >
               {description}
@@ -223,13 +219,13 @@ export default function LeftOverlay() {
             items-center
             justify-center
             rounded-md
-            text-slate-500
+            text-muted-foreground
             transition-colors
-            hover:bg-slate-100
-            hover:text-slate-900
-            dark:text-slate-400
-            dark:hover:bg-slate-800
-            dark:hover:text-white
+            hover:bg-muted
+            hover:text-foreground
+            dark:text-muted-foreground
+            dark:hover:bg-muted
+            dark:hover:text-primary-foreground
           "
           aria-label="Close panel"
           title="Close"
@@ -262,16 +258,16 @@ export default function LeftOverlay() {
                       gap-3
                       rounded-lg
                       border
-                      border-slate-200
-                      bg-white
+                      border-sidebar-border
+                      bg-card
                       p-3
                       text-left
                       transition-colors
-                      hover:border-blue-200
-                      hover:bg-slate-50
-                      dark:border-slate-700
+                      hover:border-primary/30
+                      hover:bg-muted
+                      dark:border-secondary-foreground
                       dark:bg-[#111D29]
-                      dark:hover:bg-slate-800
+                      dark:hover:bg-muted
                     "
                   >
                     {/* ITEM ICON */}
@@ -285,10 +281,10 @@ export default function LeftOverlay() {
                         items-center
                         justify-center
                         rounded-md
-                        bg-slate-100
-                        text-slate-600
-                        dark:bg-slate-800
-                        dark:text-slate-300
+                        bg-muted
+                        text-secondary-foreground
+                        dark:bg-muted
+                        dark:text-muted-foreground
                       "
                     >
                       <Icon className="h-4 w-4" />
@@ -301,8 +297,8 @@ export default function LeftOverlay() {
                         className="
                           text-sm
                           font-medium
-                          text-slate-800
-                          dark:text-white
+                          text-foreground
+                          dark:text-primary-foreground
                         "
                       >
                         {item.title}
@@ -313,8 +309,8 @@ export default function LeftOverlay() {
                           className="
                             mt-0.5
                             text-xs
-                            text-slate-500
-                            dark:text-slate-400
+                            text-muted-foreground
+                            dark:text-muted-foreground
                           "
                         >
                           {item.description}

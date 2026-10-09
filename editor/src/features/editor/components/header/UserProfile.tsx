@@ -76,15 +76,15 @@ export default function UserProfile() {
           gap-2
           rounded-lg
           border
-          border-gray-200
-          dark:border-slate-700
-          bg-white
+          border-secondary
+          dark:border-secondary-foreground
+          bg-card
           dark:bg-[#111D29]
           px-2.5
           py-1
           shadow-xs
-          hover:bg-gray-50
-          dark:hover:bg-slate-800
+          hover:bg-muted
+          dark:hover:bg-muted
           transition-colors
           cursor-pointer
         "
@@ -92,10 +92,10 @@ export default function UserProfile() {
         <Avatar className="h-8 w-8">
           <AvatarFallback
             className="
-              bg-blue-100
-              text-blue-700
-              dark:bg-blue-900/40
-              dark:text-blue-300
+              bg-primary/15
+              text-primary/90
+              dark:bg-navy-900/40
+              dark:text-navy-300
               font-semibold
             "
           >
@@ -104,7 +104,7 @@ export default function UserProfile() {
         </Avatar>
 
         <div className="hidden md:flex flex-col leading-tight text-left">
-          <span className="text-xs font-medium text-gray-900 dark:text-white">
+          <span className="text-xs font-medium text-foreground dark:text-primary-foreground">
             {userName}
           </span>
 
@@ -136,9 +136,9 @@ export default function UserProfile() {
             w-48
             rounded-lg
             border
-            border-gray-200
-            dark:border-slate-700
-            bg-white
+            border-secondary
+            dark:border-secondary-foreground
+            bg-card
             dark:bg-[#111D29]
             shadow-lg
             p-1
@@ -156,10 +156,10 @@ export default function UserProfile() {
               px-3
               py-2
               text-sm
-              text-red-600
-              dark:text-red-400
-              hover:bg-red-50
-              dark:hover:bg-red-950/30
+              text-destructive
+              dark:text-destructive
+              hover:bg-destructive/10
+              dark:hover:bg-destructive/30
               transition-colors
               cursor-pointer
             "

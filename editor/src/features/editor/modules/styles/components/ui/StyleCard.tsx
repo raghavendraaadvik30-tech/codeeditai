@@ -1,3 +1,4 @@
+
 import {
   ChevronDown,
   ChevronUp,
@@ -53,13 +54,14 @@ export function StyleCard({
       <div
         className={`
           flex
-          min-h-[48px]
+          min-h-12
           w-full
           items-center
           rounded-lg
           border
           border-border
-          bg-background
+          bg-card
+          dark:bg-card
           transition
           hover:border-primary/40
           ${open ? "border-primary" : ""}
@@ -87,7 +89,7 @@ export function StyleCard({
                   ? "underline"
                   : "none",
             }}
-            className="truncate"
+            className="truncate text-foreground dark:text-foreground"
           >
             {token.name}
           </div>
@@ -105,14 +107,15 @@ export function StyleCard({
           <div
             className="
               flex
-              min-w-[70px]
+              min-w-17.5
               flex-col
               items-end
               justify-center
               px-2
-              text-[10px]
+              text-10px
               leading-tight
               text-muted-foreground
+              dark:text-muted-foreground
             "
           >
             <span>
@@ -135,6 +138,8 @@ export function StyleCard({
               justify-center
               text-muted-foreground
               hover:text-foreground
+              dark:text-muted-foreground
+              dark:hover:text-foreground
             "
           >
             {open ? (

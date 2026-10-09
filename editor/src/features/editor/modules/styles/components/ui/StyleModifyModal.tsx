@@ -59,7 +59,7 @@ export function StyleModifyModal({
         flex
         items-center
         justify-center
-        bg-black/40
+        bg-foreground/40
         p-4
       "
     >
@@ -68,7 +68,7 @@ export function StyleModifyModal({
           flex
           max-h-[90vh]
           w-full
-          max-w-[600px]
+          max-w-150
           flex-col
           overflow-hidden
           rounded-xl

@@ -81,16 +81,16 @@ export default function RibbonSelect({
           gap-2
           rounded-md
           border
-          border-slate-300
-          dark:border-slate-700
-          bg-white
+          border-border
+          dark:border-secondary-foreground
+          bg-card
           dark:bg-[#111D29]
           px-2
           text-xs
-          text-gray-800
-          dark:text-slate-200
-          hover:bg-slate-50
-          dark:hover:bg-slate-800
+          text-foreground
+          dark:text-muted-foreground
+          hover:bg-muted
+          dark:hover:bg-muted
           disabled:opacity-50
           disabled:pointer-events-none
           cursor-pointer
@@ -102,7 +102,7 @@ export default function RibbonSelect({
         </span>
 
         <ChevronDown
-          className={`h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-slate-400 transition-transform duration-150 ${
+          className={`h-3.5 w-3.5 shrink-0 text-muted-foreground dark:text-muted-foreground transition-transform duration-150 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -123,9 +123,9 @@ export default function RibbonSelect({
             min-w-full
             rounded-md
             border
-            border-slate-200
-            dark:border-slate-700
-            bg-white
+            border-secondary
+            dark:border-secondary-foreground
+            bg-card
             dark:bg-[#0D1A26]
             shadow-lg
             py-1
@@ -148,12 +148,12 @@ export default function RibbonSelect({
                 py-1.5
                 text-left
                 text-xs
-                text-slate-700
-                hover:bg-blue-50
-                hover:text-blue-600
-                dark:text-slate-200
-                dark:hover:bg-slate-800
-                dark:hover:text-white
+                text-secondary-foreground
+                hover:bg-primary/10
+                hover:text-primary
+                dark:text-muted-foreground
+                dark:hover:bg-muted
+                dark:hover:text-primary-foreground
                 cursor-pointer
                 transition-colors
               "

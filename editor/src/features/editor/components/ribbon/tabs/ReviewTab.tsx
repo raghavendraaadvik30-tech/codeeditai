@@ -19,12 +19,10 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  ListFilter,
 } from "lucide-react";
 import RibbonButton from "../controls/RibbonButton";
 import RibbonDivider from "../controls/RibbonDivider";
 import { useTrackChanges } from "@/features/editor/modules/trackChanges";
-import { useEditor } from "@/features/editor/context/EditorContext";
 
 export default function ReviewTab() {
   const {
@@ -41,8 +39,6 @@ export default function ReviewTab() {
     nextChange,
     activeChangeId,
   } = useTrackChanges();
-
-  const { setActivePanel, setLeftPanelOpen } = useEditor();
 
   const getActiveChangeId = (): string | null => {
     if (activeChangeId) return activeChangeId;
@@ -79,11 +75,6 @@ export default function ReviewTab() {
     }
   };
 
-  const handleOpenPanel = () => {
-    setActivePanel("trackChanges");
-    setLeftPanelOpen(true);
-  };
-
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
       {/* 1. TRACK CHANGES TOGGLE */}
@@ -92,14 +83,14 @@ export default function ReviewTab() {
         onClick={toggleTrackChanges}
         className={
           trackChanges
-            ? "bg-blue-50 text-[#0078d4] font-semibold border border-blue-200 hover:bg-blue-100"
+            ? "bg-primary/10 text-brand font-semibold border border-primary/30 hover:bg-primary/15"
             : ""
         }
         title={trackChanges ? "Track Changes is ON (Ctrl+Shift+E)" : "Track Changes is OFF (Ctrl+Shift+E)"}
       >
         <span>{trackChanges ? "Tracking ON" : "Track Changes"}</span>
         {pendingChanges > 0 && (
-          <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.2 text-[10px] font-bold text-amber-800 border border-amber-300">
+          <span className="ml-1 rounded-full bg-warning-100 px-1.5 py-[0.8px] text-10px font-bold text-warning-800 border border-warning-300">
             {pendingChanges}
           </span>
         )}
@@ -130,7 +121,7 @@ export default function ReviewTab() {
 
       {/* 3. INDIVIDUAL ACCEPT & REJECT */}
       <RibbonButton
-        icon={<Check className="h-4 w-4 text-emerald-600" />}
+        icon={<Check className="h-4 w-4 text-success-600" />}
         onClick={handleAcceptActive}
         disabled={pendingChanges === 0}
         title="Accept Selected Change"
@@ -139,7 +130,7 @@ export default function ReviewTab() {
       </RibbonButton>
 
       <RibbonButton
-        icon={<XIcon className="h-4 w-4 text-rose-600" />}
+        icon={<XIcon className="h-4 w-4 text-destructive" />}
         onClick={handleRejectActive}
         disabled={pendingChanges === 0}
         title="Reject Selected Change"
@@ -151,7 +142,7 @@ export default function ReviewTab() {
 
       {/* 4. MASS ACCEPT ALL & REJECT ALL */}
       <RibbonButton
-        icon={<CheckCheck className="h-4 w-4 text-emerald-600" />}
+        icon={<CheckCheck className="h-4 w-4 text-success-600" />}
         onClick={acceptAll}
         disabled={pendingChanges === 0}
         title="Accept All Pending Changes in Document"
@@ -160,7 +151,7 @@ export default function ReviewTab() {
       </RibbonButton>
 
       <RibbonButton
-        icon={<Ban className="h-4 w-4 text-rose-600" />}
+        icon={<Ban className="h-4 w-4 text-destructive" />}
         onClick={rejectAll}
         disabled={pendingChanges === 0}
         title="Reject All Pending Changes in Document"
@@ -174,7 +165,7 @@ export default function ReviewTab() {
       <RibbonButton
         icon={<Eye className="h-4 w-4" />}
         onClick={() => setShowMarkup(true)}
-        className={showMarkup ? "bg-blue-50 text-[#0078d4] font-semibold" : ""}
+        className={showMarkup ? "bg-primary/10 text-brand font-semibold" : ""}
         title="Show visual track changes markup tags"
       >
         Show Markup
@@ -183,21 +174,10 @@ export default function ReviewTab() {
       <RibbonButton
         icon={<EyeOff className="h-4 w-4" />}
         onClick={() => setShowMarkup(false)}
-        className={!showMarkup ? "bg-blue-50 text-[#0078d4] font-semibold" : ""}
+        className={!showMarkup ? "bg-primary/10 text-brand font-semibold" : ""}
         title="Hide visual track changes markup (clean document preview)"
       >
         Hide Markup
-      </RibbonButton>
-
-      <RibbonDivider />
-
-      {/* 6. OPEN SIDEBAR REVIEW PANEL */}
-      <RibbonButton
-        icon={<ListFilter className="h-4 w-4" />}
-        onClick={handleOpenPanel}
-        title="Open Track Changes Review Panel in Sidebar"
-      >
-        Reviewing Pane
       </RibbonButton>
     </div>
   );

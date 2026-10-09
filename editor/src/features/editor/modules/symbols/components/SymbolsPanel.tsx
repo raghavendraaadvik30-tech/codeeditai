@@ -15,7 +15,7 @@ export default function SymbolsPanel() {
         h-full
         min-h-0
         flex-col
-        bg-white
+        bg-card
         dark:bg-[#07131E]
       "
     >
@@ -37,7 +37,7 @@ export default function SymbolsPanel() {
               items-center
               justify-center
               text-sm
-              text-slate-500
+              text-muted-foreground
             "
           >
             No symbols found.

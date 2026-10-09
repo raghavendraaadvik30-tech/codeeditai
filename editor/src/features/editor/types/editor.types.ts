@@ -27,8 +27,7 @@ export type LeftPanel =
   | "tables"
   | "figures"
   | "references"
-  |"symbols"
-  | "templates"
+  | "symbols"
   | "settings";
 
 export interface EditorState {

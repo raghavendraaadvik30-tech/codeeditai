@@ -23,7 +23,6 @@ import {
   ListOrdered,
   Bookmark,
   Search,
-  LayoutTemplate,
   FileCheck,
 } from "lucide-react";
 
@@ -44,7 +43,6 @@ export type PanelType =
   | "symbols"
   | "appendices"
   | "trackChanges"
-  | "templates"
   | "settings";
 
 /* --------------------------------
@@ -286,25 +284,6 @@ export const PANEL_DATA: Record<PanelType, PanelItem[]> = {
       title: "Accept Changes",
       icon: FileCheck,
       description: "Accept tracked changes",
-    },
-  ],
-
-  /* ================================
-     TEMPLATES
-  ================================= */
-
-  templates: [
-    {
-      id: "csr",
-      title: "Clinical Study Report",
-      icon: LayoutTemplate,
-      description: "Clinical study report template",
-    },
-    {
-      id: "protocol",
-      title: "Protocol",
-      icon: FileText,
-      description: "Clinical protocol template",
     },
   ],
 

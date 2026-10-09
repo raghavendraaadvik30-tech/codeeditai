@@ -495,11 +495,11 @@ export default function DocumentIconRenderer({
     >
       {/* SELECTION OVERLAY BOUNDING BOX WHEN SELECTED */}
       {isSelected && (
-        <div className="absolute inset-0 border border-dashed border-blue-500/80 pointer-events-none rounded-xs z-20" />
+        <div className="absolute inset-0 border border-dashed border-primary/80 pointer-events-none rounded-xs z-20" />
       )}
 
       {/* RENDER ICON */}
-      <div className="w-full h-full flex items-center justify-center relative overflow-hidden rounded-xs [&_svg]:!text-black [&_svg_*[fill]:not([fill='none'])]:!fill-black [&_svg_*[stroke]:not([stroke='none'])]:!stroke-black">
+      <div className="w-full h-full flex items-center justify-center relative overflow-hidden rounded-xs [&_svg]:!text-foreground [&_svg_*[fill]:not([fill='none'])]:!fill-foreground [&_svg_*[stroke]:not([stroke='none'])]:!stroke-foreground">
         <Icon
           icon={config.icon}
           style={{ width: "100%", height: "100%", color: color }}
@@ -509,10 +509,10 @@ export default function DocumentIconRenderer({
       {/* TOP ROTATION CONNECTOR & KNOB WHEN SELECTED */}
       {isSelected && (
         <>
-          <div className="w-0.5 h-4 bg-slate-800 dark:bg-slate-200 absolute -top-4 left-1/2 -translate-x-1/2 pointer-events-none z-30" />
+          <div className="w-0.5 h-4 bg-foreground dark:bg-secondary absolute -top-4 left-1/2 -translate-x-1/2 pointer-events-none z-30" />
           <div
             onPointerDown={handleRotatePointerDown}
-            className="rotate-handle absolute -top-8 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center shadow-md cursor-grab active:cursor-grabbing z-40 hover:scale-110 transition-transform"
+            className="rotate-handle absolute -top-8 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-foreground text-primary-foreground dark:bg-muted dark:text-secondary flex items-center justify-center shadow-md cursor-grab active:cursor-grabbing z-40 hover:scale-110 transition-transform"
             title="Rotate icon"
           >
             <RotateCw className="w-3 h-3" />
@@ -526,49 +526,49 @@ export default function DocumentIconRenderer({
           {/* Top-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "nw")}
-            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon (Top-Left)"
           />
           {/* Top-Middle */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "n")}
-            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon height (Top-Center)"
           />
           {/* Top-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "ne")}
-            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon (Top-Right)"
           />
           {/* Middle-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "e")}
-            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon width (Middle-Right)"
           />
           {/* Bottom-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "se")}
-            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon (Bottom-Right)"
           />
           {/* Bottom-Middle */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "s")}
-            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon height (Bottom-Center)"
           />
           {/* Bottom-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "sw")}
-            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon (Bottom-Left)"
           />
           {/* Middle-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "w")}
-            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize icon width (Middle-Left)"
           />
         </>
@@ -578,7 +578,7 @@ export default function DocumentIconRenderer({
       {isSelected && (
         <div
           data-editor-ui="true"
-          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900/95 text-white p-1.5 rounded-xl shadow-xl text-[11px] backdrop-blur-xs z-50 whitespace-nowrap"
+          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-foreground/95 text-primary-foreground p-1.5 rounded-xl shadow-xl text-11px backdrop-blur-xs z-50 whitespace-nowrap"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -587,21 +587,21 @@ export default function DocumentIconRenderer({
             type="button"
             title="Decrease size"
             onClick={() => handleSizeChange(-12)}
-            className="px-1.5 py-0.5 rounded hover:bg-slate-700 font-bold"
+            className="px-1.5 py-0.5 rounded hover:bg-secondary-foreground font-bold"
           >
             -
           </button>
-          <span className="text-[10px] text-slate-300">{width}px</span>
+          <span className="text-10px text-muted-foreground">{width}px</span>
           <button
             type="button"
             title="Increase size"
             onClick={() => handleSizeChange(12)}
-            className="px-1.5 py-0.5 rounded hover:bg-slate-700 font-bold"
+            className="px-1.5 py-0.5 rounded hover:bg-secondary-foreground font-bold"
           >
             +
           </button>
 
-          <div className="w-px h-3.5 bg-slate-700 mx-0.5" />
+          <div className="w-px h-3.5 bg-secondary-foreground mx-0.5" />
 
           {/* Delete Button */}
           <button
@@ -609,7 +609,7 @@ export default function DocumentIconRenderer({
             title="Delete Icon"
             onClick={handleDelete}
             onPointerDown={(e) => e.stopPropagation()}
-            className="p-1 rounded text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+            className="p-1 rounded text-destructive hover:bg-destructive/20 hover:text-destructive/30 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -620,7 +620,7 @@ export default function DocumentIconRenderer({
       {contextMenuPos && (
         <div
           data-editor-ui="true"
-          className="fixed z-[99999] w-44 rounded-lg border border-slate-200 bg-white/98 backdrop-blur-md p-1 shadow-xl text-xs text-slate-800 animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-slate-800 dark:text-slate-200"
+          className="fixed z-[99999] w-44 rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-xs text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
           style={{
             top: Math.max(8, Math.min(contextMenuPos.y, window.innerHeight - 80)),
             left: Math.max(8, Math.min(contextMenuPos.x, window.innerWidth - 180)),
@@ -634,9 +634,9 @@ export default function DocumentIconRenderer({
           <button
             type="button"
             onClick={handleDelete}
-            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-red-50 text-red-600 dark:hover:bg-red-950/50 font-medium transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-destructive/10 text-destructive dark:hover:bg-destructive/50 font-medium transition-colors cursor-pointer"
           >
-            <Trash2 className="w-3.5 h-3.5 text-red-600" />
+            <Trash2 className="w-3.5 h-3.5 text-destructive" />
             <span>Delete Icon</span>
           </button>
         </div>

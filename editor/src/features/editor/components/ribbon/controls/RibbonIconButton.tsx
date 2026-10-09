@@ -69,14 +69,14 @@ export default function RibbonIconButton({
         ${
           active
             ? `
-              bg-blue-100
-              text-blue-700
+              bg-primary/15
+              text-primary/90
 
-              dark:bg-blue-900/50
-              dark:text-blue-300
+              dark:bg-navy-900/50
+              dark:text-navy-300
             `
             : `
-              text-gray-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white
+              text-secondary-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted hover:text-foreground dark:hover:text-primary-foreground
             `
         }
 

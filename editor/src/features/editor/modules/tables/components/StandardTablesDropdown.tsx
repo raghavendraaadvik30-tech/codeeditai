@@ -178,26 +178,26 @@ export function StandardTablesDropdown() {
         onClick={() => setIsOpen((prev) => !prev)}
         className={`inline-flex items-center gap-2 rounded-md px-2.5 py-1 text-left transition-colors cursor-pointer border ${
           isOpen
-            ? "bg-blue-50/80 border-blue-300 text-blue-900 dark:bg-blue-950/60 dark:border-blue-700 dark:text-blue-200"
-            : "border-transparent hover:bg-slate-100 hover:border-slate-200 dark:hover:bg-slate-800 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200"
+            ? "bg-primary/80 border-navy-300 text-navy-900 dark:bg-navy-950/60 dark:border-primary/90 dark:text-primary/30"
+            : "border-transparent hover:bg-muted hover:border-secondary dark:hover:bg-muted dark:hover:border-secondary-foreground text-secondary-foreground dark:text-muted-foreground"
         }`}
         title="Standard Tables"
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 shrink-0">
+        <div className="flex h-7 w-7 items-center justify-center rounded bg-primary/10 dark:bg-navy-950/60 text-primary dark:text-primary shrink-0">
           <Table2 className="h-4 w-4" />
         </div>
 
         <div className="flex flex-col">
-          <span className="text-xs font-semibold leading-tight text-slate-800 dark:text-slate-100">
+          <span className="text-xs font-semibold leading-tight text-foreground dark:text-muted">
             Standard Tables
           </span>
-          <span className="text-[10px] leading-tight text-slate-400 font-normal">
+          <span className="text-10px leading-tight text-muted-foreground font-normal">
             Tables
           </span>
         </div>
 
         <ChevronDown
-          className={`ml-1 h-3 w-3 text-slate-400 transition-transform duration-200 ${
+          className={`ml-1 h-3 w-3 text-muted-foreground transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -209,7 +209,7 @@ export function StandardTablesDropdown() {
       {isOpen && (
         <div
           ref={menuRef}
-          className={`absolute top-full mt-1 z-50 min-w-[270px] rounded-xl border border-slate-200/90 bg-white p-1.5 shadow-xl dark:border-slate-800 dark:bg-[#0B1523] animate-in fade-in-0 zoom-in-95 duration-100 select-none ${
+          className={`absolute top-full mt-1 z-50 min-w-67.5 rounded-xl border border-secondary/90 bg-card p-1.5 shadow-xl dark:border-muted dark:bg-[#0B1523] animate-in fade-in-0 zoom-in-95 duration-100 select-none ${
             alignRight ? "right-0" : "left-0"
           }`}
         >
@@ -219,16 +219,16 @@ export function StandardTablesDropdown() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectOption(1)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   Heading 12pt, Text 12pt
                 </span>
               </div>
@@ -239,16 +239,16 @@ export function StandardTablesDropdown() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectOption(2)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   Heading 10pt, Text 10pt
                 </span>
               </div>
@@ -259,16 +259,16 @@ export function StandardTablesDropdown() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectOption(3)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   Title Only
                 </span>
               </div>
@@ -279,16 +279,16 @@ export function StandardTablesDropdown() {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectOption(4)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-muted/80 cursor-pointer group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 shrink-0 group-hover:scale-105 transition-transform">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 dark:bg-navy-950/50 text-primary dark:text-primary shrink-0 group-hover:scale-105 transition-transform">
                 <Table2 className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                <span className="text-xs font-semibold text-foreground dark:text-muted">
                   Insert Table
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="text-11px text-muted-foreground dark:text-muted-foreground">
                   No Title 12pt
                 </span>
               </div>

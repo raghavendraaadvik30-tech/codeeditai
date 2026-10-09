@@ -22,7 +22,7 @@ export default function ChartFormatTab() {
 
   if (!activeChart) {
     return (
-      <div className="flex items-center h-9 px-3 text-xs text-slate-400">
+      <div className="flex items-center h-9 px-3 text-xs text-muted-foreground">
         Select a chart in the document to configure formatting.
       </div>
     );
@@ -39,24 +39,22 @@ export default function ChartFormatTab() {
   };
 
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 text-slate-700 dark:text-slate-200">
+    <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 text-secondary-foreground dark:text-muted-foreground">
       {/* --------------------------------------------------------
           1. SHAPE FILL (BACKGROUND)
           -------------------------------------------------------- */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
+        <DropdownMenuTrigger render={<button
             type="button"
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground"
           >
-            <Paintbrush className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <Paintbrush className="h-4 w-4 text-primary dark:text-primary" />
             <span>Shape Fill</span>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>} />
 
         <DropdownMenuContent align="start" className="w-48 p-2">
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
+          <div className="text-10px font-bold text-muted-foreground uppercase tracking-wider mb-1 px-1">
             Background Colors
           </div>
           <div className="grid grid-cols-5 gap-1.5 p-1">
@@ -71,7 +69,7 @@ export default function ChartFormatTab() {
                 key={bg.color}
                 type="button"
                 onClick={() => updateActiveChart({ backgroundColor: bg.color })}
-                className="w-6 h-6 rounded border border-slate-300 shadow-2xs hover:scale-110 transition-transform"
+                className="w-6 h-6 rounded border border-border shadow-2xs hover:scale-110 transition-transform"
                 style={{ backgroundColor: bg.color }}
                 title={bg.label}
               />
@@ -84,16 +82,14 @@ export default function ChartFormatTab() {
           2. SHAPE OUTLINE (BORDER)
           -------------------------------------------------------- */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
+        <DropdownMenuTrigger render={<button
             type="button"
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground"
           >
-            <Square className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+            <Square className="h-4 w-4 text-secondary-foreground dark:text-muted-foreground" />
             <span>Outline</span>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-          </button>
-        </DropdownMenuTrigger>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>} />
 
         <DropdownMenuContent align="start" className="w-44">
           <DropdownMenuItem
@@ -110,7 +106,7 @@ export default function ChartFormatTab() {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => updateActiveChart({ borderWidth: 2, borderColor: '#2563eb' })}
-            className="text-xs font-semibold text-blue-600"
+            className="text-xs font-semibold text-primary"
           >
             Blue Accent (2px)
           </DropdownMenuItem>
@@ -129,15 +125,15 @@ export default function ChartFormatTab() {
           3. DIMENSIONS (WIDTH / HEIGHT)
           -------------------------------------------------------- */}
       <div className="flex items-center gap-2 text-xs">
-        <Maximize2 className="h-3.5 w-3.5 text-slate-400" />
+        <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
 
         {/* Width stepper */}
         <div className="flex items-center gap-1">
-          <span className="text-[11px] text-slate-500 font-medium">W:</span>
+          <span className="text-11px text-muted-foreground font-medium">W:</span>
           <button
             type="button"
             onClick={() => handleWidthChange(-40)}
-            className="w-5 h-6 flex items-center justify-center rounded border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-100"
+            className="w-5 h-6 flex items-center justify-center rounded border border-secondary bg-card text-xs font-semibold text-secondary-foreground hover:bg-muted"
           >
             -
           </button>
@@ -147,7 +143,7 @@ export default function ChartFormatTab() {
           <button
             type="button"
             onClick={() => handleWidthChange(40)}
-            className="w-5 h-6 flex items-center justify-center rounded border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-100"
+            className="w-5 h-6 flex items-center justify-center rounded border border-secondary bg-card text-xs font-semibold text-secondary-foreground hover:bg-muted"
           >
             +
           </button>
@@ -155,11 +151,11 @@ export default function ChartFormatTab() {
 
         {/* Height stepper */}
         <div className="flex items-center gap-1 ml-1">
-          <span className="text-[11px] text-slate-500 font-medium">H:</span>
+          <span className="text-11px text-muted-foreground font-medium">H:</span>
           <button
             type="button"
             onClick={() => handleHeightChange(-30)}
-            className="w-5 h-6 flex items-center justify-center rounded border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-100"
+            className="w-5 h-6 flex items-center justify-center rounded border border-secondary bg-card text-xs font-semibold text-secondary-foreground hover:bg-muted"
           >
             -
           </button>
@@ -169,7 +165,7 @@ export default function ChartFormatTab() {
           <button
             type="button"
             onClick={() => handleHeightChange(30)}
-            className="w-5 h-6 flex items-center justify-center rounded border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-100"
+            className="w-5 h-6 flex items-center justify-center rounded border border-secondary bg-card text-xs font-semibold text-secondary-foreground hover:bg-muted"
           >
             +
           </button>
@@ -186,7 +182,7 @@ export default function ChartFormatTab() {
           type="button"
           onClick={() => updateActiveChart({ alignment: 'left' })}
           className={`p-1.5 rounded transition-colors ${
-            activeChart.alignment === 'left' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-100 text-slate-600'
+            activeChart.alignment === 'left' ? 'bg-primary/15 text-primary/90' : 'hover:bg-muted text-secondary-foreground'
           }`}
           title="Align Left"
         >
@@ -197,8 +193,8 @@ export default function ChartFormatTab() {
           onClick={() => updateActiveChart({ alignment: 'center' })}
           className={`p-1.5 rounded transition-colors ${
             activeChart.alignment === 'center' || !activeChart.alignment
-              ? 'bg-blue-100 text-blue-700'
-              : 'hover:bg-slate-100 text-slate-600'
+              ? 'bg-primary/15 text-primary/90'
+              : 'hover:bg-muted text-secondary-foreground'
           }`}
           title="Align Center"
         >
@@ -208,7 +204,7 @@ export default function ChartFormatTab() {
           type="button"
           onClick={() => updateActiveChart({ alignment: 'right' })}
           className={`p-1.5 rounded transition-colors ${
-            activeChart.alignment === 'right' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-100 text-slate-600'
+            activeChart.alignment === 'right' ? 'bg-primary/15 text-primary/90' : 'hover:bg-muted text-secondary-foreground'
           }`}
           title="Align Right"
         >
@@ -224,7 +220,7 @@ export default function ChartFormatTab() {
       <button
         type="button"
         onClick={deleteActiveChart}
-        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/40 transition-colors"
         title="Delete chart from document"
       >
         <Trash2 className="h-4 w-4" />

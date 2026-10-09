@@ -487,6 +487,7 @@ function storeOptionalDocumentSnapshot(doc: DocumentModel): void {
 
 interface DocumentContextType {
   model: DocumentModel;
+  setModel: React.Dispatch<React.SetStateAction<DocumentModel>>;
   activePage: string | null;
   history: HistoryEntry[];
   savedDocuments: DocumentModel[];
@@ -985,7 +986,8 @@ export function DocumentModelProvider({
             })),
             pages: prev.pages.map((p) => {
               if (p.pageBorders) {
-                const { pageBorders: _, ...rest } = p;
+                const rest = { ...p };
+                delete rest.pageBorders;
                 return rest;
               }
               return p;
@@ -1007,7 +1009,8 @@ export function DocumentModelProvider({
             ),
             pages: prev.pages.map((p) => {
               if (p.sectionId === sectionId && p.pageBorders) {
-                const { pageBorders: _, ...rest } = p;
+                const rest = { ...p };
+                delete rest.pageBorders;
                 return rest;
               }
               return p;
@@ -1775,6 +1778,7 @@ export function DocumentModelProvider({
     <DocumentContext.Provider
       value={{
         model,
+        setModel,
         activePage,
         history,
         savedDocuments,

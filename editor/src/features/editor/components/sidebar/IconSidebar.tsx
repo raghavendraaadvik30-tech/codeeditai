@@ -9,7 +9,6 @@ import {
   Sigma,
   Files,
   ShieldCheck,
-  LayoutTemplate,
   Settings,
 } from "lucide-react";
 
@@ -77,12 +76,6 @@ const SIDEBAR_ITEMS = [
     icon: ShieldCheck,
   },
   {
-    id: "templates",
-    label: "Templates",
-    description: "Document templates",
-    icon: LayoutTemplate,
-  },
-  {
     id: "settings",
     label: "Settings",
     description: "Editor settings",
@@ -107,15 +100,15 @@ export default function IconSidebar() {
       className="
         flex
         h-full
-        w-[72px]
+        w-18
         shrink-0
         flex-col
         items-center
         border-r
-        border-slate-200
-        bg-white
+        border-sidebar-border
+        bg-sidebar
         py-3
-        dark:border-slate-800
+        dark:border-muted
         dark:bg-[#07131E]
       "
     >
@@ -140,13 +133,13 @@ export default function IconSidebar() {
                   w-10
                   items-center
                   justify-center
-                  rounded-lg
+                  rounded-xl
                   transition-all
                   duration-150
                   ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs border border-sidebar-border/60 dark:bg-primary dark:text-primary-foreground"
+                      : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-primary-foreground"
                   }
                 `}
               >
@@ -156,12 +149,12 @@ export default function IconSidebar() {
                   <span
                     className="
                       absolute
-                      -left-[2px]
-                      top-1
-                      bottom-1
-                      w-[3px]
+                      -left-0.5
+                      top-1.5
+                      bottom-1.5
+                      w-0.75
                       rounded-r-full
-                      bg-blue-600
+                      bg-primary
                     "
                   />
                 )}
@@ -173,17 +166,17 @@ export default function IconSidebar() {
                 className="
                   pointer-events-none
                   absolute
-                  left-[54px]
+                  left-13.5
                   top-1/2
                   z-[9999]
                   w-max
-                  max-w-[240px]
+                  max-w-60
                   -translate-y-1/2
                   translate-x-1
                   rounded-xl
                   border
-                  border-slate-200
-                  bg-white
+                  border-sidebar-border
+                  bg-card
                   px-4
                   py-2.5
                   opacity-0
@@ -192,7 +185,7 @@ export default function IconSidebar() {
                   duration-150
                   group-hover:translate-x-0
                   group-hover:opacity-100
-                  dark:border-slate-700
+                  dark:border-secondary-foreground
                   dark:bg-[#111D29]
                 "
               >
@@ -201,8 +194,8 @@ export default function IconSidebar() {
                     text-sm
                     font-semibold
                     leading-5
-                    text-slate-900
-                    dark:text-white
+                    text-foreground
+                    dark:text-primary-foreground
                   "
                 >
                   {item.label}
@@ -213,8 +206,8 @@ export default function IconSidebar() {
                     mt-0.5
                     text-xs
                     leading-4
-                    text-slate-500
-                    dark:text-slate-400
+                    text-muted-foreground
+                    dark:text-muted-foreground
                   "
                 >
                   {item.description}

@@ -77,13 +77,13 @@ export default function WorkspaceSidebar() {
               shrink-0
               overflow-hidden
               border-r
-              border-slate-200
-              bg-white
-              dark:border-slate-800
+              border-secondary
+              bg-card
+              dark:border-muted
               dark:bg-[#07131E]
             "
           >
-            <div className="flex h-full w-[360px] flex-col">
+            <div className="flex h-full w-90 flex-col">
               {/* HEADER */}
 
               <WorkspacePanelHeader

@@ -98,7 +98,7 @@ export const PicturesSection: React.FC = () => {
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs transition-all duration-200 dark:border-slate-800 dark:bg-[#111D29]">
+    <div className="rounded-xl border border-secondary bg-card p-3.5 shadow-xs transition-all duration-200 dark:border-muted dark:bg-[#111D29]">
       {/* Hidden File Input for Native Picture File Selection */}
       <input
         ref={fileInputRef}
@@ -111,14 +111,14 @@ export const PicturesSection: React.FC = () => {
       <div className="flex items-center justify-between">
         {/* Header Icon + Title & Subtitle */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 shadow-2xs">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-navy-950/60 dark:text-primary shadow-2xs">
             <ImageIcon className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            <h4 className="text-sm font-semibold text-foreground dark:text-muted-foreground">
               Pictures
             </h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               Insert &amp; manage images
             </p>
           </div>
@@ -126,37 +126,35 @@ export const PicturesSection: React.FC = () => {
 
         {/* Insert Dropdown Button */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
+          <DropdownMenuTrigger render={<button
               type="button"
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-blue-700 active:bg-blue-800 focus:outline-none"
+              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-all hover:bg-primary/90 active:bg-primary focus:outline-none"
             >
               <span>Insert</span>
               <ChevronDown className="h-3.5 w-3.5" />
-            </button>
-          </DropdownMenuTrigger>
+            </button>} />
 
-          <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
+          <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-lg border border-secondary dark:border-muted">
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="cursor-pointer font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 text-xs">
-                <HardDrive className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <DropdownMenuSubTrigger className="cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground flex items-center gap-2 text-xs">
+                <HardDrive className="h-4 w-4 text-primary dark:text-primary" />
                 <span>This Device...</span>
               </DropdownMenuSubTrigger>
 
-              <DropdownMenuSubContent className="w-52 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800">
+              <DropdownMenuSubContent className="w-52 rounded-xl shadow-lg border border-secondary dark:border-muted">
                 <DropdownMenuItem
                   onClick={insertPictureAndTitle}
-                  className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                  className="cursor-pointer text-xs text-secondary-foreground dark:text-muted-foreground flex items-center gap-2"
                 >
-                  <FileImage className="h-3.5 w-3.5 text-slate-500" />
+                  <FileImage className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Insert image with title</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   onClick={insertPictureOnly}
-                  className="cursor-pointer text-xs text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                  className="cursor-pointer text-xs text-secondary-foreground dark:text-muted-foreground flex items-center gap-2"
                 >
-                  <ImageIcon className="h-3.5 w-3.5 text-slate-500" />
+                  <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Insert image without title</span>
                 </DropdownMenuItem>
 
@@ -165,9 +163,9 @@ export const PicturesSection: React.FC = () => {
 
             <DropdownMenuItem
               onClick={handleOnlinePicturesClick}
-              className="cursor-pointer font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 text-xs"
+              className="cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground flex items-center gap-2 text-xs"
             >
-              <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <Globe className="h-4 w-4 text-primary dark:text-primary" />
               <span>Online Pictures...</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -41,12 +41,12 @@ export default function EditorHeader() {
   return (
     <header
       className="
-        h-[58px]
+        h-14.5
         border-b
-        bg-white
+        bg-sidebar
         dark:bg-[#0B1620]
-        border-gray-200
-        dark:border-slate-800
+        border-sidebar-border
+        dark:border-muted
         flex
         items-center
         px-3

@@ -17,13 +17,13 @@ export function SettingsPanel() {
 
   return (
     <div className="space-y-4 p-4 text-xs">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+      <div className="text-10px font-bold uppercase tracking-wider text-muted-foreground">
         Workspace Preferences
       </div>
 
       {/* Theme Selection */}
       <div className="space-y-1.5">
-        <label className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
+        <label className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
           Color Theme
         </label>
         <div className="grid grid-cols-3 gap-1.5">
@@ -38,8 +38,8 @@ export function SettingsPanel() {
               onClick={() => updateSettings({ theme: value })}
               className={`flex items-center justify-center gap-1.5 rounded-lg border p-1.5 text-xs transition-colors ${
                 settings.theme === value
-                  ? "border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] font-semibold"
-                  : "border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
+                  ? "border-brand bg-brand/10 text-brand font-semibold"
+                  : "border-secondary bg-card hover:bg-muted dark:border-muted dark:bg-secondary"
               }`}
             >
               <Icon className="h-3 w-3" />
@@ -51,14 +51,14 @@ export function SettingsPanel() {
 
       {/* Typography */}
       <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+        <div className="flex items-center gap-1.5 text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
           <Type className="h-3.5 w-3.5" />
           <span>Editor Typography</span>
         </div>
         <select
           value={settings.defaultFontFamily}
           onChange={(e) => updateSettings({ defaultFontFamily: e.target.value as DefaultFontFamily })}
-          className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 outline-none focus:border-[#0078d4] dark:border-slate-700 dark:bg-slate-900"
+          className="h-8 w-full rounded-md border border-secondary bg-card px-2 outline-none focus:border-brand dark:border-secondary-foreground dark:bg-secondary"
         >
           {AVAILABLE_FONT_FAMILIES.map((f) => (
             <option key={f.value} value={f.value}>
@@ -69,49 +69,49 @@ export function SettingsPanel() {
       </div>
 
       {/* Layout Options */}
-      <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+      <div className="space-y-2 pt-2 border-t border-muted dark:border-muted">
+        <div className="flex items-center gap-1.5 text-11px font-medium text-secondary-foreground dark:text-muted-foreground">
           <Layout className="h-3.5 w-3.5" />
           <span>Document Display</span>
         </div>
 
         <label className="flex items-center justify-between cursor-pointer select-none">
-          <span className="text-slate-600 dark:text-slate-300">Show Ruler</span>
+          <span className="text-secondary-foreground dark:text-muted-foreground">Show Ruler</span>
           <input
             type="checkbox"
             checked={settings.showRuler}
             onChange={(e) => updateSettings({ showRuler: e.target.checked })}
-            className="rounded border-slate-300 text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
 
         <label className="flex items-center justify-between cursor-pointer select-none">
-          <span className="text-slate-600 dark:text-slate-300">Show Word Count</span>
+          <span className="text-secondary-foreground dark:text-muted-foreground">Show Word Count</span>
           <input
             type="checkbox"
             checked={settings.showWordCount}
             onChange={(e) => updateSettings({ showWordCount: e.target.checked })}
-            className="rounded border-slate-300 text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
 
         <label className="flex items-center justify-between cursor-pointer select-none">
-          <span className="text-slate-600 dark:text-slate-300">Show Page Numbers</span>
+          <span className="text-secondary-foreground dark:text-muted-foreground">Show Page Numbers</span>
           <input
             type="checkbox"
             checked={settings.showPageNumbers}
             onChange={(e) => updateSettings({ showPageNumbers: e.target.checked })}
-            className="rounded border-slate-300 text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
 
         <label className="flex items-center justify-between cursor-pointer select-none">
-          <span className="text-slate-600 dark:text-slate-300">Spell Check</span>
+          <span className="text-secondary-foreground dark:text-muted-foreground">Spell Check</span>
           <input
             type="checkbox"
             checked={settings.spellCheck}
             onChange={(e) => updateSettings({ spellCheck: e.target.checked })}
-            className="rounded border-slate-300 text-[#0078d4] focus:ring-[#0078d4]"
+            className="rounded border-border text-brand focus:ring-brand"
           />
         </label>
       </div>

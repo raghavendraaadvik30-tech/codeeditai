@@ -16,10 +16,10 @@ export default function IconCategoryBar({ value, onChange }: IconCategoryBarProp
             key={cat}
             type="button"
             onClick={() => onChange(cat)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors border ${
+            className={`px-2.5 py-1 rounded-full text-11px font-medium whitespace-nowrap transition-colors border ${
               active
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-muted dark:bg-muted text-secondary-foreground dark:text-muted-foreground border-secondary dark:border-secondary-foreground hover:bg-muted dark:hover:bg-secondary-foreground"
             }`}
           >
             {cat}

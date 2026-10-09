@@ -20,7 +20,7 @@ export default function FontColorSection({
 
   return (
     <section className="mb-6">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Font Color
       </h3>
 
@@ -53,11 +53,11 @@ export default function FontColorSection({
                 border
                 transition-all
                 hover:scale-105
-                hover:border-gray-400
+                hover:border-muted-foreground
                 ${
                   isActive
-                    ? "border-blue-600 ring-2 ring-blue-200"
-                    : "border-gray-200"
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-secondary"
                 }
               `}
               style={{
@@ -78,7 +78,7 @@ export default function FontColorSection({
                     size={14}
                     strokeWidth={3}
                     className="
-                      text-white
+                      text-primary-foreground
                       drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]
                     "
                   />
@@ -91,7 +91,7 @@ export default function FontColorSection({
         {/* CUSTOM COLOR */}
      <label
   title="Custom font color"
-  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-gray-200 text-gray-500 transition hover:bg-gray-100"
+  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-secondary text-muted-foreground transition hover:bg-muted"
   onMouseDown={(event) => {
     event.preventDefault();
   }}

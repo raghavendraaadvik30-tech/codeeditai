@@ -454,7 +454,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
     >
       {/* SELECTION OVERLAY BOUNDING BOX WHEN SELECTED */}
       {isSelected && (
-        <div className="absolute inset-0 border-2 border-dashed border-blue-500 pointer-events-none rounded-xs z-20" />
+        <div className="absolute inset-0 border-2 border-dashed border-primary pointer-events-none rounded-xs z-20" />
       )}
 
       {/* RENDER PICTURE IMAGE */}
@@ -472,10 +472,10 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
       {/* TOP ROTATION CONNECTOR & KNOB WHEN SELECTED (Stitch Screen 2 spec) */}
       {isSelected && (
         <>
-          <div className="w-0.5 h-3 bg-blue-600 absolute -top-3 left-1/2 -translate-x-1/2 pointer-events-none z-30" />
+          <div className="w-0.5 h-3 bg-primary absolute -top-3 left-1/2 -translate-x-1/2 pointer-events-none z-30" />
           <div
             onPointerDown={handleRotatePointerDown}
-            className="rotate-handle absolute -top-7 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-blue-600 text-white shadow-md flex items-center justify-center cursor-grab active:cursor-grabbing z-40 hover:scale-125 transition-transform"
+            className="rotate-handle absolute -top-7 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center cursor-grab active:cursor-grabbing z-40 hover:scale-125 transition-transform"
             title="Rotate picture"
           >
             <RotateCw className="w-2.5 h-2.5" />
@@ -489,49 +489,49 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
           {/* Top-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "nw")}
-            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-nwse-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture (Top-Left)"
           />
           {/* Top-Middle */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "n")}
-            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-ns-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture height (Top-Center)"
           />
           {/* Top-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "ne")}
-            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-nesw-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture (Top-Right)"
           />
           {/* Middle-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "e")}
-            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-ew-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture width (Middle-Right)"
           />
           {/* Bottom-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "se")}
-            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-nwse-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture (Bottom-Right)"
           />
           {/* Bottom-Middle */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "s")}
-            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-ns-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture height (Bottom-Center)"
           />
           {/* Bottom-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "sw")}
-            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-nesw-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture (Bottom-Left)"
           />
           {/* Middle-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "w")}
-            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-xs cursor-ew-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border border-white shadow-xs cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize picture width (Middle-Left)"
           />
         </>
@@ -541,41 +541,41 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
       {isSelected && (
         <div
           data-editor-ui="true"
-          className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-lg shadow-lg text-[11px] backdrop-blur-md z-50 whitespace-nowrap text-slate-800 dark:text-slate-100"
+          className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-card dark:bg-secondary border border-secondary dark:border-muted p-1 rounded-lg shadow-lg text-11px backdrop-blur-md z-50 whitespace-nowrap text-foreground dark:text-muted"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
           {/* Size controls */}
-          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">
+          <div className="flex items-center gap-0.5 bg-muted dark:bg-muted px-1 py-0.5 rounded">
             <button
               type="button"
               title="Decrease size"
               onClick={() => handleSizeChange(-20, -15)}
-              className="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+              className="p-0.5 rounded hover:bg-secondary dark:hover:bg-secondary-foreground text-secondary-foreground dark:text-muted-foreground"
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="text-[10px] font-mono px-1 text-slate-700 dark:text-slate-300 tabular-nums">
+            <span className="text-10px font-mono px-1 text-secondary-foreground dark:text-muted-foreground tabular-nums">
               {width}×{height}
             </span>
             <button
               type="button"
               title="Increase size"
               onClick={() => handleSizeChange(20, 15)}
-              className="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+              className="p-0.5 rounded hover:bg-secondary dark:hover:bg-secondary-foreground text-secondary-foreground dark:text-muted-foreground"
             >
               <Plus className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700" />
+          <div className="w-px h-3.5 bg-secondary dark:bg-secondary-foreground" />
 
           {/* Delete Button */}
           <button
             type="button"
             title="Delete Picture"
             onClick={handleDelete}
-            className="p-1 rounded text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-600 transition-colors"
+            className="p-1 rounded text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/50 hover:text-destructive transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -584,7 +584,7 @@ export const DocumentPictureRenderer: React.FC<DocumentPictureRendererProps> = (
 
       {/* Stitch Dimension Watermark in lower right corner when selected */}
       {isSelected && (
-        <div className="absolute bottom-1 right-1 bg-slate-900/80 text-white backdrop-blur-xs px-1.5 py-0.5 rounded text-[9px] font-mono shadow-xs pointer-events-none z-30">
+        <div className="absolute bottom-1 right-1 bg-foreground/80 text-primary-foreground backdrop-blur-xs px-1.5 py-0.5 rounded text-9px font-mono shadow-xs pointer-events-none z-30">
           {width} × {height} px
         </div>
       )}

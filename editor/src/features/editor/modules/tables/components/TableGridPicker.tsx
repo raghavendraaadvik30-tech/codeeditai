@@ -27,12 +27,12 @@ export function TableGridPicker() {
   };
 
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm dark:border-slate-800/80 dark:bg-[#091524]">
+    <div className="rounded-xl border border-secondary/80 bg-card p-3 shadow-sm dark:border-muted/80 dark:bg-[#091524]">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+        <span className="text-xs font-semibold text-secondary-foreground dark:text-muted-foreground">
           Quick Grid
         </span>
-        <span className="text-[11px] font-medium text-[#0078d4]">
+        <span className="text-11px font-medium text-brand">
           {hoveredRow > 0 && hoveredCol > 0
             ? `${hoveredRow} × ${hoveredCol} Table`
             : "Hover to select"}
@@ -40,7 +40,7 @@ export function TableGridPicker() {
       </div>
 
       <div
-        className="grid grid-cols-8 gap-1 p-1 bg-slate-50 rounded-lg dark:bg-slate-900/50"
+        className="grid grid-cols-8 gap-1 p-1 bg-muted rounded-lg dark:bg-secondary/50"
         onMouseLeave={() => {
           setHoveredRow(0);
           setHoveredCol(0);
@@ -64,8 +64,8 @@ export function TableGridPicker() {
                 className={cn(
                   "h-5 w-5 rounded-sm border transition-all duration-75",
                   isHighlighted
-                    ? "border-[#0078d4] bg-[#0078d4]/30 dark:border-[#0078d4] dark:bg-[#0078d4]/40"
-                    : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
+                    ? "border-brand bg-brand/30 dark:border-brand dark:bg-brand/40"
+                    : "border-secondary bg-card hover:border-border dark:border-muted dark:bg-secondary"
                 )}
                 title={`${rowNum} × ${colNum}`}
               />

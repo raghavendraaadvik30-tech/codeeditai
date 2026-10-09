@@ -1207,7 +1207,7 @@ export function TableProvider({
   };
 
   const mergeWithNextTable = () => {
-    let { table } = findActiveTarget();
+    const { table } = findActiveTarget();
     const container =
       (table ? table.closest('[contenteditable="true"]') : null) ||
       editorRef.current ||

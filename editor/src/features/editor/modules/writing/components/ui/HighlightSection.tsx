@@ -11,7 +11,7 @@ export default function HighlightSection({
 }: HighlightSectionProps) {
   return (
     <section className="mb-6">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Text Highlight
       </h3>
 
@@ -20,10 +20,11 @@ export default function HighlightSection({
           <button
             key={color.name}
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => onApply(color.value)}
             title={color.name}
             aria-label={`Apply ${color.name} highlight`}
-            className="h-7 w-7 rounded border border-gray-200 transition hover:scale-105 hover:border-gray-400"
+            className="h-7 w-7 rounded border border-secondary transition hover:scale-105 hover:border-muted-foreground"
             style={{
               backgroundColor: color.value,
             }}
@@ -32,9 +33,10 @@ export default function HighlightSection({
 
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onClear}
           title="Remove highlight"
-          className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600 transition hover:bg-gray-100"
+          className="rounded-md border border-secondary px-2 py-1 text-xs text-secondary-foreground transition hover:bg-muted"
         >
           Remove
         </button>

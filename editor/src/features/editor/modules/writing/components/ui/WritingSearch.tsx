@@ -18,16 +18,16 @@ export default function WritingSearch({
         gap-2
         rounded-lg
         border
-        border-slate-200
-        bg-slate-50
+        border-secondary
+        bg-muted
         px-3
         shadow-sm
-        focus-within:border-blue-300
+        focus-within:border-navy-300
         focus-within:ring-2
-        focus-within:ring-blue-100
+        focus-within:ring-primary/15
       "
     >
-      <Search className="h-4 w-4 shrink-0 text-slate-400" />
+      <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
 
       <input
         type="text"
@@ -39,9 +39,9 @@ export default function WritingSearch({
           flex-1
           bg-transparent
           text-sm
-          text-slate-700
+          text-secondary-foreground
           outline-none
-          placeholder:text-slate-400
+          placeholder:text-muted-foreground
         "
       />
 
@@ -50,12 +50,12 @@ export default function WritingSearch({
           hidden
           rounded
           border
-          border-slate-200
-          bg-white
+          border-secondary
+          bg-card
           px-1.5
           py-0.5
-          text-[9px]
-          text-slate-400
+          text-9px
+          text-muted-foreground
           sm:block
         "
       >

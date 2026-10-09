@@ -944,7 +944,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
    * Delegated keydown handler for global shortcut (Ctrl+Shift+E).
    */
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent, _pageId: string) => {
+    (e: KeyboardEvent) => {
       const meta = e.ctrlKey || e.metaKey;
       if (meta && e.shiftKey && (e.key === "e" || e.key === "E")) {
         e.preventDefault();
@@ -957,7 +957,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
   /**
    * Delegated input handler for editable pages.
    */
-  const handleInput = useCallback((_e: Event, _pageId: string) => {
+  const handleInput = useCallback(() => {
     syncTrackedChangesFromDOM();
   }, [syncTrackedChangesFromDOM]);
 
@@ -965,7 +965,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
    * Delegated mouse click handler for selecting changes & Alt+Click (Accept) / Shift+Click (Reject).
    */
   const handleClick = useCallback(
-    (ev: MouseEvent, _pageId: string) => {
+    (ev: MouseEvent) => {
       const target = ev.target as HTMLElement;
       const node = target.closest("ins, del, [data-tc-id]") as HTMLElement;
       if (!node) return;

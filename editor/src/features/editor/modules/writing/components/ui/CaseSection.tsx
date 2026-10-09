@@ -26,7 +26,7 @@ export default function CaseSection({
 
   return (
     <section className="mb-5">
-      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Case
       </h3>
 
@@ -52,7 +52,7 @@ export default function CaseSection({
 
               className={`
                 flex
-                h-[76px]
+                h-19
                 min-w-0
                 flex-col
                 items-center
@@ -61,23 +61,23 @@ export default function CaseSection({
                 border
                 px-1
                 transition-all
-                active:scale-[0.98]
+                active:scale-98
 
                 ${
                   isActive
                     ? `
-                      border-blue-500
-                      bg-blue-50
+                      border-primary
+                      bg-primary/10
                       ring-2
-                      ring-blue-100
+                      ring-primary/15
                       shadow-sm
                     `
                     : `
-                      border-slate-200
-                      bg-white
+                      border-secondary
+                      bg-card
                       shadow-sm
-                      hover:border-blue-300
-                      hover:bg-blue-50
+                      hover:border-navy-300
+                      hover:bg-primary/10
                       hover:shadow
                     `
                 }
@@ -85,14 +85,14 @@ export default function CaseSection({
             >
               <span
                 className={`
-                  text-[17px]
+                  text-17px
                   font-bold
                   leading-none
 
                   ${
                     isActive
-                      ? "text-blue-700"
-                      : "text-blue-600"
+                      ? "text-primary/90"
+                      : "text-primary"
                   }
                 `}
               >
@@ -103,14 +103,14 @@ export default function CaseSection({
                 className={`
                   mt-2
                   text-center
-                  text-[10px]
+                  text-10px
                   font-medium
                   leading-3
 
                   ${
                     isActive
-                      ? "text-blue-700"
-                      : "text-slate-700"
+                      ? "text-primary/90"
+                      : "text-secondary-foreground"
                   }
                 `}
               >

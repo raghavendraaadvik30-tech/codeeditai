@@ -60,7 +60,7 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/40 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -68,18 +68,18 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
       aria-modal="true"
     >
       <div
-        className="relative flex flex-col w-full max-w-md bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 animate-in zoom-in-95 duration-150"
+        className="relative flex flex-col w-full max-w-md bg-card rounded-xl shadow-2xl border border-secondary overflow-hidden text-foreground animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-secondary">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">Select Data Source</h2>
-            <p className="text-xs text-slate-500">Configure chart legend series and categories</p>
+            <h2 className="text-sm font-semibold text-foreground">Select Data Source</h2>
+            <p className="text-xs text-muted-foreground">Configure chart legend series and categories</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+            className="p-1 rounded-md text-muted-foreground hover:text-secondary-foreground hover:bg-muted"
           >
             <X className="w-4 h-4" />
           </button>
@@ -89,20 +89,20 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
           {/* Legend Entries (Series) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="font-semibold text-slate-700">Legend Entries (Series)</span>
+              <span className="font-semibold text-secondary-foreground">Legend Entries (Series)</span>
               <button
                 type="button"
                 onClick={handleAddSeries}
-                className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+                className="flex items-center gap-1 text-11px font-semibold text-primary hover:text-primary/90"
               >
                 <Plus className="w-3 h-3" />
                 <span>Add Series</span>
               </button>
             </div>
 
-            <div className="border border-slate-200 rounded-lg divide-y divide-slate-100 max-h-36 overflow-y-auto">
+            <div className="border border-secondary rounded-lg divide-y divide-muted max-h-36 overflow-y-auto">
               {seriesList.map((s, idx) => (
-                <div key={s.id} className="flex items-center justify-between p-2 hover:bg-slate-50">
+                <div key={s.id} className="flex items-center justify-between p-2 hover:bg-muted">
                   <div className="flex items-center gap-2 flex-1">
                     <span
                       className="w-3 h-3 rounded-xs shrink-0"
@@ -112,14 +112,14 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
                       type="text"
                       value={s.name}
                       onChange={(e) => handleRenameSeries(idx, e.target.value)}
-                      className="w-full h-6 px-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
+                      className="w-full h-6 px-1.5 border border-secondary rounded text-xs outline-none focus:border-primary"
                     />
                   </div>
                   {seriesList.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveSeries(idx)}
-                      className="ml-2 text-slate-400 hover:text-red-500"
+                      className="ml-2 text-muted-foreground hover:text-destructive"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -131,10 +131,10 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
 
           {/* Horizontal Axis Labels (Categories) */}
           <div>
-            <span className="block font-semibold text-slate-700 mb-1.5">
+            <span className="block font-semibold text-secondary-foreground mb-1.5">
               Horizontal (Category) Axis Labels
             </span>
-            <div className="border border-slate-200 rounded-lg p-2 bg-slate-50 max-h-32 overflow-y-auto">
+            <div className="border border-secondary rounded-lg p-2 bg-muted max-h-32 overflow-y-auto">
               <div className="grid grid-cols-2 gap-1.5">
                 {categoriesList.map((cat, idx) => (
                   <input
@@ -142,7 +142,7 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
                     type="text"
                     value={cat}
                     onChange={(e) => handleRenameCategory(idx, e.target.value)}
-                    className="px-2 py-1 bg-white border border-slate-200 rounded text-slate-700 text-xs font-medium outline-none focus:border-blue-500"
+                    className="px-2 py-1 bg-card border border-secondary rounded text-secondary-foreground text-xs font-medium outline-none focus:border-primary"
                   />
                 ))}
               </div>
@@ -150,18 +150,18 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 py-3 bg-slate-50 border-t border-slate-200">
+        <div className="flex items-center justify-end gap-2 px-5 py-3 bg-muted border-t border-secondary">
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded hover:bg-slate-100"
+            className="px-3 py-1.5 text-xs font-semibold text-secondary-foreground bg-card border border-border rounded hover:bg-muted"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-white bg-[#0078d4] rounded hover:bg-[#005a9e]"
+            className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-primary-foreground bg-brand rounded hover:bg-brand-deep"
           >
             <Check className="w-3.5 h-3.5" />
             <span>Apply</span>

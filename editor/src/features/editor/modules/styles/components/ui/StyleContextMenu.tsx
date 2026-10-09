@@ -1,3 +1,4 @@
+
 interface Props {
   hasOverrides: boolean;
 
@@ -31,16 +32,22 @@ export function StyleContextMenu({
         top-full
         z-50
         mt-1
-        w-[300px]
+        w-75
         rounded-lg
         border
         border-border
-        bg-background
+        bg-popover
+        text-popover-foreground
+        dark:bg-[#111D29]
+        dark:border-muted
+        dark:text-foreground
         p-1
         shadow-lg
       "
     >
       <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={onMatch}
         className="
           block
@@ -50,13 +57,18 @@ export function StyleContextMenu({
           py-2
           text-left
           text-sm
+          text-foreground
+          dark:text-foreground
           hover:bg-muted
+          dark:hover:bg-muted/60
         "
       >
         Update Style to Match Selection
       </button>
 
       <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={onModify}
         className="
           block
@@ -66,13 +78,18 @@ export function StyleContextMenu({
           py-2
           text-left
           text-sm
+          text-foreground
+          dark:text-foreground
           hover:bg-muted
+          dark:hover:bg-muted/60
         "
       >
         Modify...
       </button>
 
       <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={onSelect}
         className="
           block
@@ -82,13 +99,18 @@ export function StyleContextMenu({
           py-2
           text-left
           text-sm
+          text-foreground
+          dark:text-foreground
           hover:bg-muted
+          dark:hover:bg-muted/60
         "
       >
         Select All Instances
       </button>
 
       <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={onClear}
         className="
           block
@@ -98,7 +120,10 @@ export function StyleContextMenu({
           py-2
           text-left
           text-sm
+          text-foreground
+          dark:text-foreground
           hover:bg-muted
+          dark:hover:bg-muted/60
         "
       >
         Clear Formatting
@@ -106,6 +131,8 @@ export function StyleContextMenu({
 
       {hasOverrides && (
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onRevert}
           className="
             block
@@ -115,16 +142,21 @@ export function StyleContextMenu({
             py-2
             text-left
             text-sm
+            text-foreground
+            dark:text-foreground
             hover:bg-muted
+            dark:hover:bg-muted/60
           "
         >
           Revert to Original
         </button>
       )}
 
-      <div className="my-1 border-t" />
+      <div className="my-1 border-t border-border dark:border-muted" />
 
       <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={onRemove}
         className="
           block

@@ -26,8 +26,8 @@ export default function HeaderLogo() {
           items-center
           justify-center
           rounded-xl
-          bg-blue-600
-          text-white
+          bg-primary
+          text-primary-foreground
           shadow-sm
         "
       >
@@ -38,10 +38,10 @@ export default function HeaderLogo() {
       <div className="leading-tight">
         <h1
           className="
-            text-[17px]
+            text-17px
             font-semibold
-            text-gray-900
-            dark:text-white"
+            text-foreground
+            dark:text-primary-foreground"
         >
           Document Editor
         </h1>
@@ -49,8 +49,8 @@ export default function HeaderLogo() {
         <p
           className="
             text-xs
-            text-gray-500
-            dark:text-slate-400
+            text-muted-foreground
+            dark:text-muted-foreground
           "
         >
         

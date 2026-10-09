@@ -40,7 +40,5 @@ export const UsersPage = lazy(() =>
 );
 
 export const EditorPage = lazy(() =>
-  import("../../features/editor/index").then((module) => ({
-    default: module.EditorPage,
-  }))
+  import("../../features/editor/pages/EditorPage")
 );

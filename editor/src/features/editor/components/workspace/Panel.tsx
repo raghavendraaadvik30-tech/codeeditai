@@ -1,8 +1,4 @@
-// /*
-// Purpose:
-// Presentation component that displays the content area for the active workspace module or tool panel.
-// Consumes feature modules through their public index.ts entry points.
-// */
+// __BLOCKCOMMENT_0__
 // import type { ComponentType } from "react";
 // import { Search } from "lucide-react";
 
@@ -40,7 +36,7 @@
 
 //   return (
 //     <div className="flex h-full flex-col">
-//       {/* Search Tools */}
+//       {__BLOCKCOMMENT_1__}
 //       <div className="border-b border-slate-200 p-3 dark:border-slate-800">
 //         <div
 //           className="
@@ -73,7 +69,7 @@
 //         </div>
 //       </div>
 
-//       {/* Panel Content */}
+//       {__BLOCKCOMMENT_2__}
 //       <div className="flex-1 overflow-y-auto p-3">
 //         {ActiveComponent ? (
 //           <ActiveComponent />
@@ -85,9 +81,7 @@
 //   );
 // }
 
-// /* --------------------------------
-//    WRITING
-// -------------------------------- */
+// __BLOCKCOMMENT_3__
 
 // export function WritingPanel() {
 //   const tools = [
@@ -136,8 +130,8 @@
 //             p-3
 //             text-left
 //             transition
-//             hover:border-blue-300
-//             hover:bg-blue-50/40
+//             hover:border-navy-300
+//             hover:bg-primary/40
 //             dark:border-slate-700
 //             dark:bg-[#111D29]
 //           "
@@ -151,11 +145,11 @@
 //               items-center
 //               justify-center
 //               rounded-xl
-//               bg-blue-50
+//               bg-primary/10
 //               text-xl
 //               font-semibold
-//               text-blue-600
-//               dark:bg-blue-950/50
+//               text-primary
+//               dark:bg-navy-950/50
 //             "
 //           >
 //             {tool.icon}
@@ -167,7 +161,7 @@
 //                 block
 //                 text-sm
 //                 font-semibold
-//                 text-slate-900
+//                 text-foreground
 //                 dark:text-white
 //               "
 //             >
@@ -178,7 +172,7 @@
 //               className="
 //                 block
 //                 text-xs
-//                 text-slate-500
+//                 text-muted-foreground
 //                 dark:text-slate-400
 //               "
 //             >
@@ -191,9 +185,7 @@
 //   );
 // }
 
-// /* --------------------------------
-//    LINKS
-// -------------------------------- */
+// __BLOCKCOMMENT_4__
 
 // export function LinksPanel() {
 //   return (
@@ -203,20 +195,20 @@
 //         className="
 //           w-full
 //           rounded-lg
-//           bg-blue-600
+//           bg-primary
 //           px-4
 //           py-2.5
 //           text-sm
 //           font-medium
 //           text-white
-//           hover:bg-blue-700
+//           hover:bg-primary/90
 //         "
 //       >
 //         + Register Reference Link
 //       </button>
 
 //       <div>
-//         <p className="mb-2 text-xs font-medium text-slate-500">
+//         <p className="mb-2 text-xs font-medium text-muted-foreground">
 //           QUICK INSERT
 //         </p>
 
@@ -240,7 +232,7 @@
 //                 text-left
 //                 text-xs
 //                 font-medium
-//                 hover:bg-blue-50
+//                 hover:bg-primary/10
 //                 dark:border-slate-700
 //                 dark:bg-[#111D29]
 //               "
@@ -254,15 +246,13 @@
 //   );
 // }
 
-// /* --------------------------------
-//    DOCUMENT
-// -------------------------------- */
+// __BLOCKCOMMENT_5__
 
 // export function DocumentPanel() {
 //   return (
 //     <div className="space-y-3">
 //       <div className="rounded-lg border p-4">
-//         <p className="text-xs text-slate-500">
+//         <p className="text-xs text-muted-foreground">
 //           Size
 //         </p>
 
@@ -272,7 +262,7 @@
 //       </div>
 
 //       <div className="rounded-lg border p-4">
-//         <p className="text-xs text-slate-500">
+//         <p className="text-xs text-muted-foreground">
 //           Orientation
 //         </p>
 
@@ -282,7 +272,7 @@
 //       </div>
 
 //       <div className="rounded-lg border p-4">
-//         <p className="text-xs text-slate-500">
+//         <p className="text-xs text-muted-foreground">
 //           Margins
 //         </p>
 
@@ -294,9 +284,7 @@
 //   );
 // }
 
-// /* --------------------------------
-//    GENERIC
-// -------------------------------- */
+// __BLOCKCOMMENT_6__
 
 // export function GenericPanel({
 //   title,
@@ -318,7 +306,7 @@
 //         {title}
 //       </p>
 
-//       <p className="mt-1 text-xs text-slate-500">
+//       <p className="mt-1 text-xs text-muted-foreground">
 //         Tools for this section will appear here.
 //       </p>
 //     </div>
@@ -416,20 +404,20 @@ export function LinksPanel() {
         className="
           w-full
           rounded-lg
-          bg-blue-600
+          bg-primary
           px-4
           py-2.5
           text-sm
           font-medium
-          text-white
-          hover:bg-blue-700
+          text-primary-foreground
+          hover:bg-primary/90
         "
       >
         + Register Reference Link
       </button>
 
       <div>
-        <p className="mb-2 text-xs font-medium text-slate-500">
+        <p className="mb-2 text-xs font-medium text-muted-foreground">
           QUICK INSERT
         </p>
 
@@ -446,15 +434,15 @@ export function LinksPanel() {
               className="
                 rounded-lg
                 border
-                border-slate-200
-                bg-slate-50
+                border-secondary
+                bg-muted
                 px-3
                 py-2.5
                 text-left
                 text-xs
                 font-medium
-                hover:bg-blue-50
-                dark:border-slate-700
+                hover:bg-primary/10
+                dark:border-secondary-foreground
                 dark:bg-[#111D29]
               "
             >
@@ -475,7 +463,7 @@ export function DocumentPanel() {
   return (
     <div className="space-y-3">
       <div className="rounded-lg border p-4">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Size
         </p>
 
@@ -485,7 +473,7 @@ export function DocumentPanel() {
       </div>
 
       <div className="rounded-lg border p-4">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Orientation
         </p>
 
@@ -495,7 +483,7 @@ export function DocumentPanel() {
       </div>
 
       <div className="rounded-lg border p-4">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Margins
         </p>
 
@@ -520,7 +508,7 @@ export function GenericPanel({
     <div className="flex h-full flex-col">
       {/* Search Tools */}
 
-      <div className="border-b border-slate-200 p-3 dark:border-slate-800">
+      <div className="border-b border-secondary p-3 dark:border-muted">
         <div
           className="
             flex
@@ -529,14 +517,14 @@ export function GenericPanel({
             gap-2
             rounded-lg
             border
-            border-slate-200
-            bg-white
+            border-secondary
+            bg-card
             px-3
-            dark:border-slate-700
+            dark:border-secondary-foreground
             dark:bg-[#111D29]
           "
         >
-          <Search className="h-4 w-4 text-slate-400" />
+          <Search className="h-4 w-4 text-muted-foreground" />
 
           <input
             type="text"
@@ -546,8 +534,8 @@ export function GenericPanel({
               bg-transparent
               text-sm
               outline-none
-              placeholder:text-slate-400
-              dark:text-white
+              placeholder:text-muted-foreground
+              dark:text-primary-foreground
             "
           />
         </div>
@@ -561,17 +549,17 @@ export function GenericPanel({
             rounded-xl
             border
             border-dashed
-            border-slate-300
+            border-border
             p-6
             text-center
-            dark:border-slate-700
+            dark:border-secondary-foreground
           "
         >
           <p className="text-sm font-medium capitalize">
             {title}
           </p>
 
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-muted-foreground">
             Tools for this section will appear here.
           </p>
         </div>

@@ -53,7 +53,7 @@ export function WordCount() {
         }
 
         const rawText = (clone.textContent || "")
-          .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+          .replace(/[\u200B\u200C\uFEFF\u00AD]/g, "").replace(/\u200D/g, "")
           .replace(/\u00A0/g, " ");
 
         const trimmed = rawText.trim();
@@ -75,27 +75,27 @@ export function WordCount() {
   }, [model.pageHtml, model.pages]);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-[#111D29]">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-        <Sparkles className="h-3.5 w-3.5 text-blue-500" />
+    <div className="rounded-lg border border-secondary bg-card p-3 dark:border-muted dark:bg-[#111D29]">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
         Document Statistics
       </div>
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="flex justify-between border-b border-slate-100 pb-1 dark:border-slate-800">
-          <span className="text-slate-500">Words:</span>
-          <span className="font-semibold text-slate-900 dark:text-white">{stats.words}</span>
+        <div className="flex justify-between border-b border-muted pb-1 dark:border-muted">
+          <span className="text-muted-foreground">Words:</span>
+          <span className="font-semibold text-foreground dark:text-primary-foreground">{stats.words}</span>
         </div>
-        <div className="flex justify-between border-b border-slate-100 pb-1 dark:border-slate-800">
-          <span className="text-slate-500">Characters:</span>
-          <span className="font-semibold text-slate-900 dark:text-white">{stats.characters}</span>
-        </div>
-        <div className="flex justify-between pt-1">
-          <span className="text-slate-500">Paragraphs:</span>
-          <span className="font-semibold text-slate-900 dark:text-white">{stats.paragraphs}</span>
+        <div className="flex justify-between border-b border-muted pb-1 dark:border-muted">
+          <span className="text-muted-foreground">Characters:</span>
+          <span className="font-semibold text-foreground dark:text-primary-foreground">{stats.characters}</span>
         </div>
         <div className="flex justify-between pt-1">
-          <span className="text-slate-500">Pages:</span>
-          <span className="font-semibold text-slate-900 dark:text-white">{stats.pages}</span>
+          <span className="text-muted-foreground">Paragraphs:</span>
+          <span className="font-semibold text-foreground dark:text-primary-foreground">{stats.paragraphs}</span>
+        </div>
+        <div className="flex justify-between pt-1">
+          <span className="text-muted-foreground">Pages:</span>
+          <span className="font-semibold text-foreground dark:text-primary-foreground">{stats.pages}</span>
         </div>
       </div>
     </div>

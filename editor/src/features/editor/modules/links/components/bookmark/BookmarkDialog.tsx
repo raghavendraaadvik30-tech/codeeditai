@@ -57,17 +57,17 @@ export function BookmarkDialog({ open, onOpenChange, onSuccess }: BookmarkDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px] bg-white dark:bg-[#0E1A29] border border-slate-200 dark:border-slate-800 p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="p-4 border-b border-slate-100 dark:border-slate-800">
-          <DialogTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-            <Bookmark className="h-4 w-4 text-amber-500" />
+      <DialogContent className="sm:max-w-105 bg-card dark:bg-[#0E1A29] border border-secondary dark:border-muted p-0 overflow-hidden shadow-2xl">
+        <DialogHeader className="p-4 border-b border-muted dark:border-muted">
+          <DialogTitle className="text-sm font-semibold text-foreground dark:text-primary-foreground flex items-center gap-2">
+            <Bookmark className="h-4 w-4 text-warning-500" />
             Add Bookmark
           </DialogTitle>
         </DialogHeader>
 
         <div className="p-4 space-y-3 text-xs">
           <div className="space-y-1">
-            <label className="font-semibold text-slate-700 dark:text-slate-300">Bookmark Name</label>
+            <label className="font-semibold text-secondary-foreground dark:text-muted-foreground">Bookmark Name</label>
             <input
               type="text"
               value={name}
@@ -79,31 +79,31 @@ export function BookmarkDialog({ open, onOpenChange, onSuccess }: BookmarkDialog
                 if (e.key === 'Enter') handleCreate();
               }}
               placeholder="e.g. Protocol_Objectives_Sec2"
-              className="h-8 w-full rounded-md border border-slate-200 bg-white px-3 outline-none dark:border-slate-700 dark:bg-[#07131E] dark:text-white focus:border-amber-500"
+              className="h-8 w-full rounded-md border border-secondary bg-card px-3 outline-none dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground focus:border-warning-500"
               autoFocus
             />
           </div>
 
-          <p className="text-[11px] text-slate-400">
+          <p className="text-11px text-muted-foreground">
             Bookmarks allow you to create jump targets in your document without altering visible content. If text is currently selected, it will be wrapped in this bookmark.
           </p>
 
           {error && (
-            <div className="flex items-center gap-1.5 text-[11px] text-red-500 font-medium">
+            <div className="flex items-center gap-1.5 text-11px text-destructive font-medium">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
         </div>
 
-        <DialogFooter className="p-3 border-t border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-[#07131E] flex items-center justify-end gap-2">
+        <DialogFooter className="p-3 border-t border-muted bg-muted/50 dark:border-muted dark:bg-[#07131E] flex items-center justify-end gap-2">
           <LinkButton variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </LinkButton>
           <button
             type="button"
             onClick={handleCreate}
-            className="flex h-7 items-center justify-center rounded-md bg-amber-500 px-3 text-xs font-semibold text-white hover:bg-amber-600 transition-colors"
+            className="flex h-7 items-center justify-center rounded-md bg-warning-500 px-3 text-xs font-semibold text-primary-foreground hover:bg-warning-600 transition-colors"
           >
             Create Bookmark
           </button>

@@ -175,7 +175,7 @@ export class HyperlinkService {
     activeEditor.focus();
 
     const uniqueId = `link_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-    let anchorHtml = '';
+    let anchorHtml: string;
 
     if (item.type === 'Cross Reference' || target.startsWith('#')) {
       const cleanTargetId = item.targetId || target.replace(/^#/, '');

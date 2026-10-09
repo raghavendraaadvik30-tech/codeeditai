@@ -25,11 +25,11 @@ export function LinkButton({
   ...props
 }: LinkButtonProps) {
   const variantStyles = {
-    primary: 'bg-[#0078d4] text-white hover:bg-[#005a9e] dark:bg-[#0078d4] dark:hover:bg-[#005a9e]',
-    secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700',
-    outline: 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-[#111D29] dark:text-slate-200 dark:hover:bg-slate-800',
-    danger: 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60',
-    ghost: 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
+    primary: 'bg-brand text-primary-foreground hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep',
+    secondary: 'bg-muted text-secondary-foreground hover:bg-secondary dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground',
+    outline: 'border border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted',
+    danger: 'bg-destructive/10 text-destructive hover:bg-destructive/10 dark:bg-destructive/40 dark:text-destructive dark:hover:bg-destructive/60',
+    ghost: 'text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted',
   };
 
   const sizeStyles = {

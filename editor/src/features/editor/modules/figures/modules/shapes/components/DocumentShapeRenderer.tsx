@@ -515,7 +515,7 @@ export default function DocumentShapeRenderer({
     >
       {/* EXACTLY ONE SELECTION CONTAINER OVERLAY WHEN SELECTED */}
       {isSelected && (
-        <div className="absolute inset-0 border border-dashed border-blue-500/90 pointer-events-none rounded-xs z-20" />
+        <div className="absolute inset-0 border border-dashed border-primary/90 pointer-events-none rounded-xs z-20" />
       )}
 
       {/* SHAPE ICON SVG */}
@@ -544,10 +544,10 @@ export default function DocumentShapeRenderer({
             }}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
-            className="absolute inset-x-2 text-center text-xs font-semibold bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 rounded px-1 py-0.5 border border-blue-500 shadow-xs z-30 outline-hidden pointer-events-auto"
+            className="absolute inset-x-2 text-center text-xs font-semibold bg-card/90 dark:bg-muted/90 text-foreground dark:text-muted rounded px-1 py-0.5 border border-primary shadow-xs z-30 outline-hidden pointer-events-auto"
           />
         ) : text ? (
-          <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-900 dark:text-slate-100 pointer-events-none px-2 select-none">
+          <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-foreground dark:text-muted pointer-events-none px-2 select-none">
             {text}
           </span>
         ) : null}
@@ -559,49 +559,49 @@ export default function DocumentShapeRenderer({
           {/* 1. Top-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "nw")}
-            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Top-Left)"
           />
           {/* 2. Top-Center */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "n")}
-            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape height (Top-Center)"
           />
           {/* 3. Top-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "ne")}
-            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Top-Right)"
           />
           {/* 4. Middle-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "e")}
-            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape width (Middle-Right)"
           />
           {/* 5. Bottom-Right */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "se")}
-            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Bottom-Right)"
           />
           {/* 6. Bottom-Center */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "s")}
-            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ns-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape height (Bottom-Center)"
           />
           {/* 7. Bottom-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "sw")}
-            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape (Bottom-Left)"
           />
           {/* 8. Middle-Left */}
           <div
             onPointerDown={(e) => handleResizePointerDown(e, "w")}
-            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600 shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
+            className="resize-handle absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-card border-2 border-primary shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
             title="Resize shape width (Middle-Left)"
           />
         </>
@@ -611,7 +611,7 @@ export default function DocumentShapeRenderer({
       {isSelected && (
         <div
           data-editor-ui="true"
-          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900/95 text-white p-1.5 rounded-xl shadow-xl text-[11px] backdrop-blur-xs z-50 whitespace-nowrap"
+          className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-foreground/95 text-primary-foreground p-1.5 rounded-xl shadow-xl text-11px backdrop-blur-xs z-50 whitespace-nowrap"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -624,13 +624,13 @@ export default function DocumentShapeRenderer({
               setIsEditingText(true);
             }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-slate-700 text-slate-200 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-secondary-foreground text-secondary hover:text-primary-foreground transition-colors cursor-pointer"
           >
             <Type className="w-3.5 h-3.5" />
             <span>Edit</span>
           </button>
 
-          <div className="w-px h-3.5 bg-slate-700 mx-0.5" />
+          <div className="w-px h-3.5 bg-secondary-foreground mx-0.5" />
 
           {/* Delete Button */}
           <button
@@ -638,7 +638,7 @@ export default function DocumentShapeRenderer({
             title="Delete Shape"
             onClick={handleDelete}
             onPointerDown={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-destructive hover:bg-destructive/20 hover:text-destructive/30 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Delete</span>
@@ -650,7 +650,7 @@ export default function DocumentShapeRenderer({
       {contextMenuPos && (
         <div
           data-editor-ui="true"
-          className="fixed z-[99999] w-40 rounded-lg border border-slate-200 bg-white/98 backdrop-blur-md p-1 shadow-xl text-xs text-slate-800 animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-slate-800 dark:text-slate-200"
+          className="fixed z-[99999] w-40 rounded-lg border border-secondary bg-card/98 backdrop-blur-md p-1 shadow-xl text-xs text-foreground animate-in fade-in zoom-in-95 duration-100 select-none dark:bg-[#111D29] dark:border-muted dark:text-muted-foreground"
           style={{
             top: Math.max(8, Math.min(contextMenuPos.y, window.innerHeight - 90)),
             left: Math.max(8, Math.min(contextMenuPos.x, window.innerWidth - 170)),
@@ -668,18 +668,18 @@ export default function DocumentShapeRenderer({
               setContextMenuPos(null);
               setIsEditingText(true);
             }}
-            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-muted dark:hover:bg-muted text-secondary-foreground dark:text-muted-foreground font-medium transition-colors cursor-pointer"
           >
             <Type className="w-3.5 h-3.5" />
             <span>Edit</span>
           </button>
-          <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
+          <div className="my-1 h-px bg-muted dark:bg-muted" />
           <button
             type="button"
             onClick={handleDelete}
-            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-red-50 text-red-600 dark:hover:bg-red-950/50 font-medium transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded hover:bg-destructive/10 text-destructive dark:hover:bg-destructive/50 font-medium transition-colors cursor-pointer"
           >
-            <Trash2 className="w-3.5 h-3.5 text-red-600" />
+            <Trash2 className="w-3.5 h-3.5 text-destructive" />
             <span>Delete</span>
           </button>
         </div>

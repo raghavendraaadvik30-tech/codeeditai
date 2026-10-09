@@ -44,8 +44,8 @@ export default function RibbonDivider({
         shrink-0
         self-center
 
-        bg-slate-300
-        dark:bg-slate-700
+        bg-secondary
+        dark:bg-secondary-foreground
 
         ${height}
         ${className}
