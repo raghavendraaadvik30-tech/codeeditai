@@ -361,7 +361,7 @@ export const ChooseSmartArtModal: React.FC<ChooseSmartArtModalProps> = ({
           <button
             type="button"
             onClick={handleConfirm}
-            className="px-5 py-1.5 text-xs font-semibold rounded-md bg-brand text-primary-foreground hover:bg-brand-deep shadow-xs transition-colors"
+            className="px-5 py-1.5 text-xs font-semibold rounded-md bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active shadow-xs transition-colors"
           >
             OK
           </button>

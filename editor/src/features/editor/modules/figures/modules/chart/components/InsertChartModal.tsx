@@ -195,7 +195,7 @@ export const InsertChartModal: React.FC<InsertChartModalProps> = ({
             type="button"
             onClick={handleConfirmInsert}
             disabled={!selectedType}
-            className="px-5 py-2 text-sm font-semibold text-primary-foreground bg-brand rounded-lg shadow-xs hover:bg-brand-deep disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-5 py-2 text-sm font-semibold text-button-primary-foreground bg-button-primary rounded-lg shadow-xs hover:bg-button-primary-hover active:bg-button-primary-active disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Insert
           </button>

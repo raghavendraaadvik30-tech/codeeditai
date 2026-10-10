@@ -47,7 +47,7 @@ export function InternalRefColumn({
   ];
 
   return (
-    <div className="flex flex-col space-y-2.5">
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-3.5 space-y-3 dark:border-[#294564] dark:bg-[#111D29]">
       {/* Sub-Tabs Selector */}
       <div className="grid grid-cols-2 gap-2">
         {tabs.map((tab) => {
@@ -59,13 +59,13 @@ export function InternalRefColumn({
               type="button"
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                'flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium transition-all select-none cursor-pointer',
+                'flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-all select-none cursor-pointer',
                 isActive
-                  ? 'bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] shadow-2xs font-semibold dark:bg-[#1E293B] dark:border-[#38BDF8]/40 dark:text-[#38BDF8]'
-                  : 'bg-white text-[#64748B] hover:bg-slate-50 border border-[#E2E8F0] dark:bg-[#111D29] dark:border-[#294564] dark:text-slate-400 dark:hover:text-white'
+                  ? 'bg-button-primary text-button-primary-foreground border border-[#C2D9F7] shadow-2xs font-semibold dark:bg-[#1E3A8A] dark:border-[#38BDF8]/40 dark:text-white'
+                  : 'bg-white text-[#64748B] hover:bg-slate-50 border border-slate-200 dark:bg-[#111D29] dark:border-[#294564] dark:text-slate-400 dark:hover:text-white'
               )}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className={cn("h-4 w-4", isActive ? "text-[#2563EB] dark:text-[#38BDF8]" : "text-slate-400")} />
               <span>{tab.label}</span>
             </button>
           );

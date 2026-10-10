@@ -199,7 +199,7 @@ export default function DashboardOverview() {
 
             {/* Authors Row */}
             <div className="flex items-center gap-4 rounded-2xl border border-[#E0E7EF] bg-[#F8FAFC]/60 px-4 py-3 dark:border-[#294564] dark:bg-[#111D29]/50">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0E7FE] text-[#4F46E5] dark:bg-indigo-950/80 dark:text-indigo-300">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0284C7] dark:bg-indigo-950/80 dark:text-indigo-300">
                 <Pencil className="h-4 w-4" />
               </div>
 

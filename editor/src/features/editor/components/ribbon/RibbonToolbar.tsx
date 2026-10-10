@@ -94,7 +94,7 @@ export default function RibbonToolbar() {
                 cursor-pointer
                 ${
                   active
-                    ? "text-[#324480] font-bold border-b-2 border-[#E82D91] bg-transparent dark:text-[#38BDF8] dark:border-[#38BDF8]"
+                    ? "text-[#324480] font-bold border-b-2 border-[#324480] bg-transparent dark:text-[#38BDF8] dark:border-[#38BDF8]"
                     : "text-[#324480]/70 hover:text-[#324480] hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-transparent"
                 }
               `}

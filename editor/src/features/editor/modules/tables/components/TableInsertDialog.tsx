@@ -498,7 +498,7 @@ export function TableInsertDialog({ open, onClose, onInsert }: TableInsertDialog
           <Button
             type="button"
             onClick={handleInsert}
-            className="h-8 px-5 text-xs font-semibold bg-brand hover:bg-brand active:bg-brand-deep text-primary-foreground rounded-md transition-colors shadow-sm"
+            className="h-8 px-5 text-xs font-semibold bg-button-primary hover:bg-button-primary-hover active:bg-button-primary-active text-button-primary-foreground rounded-md transition-colors shadow-sm"
           >
             Insert Table
           </Button>

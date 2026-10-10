@@ -99,39 +99,34 @@ export default function LoginUI() {
     <div
       className="relative flex min-h-screen w-full items-center justify-center p-4 overflow-hidden select-none"
       style={{
-        backgroundColor: "#EEF5FF",
-        backgroundImage: `
-          linear-gradient(to right, #DCE8F8 1px, transparent 1px),
-          linear-gradient(to bottom, #DCE8F8 1px, transparent 1px)
-        `,
-        backgroundSize: "44px 44px",
+        background: "radial-gradient(ellipse at 50% 40%, #FFFFFF 0%, #EEF5FF 45%, #DCE8FA 100%)",
       }}
     >
-      {/* Soft blue radial ambient lighting */}
+      {/* Soft ambient radial lighting */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background: `
-            radial-gradient(ellipse at 50% 50%, rgba(211, 227, 252, 0.65) 0%, rgba(238, 245, 255, 0.2) 65%, transparent 100%),
-            radial-gradient(circle at 80% 30%, rgba(186, 215, 252, 0.4) 0%, transparent 55%),
-            radial-gradient(circle at 20% 70%, rgba(186, 215, 252, 0.3) 0%, transparent 55%)
+            radial-gradient(circle at 50% 50%, rgba(211, 227, 253, 0.6) 0%, rgba(238, 245, 255, 0.2) 60%, transparent 100%),
+            radial-gradient(circle at 80% 20%, rgba(194, 217, 247, 0.4) 0%, transparent 50%),
+            radial-gradient(circle at 20% 80%, rgba(194, 217, 247, 0.35) 0%, transparent 50%)
           `,
         }}
       />
 
       {/* Centered Login Card */}
-      <div className="relative z-10 w-full max-w-[470px] rounded-[28px] border border-[#E2EAF4]/90 bg-white p-7 sm:p-9 shadow-[0_12px_45px_rgba(50,68,128,0.08)]">
+      <div className="relative z-10 w-full max-w-[420px] rounded-[28px] border border-white/80 bg-white p-8 sm:p-9 shadow-[0_20px_60px_rgba(50,68,128,0.08)]">
         {/* Card Header */}
         <div className="text-center">
-          <div className="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D3E3FC] text-[#324480] shadow-xs">
-            <ShieldCheck className="h-7 w-7" />
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D3E3FD] text-[#1E3A5F] shadow-xs">
+            <ShieldCheck className="h-6 w-6 text-[#1E3A5F]" />
           </div>
 
-          <h1 className="text-2xl font-black tracking-wide text-[#172B45]">
+          <h1 className="text-xl font-bold tracking-wide text-[#1E3A5F]">
             LOGIN
           </h1>
 
-          <p className="mt-1 text-xs text-[#718096] mb-6">
+          <p className="mt-1 text-xs text-slate-500 mb-6">
             Welcome back! Please sign in to continue.
           </p>
         </div>
@@ -156,13 +151,13 @@ export default function LoginUI() {
           <div className="space-y-1.5">
             <label
               htmlFor="email"
-              className="block text-xs font-semibold text-[#172B45]"
+              className="block text-xs font-semibold text-slate-700"
             >
               Email
             </label>
 
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#69CBE8]" />
+              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#38BDF8]" />
 
               <input
                 id="email"
@@ -173,7 +168,7 @@ export default function LoginUI() {
                   setEmail(e.target.value);
                   if (emailError) setEmailError("");
                 }}
-                className="h-11 w-full rounded-xl border border-[#D6E5F5] bg-[#F5F9FF] pl-10 pr-4 text-xs font-medium text-[#172B45] placeholder:text-[#A0AEC0] outline-none transition-colors focus:border-[#69CBE8] focus:bg-white"
+                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-4 text-xs font-medium text-[#1E3A5F] placeholder:text-slate-400 outline-none transition-colors focus:border-[#60A5FA] focus:bg-white"
               />
             </div>
 
@@ -188,13 +183,13 @@ export default function LoginUI() {
           <div className="space-y-1.5">
             <label
               htmlFor="password"
-              className="block text-xs font-semibold text-[#172B45]"
+              className="block text-xs font-semibold text-slate-700"
             >
               Password
             </label>
 
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#69CBE8]" />
+              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#38BDF8]" />
 
               <input
                 id="password"
@@ -205,13 +200,13 @@ export default function LoginUI() {
                   setPassword(e.target.value);
                   if (passwordError) setPasswordError("");
                 }}
-                className="h-11 w-full rounded-xl border border-[#D6E5F5] bg-[#F5F9FF] pl-10 pr-10 text-xs font-medium text-[#172B45] placeholder:text-[#A0AEC0] outline-none transition-colors focus:border-[#69CBE8] focus:bg-white"
+                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-10 text-xs font-medium text-[#1E3A5F] placeholder:text-slate-400 outline-none transition-colors focus:border-[#60A5FA] focus:bg-white"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#718096] hover:text-[#172B45] transition-colors cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 title={showPassword ? "Hide password" : "Show password"}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -237,9 +232,9 @@ export default function LoginUI() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-[#D6E5F5] text-[#324480] accent-[#324480] cursor-pointer"
+                className="h-4 w-4 rounded border-[#D3E3FD] text-[#2563EB] accent-[#2563EB] cursor-pointer"
               />
-              <span className="text-xs font-medium text-[#718096]">
+              <span className="text-xs font-medium text-slate-600">
                 Remember me
               </span>
             </label>
@@ -247,7 +242,7 @@ export default function LoginUI() {
             <button
               type="button"
               onClick={() => navigate(ROUTE_PATHS.FORGOT_PASSWORD)}
-              className="text-xs font-semibold text-[#2563EB] hover:underline cursor-pointer"
+              className="text-xs font-semibold text-[#0284C7] hover:underline cursor-pointer"
             >
               Forgot Password?
             </button>
@@ -257,11 +252,11 @@ export default function LoginUI() {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-[#C2D8FC] bg-[#D3E3FC] text-xs font-bold text-[#172B45] shadow-xs transition-colors hover:bg-[#C2D8FC] hover:shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+            className="flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-button-primary text-xs font-semibold text-button-primary-foreground shadow-xs transition-colors hover:bg-button-primary-hover active:bg-button-primary-active cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin text-[#172B45]" />
+                <Loader2 className="h-4 w-4 animate-spin text-[#1E3A5F]" />
                 <span>Signing In...</span>
               </>
             ) : (
@@ -271,6 +266,53 @@ export default function LoginUI() {
               </>
             )}
           </button>
+
+          {/* Or continue with divider */}
+          <div className="relative my-5 flex items-center justify-center pt-2">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <span className="relative bg-white px-3 text-[11px] font-medium text-slate-400">
+              Or continue with
+            </span>
+          </div>
+
+          {/* Social Logins */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("admin@gmail.com");
+                setPassword("admin123");
+              }}
+              className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-colors cursor-pointer"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Google</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("admin@gmail.com");
+                setPassword("admin123");
+              }}
+              className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-colors cursor-pointer"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 21 21">
+                <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+                <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+                <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+                <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+              </svg>
+              <span>Microsoft</span>
+            </button>
+          </div>
         </form>
       </div>
     </div>

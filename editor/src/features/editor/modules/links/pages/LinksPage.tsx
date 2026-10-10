@@ -147,11 +147,11 @@ function LinksPageContent() {
 
   const mainTabs: { id: MainSectionTab; label: string; number: string }[] = [
     { id: 'internal', label: 'INTERNAL REFERENCE', number: '1' },
-    { id: 'crossRef', label: 'CROSS REFERENCES', number: '2' },
+    { id: 'crossRef', label: 'CROSS REFERENCE', number: '2' },
   ];
 
   return (
-    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-white dark:bg-[#0D213D] text-[#0F172A] dark:text-muted">
+    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-white dark:bg-[#0D213D] text-button-primary-foreground dark:text-muted">
       {/* Top Fixed Area (Tabs + Form + Controls) - Fits neatly without scrollbar */}
       <div className="shrink-0 p-3 space-y-2.5">
         {/* Main Selectable Tabs (Side-by-Side: 1. INTERNAL REFERENCE | 2. CROSS REFERENCES) */}
@@ -164,10 +164,10 @@ function LinksPageContent() {
                 type="button"
                 onClick={() => setActiveMainTab(tab.id)}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg text-11px font-medium transition-all select-none whitespace-nowrap cursor-pointer',
+                  'flex-1 min-w-0 flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-lg text-[11px] font-semibold transition-all select-none whitespace-nowrap cursor-pointer',
                   isActive
-                    ? 'bg-white text-[#0F172A] shadow-xs font-semibold dark:bg-[#17263D] dark:text-white'
-                    : 'text-[#64748B] hover:text-[#0F172A] dark:text-slate-400 dark:hover:text-white'
+                    ? 'bg-button-primary text-button-primary-foreground shadow-xs font-bold dark:bg-[#1E3A8A] dark:text-white'
+                    : 'text-[#64748B] hover:text-[#1E3A5F] dark:text-slate-400 dark:hover:text-white'
                 )}
               >
                 <span>{tab.number}.</span>
@@ -196,31 +196,32 @@ function LinksPageContent() {
         {feedbackMsg && (
           <div
             className={cn(
-              'flex items-center gap-1.5 p-1.5 rounded-md border text-10px font-medium transition-all',
+              'flex items-center gap-1.5 p-2 rounded-xl border text-xs font-medium transition-all',
               feedbackMsg.type === 'success'
                 ? 'bg-success-50 border-success-200 text-success-800 dark:bg-success-950/40 dark:border-success-800 dark:text-success-300'
                 : 'bg-destructive/10 border-destructive/20 text-destructive/60 dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30'
             )}
           >
             {feedbackMsg.type === 'success' ? (
-              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success-600 dark:text-success-400" />
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-success-600 dark:text-success-400" />
             ) : (
-              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive dark:text-destructive" />
+              <AlertCircle className="h-4 w-4 shrink-0 text-destructive dark:text-destructive" />
             )}
             <span>{feedbackMsg.text}</span>
           </div>
         )}
 
         {/* CONTROLS BELOW MAIN SECTIONS */}
-        <div className="w-full pt-0.5">
+        <div className="w-full pt-1">
           {/* BARE LINKS CONVERTOR */}
           <button
             type="button"
             onClick={handleConvertBareLinks}
-            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white text-[#475569] text-xs font-medium hover:bg-slate-50 transition shadow-2xs dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-300 cursor-pointer"
+            className="w-full h-10 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 transition shadow-xs dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 cursor-pointer"
           >
-            <LinkIcon className="h-3.5 w-3.5 text-[#2563EB] dark:text-[#38BDF8]" />
-            <span>BARE LINKS (Convert Raw URLs)</span>
+            <LinkIcon className="h-4 w-4 text-[#2563EB] dark:text-[#38BDF8]" />
+            <span>BARE LINKS</span>
+            <span className="font-normal text-slate-500">(Convert Raw URLs)</span>
           </button>
         </div>
       </div>

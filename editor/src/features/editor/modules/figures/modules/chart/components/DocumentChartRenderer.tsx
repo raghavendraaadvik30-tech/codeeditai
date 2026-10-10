@@ -32,6 +32,20 @@ import { ChartStyleModal } from './ChartStyleModal';
 import { SelectDataModal } from './SelectDataModal';
 import { ChartLayoutOptions } from './ChartLayoutOptions';
 
+const formatPieLabel = ({ name, percent }: { name?: string; percent?: number }) =>
+  `${name || ''} ${((percent || 0) * 100).toFixed(0)}%`;
+
+const PIE_MARGIN = { top: 8, right: 8, bottom: 12, left: 8 };
+const SCATTER_MARGIN = { top: 10, right: 15, bottom: 20, left: 10 };
+const BAR_MARGIN = { top: 10, right: 20, bottom: 15, left: 20 };
+const COMMON_MARGIN = { top: 10, right: 15, bottom: 20, left: 10 };
+
+const COMMON_TICK = { fontSize: 11, fill: '#64748b' };
+const COMMON_AXIS_LINE = { stroke: '#cbd5e1' };
+const TOOLTIP_CURSOR = { strokeDasharray: '3 3' };
+const ACTIVE_DOT = { r: 6 };
+const BAR_RADIUS_VERTICAL: [number, number, number, number] = [4, 4, 0, 0];
+const BAR_RADIUS_HORIZONTAL: [number, number, number, number] = [0, 4, 4, 0];
 interface DocumentChartRendererProps {
   chart: ChartModel;
   figureEl?: HTMLElement;
@@ -150,11 +164,41 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
       .filter((pt): pt is { x: number; y: number; name: string } => pt !== null);
   }, [chart.chartType, chart.categories, chart.series]);
 
+  // Derive Pie dataset (memoized to prevent infinite update loop in Recharts)
+  const pieData = useMemo(() => {
+    if (chart.chartType !== 'pie' && chart.chartType !== 'doughnut') return [];
+    return chart.categories
+      .map((cat, idx) => {
+        const raw = chart.series[0]?.values[idx];
+        if (raw === '' || raw === null || raw === undefined) return null;
+        const num = typeof raw === 'number' ? raw : parseFloat(raw);
+        if (isNaN(num)) return null;
+        return {
+          name: cat,
+          value: num,
+        };
+      })
+      .filter((pt): pt is { name: string; value: number } => pt !== null);
+  }, [chart.chartType, chart.categories, chart.series]);
+
   // Derive active color palette
   const activePalette = useMemo(() => {
     const scheme = COLOR_SCHEMES.find((s) => s.id === chart.colorScheme);
     return scheme ? scheme.colors : COLOR_SCHEMES[0].colors;
   }, [chart.colorScheme]);
+
+  const seriesDots = useMemo(() => {
+    return chart.series.map((s, idx) => {
+      const color = s.color || activePalette[idx % activePalette.length];
+      return { r: 4, fill: '#ffffff', stroke: color, strokeWidth: 2 };
+    });
+  }, [chart.series, activePalette]);
+
+  const xAxisLabelScatter = useMemo(() => chart.showXAxisTitle ? { value: chart.xAxisTitle || 'X Axis', position: 'insideBottom' as const, offset: 0, fontSize: 11 } : undefined, [chart.showXAxisTitle, chart.xAxisTitle]);
+  const yAxisLabelScatter = useMemo(() => chart.showYAxisTitle ? { value: chart.yAxisTitle || 'Y Axis', angle: -90, position: 'insideLeft' as const, fontSize: 11 } : undefined, [chart.showYAxisTitle, chart.yAxisTitle]);
+  const xAxisLabelBar = useMemo(() => chart.showXAxisTitle ? { value: chart.xAxisTitle || 'Values', position: 'insideBottom' as const, offset: 0, fontSize: 11 } : undefined, [chart.showXAxisTitle, chart.xAxisTitle]);
+  const xAxisLabelCommon = useMemo(() => chart.showXAxisTitle ? { value: chart.xAxisTitle || 'Categories', position: 'insideBottom' as const, offset: 0, fontSize: 11 } : undefined, [chart.showXAxisTitle, chart.xAxisTitle]);
+  const yAxisLabelCommon = useMemo(() => chart.showYAxisTitle ? { value: chart.yAxisTitle || 'Values', angle: -90, position: 'insideLeft' as const, offset: 5, fontSize: 11 } : undefined, [chart.showYAxisTitle, chart.yAxisTitle]);
 
   const handleChartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -409,7 +453,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               key={s.id}
               dataKey={s.name}
               fill={color}
-              radius={[4, 4, 0, 0]}
+              radius={BAR_RADIUS_VERTICAL}
               name={s.name}
             >
               {chart.showDataLabels && <LabelList dataKey={s.name} position="top" fill="#475569" fontSize={10} />}
@@ -436,7 +480,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               key={s.id}
               dataKey={s.name}
               fill={color}
-              radius={[0, 4, 4, 0]}
+              radius={BAR_RADIUS_HORIZONTAL}
               name={s.name}
             >
               {chart.showDataLabels && <LabelList dataKey={s.name} position="right" fill="#475569" fontSize={10} />}
@@ -451,8 +495,8 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               dataKey={s.name}
               stroke={color}
               strokeWidth={2.5}
-              dot={{ r: 4, fill: '#ffffff', stroke: color, strokeWidth: 2 }}
-              activeDot={{ r: 6 }}
+              dot={seriesDots[idx]}
+              activeDot={ACTIVE_DOT}
               name={s.name}
             >
               {chart.showDataLabels && <LabelList dataKey={s.name} position="top" fill="#475569" fontSize={10} />}
@@ -482,7 +526,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
                 key={s.id}
                 dataKey={s.name}
                 fill={color}
-                radius={[4, 4, 0, 0]}
+                radius={BAR_RADIUS_VERTICAL}
                 name={s.name}
               />
             );
@@ -494,7 +538,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               dataKey={s.name}
               stroke={color}
               strokeWidth={2.5}
-              dot={{ r: 4, fill: '#ffffff', stroke: color, strokeWidth: 2 }}
+              dot={seriesDots[idx]}
               name={s.name}
             />
           );
@@ -511,24 +555,11 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
     // Pie / Doughnut uses first series mapped over categories
     if (chart.chartType === 'pie' || chart.chartType === 'doughnut') {
-      const pieData = chart.categories
-        .map((cat, idx) => {
-          const raw = chart.series[0]?.values[idx];
-          if (raw === '' || raw === null || raw === undefined) return null;
-          const num = typeof raw === 'number' ? raw : parseFloat(raw);
-          if (isNaN(num)) return null;
-          return {
-            name: cat,
-            value: num,
-          };
-        })
-        .filter((pt): pt is { name: string; value: number } => pt !== null);
-
       const isDoughnut = chart.chartType === 'doughnut';
 
       return (
         <ResponsiveContainer width="100%" height={effectiveChartHeight}>
-          <PieChart margin={{ top: 8, right: 8, bottom: 12, left: 8 }}>
+          <PieChart margin={PIE_MARGIN}>
             <Tooltip />
             {chart.showLegend && (
               <Legend verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'} height={28} />
@@ -541,12 +572,7 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
               cy="48%"
               innerRadius={isDoughnut ? 52 : 0}
               outerRadius={85}
-              label={
-                chart.showDataLabels
-                  ? ({ name, percent }: { name?: string; percent?: number }) =>
-                      `${name || ''} ${((percent || 0) * 100).toFixed(0)}%`
-                  : undefined
-              }
+              label={chart.showDataLabels ? formatPieLabel : undefined}
             >
               {pieData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={activePalette[index % activePalette.length]} />
@@ -561,23 +587,23 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
     if (chart.chartType === 'scatter') {
       return (
         <ResponsiveContainer width="100%" height={effectiveChartHeight}>
-          <ScatterChart margin={{ top: 10, right: 15, bottom: 20, left: 10 }}>
+          <ScatterChart margin={SCATTER_MARGIN}>
             {chart.showGridlines && <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />}
             <XAxis
               type="number"
               dataKey="x"
               name={chart.xAxisTitle || 'X Axis'}
-              tick={{ fontSize: 11, fill: '#64748b' }}
-              label={chart.showXAxisTitle ? { value: chart.xAxisTitle || 'X Axis', position: 'bottom', offset: 0, fontSize: 11 } : undefined}
+              tick={COMMON_TICK}
+              label={xAxisLabelScatter}
             />
             <YAxis
               type="number"
               dataKey="y"
               name={chart.yAxisTitle || 'Y Axis'}
-              tick={{ fontSize: 11, fill: '#64748b' }}
-              label={chart.showYAxisTitle ? { value: chart.yAxisTitle || 'Y Axis', angle: -90, position: 'left', fontSize: 11 } : undefined}
+              tick={COMMON_TICK}
+              label={yAxisLabelScatter}
             />
-            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            <Tooltip cursor={TOOLTIP_CURSOR} />
             {chart.showLegend && <Legend verticalAlign="bottom" height={28} />}
             <Scatter
               name={chart.series[0]?.name || 'Series 1'}
@@ -597,22 +623,22 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
           <BarChart
             data={rechartsData}
             layout="vertical"
-            margin={{ top: 10, right: 20, bottom: 15, left: 20 }}
+            margin={BAR_MARGIN}
           >
             {chart.showGridlines && <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />}
             <XAxis
               type="number"
-              tick={{ fontSize: 11, fill: '#64748b' }}
-              axisLine={{ stroke: '#cbd5e1' }}
-              label={chart.showXAxisTitle ? { value: chart.xAxisTitle || 'Values', position: 'bottom', offset: 0, fontSize: 11 } : undefined}
+              tick={COMMON_TICK}
+              axisLine={COMMON_AXIS_LINE}
+              label={xAxisLabelBar}
             />
             <YAxis
               dataKey="category"
               type="category"
-              tick={{ fontSize: 11, fill: '#64748b' }}
-              axisLine={{ stroke: '#cbd5e1' }}
+              tick={COMMON_TICK}
+              axisLine={COMMON_AXIS_LINE}
             />
-            <Tooltip />
+            <Tooltip cursor={TOOLTIP_CURSOR} />
             {chart.showLegend && (
               <Legend verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'} height={28} />
             )}
@@ -634,20 +660,20 @@ export const DocumentChartRenderer: React.FC<DocumentChartRendererProps> = ({
 
     return (
       <ResponsiveContainer width="100%" height={effectiveChartHeight}>
-        <ChartContainerComponent data={rechartsData} margin={{ top: 10, right: 15, bottom: 20, left: 10 }}>
+        <ChartContainerComponent data={rechartsData} margin={COMMON_MARGIN}>
           {chart.showGridlines && <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />}
           <XAxis
             dataKey="category"
-            tick={{ fontSize: 11, fill: '#64748b' }}
-            axisLine={{ stroke: '#cbd5e1' }}
-            label={chart.showXAxisTitle ? { value: chart.xAxisTitle || 'Categories', position: 'bottom', offset: 0, fontSize: 11 } : undefined}
+            tick={COMMON_TICK}
+            axisLine={COMMON_AXIS_LINE}
+            label={xAxisLabelCommon}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: '#64748b' }}
-            axisLine={{ stroke: '#cbd5e1' }}
-            label={chart.showYAxisTitle ? { value: chart.yAxisTitle || 'Values', angle: -90, position: 'left', offset: 5, fontSize: 11 } : undefined}
+            tick={COMMON_TICK}
+            axisLine={COMMON_AXIS_LINE}
+            label={yAxisLabelCommon}
           />
-          <Tooltip />
+          <Tooltip cursor={TOOLTIP_CURSOR} />
           {chart.showLegend && (
             <Legend
               verticalAlign={chart.legendPosition === 'top' ? 'top' : 'bottom'}

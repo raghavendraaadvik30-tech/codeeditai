@@ -82,7 +82,7 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
     <div className="space-y-2.5 pt-1 select-none">
       {/* Recipient Email */}
       <div>
-        <label className="block text-10px font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
+        <label className="block text-[9px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
           Recipient Email <span className="text-destructive">*</span>
         </label>
         <div className="relative">
@@ -96,14 +96,14 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
               if (success) setSuccess(null);
             }}
             placeholder="recipient@example.com"
-            className="w-full h-7.5 pl-8 pr-2.5 text-11px rounded-md border border-secondary bg-card text-foreground placeholder:text-11px placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
+            className="w-full h-6 pl-8 pr-2.5 text-[10px] rounded-md border border-secondary bg-card text-foreground placeholder:text-[10px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
           />
         </div>
       </div>
 
       {/* Subject */}
       <div>
-        <label className="block text-10px font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
+        <label className="block text-[9px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
           Subject
         </label>
         <div className="relative">
@@ -116,14 +116,14 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
               if (success) setSuccess(null);
             }}
             placeholder="Enter subject..."
-            className="w-full h-7.5 pl-8 pr-2.5 text-11px rounded-md border border-secondary bg-card text-foreground placeholder:text-11px placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
+            className="w-full h-6 pl-8 pr-2.5 text-[10px] rounded-md border border-secondary bg-card text-foreground placeholder:text-[10px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
           />
         </div>
       </div>
 
       {/* Message */}
       <div>
-        <label className="block text-10px font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
+        <label className="block text-[9px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
           Message
         </label>
         <div className="relative">
@@ -136,7 +136,7 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
             }}
             rows={3}
             placeholder="Write your email message..."
-            className="w-full pl-8 pr-2.5 py-1.5 text-11px rounded-md border border-secondary bg-card text-foreground placeholder:text-11px placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted resize-none"
+            className="w-full pl-8 pr-2.5 py-1 text-[10px] rounded-md border border-secondary bg-card text-foreground placeholder:text-[10px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted resize-none"
           />
         </div>
       </div>
@@ -163,7 +163,7 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={handleSendToGmail}
-          className="w-full h-8 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-11px font-semibold hover:bg-primary/90 active:bg-primary transition shadow-sm active:scale-99"
+          className="w-full h-7 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold hover:bg-primary/90 active:bg-primary transition shadow-sm active:scale-99"
         >
           <Send className="h-3.5 w-3.5" />
           <span>Send to Gmail</span>
@@ -171,7 +171,7 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
       </div>
 
       {/* Helper text */}
-      <p className="text-10px text-muted-foreground dark:text-muted-foreground leading-relaxed">
+      <p className="text-[9px] text-muted-foreground dark:text-muted-foreground leading-relaxed">
         Opens Gmail in a new browser tab with recipient, subject, and message ready to send.
       </p>
     </div>

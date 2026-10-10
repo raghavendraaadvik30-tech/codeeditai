@@ -314,7 +314,7 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
                 type="submit"
                 size="sm"
                 disabled={imageState.status !== 'success'}
-                className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold px-4 rounded-md shadow-xs disabled:opacity-50"
+                className="h-8 bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active text-xs font-semibold px-4 rounded-md shadow-xs disabled:opacity-50"
               >
                 Insert into Document
               </Button>

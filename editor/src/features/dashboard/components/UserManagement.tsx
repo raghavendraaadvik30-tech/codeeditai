@@ -1402,11 +1402,11 @@ Please use the credentials above to access the secure portal.`
 
               sm:w-auto
 
-              bg-primary
+              bg-button-primary
 
-              hover:bg-primary/90
+              hover:bg-button-primary-hover
 
-              text-primary-foreground
+              text-button-primary-foreground
 
               font-bold
 
@@ -1680,7 +1680,7 @@ Please use the credentials above to access the secure portal.`
 
                               : user.role === "Author"
 
-                                ? "bg-primary/10 text-primary/90"
+                                ? "bg-primary/10 text-primary"
 
                                 : "bg-warning-50 text-warning-700"
 
@@ -2468,7 +2468,7 @@ Please use the credentials above to access the secure portal.`
 
                 type="submit"
 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="bg-button-primary hover:bg-button-primary-hover text-button-primary-foreground"
 
               >
 
@@ -2847,7 +2847,7 @@ Please use the credentials above to access the secure portal.`
 
                 type="submit"
 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="bg-button-primary hover:bg-button-primary-hover text-button-primary-foreground"
 
               >
 
@@ -4392,11 +4392,11 @@ Please use the credentials above to access the secure portal.`
 
                     rounded-lg
 
-                    bg-primary
+                    bg-button-primary
 
-                    hover:bg-primary/90
+                    hover:bg-button-primary-hover
 
-                    text-primary-foreground
+                    text-button-primary-foreground
 
                     text-xs
 

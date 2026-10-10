@@ -519,7 +519,7 @@ export default function DocumentPage() {
             <button
               type="button"
               onClick={handleCreateDoc}
-              className="flex h-7 items-center gap-1 rounded-md bg-brand px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-brand-deep"
+              className="flex h-7 items-center gap-1 rounded-md bg-button-primary px-2.5 text-xs font-semibold text-button-primary-foreground shadow-xs transition-colors hover:bg-button-primary-hover active:bg-button-primary-active cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               New

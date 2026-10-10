@@ -161,7 +161,7 @@ export const SelectDataModal: React.FC<SelectDataModalProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-primary-foreground bg-brand rounded hover:bg-brand-deep"
+            className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-button-primary-foreground bg-button-primary rounded hover:bg-button-primary-hover active:bg-button-primary-active"
           >
             <Check className="w-3.5 h-3.5" />
             <span>Apply</span>

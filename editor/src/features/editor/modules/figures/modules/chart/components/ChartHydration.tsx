@@ -10,6 +10,7 @@ interface ChartMountInfo {
   figureEl: HTMLElement;
   mountEl: HTMLElement;
   chart: ChartModel;
+  rawConfig: string;
 }
 
 export const ChartHydration: React.FC = () => {
@@ -35,9 +36,6 @@ export const ChartHydration: React.FC = () => {
 
       if (chartId && mountEl && rawConfig) {
         try {
-          const chart: ChartModel = JSON.parse(decodeURIComponent(rawConfig));
-          
-          // Check if this mount is already tracked by React
           const existing = mountsRef.current.find(
             (m) => m.id === chartId && m.mountEl === mountEl
           );
@@ -47,13 +45,24 @@ export const ChartHydration: React.FC = () => {
             mountEl.innerHTML = '';
           }
 
-          // Take the chart with the newest updatedAt timestamp between memory and DOM
-          let effectiveChart = chart;
-          if (existing?.chart) {
-            const existingTime = new Date(existing.chart.updatedAt || 0).getTime();
-            const domTime = new Date(chart.updatedAt || 0).getTime();
-            if (existingTime > domTime) {
-              effectiveChart = existing.chart;
+          let effectiveChart: ChartModel;
+
+          // Crucial fix: if the raw DOM config string hasn't changed, 
+          // DO NOT parse a new object. This prevents infinite React render loops
+          // caused by MutationObserver picking up Recharts SVG updates.
+          if (existing && existing.rawConfig === rawConfig) {
+            effectiveChart = existing.chart;
+          } else {
+            const chart: ChartModel = JSON.parse(decodeURIComponent(rawConfig));
+            effectiveChart = chart;
+            
+            // Take the chart with the newest updatedAt timestamp between memory and DOM
+            if (existing?.chart) {
+              const existingTime = new Date(existing.chart.updatedAt || 0).getTime();
+              const domTime = new Date(chart.updatedAt || 0).getTime();
+              if (existingTime > domTime) {
+                effectiveChart = existing.chart;
+              }
             }
           }
 
@@ -176,6 +185,9 @@ export const ChartHydration: React.FC = () => {
                   // Update data-chart-config on the figure
                   const encoded = encodeURIComponent(JSON.stringify(updatedChart));
                   figEl.setAttribute('data-chart-config', encoded);
+                  if (currentM) {
+                    currentM.rawConfig = encoded;
+                  }
 
                   // Sync with context
                   setActiveChart(updatedChart);
@@ -251,6 +263,7 @@ export const ChartHydration: React.FC = () => {
             figureEl: figEl,
             mountEl,
             chart: effectiveChart,
+            rawConfig,
           });
         } catch (err) {
           console.error('Failed to parse chart config for', chartId, err);
@@ -300,6 +313,7 @@ export const ChartHydration: React.FC = () => {
       // 3. Update DOM attributes on the figure element
       const encoded = encodeURIComponent(JSON.stringify(updated));
       mount.figureEl.setAttribute('data-chart-config', encoded);
+      mount.rawConfig = encoded;
       mount.figureEl.setAttribute('data-chart-type', updated.chartType);
       mount.figureEl.setAttribute('data-chart-wrap', updated.wrapMode || 'inline');
       applyChartFigureStyles(mount.figureEl, updated);

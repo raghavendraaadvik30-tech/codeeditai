@@ -153,7 +153,7 @@ export function StandardTablesPanel({ searchQuery = "" }: StandardTablesPanelPro
               e.stopPropagation();
               handleSelect(item.id);
             }}
-            className="flex h-6 shrink-0 items-center gap-1 rounded-md bg-brand/10 px-2 text-11px font-medium text-brand hover:bg-brand hover:text-primary-foreground transition-colors cursor-pointer"
+            className="flex h-6 shrink-0 items-center gap-1 rounded-md bg-button-primary px-2 text-11px font-medium text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active transition-colors cursor-pointer"
           >
             <Plus className="h-3 w-3" />
             <span>Insert</span>

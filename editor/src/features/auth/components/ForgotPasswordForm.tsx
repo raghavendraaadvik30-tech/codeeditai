@@ -203,7 +203,7 @@ export default function ForgotPasswordForm() {
 
                 <Button
                   type="submit"
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                  className="flex-1"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (

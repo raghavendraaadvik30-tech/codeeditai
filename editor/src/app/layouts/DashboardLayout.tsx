@@ -209,7 +209,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
               activeTab === "profile"
 
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-button-primary text-button-primary-foreground shadow-sm"
 
                 : "border border-secondary bg-card text-secondary-foreground hover:bg-muted"
 
@@ -233,7 +233,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
               activeTab === "password"
 
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-button-primary text-button-primary-foreground shadow-sm"
 
                 : "border border-secondary bg-card text-secondary-foreground hover:bg-muted"
 
@@ -323,7 +323,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                 onClick={openPasswordTab}
 
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-button-primary px-4 py-2.5 text-xs font-bold text-button-primary-foreground shadow-sm transition hover:bg-button-primary-hover"
 
               >
 
@@ -498,7 +498,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                   onClick={handleSavePassword}
 
-                  className="rounded-lg bg-primary px-5 py-2 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                  className="rounded-lg bg-button-primary px-5 py-2 text-xs font-bold text-button-primary-foreground shadow-sm transition hover:bg-button-primary-hover"
 
                 >
 

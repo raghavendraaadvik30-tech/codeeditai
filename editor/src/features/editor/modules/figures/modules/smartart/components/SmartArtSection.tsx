@@ -55,7 +55,7 @@ export const SmartArtSection: React.FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
                 type="button"
-                className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-all hover:bg-primary/90 active:bg-primary focus:outline-none"
+                className="flex items-center gap-1.5 rounded-lg bg-button-primary px-3 py-1.5 text-xs font-semibold text-button-primary-foreground shadow-xs transition-all hover:bg-button-primary-hover active:bg-button-primary-active focus:outline-none cursor-pointer"
               >
                 <span>Insert</span>
                 <ChevronDown className="h-3.5 w-3.5" />

@@ -165,16 +165,16 @@ export default function LeftOverlay() {
           <div
             className="
               flex
-              h-7.5
-              w-7.5
+              h-8
+              w-8
               shrink-0
               items-center
               justify-center
-              rounded-lg
-              bg-[#EBF2FC]
-              text-[#324480]
+              rounded-xl
+              bg-[#D3E3FD]
+              text-[#1E3A5F]
               border
-              border-[#E0E7EF]
+              border-[#C2D9F7]
               dark:bg-[#132742]
               dark:text-[#38BDF8]
               dark:border-[#1E3A5F]

@@ -183,7 +183,7 @@ export default function CommentsTab() {
           cursor-pointer
           ${
             isCommentsPanelOpen
-              ? "bg-[#EFF6FF] text-[#E82D91] border border-[#E82D91]/40 dark:bg-[#1E3A8A] dark:text-[#93C5FD]"
+              ? "bg-button-primary text-button-primary-foreground border border-secondary dark:bg-[#1E3A8A] dark:text-[#93C5FD]"
               : "text-[#324480] hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
           }
         `}

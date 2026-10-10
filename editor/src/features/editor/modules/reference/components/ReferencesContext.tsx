@@ -737,7 +737,7 @@ function CreateSourceDialog({ onClose }: ModalProps) {
               </button>
               <button
                 type="submit"
-                className="h-9 px-5 text-xs font-semibold rounded-md bg-brand hover:bg-brand text-primary-foreground shadow-sm transition-colors"
+                className="h-9 px-5 text-xs font-semibold rounded-md bg-button-primary hover:bg-button-primary-hover active:bg-button-primary-active text-button-primary-foreground shadow-sm transition-colors"
               >
                 OK
               </button>
@@ -792,7 +792,7 @@ function PlaceholderDialog({ onClose }: ModalProps) {
             </button>
             <button
               type="submit"
-              className="h-9 px-4 text-xs font-semibold rounded-md bg-brand text-primary-foreground hover:bg-brand transition-colors"
+              className="h-9 px-4 text-xs font-semibold rounded-md bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active transition-colors"
             >
               OK
             </button>
@@ -923,7 +923,7 @@ function SourceManagerDialog({ onClose }: ModalProps) {
               refs.setEditingSource(null);
               refs.setIsOpenCreateSource(true);
             }}
-            className="h-9 px-4 text-xs font-semibold bg-brand text-primary-foreground hover:bg-brand rounded-md transition-colors shadow-sm"
+            className="h-9 px-4 text-xs font-semibold bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active rounded-md transition-colors shadow-sm"
           >
             + New Source...
           </button>

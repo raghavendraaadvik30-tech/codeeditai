@@ -235,23 +235,23 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
   };
 
   return (
-    <div className="flex flex-col bg-card dark:bg-[#0B1520] border border-secondary dark:border-muted rounded-lg p-2.5 shadow-xs select-none space-y-2">
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-3.5 space-y-3.5 dark:border-[#294564] dark:bg-[#111D29] shadow-xs select-none">
       {/* Reference Type Pills Grid */}
       <div>
-        <div className="flex items-center justify-between mb-1">
-          <label className="block text-10px font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             Reference Type
           </label>
           <button
             type="button"
             onClick={handleManualRefresh}
             title="Refresh targets"
-            className="text-muted-foreground hover:text-secondary-foreground dark:hover:text-muted-foreground transition-colors p-0.5"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors p-0.5 cursor-pointer"
           >
-            <RefreshCw className={cn("h-3 w-3", isScanning && "animate-spin text-primary")} />
+            <RefreshCw className={cn("h-3.5 w-3.5", isScanning && "animate-spin text-[#2563EB]")} />
           </button>
         </div>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-2 gap-2">
           {referenceTypes.map((type) => {
             const Icon = type.icon;
             const isSelected = selectedType === type.id;
@@ -264,13 +264,13 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                   setError(null);
                 }}
                 className={cn(
-                  'flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-10px font-medium transition border select-none',
+                  'flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-all select-none cursor-pointer',
                   isSelected
-                    ? 'border-primary bg-primary/10 text-primary/90 dark:border-primary dark:bg-navy-950/40 dark:text-navy-300 shadow-xs'
-                    : 'border-secondary bg-card text-secondary-foreground hover:bg-muted dark:border-muted dark:bg-[#111D29] dark:text-muted-foreground'
+                    ? 'bg-button-primary text-button-primary-foreground border border-[#C2D9F7] shadow-2xs font-semibold dark:bg-[#1E3A8A] dark:border-[#38BDF8]/40 dark:text-white'
+                    : 'bg-white text-[#64748B] hover:bg-slate-50 border border-slate-200 dark:bg-[#111D29] dark:border-[#294564] dark:text-slate-400 dark:hover:text-white'
                 )}
               >
-                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <Icon className={cn("h-4 w-4 shrink-0", isSelected ? "text-[#2563EB] dark:text-[#38BDF8]" : "text-slate-400")} />
                 <span className="truncate">{type.label}</span>
               </button>
             );
@@ -280,17 +280,17 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
 
       {/* Bookmark creation tool when Bookmark is selected */}
       {selectedType === 'bookmark' && (
-        <div className="p-2 rounded-md border border-warning-200 bg-warning-50/50 dark:border-warning-900/50 dark:bg-warning-950/20 space-y-1.5">
-          <label className="block text-10px font-semibold text-warning-800 dark:text-warning-300">
+        <div className="p-3 rounded-xl border border-warning-200 bg-warning-50/50 dark:border-warning-900/50 dark:bg-warning-950/20 space-y-2">
+          <label className="block text-xs font-semibold text-warning-800 dark:text-warning-300">
             + Create Bookmark at Selection / Cursor
           </label>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <input
               type="text"
               value={newBookmarkName}
               onChange={(e) => setNewBookmarkName(e.target.value)}
               placeholder="e.g. SafetySummary"
-              className="flex-1 h-7 px-2 text-11px rounded border border-warning-200 bg-card dark:bg-[#111D29] text-foreground dark:text-muted-foreground focus:outline-none placeholder:text-11px placeholder:text-muted-foreground"
+              className="flex-1 h-9 px-3 text-xs rounded-xl border border-warning-200 bg-white dark:bg-[#111D29] text-foreground dark:text-muted-foreground focus:outline-none placeholder:text-xs placeholder:text-muted-foreground"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreateBookmark();
               }}
@@ -299,14 +299,14 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleCreateBookmark}
-              className="h-7 px-2.5 rounded bg-warning-600 hover:bg-warning-700 text-primary-foreground text-10px font-semibold flex items-center gap-1 shrink-0 shadow-2xs"
+              className="h-9 px-3 rounded-xl bg-warning-600 hover:bg-warning-700 text-white text-xs font-semibold flex items-center gap-1 shrink-0 shadow-2xs cursor-pointer"
             >
-              <Plus className="h-3 w-3" />
+              <Plus className="h-3.5 w-3.5" />
               Add
             </button>
           </div>
           {bookmarkSuccess && (
-            <p className="text-10px text-success-600 dark:text-success-400 font-medium">
+            <p className="text-xs text-success-600 dark:text-success-400 font-medium">
               {bookmarkSuccess}
             </p>
           )}
@@ -315,28 +315,28 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
 
       {/* For Which Target Dropdown */}
       <div>
-        <div className="flex items-center justify-between mb-1">
-          <label className="block text-10px font-semibold text-secondary-foreground dark:text-muted-foreground">
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
             For which target ({targets.length} found)
           </label>
           <button
             type="button"
             onClick={handleManualRefresh}
-            className="flex items-center gap-1 text-9px text-primary hover:text-primary/90 dark:text-primary"
+            className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer font-semibold"
             title="Scan document for targets"
           >
-            <RefreshCw className={cn("h-2.5 w-2.5", isScanning && "animate-spin")} />
-            Refresh
+            <RefreshCw className={cn("h-3 w-3", isScanning && "animate-spin text-[#2563EB]")} />
+            <span>Refresh</span>
           </button>
         </div>
         {targets.length === 0 ? (
-          <div className="p-2 text-center text-10px text-muted-foreground bg-muted dark:bg-[#111D29] rounded-md border border-dashed border-border dark:border-secondary-foreground">
+          <div className="p-3.5 text-center text-xs font-medium text-slate-500 bg-[#F8FAFC] dark:bg-[#111D29] rounded-xl border border-slate-200 dark:border-[#294564]">
             {selectedType === 'bookmark'
               ? 'No bookmarks in document yet. Type a name above and click "Add".'
               : `No ${currentTypeLabel.toLowerCase()}s created in the document yet.`}
           </div>
         ) : selectedType === 'bookmark' ? (
-          <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
+          <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">
             {targets.map((t) => (
               <button
                 key={t.id}
@@ -345,7 +345,7 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                   setSuccessMsg(`Navigated to ${t.title}`);
                   setTimeout(() => setSuccessMsg(null), 2000);
                 }}
-                className="w-full text-left px-2.5 py-1.5 text-10px rounded bg-muted hover:bg-muted border border-secondary text-secondary-foreground dark:bg-[#111D29] dark:hover:bg-[#1A2C3D] dark:border-muted dark:text-muted-foreground transition"
+                className="w-full text-left px-3 py-2 text-xs rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 dark:bg-[#111D29] dark:hover:bg-[#1A2C3D] dark:border-muted dark:text-muted-foreground transition cursor-pointer"
               >
                 {t.title}
               </button>
@@ -359,20 +359,20 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                 if (!isDropdownOpen) refreshTargets();
                 setIsDropdownOpen(!isDropdownOpen);
               }}
-              className="w-full h-7.5 px-2.5 text-11px rounded-md border border-secondary bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted flex items-center justify-between transition-colors"
+              className="w-full h-10 px-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-white flex items-center justify-between transition-colors cursor-pointer"
             >
               <span className="truncate pr-2">
                 {targets.find((t) => t.id === selectedTargetId)?.title || 'Select a target'}
               </span>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />
             </button>
             
             {isDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-                <div className="absolute left-0 top-[calc(100%+4px)] z-50 w-full max-h-45 overflow-y-auto rounded-md border border-secondary bg-card shadow-lg dark:border-secondary-foreground dark:bg-[#111D29] py-1 scrollbar-thin scrollbar-thumb-secondary dark:scrollbar-thumb-secondary-foreground">
+                <div className="absolute left-0 top-[calc(100%+4px)] z-50 w-full max-h-45 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-secondary-foreground dark:bg-[#111D29] py-1 scrollbar-thin">
                   {targets.length === 0 ? (
-                    <div className="px-3 py-2 text-10px text-muted-foreground italic">No targets found</div>
+                    <div className="px-3 py-2 text-xs text-slate-400 italic">No targets found</div>
                   ) : (
                     targets.map((t) => (
                       <button
@@ -383,8 +383,8 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
                           setIsDropdownOpen(false);
                         }}
                         className={cn(
-                          "w-full text-left px-3 py-1.5 text-10px hover:bg-muted dark:hover:bg-muted transition-colors truncate",
-                          selectedTargetId === t.id && "bg-primary/50 text-primary dark:bg-navy-900/20 dark:text-primary font-medium"
+                          "w-full text-left px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors truncate cursor-pointer",
+                          selectedTargetId === t.id && "bg-button-primary/60 text-[#1E3A5F] font-semibold"
                         )}
                         title={t.title}
                       >
@@ -404,15 +404,15 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
         <>
           {/* Error / Success Feedback */}
           {error && (
-            <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-10px dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <div className="flex items-center gap-1.5 p-2 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
+              <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-success-50 border border-success-200 text-success-700 text-10px dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
-              <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+            <div className="flex items-center gap-1.5 p-2 rounded-xl bg-success-50 border border-success-200 text-success-700 text-xs dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -423,10 +423,10 @@ export function CrossReferenceColumn({ onLinkInserted }: CrossReferenceColumnPro
             disabled={targets.length === 0}
             onMouseDown={(e) => e.preventDefault()}
             onClick={handleInsertReference}
-            className="w-full h-7.5 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-11px font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm active:scale-99"
+            className="w-full h-10 rounded-xl bg-button-primary hover:bg-button-primary-hover active:bg-button-primary-active text-button-primary-foreground font-semibold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span>Insert Reference</span>
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ArrowRight className="h-4 w-4" />
           </button>
         </>
       )}
