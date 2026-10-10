@@ -146,16 +146,16 @@ function LinksPageContent() {
   };
 
   const mainTabs: { id: MainSectionTab; label: string; number: string }[] = [
-    { id: 'internal', label: 'Internal Reference', number: '1' },
-    { id: 'crossRef', label: 'Cross References', number: '2' },
+    { id: 'internal', label: 'INTERNAL REFERENCE', number: '1' },
+    { id: 'crossRef', label: 'CROSS REFERENCES', number: '2' },
   ];
 
   return (
-    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-muted dark:bg-[#07131E] text-foreground dark:text-muted">
+    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-white dark:bg-[#0D213D] text-[#0F172A] dark:text-muted">
       {/* Top Fixed Area (Tabs + Form + Controls) - Fits neatly without scrollbar */}
-      <div className="shrink-0 p-2.5 space-y-2">
-        {/* Main Selectable Tabs (Side-by-Side: 1. Internal Reference | 2. Cross References) */}
-        <div className="flex gap-1 p-0.5 rounded-lg bg-secondary/80 dark:bg-[#111D29] border border-secondary dark:border-muted">
+      <div className="shrink-0 p-3 space-y-2.5">
+        {/* Main Selectable Tabs (Side-by-Side: 1. INTERNAL REFERENCE | 2. CROSS REFERENCES) */}
+        <div className="flex gap-1 p-1 rounded-xl bg-[#F1F5F9] dark:bg-[#111D29] border border-[#E2E8F0] dark:border-[#294564]">
           {mainTabs.map((tab) => {
             const isActive = activeMainTab === tab.id;
             return (
@@ -164,10 +164,10 @@ function LinksPageContent() {
                 type="button"
                 onClick={() => setActiveMainTab(tab.id)}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-xs font-medium transition-all select-none whitespace-nowrap',
+                  'flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg text-11px font-medium transition-all select-none whitespace-nowrap cursor-pointer',
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-xs font-semibold'
-                    : 'text-secondary-foreground hover:text-foreground hover:bg-secondary/50 dark:text-muted-foreground dark:hover:text-primary-foreground dark:hover:bg-muted/60'
+                    ? 'bg-white text-[#0F172A] shadow-xs font-semibold dark:bg-[#17263D] dark:text-white'
+                    : 'text-[#64748B] hover:text-[#0F172A] dark:text-slate-400 dark:hover:text-white'
                 )}
               >
                 <span>{tab.number}.</span>
@@ -217,9 +217,9 @@ function LinksPageContent() {
           <button
             type="button"
             onClick={handleConvertBareLinks}
-            className="w-full h-7.5 flex items-center justify-center gap-1.5 rounded-md border border-secondary bg-card text-secondary-foreground text-11px font-semibold hover:bg-muted hover:text-foreground transition shadow-2xs dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted-foreground dark:hover:bg-muted"
+            className="w-full h-8 flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white text-[#475569] text-xs font-medium hover:bg-slate-50 transition shadow-2xs dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-300 cursor-pointer"
           >
-            <LinkIcon className="h-3.5 w-3.5 text-primary dark:text-primary" />
+            <LinkIcon className="h-3.5 w-3.5 text-[#2563EB] dark:text-[#38BDF8]" />
             <span>BARE LINKS (Convert Raw URLs)</span>
           </button>
         </div>

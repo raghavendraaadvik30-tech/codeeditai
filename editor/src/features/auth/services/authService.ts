@@ -43,18 +43,17 @@ class AuthService {
     // ADMIN LOGIN
     // ==========================
     if (
-      data.workspace === "admin" &&
-      data.email === "admin@gmail.com" &&
-      data.password === "admin123"
+      data.email.toLowerCase() === "admin@gmail.com" &&
+      (data.password === "admin123" || data.password === "Admin123!" || data.password === "Password123!")
     ) {
       return {
         token: "mock-admin-token",
         user: {
           id: "1",
-          name: "Administrator",
+          name: "Sarah Jenkins",
           email: data.email,
           role: Role.Admin,
-          workspace: data.workspace,
+          workspace: "default-sec",
         },
       };
     }
@@ -63,23 +62,70 @@ class AuthService {
     // AUTHOR LOGIN
     // ==========================
     if (
-      data.workspace === "author" &&
-      data.email === "author@gmail.com" &&
-      data.password === "author123"
+      data.email.toLowerCase() === "author@gmail.com" &&
+      (data.password === "author123" || data.password === "Author123!" || data.password === "Password123!")
     ) {
       return {
         token: "mock-author-token",
         user: {
           id: "2",
-          name: "Author User",
+          name: "Bhumika C",
           email: data.email,
           role: Role.Author,
-          workspace: data.workspace,
+          workspace: "Clinical Research",
         },
       };
     }
 
-    throw new Error("Invalid workspace, email, or password");
+    // ==========================
+    // REVIEWER LOGIN
+    // ==========================
+    if (
+      data.email.toLowerCase() === "reviewer@gmail.com" &&
+      (data.password === "reviewer123" || data.password === "Reviewer123!" || data.password === "Password123!")
+    ) {
+      return {
+        token: "mock-reviewer-token",
+        user: {
+          id: "3",
+          name: "Elena Rostova",
+          email: data.email,
+          role: Role.Reviewer,
+          workspace: "Medical Review",
+        },
+      };
+    }
+
+    // Check users from localStorage/store if present
+    try {
+      const storedUsersRaw = localStorage.getItem("users-storage");
+      if (storedUsersRaw) {
+        const parsed = JSON.parse(storedUsersRaw);
+        const storeUsers = parsed?.state?.users || [];
+        const match = storeUsers.find(
+          (u: { email: string; password?: string }) =>
+            u.email.toLowerCase() === data.email.toLowerCase() &&
+            (!u.password || u.password === data.password)
+        );
+        if (match) {
+          const userRole = match.role === "Admin" ? Role.Admin : match.role === "Reviewer" ? Role.Reviewer : Role.Author;
+          return {
+            token: `mock-${userRole.toLowerCase()}-token`,
+            user: {
+              id: match.id,
+              name: match.fullName,
+              email: match.email,
+              role: userRole,
+              workspace: userRole === Role.Admin ? "default-sec" : "Clinical Research",
+            },
+          };
+        }
+      }
+    } catch {
+      // Fallback to default error
+    }
+
+    throw new Error("Invalid email or password");
   }
 
   logout() {

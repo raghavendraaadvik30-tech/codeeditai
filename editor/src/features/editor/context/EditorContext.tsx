@@ -10,6 +10,7 @@ import React, {
 import type { ReactNode, RefObject } from "react";
 
 import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
+import { updateHeadingNumbers } from "../modules/styles/utils/headingNumbering";
 import { useDocumentModel } from "../store/documentModel";
 import { loadGoogleFont } from "../modules/document/api/fontapi";
 
@@ -1244,49 +1245,83 @@ useEffect(() => {
     if (!pageEl) return;
 
     const lowerName = token.name.toLowerCase();
-    if (lowerName.includes("heading 1")) {
-      document.execCommand("formatBlock", false, "<h1>");
-    } else if (lowerName.includes("heading 2")) {
-      document.execCommand("formatBlock", false, "<h2>");
-    } else if (lowerName.includes("heading 3")) {
-      document.execCommand("formatBlock", false, "<h3>");
-    } else if (lowerName.includes("heading 4")) {
-      document.execCommand("formatBlock", false, "<h4>");
+    let blockTag = "<p>";
+    if (lowerName === "heading 1") {
+      blockTag = "<h1>";
+    } else if (lowerName === "heading 2") {
+      blockTag = "<h2>";
+    } else if (lowerName === "heading 3") {
+      blockTag = "<h3>";
+    } else if (lowerName === "heading 4") {
+      blockTag = "<h4>";
+    } else if (lowerName === "heading 5") {
+      blockTag = "<h5>";
+    } else if (lowerName === "heading 6") {
+      blockTag = "<h6>";
     } else if (lowerName.includes("quote")) {
-      document.execCommand("formatBlock", false, "<blockquote>");
+      blockTag = "<blockquote>";
+    } else if (lowerName === "title" || lowerName === "heading") {
+      blockTag = "<h1>";
+    } else {
+      blockTag = "<p>";
     }
 
-    if (token.size) {
-      applyFontSize(token.size);
+    document.execCommand("formatBlock", false, blockTag);
+
+    const selNow = window.getSelection();
+    let targetBlock: HTMLElement | null = null;
+    if (selNow && selNow.rangeCount > 0) {
+      const r = selNow.getRangeAt(0);
+      const node = r.commonAncestorContainer;
+      const elem = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+      targetBlock = elem?.closest<HTMLElement>("h1, h2, h3, h4, h5, h6, p, blockquote, div") || null;
     }
-    const familyOrFont = token.family || token.font;
-    if (familyOrFont) {
-      applyFontFamily(familyOrFont);
+
+    if (targetBlock) {
+      targetBlock.dataset.styleName = token.name;
+      targetBlock.dataset.style = token.name;
+
+      const font = token.family || token.font;
+      if (font) {
+        loadGoogleFont(font);
+        targetBlock.style.fontFamily = `${font}, Calibri, sans-serif`;
+      }
+      if (token.size) {
+        targetBlock.style.fontSize = `${token.size}pt`;
+      }
+      if (token.weight !== undefined) {
+        targetBlock.style.fontWeight = String(token.weight);
+      }
+      if (token.italic !== undefined) {
+        targetBlock.style.fontStyle = token.italic ? "italic" : "normal";
+      }
+      if (token.underline !== undefined) {
+        targetBlock.style.textDecoration = token.underline ? "underline" : "none";
+      }
+      if (token.color) {
+        targetBlock.style.color = token.color === "primary" ? "#0078d4" : token.color;
+      }
+      const align = token.alignment || token.align;
+      if (align) {
+        targetBlock.style.textAlign = align;
+      }
+      if (token.lineHeight) {
+        targetBlock.style.lineHeight = String(token.lineHeight);
+      }
+      if (token.spaceBefore !== undefined) {
+        targetBlock.style.marginTop = `${token.spaceBefore}pt`;
+      }
+      if (token.spaceAfter !== undefined) {
+        targetBlock.style.marginBottom = `${token.spaceAfter}pt`;
+      }
     }
-    if (token.weight && token.weight >= 600) {
-      document.execCommand("bold", false);
-    }
-    if (token.italic) {
-      document.execCommand("italic", false);
-    }
-    if (token.underline) {
-      document.execCommand("underline", false);
-    }
-    if (token.color && token.color !== "primary") {
-      applyFormatCommand("foreColor", token.color);
-    } else if (token.color === "primary") {
-      applyFormatCommand("foreColor", "#0078d4");
-    }
-    const align = token.alignment || token.align;
-    if (align) {
-      if (align === "center") document.execCommand("justifyCenter", false);
-      else if (align === "right") document.execCommand("justifyRight", false);
-      else if (align === "justify") document.execCommand("justifyFull", false);
-      else document.execCommand("justifyLeft", false);
-    }
+
+    updateHeadingNumbers(pageEl);
+
+    restoreEditorSelection();
 
     pageEl.dispatchEvent(new Event("input", { bubbles: true }));
-  }, [restoreEditorSelection, applyFontSize, applyFontFamily, applyFormatCommand, editorRef]);
+  }, [restoreEditorSelection, editorRef]);
 
   const focusEditor = () => {
     editorRef.current?.focus();

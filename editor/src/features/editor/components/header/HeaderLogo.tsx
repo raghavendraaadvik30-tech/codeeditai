@@ -12,49 +12,46 @@ Responsive/reusable – The component can be placed anywhere in the application 
 No backend/API logic – This component is purely presentational and does not communicate with the backend or manage application state.
 */
 
-import { FileText } from "lucide-react";
+import { Shield } from "lucide-react";
 
 export default function HeaderLogo() {
   return (
     <div className="flex items-center gap-2.5">
-      {/* Logo */}
+      {/* White rounded shield tile */}
       <div
         className="
           flex
-          h-8
-          w-8
+          h-7.5
+          w-7.5
           items-center
           justify-center
-          rounded-xl
-          bg-primary
-          text-primary-foreground
-          shadow-sm
+          rounded-lg
+          bg-white
+          border
+          border-[#E0E7EF]
+          text-[#324480]
+          shadow-xs
+          dark:bg-[#132742]
+          dark:border-[#1E3A5F]
+          dark:text-[#38BDF8]
         "
       >
-        <FileText className="h-4 w-4" />
+        <Shield className="h-4 w-4 fill-current/15" />
       </div>
 
-      {/* Document Information */}
+      {/* DOCUMENT PORTAL title */}
       <div className="leading-tight">
         <h1
           className="
-            text-17px
-            font-semibold
-            text-foreground
-            dark:text-primary-foreground"
-        >
-          Document Editor
-        </h1>
-
-        <p
-          className="
             text-xs
-            text-muted-foreground
-            dark:text-muted-foreground
+            font-extrabold
+            tracking-wider
+            text-[#324480]
+            dark:text-white
           "
         >
-        
-        </p>
+          DOCUMENT PORTAL
+        </h1>
       </div>
     </div>
   );

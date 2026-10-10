@@ -41,24 +41,24 @@ export default function EditorHeader() {
   return (
     <header
       className="
-        h-14.5
+        h-13
         border-b
-        bg-sidebar
-        dark:bg-[#0B1620]
-        border-sidebar-border
-        dark:border-muted
+        bg-[#D3E3FD]
+        dark:bg-[#0B1528]
+        border-[#E0E7EF]
+        dark:border-[#1E3A5F]
         flex
         items-center
-        px-3
+        justify-between
+        px-3.5
+        shadow-xs
       "
     >
       <HeaderLogo />
 
       <div className="flex-1" />
 
-      <div className="flex items-center gap-1">
-        <HeaderActions />
-      </div>
+      <HeaderActions />
     </header>
   );
 }

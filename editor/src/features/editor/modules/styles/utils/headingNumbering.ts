@@ -24,7 +24,19 @@ const HEADING_NAMES: Record<HeadingLevel, string> = {
 const NUMBER_CLASS = "editor-heading-number";
 
 /**
- * Returns the heading level from a style name.
+ * Injects CSS used by the generated heading numbers into document head if missing.
+ */
+export function injectHeadingNumberingStyles(): void {
+  if (typeof document === "undefined") return;
+  if (document.getElementById("editor-heading-numbering-styles")) return;
+  const style = document.createElement("style");
+  style.id = "editor-heading-numbering-styles";
+  style.textContent = HEADING_NUMBERING_CSS;
+  document.head.appendChild(style);
+}
+
+/**
+ * Returns the heading level from a style name or tag name.
  */
 export function getHeadingLevel(
   styleName: string | null | undefined
@@ -33,13 +45,17 @@ export function getHeadingLevel(
     return null;
   }
 
-  const match = styleName.match(/^Heading ([1-9])$/);
-
-  if (!match) {
-    return null;
+  const match = styleName.match(/^Heading\s*([1-9])$/i);
+  if (match) {
+    return Number(match[1]) as HeadingLevel;
   }
 
-  return Number(match[1]) as HeadingLevel;
+  const tagMatch = styleName.match(/^H([1-6])$/i);
+  if (tagMatch) {
+    return Number(tagMatch[1]) as HeadingLevel;
+  }
+
+  return null;
 }
 
 /**
@@ -61,25 +77,28 @@ export function isHeadingStyle(
 }
 
 /**
- * Finds the editable blocks in the editor.
- *
- * This deliberately works with your existing editor DOM
- * instead of using <h7>, <h8>, <h9>.
+ * Finds the editable blocks in the editor across contenteditable pages.
  */
 function getEditorBlocks(
   editor: HTMLElement
 ): HTMLElement[] {
-  return Array.from(
+  const elements = Array.from(
     editor.querySelectorAll<HTMLElement>(
-      "[data-style-name]"
+      "[data-style-name], [data-style], h1, h2, h3, h4, h5, h6"
     )
   );
+
+  return elements.filter((el) => {
+    if (!el.closest('[contenteditable="true"]')) return false;
+    const name = el.dataset.styleName || el.dataset.style || el.tagName;
+    return Boolean(name);
+  });
 }
 
 /**
  * Get the actual text of a block without its generated number.
  */
-function getBlockText(
+export function getBlockText(
   block: HTMLElement
 ): string {
   const clone = block.cloneNode(true) as HTMLElement;
@@ -129,41 +148,31 @@ function createNumberElement(
 }
 
 /**
- * Renumbers all Heading 1-9 blocks.
- *
- * Example:
- *
- * Heading 1
- * Heading 2
- * Heading 2
- * Heading 3
- * Heading 1
- * Heading 2
- *
- * becomes:
- *
- * 1 Heading 1
- * 1.1 Heading 2
- * 1.2 Heading 2
- * 1.2.1 Heading 3
- * 2 Heading 1
- * 2.1 Heading 2
+ * Renumbers all Heading 1-9 blocks across document.
  */
 export function updateHeadingNumbers(
-  editor: HTMLElement
+  editor?: HTMLElement | null
 ): void {
-  const counters: number[] =
-    Array(9).fill(0);
+  injectHeadingNumberingStyles();
 
-  const blocks =
-    getEditorBlocks(editor);
+  const root =
+    editor?.closest<HTMLElement>("main, body") ||
+    document.querySelector<HTMLElement>("main") ||
+    editor ||
+    (typeof document !== "undefined" ? document.body : null);
+
+  if (!root) return;
+
+  const counters: number[] = Array(9).fill(0);
+  const blocks = getEditorBlocks(root);
 
   blocks.forEach((block) => {
     const styleName =
-      block.dataset.styleName;
+      block.dataset.styleName ||
+      block.dataset.style ||
+      block.tagName;
 
-    const level =
-      getHeadingLevel(styleName);
+    const level = getHeadingLevel(styleName);
 
     if (!level) {
       removeNumber(block);
@@ -177,17 +186,12 @@ export function updateHeadingNumbers(
     /*
      * Reset all deeper levels.
      */
-    for (
-      let index = level;
-      index < 9;
-      index++
-    ) {
+    for (let index = level; index < 9; index++) {
       counters[index] = 0;
     }
 
     /*
      * Build:
-     *
      * H1 -> 1
      * H2 -> 1.1
      * H3 -> 1.1.1
@@ -196,12 +200,10 @@ export function updateHeadingNumbers(
       .slice(0, level)
       .join(".");
 
-    const numberElement =
-      createNumberElement(number);
+    const numberElement = createNumberElement(number);
 
     /*
-     * Put the number at the beginning
-     * of the existing block.
+     * Put the number at the beginning of the existing block.
      */
     block.insertBefore(
       numberElement,
@@ -212,18 +214,15 @@ export function updateHeadingNumbers(
 
 /**
  * Apply the style marker to a block.
- *
- * Call this whenever your existing style system
- * changes a block to Heading 1-9.
  */
 export function setHeadingStyleMarker(
   block: HTMLElement,
   styleName: string
 ): void {
   block.dataset.styleName = styleName;
+  block.dataset.style = styleName;
 
-  const level =
-    getHeadingLevel(styleName);
+  const level = getHeadingLevel(styleName);
 
   if (level === null) {
     removeNumber(block);
@@ -239,6 +238,7 @@ export function clearHeadingNumbering(
   removeNumber(block);
 
   delete block.dataset.styleName;
+  delete block.dataset.style;
 }
 
 /**
@@ -247,7 +247,10 @@ export function clearHeadingNumbering(
 export const HEADING_NUMBERING_CSS = `
 .editor-heading-number {
   display: inline-block;
-  margin-right: 0.25em;
+  margin-right: 0.5em;
+  font-weight: 700;
+  color: #0f172a;
+  text-decoration: none !important;
   user-select: none;
   pointer-events: none;
 }

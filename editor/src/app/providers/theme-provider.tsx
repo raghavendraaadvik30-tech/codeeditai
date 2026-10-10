@@ -346,6 +346,7 @@ export function ThemeProvider({
       // Add the newly resolved theme class.
       // Result:<html class="dark">  or  <html class="light">
       root.classList.add(resolvedTheme)
+      root.setAttribute("data-theme", resolvedTheme)
 
 
       // Restore normal CSS transitions if they were disabled.

@@ -16,6 +16,7 @@ function applyTheme(theme: Theme) {
         "dark",
         theme === "dark"
     );
+    document.documentElement.setAttribute("data-theme", theme);
 }
 
 export function useTheme(): [Theme, (theme: Theme) => void] {

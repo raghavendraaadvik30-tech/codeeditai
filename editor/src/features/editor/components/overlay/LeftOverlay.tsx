@@ -142,53 +142,55 @@ export default function LeftOverlay() {
     PANEL_ICONS[panelKey] ?? FileText;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-card text-foreground dark:bg-[#07131E] dark:text-muted">
+    <div className="flex h-full min-h-0 flex-col bg-white text-[#324480] dark:bg-[#0E1F36] dark:text-white">
 
       {/* HEADER */}
-
       <div
         className="
           flex
-          h-18.5
+          h-13
           shrink-0
           items-center
           justify-between
           border-b
-          border-sidebar-border
-          bg-card
-          px-5
-          dark:border-muted
-          dark:bg-[#07131E]
+          border-[#E0E7EF]
+          bg-white
+          px-3.5
+          dark:border-[#1E3A5F]
+          dark:bg-[#0E1F36]
         "
       >
         {/* TITLE + ICON */}
-
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <div
             className="
               flex
-              h-10
-              w-10
+              h-7.5
+              w-7.5
               shrink-0
               items-center
               justify-center
-              rounded-xl
-              bg-primary/10
-              text-primary
-              dark:bg-brand/20
-              dark:text-brand
+              rounded-lg
+              bg-[#EBF2FC]
+              text-[#324480]
+              border
+              border-[#E0E7EF]
+              dark:bg-[#132742]
+              dark:text-[#38BDF8]
+              dark:border-[#1E3A5F]
             "
           >
-            <HeaderIcon className="h-5 w-5" />
+            <HeaderIcon className="h-4 w-4" />
           </div>
 
           <div>
             <h2
               className="
                 text-xs
-                font-semibold
-                text-foreground
-                dark:text-primary-foreground
+                font-bold
+                text-[#324480]
+                leading-tight
+                dark:text-white
               "
             >
               {title}
@@ -196,9 +198,10 @@ export default function LeftOverlay() {
 
             <p
               className="
-                text-10px
-                text-muted-foreground
-                dark:text-muted-foreground
+                text-[10px]
+                text-[#64748B]
+                leading-tight
+                dark:text-[#8BA0B8]
               "
             >
               {description}
@@ -207,30 +210,30 @@ export default function LeftOverlay() {
         </div>
 
         {/* CLOSE */}
-
         <button
           type="button"
           onClick={() => setLeftPanelOpen(false)}
           className="
             flex
-            h-8
-            w-8
+            h-6
+            w-6
             shrink-0
             items-center
             justify-center
             rounded-md
-            text-muted-foreground
+            text-[#64748B]
+            hover:text-[#324480]
+            hover:bg-slate-100
+            dark:text-[#8BA0B8]
+            dark:hover:text-white
+            dark:hover:bg-white/10
             transition-colors
-            hover:bg-muted
-            hover:text-foreground
-            dark:text-muted-foreground
-            dark:hover:bg-muted
-            dark:hover:text-primary-foreground
+            cursor-pointer
           "
           aria-label="Close panel"
           title="Close"
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
         </button>
       </div>
 

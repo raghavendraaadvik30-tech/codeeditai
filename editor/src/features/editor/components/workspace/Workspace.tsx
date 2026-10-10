@@ -20,6 +20,7 @@ and provides true Word-style content-overflow pagination across pages.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useEditor, getCaretCharacterOffsetWithin, type ViewMode } from "../../context/EditorContext";
+import { updateHeadingNumbers } from "../../modules/styles/utils/headingNumbering";
 import { useDocumentModel, type PageModel, type SectionModel, type PageBorderConfig } from "../../store/documentModel";
 import { useHeaderFooter } from "../../modules/document/context/HeaderFooterContext";
 import {
@@ -35,6 +36,7 @@ import { ChartHydration, useChartContext } from "@/features/editor/modules/figur
 import { SmartArtHydration } from "@/features/editor/modules/figures/modules/smartart";
 import { useTrackChanges } from "../../modules/trackChanges";
 import DocumentRuler from "./DocumentRuler";
+import { useSettings } from "../../modules/settings/hooks";
 
 export default function Workspace() {
   const {
@@ -70,6 +72,8 @@ export default function Workspace() {
     setAiPanelOpen,
     viewMode,
   } = useEditor();
+
+  const { settings } = useSettings();
 
   const [activeTable, setActiveTable] = useState<HTMLTableElement | null>(null);
   const [tableContextMenu, setTableContextMenu] = useState<TableContextMenuState>({
@@ -233,12 +237,12 @@ export default function Workspace() {
         flex-col
         overflow-x-auto
         overflow-y-auto
-        bg-[#EEF4FA]
-        dark:bg-[#050B11]
+        bg-[#F0F8FF]
+        dark:bg-[#0B1528]
       "
     >
       {/* WORD HORIZONTAL RULER */}
-      {viewMode !== "read" && (
+      {Boolean(settings?.showRuler) && viewMode !== "read" && (
         <DocumentRuler
           pageWidth={activePageWidth}
           zoom={zoom}
@@ -414,40 +418,27 @@ export default function Workspace() {
           className="
             fixed
             right-6
-            top-[88%]
+            bottom-6
             z-50
             flex
-            h-14
-            w-14
-            -translate-y-1/2
+            h-11
+            w-11
             items-center
             justify-center
             rounded-full
-            bg-gradient-to-br
-            from-primary
-            to-primary/80
-            text-primary-foreground
-            shadow-lg
+            bg-[#D3E3FD]
+            text-[#324480]
+            shadow-md
             transition-all
+            hover:bg-[#C2D8FC]
             hover:scale-105
-            hover:shadow-xl
+            hover:shadow-lg
+            dark:bg-[#1E3A8A]
+            dark:text-[#93C5FD]
+            cursor-pointer
           "
         >
-          <Sparkles className="h-6 w-6" />
-
-          <span
-            className="
-              absolute
-              right-0
-              top-0
-              h-3.5
-              w-3.5
-              rounded-full
-              border-2
-              border-background
-              bg-leaf-500
-            "
-          />
+          <Sparkles className="h-5 w-5" />
         </button>
       )}
     </main>
@@ -1048,6 +1039,7 @@ function DocumentPage({
     const savedSel = saveSelection(element);
     element.innerHTML = html || "<p><br></p>";
     lastHtmlRef.current = html;
+    updateHeadingNumbers(element);
     if (savedSel) {
       restoreSelection(element, savedSel);
     }
@@ -1069,6 +1061,7 @@ function DocumentPage({
 
     const onNativeInput = (e: Event) => {
       handleTcInput(e, pageId);
+      updateHeadingNumbers(el);
     };
 
     const onNativeClick = (e: MouseEvent) => {
@@ -2001,12 +1994,8 @@ function DocumentPage({
           box-border
           border
           ${isWeb || isDraft
-            ? "shadow-sm border-secondary dark:border-muted"
-            : "shadow-[0_4px_20px_rgba(0,0,0,0.12)] border-secondary"
-          }
-          ${active && !isRead
-            ? "border-navy-300 ring-1 ring-navy-300/40"
-            : ""
+            ? "shadow-xs border-[#E2E8F0] dark:border-[#294564]"
+            : "shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[#E2E8F0] dark:border-[#294564] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
           }
         `}
         style={{

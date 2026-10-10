@@ -47,9 +47,9 @@ export function InternalRefColumn({
   ];
 
   return (
-    <div className="flex flex-col bg-card dark:bg-[#0B1520] border border-secondary dark:border-muted rounded-lg p-2.5 shadow-xs">
+    <div className="flex flex-col space-y-2.5">
       {/* Sub-Tabs Selector */}
-      <div className="flex gap-1 p-0.5 mb-2 rounded-md bg-muted dark:bg-[#111D29]">
+      <div className="grid grid-cols-2 gap-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.id;
@@ -59,10 +59,10 @@ export function InternalRefColumn({
               type="button"
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 py-1 rounded text-10px font-medium transition-all select-none',
+                'flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium transition-all select-none cursor-pointer',
                 isActive
-                  ? 'bg-card text-primary shadow-xs dark:bg-[#1B2A3A] dark:text-primary'
-                  : 'text-secondary-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground'
+                  ? 'bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] shadow-2xs font-semibold dark:bg-[#1E293B] dark:border-[#38BDF8]/40 dark:text-[#38BDF8]'
+                  : 'bg-white text-[#64748B] hover:bg-slate-50 border border-[#E2E8F0] dark:bg-[#111D29] dark:border-[#294564] dark:text-slate-400 dark:hover:text-white'
               )}
             >
               <Icon className="h-3.5 w-3.5" />

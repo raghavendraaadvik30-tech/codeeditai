@@ -25,15 +25,6 @@ z.infer<typeof loginSchema>
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  workspace: z
-    .string()
-    .min(3, "Workspace must be at least 3 characters")
-    .max(50, "Workspace must not exceed 50 characters")
-    .regex(
-      /^[a-zA-Z0-9_-]+$/,
-      "Workspace can only contain letters, numbers, hyphens (-), and underscores (_)"
-    ),
-
   email: z
     .string()
     .min(1, "Email is required")
@@ -41,7 +32,7 @@ export const loginSchema = z.object({
 
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters"),
+    .min(6, "Password must be at least 6 characters"),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

@@ -17,10 +17,11 @@ import HomeTab from "./tabs/HomeTab";
 import InsertTab from "./tabs/InsertTab";
 import LayoutTab from "./tabs/LayoutTab";
 import ReviewTab from "./tabs/ReviewTab";
+import CommentsTab from "./tabs/CommentsTab";
 import HeaderFooterTab from "./tabs/HeaderFooterTab";
 import { useHeaderFooter } from "@/features/editor/modules/document/context/HeaderFooterContext";
 
-const baseTabs = ["Home", "Insert", "Layout", "Review"] as const;
+const baseTabs = ["Home", "Insert", "Layout", "Review", "Comments"] as const;
 
 type RibbonTab = (typeof baseTabs)[number];
 
@@ -52,6 +53,8 @@ export default function RibbonToolbar() {
         return <LayoutTab />;
       case "Review":
         return <ReviewTab />;
+      case "Comments":
+        return <CommentsTab />;
       case "Header & Footer":
         return <HeaderFooterTab />;
       default:
@@ -63,8 +66,9 @@ export default function RibbonToolbar() {
     <div
       className="
         border-b
-        border-sidebar-border
-        bg-card
+        border-[#E0E7EF]
+        bg-white
+        dark:border-[#1E3A5F]
         dark:bg-[#0B1620]
       "
     >
@@ -82,16 +86,16 @@ export default function RibbonToolbar() {
               type="button"
               onClick={() => setActiveTab(tab)}
               className={`
-                rounded-t-md
-                px-4
-                py-1.5
-                text-sm
+                px-3.5
+                py-1
+                text-xs
                 font-medium
                 transition-colors
+                cursor-pointer
                 ${
                   active
-                    ? "bg-secondary text-primary font-semibold border-b-2 border-primary dark:bg-navy-950/60 dark:text-navy-300 dark:border-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-primary-foreground"
+                    ? "text-[#324480] font-bold border-b-2 border-[#E82D91] bg-transparent dark:text-[#38BDF8] dark:border-[#38BDF8]"
+                    : "text-[#324480]/70 hover:text-[#324480] hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-transparent"
                 }
               `}
             >
@@ -136,13 +140,13 @@ export default function RibbonToolbar() {
       <div
         className={`
           border-t
-          border-secondary
-          bg-card
+          border-[#E0E7EF]
+          bg-white
           px-2
           py-1
-          dark:border-muted
+          dark:border-[#1E3A5F]
           dark:bg-[#07131E]
-          ${activeTab === "Header & Footer" ? "min-h-23.5 bg-card dark:bg-[#081522]" : "min-h-12"}
+          ${activeTab === "Header & Footer" ? "min-h-23.5 bg-white dark:bg-[#081522]" : "min-h-12"}
         `}
       >
         {renderRibbon()}

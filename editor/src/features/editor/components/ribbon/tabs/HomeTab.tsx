@@ -15,6 +15,16 @@ import {
   Undo2,
   Redo2,
   ChevronDown,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  List,
+  ListOrdered,
 } from "lucide-react";
 
 import { FONT_SIZES } from "../constant";
@@ -41,16 +51,21 @@ export default function HomeTab() {
     canRedo,
     applyFontSize,
     applyFontFamily,
+    applyFormatCommand,
   } = useEditor();
 
   const [fontName, setFontName] =
-  useState("Calibri");
+  useState("Inter (Modern Clean)");
 
 const [fontSize, setFontSize] =
-  useState("12");
+  useState("10 pt");
 
 const [fonts, setFonts] = useState<string[]>([
+  "Inter (Modern Clean)",
   "Calibri",
+  "Arial",
+  "Times New Roman",
+  "Roboto",
 ]);
 
 const [fontsLoading, setFontsLoading] =
@@ -439,6 +454,127 @@ const [fontsLoading, setFontsLoading] =
             </div>
           </div>
         )}
+      </div>
+
+      <RibbonDivider />
+
+      {/* =====================================================
+          Text Formatting: Bold, Italic, Underline, Strike
+      ====================================================== */}
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("bold")}
+          title="Bold (Ctrl+B)"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer text-xs font-bold"
+        >
+          <Bold className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("italic")}
+          title="Italic (Ctrl+I)"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer text-xs"
+        >
+          <Italic className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("underline")}
+          title="Underline (Ctrl+U)"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer text-xs"
+        >
+          <Underline className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("strikeThrough")}
+          title="Strikethrough"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer text-xs"
+        >
+          <Strikethrough className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      <RibbonDivider />
+
+      {/* =====================================================
+          Alignment: Left, Center, Right, Justify
+      ====================================================== */}
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("justifyLeft")}
+          title="Align Left"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer"
+        >
+          <AlignLeft className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("justifyCenter")}
+          title="Align Center"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer"
+        >
+          <AlignCenter className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("justifyRight")}
+          title="Align Right"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer"
+        >
+          <AlignRight className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("justifyFull")}
+          title="Justify"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer"
+        >
+          <AlignJustify className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      <RibbonDivider />
+
+      {/* =====================================================
+          Lists: Bullets & Numbering
+      ====================================================== */}
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("insertUnorderedList")}
+          title="Bulleted List"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer"
+        >
+          <List className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={preventFocusLoss}
+          onClick={() => applyFormatCommand("insertOrderedList")}
+          title="Numbered List"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent hover:border-[#E2E8F0] hover:bg-slate-50 text-[#102A43] dark:text-slate-200 transition-colors cursor-pointer"
+        >
+          <ListOrdered className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
 
   pageSize: "A4",
   pageOrientation: "portrait",
-  showRuler: true,
+  showRuler: false,
   showWordCount: true,
   showPageNumbers: true,
   defaultZoom: 100,

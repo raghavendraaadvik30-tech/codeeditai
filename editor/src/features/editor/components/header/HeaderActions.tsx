@@ -340,7 +340,7 @@ export default function HeaderActions() {
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5">
 
       {/* =================================
           SAVE
@@ -350,27 +350,29 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8.5
+          h-7.5
           gap-1.5
-          px-3
+          px-2.5
           text-xs
-          font-medium
+          font-semibold
           rounded-lg
           border
-          border-sidebar-border
-          bg-card
-          text-foreground
+          border-[#E0E7EF]
+          bg-white
+          text-[#324480]
           shadow-2xs
-          hover:bg-muted
-          dark:border-muted
-          dark:bg-[#111D29]
-          dark:text-primary-foreground
-          dark:hover:bg-muted
+          hover:bg-slate-50
+          dark:border-[#1E3A5F]
+          dark:bg-[#132742]
+          dark:text-white
+          dark:hover:bg-[#1C3659]
+          transition-colors
+          cursor-pointer
         "
         onClick={doSave}
         title="Save"
       >
-        <Save className="h-3.5 w-3.5 text-primary dark:text-primary" />
+        <Save className="h-3.5 w-3.5 text-[#324480] dark:text-[#38BDF8]" />
 
         <span>Save</span>
 
@@ -407,26 +409,28 @@ export default function HeaderActions() {
             variant="ghost"
             size="sm"
             className="
-              h-8.5
+              h-7.5
               gap-1.5
-              px-3
+              px-2.5
               text-xs
-              font-medium
+              font-semibold
               rounded-lg
               border
-              border-sidebar-border
-              bg-card
-              text-foreground
+              border-[#E0E7EF]
+              bg-white
+              text-[#324480]
               shadow-2xs
-              hover:bg-muted
-              dark:border-muted
-              dark:bg-[#111D29]
-              dark:text-primary-foreground
-              dark:hover:bg-muted
+              hover:bg-slate-50
+              dark:border-[#1E3A5F]
+              dark:bg-[#132742]
+              dark:text-white
+              dark:hover:bg-[#1C3659]
+              transition-colors
+              cursor-pointer
             "
             title="Save As"
           >
-            <FilePlus2 className="h-3.5 w-3.5 text-primary dark:text-primary" />
+            <FilePlus2 className="h-3.5 w-3.5 text-[#324480] dark:text-[#38BDF8]" />
 
             <span>Save As</span>
           </Button>
@@ -521,27 +525,29 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8.5
+          h-7.5
           gap-1.5
-          px-3
+          px-2.5
           text-xs
-          font-medium
+          font-semibold
           rounded-lg
           border
-          border-sidebar-border
-          bg-card
-          text-foreground
+          border-[#E0E7EF]
+          bg-white
+          text-[#324480]
           shadow-2xs
-          hover:bg-muted
-          dark:border-muted
-          dark:bg-[#111D29]
-          dark:text-primary-foreground
-          dark:hover:bg-muted
+          hover:bg-slate-50
+          dark:border-[#1E3A5F]
+          dark:bg-[#132742]
+          dark:text-white
+          dark:hover:bg-[#1C3659]
+          transition-colors
+          cursor-pointer
         "
         onClick={handleExportDocx}
         title="Export DOCX"
       >
-        <FileText className="h-3.5 w-3.5 text-primary dark:text-primary" />
+        <FileText className="h-3.5 w-3.5 text-[#324480] dark:text-[#38BDF8]" />
 
         <span>DOCX</span>
       </Button>
@@ -555,27 +561,29 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8.5
+          h-7.5
           gap-1.5
-          px-3
+          px-2.5
           text-xs
-          font-medium
+          font-semibold
           rounded-lg
           border
-          border-sidebar-border
-          bg-card
-          text-foreground
+          border-[#E0E7EF]
+          bg-white
+          text-[#324480]
           shadow-2xs
-          hover:bg-muted
-          dark:border-muted
-          dark:bg-[#111D29]
-          dark:text-primary-foreground
-          dark:hover:bg-muted
+          hover:bg-slate-50
+          dark:border-[#1E3A5F]
+          dark:bg-[#132742]
+          dark:text-white
+          dark:hover:bg-[#1C3659]
+          transition-colors
+          cursor-pointer
         "
         onClick={handleExportPdf}
         title="Export PDF"
       >
-        <FileDown className="h-3.5 w-3.5 text-primary dark:text-primary" />
+        <FileDown className="h-3.5 w-3.5 text-[#324480] dark:text-[#38BDF8]" />
 
         <span>PDF</span>
       </Button>
@@ -598,29 +606,33 @@ export default function HeaderActions() {
         variant="ghost"
         size="sm"
         className="
-          h-8.5
+          h-7.5
           gap-1.5
-          px-3
+          px-2.5
           text-xs
-          font-medium
+          font-semibold
           rounded-lg
           border
-          border-sidebar-border
-          bg-card
-          text-foreground
+          border-[#E0E7EF]
+          bg-white
+          text-[#324480]
           shadow-2xs
-          hover:bg-muted
-          dark:border-muted
-          dark:bg-[#111D29]
-          dark:text-primary-foreground
-          dark:hover:bg-muted
+          hover:bg-slate-50
+          dark:border-[#1E3A5F]
+          dark:bg-[#132742]
+          dark:text-white
+          dark:hover:bg-[#1C3659]
+          transition-colors
+          cursor-pointer
         "
         onClick={handleUploadClick}
         title="Upload Document from File Manager"
       >
-        <Upload className="h-3.5 w-3.5 text-primary dark:text-primary" />
+        <Upload className="h-3.5 w-3.5 text-[#324480] dark:text-[#38BDF8]" />
         <span>{uploading ? "Importing…" : "Upload"}</span>
       </Button>
+
+
 
       {uploadError && (
         <div

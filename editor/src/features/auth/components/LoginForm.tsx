@@ -48,7 +48,6 @@ import {
   ShieldCheck,
   Mail,
   Lock,
-  Server,
   AlertCircle,
 } from "lucide-react";
 
@@ -73,28 +72,19 @@ export default function LoginUI() {
 
   const { login, isLoading, error } = useAuth();
 
-  const [workspace, setWorkspace] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const [workspaceError, setWorkspaceError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
   const validateForm = () => {
     let valid = true;
 
-    setWorkspaceError("");
     setEmailError("");
     setPasswordError("");
-
-    // Workspace Validation
-    if (!workspace.trim()) {
-      setWorkspaceError("Workspace is required.");
-      valid = false;
-    }
 
     // Email Validation
     if (!email.trim()) {
@@ -120,7 +110,6 @@ const handleLogin = async () => {
   if (!validateForm()) return;
 
   const success = await login({
-    workspace,
     email,
     password,
   });
@@ -192,38 +181,6 @@ const handleLogin = async () => {
               </div>
             )}
 
-            {/* Workspace */}
-            <div className="space-y-2">
-
-              <Label htmlFor="workspace">
-                Workspace
-              </Label>
-
-              <div className="relative">
-
-                <Server className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-                <Input
-                  id="workspace"
-                  type="text"
-                  placeholder="Enter Workspace"
-                  value={workspace}
-                  onChange={(e) => {
-                    setWorkspace(e.target.value);
-                    if (workspaceError) setWorkspaceError("");
-                  }}
-                  className="pl-10"
-                />
-
-              </div>
-
-              {workspaceError && (
-                <p className="text-xs text-destructive">
-                  {workspaceError}
-                </p>
-              )}
-
-            </div>
 
             {/* Email */}
             <div className="space-y-2">

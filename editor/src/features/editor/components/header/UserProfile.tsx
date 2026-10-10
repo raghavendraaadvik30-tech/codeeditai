@@ -11,15 +11,7 @@ Responsibilities:
 - No direct backend/API logic.
 */
 
-import {
-  Avatar,
-  AvatarFallback,
-} from "@/shared/components/ui/avatar";
-
-import {
-  ChevronDown,
-  LogOut,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ROUTE_PATHS } from "@/app/router/routePaths";
 import { useState, useRef, useEffect } from "react";
@@ -74,54 +66,47 @@ export default function UserProfile() {
           flex
           items-center
           gap-2
-          rounded-lg
+          rounded-full
           border
-          border-secondary
-          dark:border-secondary-foreground
-          bg-card
+          border-[#B8CBE4]/80
+          dark:border-[#33465F]
+          bg-white
           dark:bg-[#111D29]
-          px-2.5
-          py-1
-          shadow-xs
-          hover:bg-muted
+          px-2
+          py-0.5
+          shadow-2xs
+          hover:bg-slate-50
           dark:hover:bg-muted
           transition-colors
           cursor-pointer
         "
       >
-        <Avatar className="h-8 w-8">
-          <AvatarFallback
-            className="
-              bg-primary/15
-              text-primary/90
-              dark:bg-navy-900/40
-              dark:text-navy-300
-              font-semibold
-            "
-          >
-            {initials}
-          </AvatarFallback>
-        </Avatar>
+        <div
+          className="
+            flex
+            h-6.5
+            w-6.5
+            shrink-0
+            items-center
+            justify-center
+            rounded-full
+            bg-[#D3E3FD]
+            text-[#102A43]
+            font-bold
+            text-[10px]
+          "
+        >
+          {initials}
+        </div>
 
-        <div className="hidden md:flex flex-col leading-tight text-left">
-          <span className="text-xs font-medium text-foreground dark:text-primary-foreground">
+        <div className="hidden md:flex flex-col leading-none text-left">
+          <span className="text-11px font-bold text-[#102A43] dark:text-white">
             {userName}
           </span>
-
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[9px] text-[#64748B] dark:text-muted-foreground mt-0.5">
             {userRole}
           </span>
         </div>
-
-        <ChevronDown
-          className={`
-            h-4
-            w-4
-            text-muted-foreground
-            transition-transform
-            ${open ? "rotate-180" : ""}
-          `}
-        />
       </button>
 
       {/* Dropdown */}

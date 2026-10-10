@@ -35,9 +35,9 @@ Defines the expected result of a successful login.
 import { Role } from "@/app/config/roles";
 
 export interface LoginRequest {
-  workspace: string;
   email: string;
   password: string;
+  workspace?: string;
 } 
 
 export interface User {

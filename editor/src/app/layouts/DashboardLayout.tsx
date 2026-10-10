@@ -13,28 +13,19 @@ import { Role } from "../config/roles";
 
 
 import {
-
-  ShieldAlert,
-
   Menu,
-
-  UserCheck as UserIcon,
-
   LogOut,
-
   X,
-
   ShieldCheck,
-
   KeyRound,
-
   CheckCircle2,
-
   Eye,
-
   EyeOff,
-
+  Moon,
+  Sun,
 } from "lucide-react";
+
+import { useTheme } from "@/shared/components/theme/themeToggle";
 
 
 
@@ -534,311 +525,188 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
 
 export const DashboardLayout: React.FC = () => {
-
   const { user, logout } = useAuth();
-
   const location = useLocation();
-
-
+  const [theme, setTheme] = useTheme();
 
   const [sidebarExpanded, setSidebarExpanded] = useState(() => {
-
     return localStorage.getItem("sidebarExpanded") === "true";
-
   });
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   const [showAdminProfile, setShowAdminProfile] = useState(false);
-
-
 
   const isExpanded = sidebarExpanded || mobileMenuOpen;
 
-
-
   const handleToggle = () => {
-
     if (window.innerWidth < 1024) {
-
       setMobileMenuOpen((value) => !value);
-
       return;
-
     }
 
-
-
     const nextState = !sidebarExpanded;
-
     setSidebarExpanded(nextState);
-
     localStorage.setItem("sidebarExpanded", String(nextState));
-
   };
 
-
-
   const userRole = (user?.role || Role.Author) as Role;
-
   const filteredNavItems = navigationItems.filter(
-
     (item) => !item.roles || item.roles.includes(userRole)
-
   );
 
-
-
   return (
-
-    <div className="flex h-screen overflow-hidden bg-muted font-sans text-foreground">
-
+    <div className="flex h-screen overflow-hidden bg-[#EEF7FF] font-sans text-[#172033] dark:bg-[#0B1426] dark:text-white">
+      {/* SIDEBAR */}
       <aside
-
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-secondary bg-card transition-all duration-300 ${
-
-          sidebarExpanded ? "w-64" : "w-19"
-
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#DCE7F2] bg-[#D3E3FC] transition-all duration-300 dark:border-[#294564] dark:bg-[#0D213D] ${
+          sidebarExpanded ? "w-[188px]" : "w-16"
         } ${
-
           mobileMenuOpen
-
-            ? "translate-x-0 w-64"
-
+            ? "translate-x-0 w-[188px]"
             : "-translate-x-full lg:translate-x-0"
-
         }`}
-
       >
-
         <div>
-
+          {/* Logo & Title */}
           <div
-
-            className={`flex h-16 shrink-0 items-center border-b border-muted ${
-
-              isExpanded ? "justify-between px-6" : "justify-center"
-
+            className={`flex h-14 shrink-0 items-center border-b border-[#DCE7F2] dark:border-[#294564] ${
+              isExpanded ? "justify-between px-3.5" : "justify-center"
             }`}
-
           >
-
-            <div className="flex items-center gap-2.5">
-
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary p-1.5 shadow-md">
-
-                <ShieldAlert className="h-5 w-5 text-primary-foreground" />
-
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#DCE7F2] bg-white text-[#324480] shadow-xs dark:border-[#294564] dark:bg-[#132742] dark:text-[#38BDF8]">
+                <ShieldCheck className="h-4 w-4" />
               </div>
 
-
-
               {isExpanded && (
-
-                <div>
-
-                  <span className="text-sm font-extrabold">SYSTEM</span>
-
-                  <span className="block text-9px font-bold uppercase tracking-wider text-primary">
-
-                    ADMIN PORTAL
-
+                <div className="leading-tight">
+                  <span className="block text-[8px] font-bold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
+                    SYSTEM
                   </span>
-
+                  <span className="block text-[11px] font-black uppercase tracking-wide text-[#172033] dark:text-white">
+                    ADMIN PORTAL
+                  </span>
                 </div>
-
               )}
-
             </div>
-
           </div>
 
-
-
-          <nav className="space-y-1.5 p-4">
-
+          {/* Navigation Items */}
+          <nav className="space-y-1.5 p-3">
             {filteredNavItems.map((item) => {
-
               const Icon = item.icon;
-
               const isActive = location.pathname === item.path;
 
-
-
               return (
-
                 <Link
-
                   key={item.path}
-
                   to={item.path}
-
                   onClick={() => setMobileMenuOpen(false)}
-
-                  className={`flex w-full items-center rounded-xl text-sm font-bold transition-all ${
-
+                  className={`flex w-full items-center rounded-xl text-xs font-bold transition-all ${
                     isExpanded
-
-                      ? "justify-between px-3.5 py-2.5"
-
-                      : "justify-center py-2.5"
-
+                      ? "px-3 py-2"
+                      : "justify-center py-2"
                   } ${
-
                     isActive
-
-                      ? "bg-primary text-primary-foreground shadow-sm"
-
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-
+                      ? "bg-white text-[#324480] shadow-xs dark:bg-[#132742] dark:text-[#38BDF8]"
+                      : "text-[#64748B] hover:bg-white/60 hover:text-[#172033] dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
                   }`}
-
                 >
-
-                  <div className="flex items-center gap-3">
-
-                    <Icon className="h-5 w-5 shrink-0" />
-
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="h-4 w-4 shrink-0" />
                     {isExpanded && <span>{item.title}</span>}
-
                   </div>
-
                 </Link>
-
               );
-
             })}
-
           </nav>
-
         </div>
 
-
-
-        <div className="shrink-0 space-y-3 border-t border-muted bg-muted/70 p-4">
-
+        {/* Bottom Profile and Sign Out */}
+        <div className="shrink-0 space-y-2 border-t border-[#DCE7F2] p-3 dark:border-[#294564]">
           <button
-
             type="button"
-
             onClick={() => setShowAdminProfile(true)}
-
-            className={`w-full rounded-xl text-left transition-colors hover:bg-card ${
-
-              isExpanded ? "px-2 py-2" : "flex justify-center p-1"
-
+            className={`w-full rounded-xl text-left transition-colors hover:bg-white/40 cursor-pointer dark:hover:bg-white/10 ${
+              isExpanded ? "p-1.5" : "flex justify-center p-1"
             }`}
-
           >
-
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary">
-
-                <UserIcon className="h-4.5 w-4.5" />
-
+            <div className="flex items-center gap-2.5">
+              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#DCE7F2] bg-white text-xs font-bold text-[#172033] shadow-xs dark:border-[#294564] dark:bg-[#132742] dark:text-white">
+                {user?.name ? user.name[0].toUpperCase() : "S"}
+                <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-white bg-[#10B981] dark:border-[#132742]" />
               </div>
 
-
-
               {isExpanded && (
-
-                <div className="min-w-0 overflow-hidden">
-
-                  <p className="truncate text-xs font-extrabold">
-
-                    {user?.name || "Administrator"}
-
+                <div className="min-w-0 overflow-hidden leading-tight">
+                  <p className="truncate text-xs font-bold text-[#172033] dark:text-white">
+                    {user?.name || "Sarah Jenkins"} {user?.role ? `(${user.role})` : "(Admin)"}
                   </p>
-
-                  <p className="truncate text-10px text-muted-foreground">
-
+                  <p className="truncate text-[10px] text-[#64748B] dark:text-slate-400">
                     {user?.email || "admin@gmail.com"}
-
                   </p>
-
+                  <p className="truncate text-[9px] text-[#94A3B8] dark:text-slate-500">
+                    Workspace: default-sec
+                  </p>
                 </div>
-
               )}
-
             </div>
-
           </button>
-
-
 
           <button
-
             type="button"
-
             onClick={logout}
-
-            className="flex w-full items-center justify-center rounded-xl border border-destructive/20 py-2.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10"
-
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#DCE7F2] bg-white py-1.5 text-xs font-bold text-[#172033] shadow-xs transition-colors hover:bg-slate-50 cursor-pointer dark:border-[#294564] dark:bg-[#132742] dark:text-white dark:hover:bg-[#1C3659]"
           >
-
-            <LogOut className="mr-2 h-4 w-4" />
-
-            {isExpanded && <span>Logout</span>}
-
+            <LogOut className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
+            {isExpanded && <span>Sign Out</span>}
           </button>
-
         </div>
-
       </aside>
 
-
-
+      {/* MAIN CONTAINER */}
       <div
-
         className={`flex h-screen min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
-
-          sidebarExpanded ? "lg:pl-64" : "lg:pl-19"
-
+          sidebarExpanded ? "lg:pl-[188px]" : "lg:pl-16"
         }`}
-
       >
-
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-secondary bg-card px-6">
-
-          <div className="flex items-center gap-6">
-
+        {/* TOP HEADER */}
+        <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between border-b border-[#DCE7F2] bg-[#D3E3FC] px-4 md:px-6 dark:border-[#294564] dark:bg-[#0D213D]">
+          <div className="flex items-center gap-3">
             <button
-
               type="button"
-
               onClick={handleToggle}
-
-              className="rounded-xl border border-secondary p-2 transition-colors hover:bg-muted"
-
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#DCE7F2] bg-white text-[#324480] shadow-xs transition-colors hover:bg-slate-50 cursor-pointer dark:border-[#294564] dark:bg-[#132742] dark:text-[#38BDF8] dark:hover:bg-[#1C3659]"
               aria-label="Toggle sidebar"
-
             >
-
-              <Menu className="h-5 w-5" />
-
+              <Menu className="h-4 w-4" />
             </button>
 
-
-
-            <h1 className="text-lg font-extrabold uppercase tracking-wide">
-
+            <h1 className="text-xs md:text-sm font-extrabold uppercase tracking-wider text-[#172033] dark:text-white">
               SYSTEM ADMIN PORTAL
-
             </h1>
-
           </div>
 
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#DCE7F2] bg-white text-[#324480] shadow-xs transition-colors hover:bg-slate-50 cursor-pointer dark:border-[#294564] dark:bg-[#132742] dark:text-[#38BDF8] dark:hover:bg-[#1C3659]"
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </header>
 
-
-
-        <main className="flex-1 min-h-0 overflow-hidden p-4 md:p-8">
-
+        {/* WORKSPACE CONTENT */}
+        <main className="flex-1 min-h-0 overflow-y-auto bg-[#EEF7FF] p-6 md:p-8 dark:bg-[#0B1426]">
           <Outlet />
-
         </main>
-
       </div>
 
 
