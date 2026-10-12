@@ -50,8 +50,20 @@ export default function HeaderLogo() {
             dark:text-white
           "
         >
-          DOCUMENT PORTAL
+          DOCU PILOT
         </h1>
+
+        <h6
+          className="
+            text-xs
+            font-extrabold
+            tracking-wider
+            text-[#324480]
+            dark:text-white
+          "
+        >
+          Doc. Prep. Reimagined
+        </h6>
       </div>
     </div>
   );

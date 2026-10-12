@@ -17,11 +17,10 @@ import HomeTab from "./tabs/HomeTab";
 import InsertTab from "./tabs/InsertTab";
 import LayoutTab from "./tabs/LayoutTab";
 import ReviewTab from "./tabs/ReviewTab";
-import CommentsTab from "./tabs/CommentsTab";
 import HeaderFooterTab from "./tabs/HeaderFooterTab";
 import { useHeaderFooter } from "@/features/editor/modules/document/context/HeaderFooterContext";
 
-const baseTabs = ["Home", "Insert", "Layout", "Review", "Comments"] as const;
+const baseTabs = ["Home", "Insert", "Layout", "Review"] as const;
 
 type RibbonTab = (typeof baseTabs)[number];
 
@@ -53,8 +52,6 @@ export default function RibbonToolbar() {
         return <LayoutTab />;
       case "Review":
         return <ReviewTab />;
-      case "Comments":
-        return <CommentsTab />;
       case "Header & Footer":
         return <HeaderFooterTab />;
       default:
