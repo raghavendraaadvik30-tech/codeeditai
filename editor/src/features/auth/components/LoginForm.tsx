@@ -1,27 +1,16 @@
-/*
-Purpose:
-LoginForm provides the main authentication interface matching the exact light-blue reference design.
-Features:
-- Centered white card with rounded-[28px] corners and subtle shadow.
-- Light-blue shield header icon with LOGIN title and subtitle.
-- Pale-blue input fields with cyan envelope and lock icons.
-- Remember me checkbox and Forgot Password link row.
-- Light-blue login button with right arrow.
-- Full viewport pale-blue background with grid lines and ambient glow.
-*/
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Eye,
   EyeOff,
   Loader2,
-  ShieldCheck,
   Mail,
   Lock,
   ArrowRight,
   AlertCircle,
 } from "lucide-react";
 
+import docupilotLogo from "@/assets/images/docupilot-logo.png";
 import { useAuth } from "../hooks/useAuth";
 import { ROUTE_PATHS } from "@/app/router/routePaths";
 import { Role } from "@/app/config/roles";
@@ -33,10 +22,9 @@ export default function LoginUI() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(() => {
-    return localStorage.getItem("rememberMe") === "true";
-  });
-
+  const [rememberMe, setRememberMe] = useState(
+    () => localStorage.getItem("rememberMe") === "true",
+  );
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
@@ -70,11 +58,7 @@ export default function LoginUI() {
       localStorage.removeItem("rememberMe");
     }
 
-    const success = await login({
-      email,
-      password,
-    });
-
+    const success = await login({ email, password });
     if (!success) return;
 
     const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -84,11 +68,9 @@ export default function LoginUI() {
       case Role.Admin:
         navigate(ROUTE_PATHS.DASHBOARD, { replace: true });
         break;
-
       case Role.Author:
         navigate(ROUTE_PATHS.EDITOR, { replace: true });
         break;
-
       default:
         navigate(ROUTE_PATHS.LOGIN, { replace: true });
         break;
@@ -97,9 +79,10 @@ export default function LoginUI() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full items-center justify-center p-4 overflow-hidden select-none"
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden select-none p-4"
       style={{
-        background: "radial-gradient(ellipse at 50% 40%, #FFFFFF 0%, #EEF5FF 45%, #DCE8FA 100%)",
+        background:
+          "radial-gradient(ellipse at 50% 40%, #FFFFFF 0%, #EEF5FF 45%, #DCE8FA 100%)",
       }}
     >
       {/* Soft ambient radial lighting */}
@@ -115,18 +98,22 @@ export default function LoginUI() {
       />
 
       {/* Centered Login Card */}
-      <div className="relative z-10 w-full max-w-[420px] rounded-[28px] border border-white/80 bg-white p-8 sm:p-9 shadow-[0_20px_60px_rgba(50,68,128,0.08)]">
-        {/* Card Header */}
-        <div className="text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D3E3FD] text-[#1E3A5F] shadow-xs">
-            <ShieldCheck className="h-6 w-6 text-[#1E3A5F]" />
-          </div>
+      <div className="relative z-10 w-full max-w-[525px] rounded-[32px] border border-white/80 bg-white p-8 shadow-[0_20px_60px_rgba(50,68,128,0.08)] sm:p-10">
+        {/* DocuPilot Logo */}
+        <div className="mb-5 flex justify-center">
+          <img
+            src={docupilotLogo}
+            alt="DocuPilot Logo"
+            className="h-auto w-[130px] object-contain"
+          />
+        </div>
 
+        {/* Login Header */}
+        <div className="mb-6 text-center">
           <h1 className="text-xl font-bold tracking-wide text-[#1E3A5F]">
             LOGIN
           </h1>
-
-          <p className="mt-1 text-xs text-slate-500 mb-6">
+          <p className="mt-2 text-xs text-slate-500">
             Welcome back! Please sign in to continue.
           </p>
         </div>
@@ -139,11 +126,11 @@ export default function LoginUI() {
           </div>
         )}
 
-        {/* Form Fields */}
+        {/* Login Form */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleLogin();
+            void handleLogin();
           }}
           className="space-y-4"
         >
@@ -155,27 +142,24 @@ export default function LoginUI() {
             >
               Email
             </label>
-
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#38BDF8]" />
-
               <input
                 id="email"
                 type="email"
+                autoComplete="email"
                 placeholder="admin@gmail.com"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (emailError) setEmailError("");
                 }}
-                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-4 text-xs font-medium text-[#1E3A5F] placeholder:text-slate-400 outline-none transition-colors focus:border-[#60A5FA] focus:bg-white"
+                aria-invalid={Boolean(emailError)}
+                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-4 text-xs font-medium text-[#1E3A5F] outline-none transition-colors placeholder:text-slate-400 focus:border-[#60A5FA] focus:bg-white"
               />
             </div>
-
             {emailError && (
-              <p className="text-[11px] text-destructive">
-                {emailError}
-              </p>
+              <p className="text-[11px] text-destructive">{emailError}</p>
             )}
           </div>
 
@@ -187,26 +171,25 @@ export default function LoginUI() {
             >
               Password
             </label>
-
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#38BDF8]" />
-
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (passwordError) setPasswordError("");
                 }}
-                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-10 text-xs font-medium text-[#1E3A5F] placeholder:text-slate-400 outline-none transition-colors focus:border-[#60A5FA] focus:bg-white"
+                aria-invalid={Boolean(passwordError)}
+                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-10 text-xs font-medium text-[#1E3A5F] outline-none transition-colors placeholder:text-slate-400 focus:border-[#60A5FA] focus:bg-white"
               />
-
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition-colors hover:text-slate-600"
                 title={showPassword ? "Hide password" : "Show password"}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -217,32 +200,28 @@ export default function LoginUI() {
                 )}
               </button>
             </div>
-
             {passwordError && (
-              <p className="text-[11px] text-destructive">
-                {passwordError}
-              </p>
+              <p className="text-[11px] text-destructive">{passwordError}</p>
             )}
           </div>
 
-          {/* Remember Me and Forgot Password Row */}
+          {/* Remember Me and Forgot Password */}
           <div className="flex items-center justify-between pt-1">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
+            <label className="flex cursor-pointer select-none items-center gap-2">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-[#D3E3FD] text-[#2563EB] accent-[#2563EB] cursor-pointer"
+                className="h-4 w-4 cursor-pointer rounded border-[#D3E3FD] accent-[#2563EB]"
               />
               <span className="text-xs font-medium text-slate-600">
                 Remember me
               </span>
             </label>
-
             <button
               type="button"
               onClick={() => navigate(ROUTE_PATHS.FORGOT_PASSWORD)}
-              className="text-xs font-semibold text-[#0284C7] hover:underline cursor-pointer"
+              className="cursor-pointer text-xs font-semibold text-[#0284C7] hover:underline"
             >
               Forgot Password?
             </button>
@@ -252,11 +231,11 @@ export default function LoginUI() {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-button-primary text-xs font-semibold text-button-primary-foreground shadow-xs transition-colors hover:bg-button-primary-hover active:bg-button-primary-active cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+            className="mt-2 flex h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-button-primary text-xs font-semibold text-button-primary-foreground shadow-xs transition-colors hover:bg-button-primary-hover active:bg-button-primary-active disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin text-[#1E3A5F]" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Signing In...</span>
               </>
             ) : (
@@ -266,53 +245,6 @@ export default function LoginUI() {
               </>
             )}
           </button>
-
-          {/* Or continue with divider */}
-          <div className="relative my-5 flex items-center justify-center pt-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
-            </div>
-            <span className="relative bg-white px-3 text-[11px] font-medium text-slate-400">
-              Or continue with
-            </span>
-          </div>
-
-          {/* Social Logins */}
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("admin@gmail.com");
-                setPassword("admin123");
-              }}
-              className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-colors cursor-pointer"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-              </svg>
-              <span>Google</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("admin@gmail.com");
-                setPassword("admin123");
-              }}
-              className="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-colors cursor-pointer"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 21 21">
-                <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-                <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-                <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
-                <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-              </svg>
-              <span>Microsoft</span>
-            </button>
-          </div>
         </form>
       </div>
     </div>

@@ -50,7 +50,7 @@ export default function HeaderLogo() {
             dark:text-white
           "
         >
-          DOCU PILOT
+          Docu Pilot
         </h1>
 
         <h6
@@ -62,7 +62,7 @@ export default function HeaderLogo() {
             dark:text-white
           "
         >
-          Doc. Prep. Reimagined
+          Doc. Prep. Reimagined!
         </h6>
       </div>
     </div>
