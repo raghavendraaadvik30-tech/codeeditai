@@ -11,7 +11,7 @@ Dark mode – Supports dark theme using dark: Tailwind classes.
 Responsive/reusable – The component can be placed anywhere in the application header without additional logic.
 No backend/API logic – This component is purely presentational and does not communicate with the backend or manage application state.
 */
-
+import docupilotLogo from "@/assets/images/docupilot-logo.png";
 import { Shield } from "lucide-react";
 
 export default function HeaderLogo() {
@@ -21,8 +21,8 @@ export default function HeaderLogo() {
       <div
         className="
           flex
-          h-7.5
-          w-7.5
+          h-12
+          w-12
           items-center
           justify-center
           rounded-lg
@@ -36,14 +36,18 @@ export default function HeaderLogo() {
           dark:text-[#38BDF8]
         "
       >
-        <Shield className="h-4 w-4 fill-current/15" />
+        <img
+          src={docupilotLogo}
+          alt="DocuPilot Logo"
+          className="h-auto w-[140px] object-contain"
+        />
       </div>
 
       {/* DOCUMENT PORTAL title */}
       <div className="leading-tight">
         <h1
           className="
-            text-xs
+            text-xl
             font-extrabold
             tracking-wider
             text-[#324480]

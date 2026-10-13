@@ -114,10 +114,9 @@ export default function EditorStatusBar() {
           }}
           className={`
             flex items-center gap-1.5 px-1 py-0.5 rounded-[2px] transition-colors cursor-pointer
-            ${
-              trackChanges
-                ? "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300"
-                : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+            ${trackChanges
+              ? "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300"
+              : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
             }
           `}
           title="Click to open Track Changes panel"
@@ -132,6 +131,10 @@ export default function EditorStatusBar() {
         </button>
       </div>
 
+      {/* CENTER: Copyright */}
+      <div className="absolute left-1/2 -translate-x-1/2 text-[10px] text-[#64748B] dark:text-slate-400 whitespace-nowrap pointer-events-none">
+        All rights are reserved @ 2026 - CodeOrigin.Ai Pvt. Ltd.
+      </div>
       {/* RIGHT: Word-style View Modes & Zoom Controls */}
       <div className="flex items-center gap-1">
         {/* GROUP 1: Primary View Modes (Read Mode, Print Layout, Web Layout) */}
@@ -147,10 +150,9 @@ export default function EditorStatusBar() {
               rounded-[2px]
               transition-colors
               cursor-pointer
-              ${
-                viewMode === "read"
-                  ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
-                  : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              ${viewMode === "read"
+                ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
+                : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
               }
             `}
           >
@@ -168,10 +170,9 @@ export default function EditorStatusBar() {
               rounded-[2px]
               transition-colors
               cursor-pointer
-              ${
-                viewMode === "print"
-                  ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
-                  : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              ${viewMode === "print"
+                ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
+                : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
               }
             `}
           >
@@ -189,10 +190,9 @@ export default function EditorStatusBar() {
               rounded-[2px]
               transition-colors
               cursor-pointer
-              ${
-                viewMode === "web"
-                  ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
-                  : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              ${viewMode === "web"
+                ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
+                : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
               }
             `}
           >
@@ -217,10 +217,9 @@ export default function EditorStatusBar() {
               rounded-[2px]
               transition-colors
               cursor-pointer
-              ${
-                viewMode === "outline"
-                  ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
-                  : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              ${viewMode === "outline"
+                ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
+                : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
               }
             `}
           >
@@ -238,10 +237,9 @@ export default function EditorStatusBar() {
               rounded-[2px]
               transition-colors
               cursor-pointer
-              ${
-                viewMode === "draft"
-                  ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
-                  : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              ${viewMode === "draft"
+                ? "bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800"
+                : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] border border-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
               }
             `}
           >

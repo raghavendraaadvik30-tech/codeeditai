@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-
+import docupilotLogo from "@/assets/images/docupilot-logo.png";
 
 import { Link, useLocation, Outlet } from "react-router-dom";
 
@@ -16,7 +16,7 @@ import {
   Menu,
   LogOut,
   X,
-  ShieldCheck,
+
   KeyRound,
   CheckCircle2,
   Eye,
@@ -143,10 +143,12 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
           <div className="flex items-center gap-3">
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
-              <ShieldCheck className="h-5 w-5" />
-
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <img
+                src={docupilotLogo}
+                alt="DocuPilot Logo"
+                className="h-12 w-12 object-contain"
+              />
             </div>
 
             <div>
@@ -205,15 +207,13 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
             }}
 
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+            className={`rounded-full px-4 py-2 text-xs font-semibold transition ${activeTab === "profile"
 
-              activeTab === "profile"
+              ? "bg-button-primary text-button-primary-foreground shadow-sm"
 
-                ? "bg-button-primary text-button-primary-foreground shadow-sm"
+              : "border border-secondary bg-card text-secondary-foreground hover:bg-muted"
 
-                : "border border-secondary bg-card text-secondary-foreground hover:bg-muted"
-
-            }`}
+              }`}
 
           >
 
@@ -223,7 +223,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
 
 
-{/*           <button
+          {/*           <button
 
             type="button"
 
@@ -400,69 +400,69 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
                   </label>
 
                   <div className="relative">
-  <input
-    type={showNewPassword ? "text" : "password"}
-    value={newPassword}
-    onChange={(event) => setNewPassword(event.target.value)}
-    placeholder="At least 6 characters"
-    className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
-  />
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      placeholder="At least 6 characters"
+                      className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                    />
 
-  <button
-    type="button"
-    onClick={() => setShowNewPassword((value) => !value)}
-    aria-label={
-      showNewPassword
-        ? "Hide new password"
-        : "Show new password"
-    }
-    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground"
-  >
-    {showNewPassword ? (
-      <Eye className="h-4 w-4" />
-    ) : (
-      <EyeOff className="h-4 w-4" />
-    )}
-  </button>
-</div>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword((value) => !value)}
+                      aria-label={
+                        showNewPassword
+                          ? "Hide new password"
+                          : "Show new password"
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground"
+                    >
+                      {showNewPassword ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
 
 
                 <div>
-  <label className="mb-1.5 block text-xs font-bold text-foreground">
-    Confirm New Password
-  </label>
+                  <label className="mb-1.5 block text-xs font-bold text-foreground">
+                    Confirm New Password
+                  </label>
 
-  <div className="relative">
-    <input
-      type={showConfirmPassword ? "text" : "password"}
-      value={confirmPassword}
-      onChange={(event) => setConfirmPassword(event.target.value)}
-      placeholder="Re-enter new password"
-      className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
-    />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      placeholder="Re-enter new password"
+                      className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                    />
 
-    <button
-      type="button"
-      onClick={() =>
-        setShowConfirmPassword((value) => !value)
-      }
-      aria-label={
-        showConfirmPassword
-          ? "Hide confirm password"
-          : "Show confirm password"
-      }
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground"
-    >
-      {showConfirmPassword ? (
-        <Eye className="h-4 w-4" />
-      ) : (
-        <EyeOff className="h-4 w-4" />
-      )}
-    </button>
-  </div>
-</div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword((value) => !value)
+                      }
+                      aria-label={
+                        showConfirmPassword
+                          ? "Hide confirm password"
+                          : "Show confirm password"
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground"
+                    >
+                      {showConfirmPassword ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
               </div>
 
@@ -557,22 +557,19 @@ export const DashboardLayout: React.FC = () => {
     <div className="flex h-screen overflow-hidden bg-[#EEF7FF] font-sans text-[#172033] dark:bg-[#0B1426] dark:text-white">
       {/* SIDEBAR */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#DCE7F2] bg-[#D3E3FC] transition-all duration-300 dark:border-[#294564] dark:bg-[#0D213D] ${
-          sidebarExpanded ? "w-[188px]" : "w-16"
-        } ${
-          mobileMenuOpen
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#DCE7F2] bg-[#D3E3FC] transition-all duration-300 dark:border-[#294564] dark:bg-[#0D213D] ${sidebarExpanded ? "w-[188px]" : "w-16"
+          } ${mobileMenuOpen
             ? "translate-x-0 w-[188px]"
             : "-translate-x-full lg:translate-x-0"
-        }`}
+          }`}
       >
         <div>
           {/* Logo & Title */}
           <div
-            className={`flex h-14 shrink-0 items-center border-b border-[#DCE7F2] dark:border-[#294564] ${
-              isExpanded ? "justify-between px-3.5" : "justify-center"
-            }`}
+            className={`flex h-14 shrink-0 items-center border-b border-[#DCE7F2] dark:border-[#294564] ${isExpanded ? "justify-between px-3.5" : "justify-center"
+              }`}
           >
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#DCE7F2] bg-white text-[#324480] shadow-xs dark:border-[#294564] dark:bg-[#132742] dark:text-[#38BDF8]">
                 <ShieldCheck className="h-4 w-4" />
               </div>
@@ -587,7 +584,32 @@ export const DashboardLayout: React.FC = () => {
                   </span>
                 </div>
               )}
+            </div> */}
+
+
+
+            <div className="flex items-center gap-2">
+              <img
+                src={docupilotLogo}
+                alt="DocuPilot Logo"
+                className="h-12 w-12 shrink-0 object-contain"
+              />
+
+              {isExpanded && (
+                <div className="leading-tight">
+                  <span className="block text-xl font-black tracking-tight text-[#172033] dark:text-white">
+                    Docu Pilot
+                  </span>
+
+                  <span className="block text-[8px] font-semibold tracking-wide text-[#64748B] dark:text-slate-400">
+                    Doc. Prep. Reimagined!
+                  </span>
+                </div>
+              )}
             </div>
+
+
+
           </div>
 
           {/* Navigation Items */}
@@ -601,15 +623,13 @@ export const DashboardLayout: React.FC = () => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex w-full items-center rounded-xl text-xs font-bold transition-all ${
-                    isExpanded
-                      ? "px-3 py-2"
-                      : "justify-center py-2"
-                  } ${
-                    isActive
+                  className={`flex w-full items-center rounded-xl text-xs font-bold transition-all ${isExpanded
+                    ? "px-3 py-2"
+                    : "justify-center py-2"
+                    } ${isActive
                       ? "bg-white text-[#324480] shadow-xs dark:bg-[#132742] dark:text-[#38BDF8]"
                       : "text-[#64748B] hover:bg-white/60 hover:text-[#172033] dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className="h-4 w-4 shrink-0" />
@@ -626,9 +646,8 @@ export const DashboardLayout: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowAdminProfile(true)}
-            className={`w-full rounded-xl text-left transition-colors hover:bg-white/40 cursor-pointer dark:hover:bg-white/10 ${
-              isExpanded ? "p-1.5" : "flex justify-center p-1"
-            }`}
+            className={`w-full rounded-xl text-left transition-colors hover:bg-white/40 cursor-pointer dark:hover:bg-white/10 ${isExpanded ? "p-1.5" : "flex justify-center p-1"
+              }`}
           >
             <div className="flex items-center gap-2.5">
               <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#DCE7F2] bg-white text-xs font-bold text-[#172033] shadow-xs dark:border-[#294564] dark:bg-[#132742] dark:text-white">
@@ -665,9 +684,8 @@ export const DashboardLayout: React.FC = () => {
 
       {/* MAIN CONTAINER */}
       <div
-        className={`flex h-screen min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
-          sidebarExpanded ? "lg:pl-[188px]" : "lg:pl-16"
-        }`}
+        className={`flex h-screen min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${sidebarExpanded ? "lg:pl-[188px]" : "lg:pl-16"
+          }`}
       >
         {/* TOP HEADER */}
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between border-b border-[#DCE7F2] bg-[#D3E3FC] px-4 md:px-6 dark:border-[#294564] dark:bg-[#0D213D]">

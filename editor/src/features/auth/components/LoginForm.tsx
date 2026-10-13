@@ -97,15 +97,23 @@ export default function LoginUI() {
         }}
       />
 
+
+
       {/* Centered Login Card */}
-      <div className="relative z-10 w-full max-w-[525px] rounded-[32px] border border-white/80 bg-white p-8 shadow-[0_20px_60px_rgba(50,68,128,0.08)] sm:p-10">
-        {/* DocuPilot Logo */}
-        <div className="mb-5 flex justify-center">
+
+      <div className="relative z-10 w-full max-w-[480px] rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_20px_60px_rgba(50,68,128,0.08)] sm:p-8">
+
+        {/* DocuPilot Logo and Tagline */}
+        <div className="mb-5 flex flex-col items-center">
           <img
             src={docupilotLogo}
             alt="DocuPilot Logo"
-            className="h-auto w-[130px] object-contain"
+            className="h-auto w-[140px] object-contain"
           />
+
+          <h4 className="-mt-1 text-center text-sm font-medium tracking-wide text-[#1E3A5F]">
+            Doc. Prep. Reimagined!
+          </h4>
         </div>
 
         {/* Login Header */}
@@ -113,6 +121,7 @@ export default function LoginUI() {
           <h1 className="text-xl font-bold tracking-wide text-[#1E3A5F]">
             LOGIN
           </h1>
+
           <p className="mt-2 text-xs text-slate-500">
             Welcome back! Please sign in to continue.
           </p>
@@ -125,6 +134,13 @@ export default function LoginUI() {
             <span>{error}</span>
           </div>
         )}
+
+        {/* Keep your existing email field, password field,
+      remember-me checkbox, forgot-password link,
+      and login button here unchanged. */}
+
+
+
 
         {/* Login Form */}
         <form
@@ -247,6 +263,7 @@ export default function LoginUI() {
           </button>
         </form>
       </div>
-    </div>
+    </div >
+
   );
 }
