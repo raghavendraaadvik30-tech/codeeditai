@@ -1,22 +1,26 @@
 /**
  * --------------------------------------------------------
  * Module: Links
- * Feature: LinksPage / Master Links Management Panel
+ * Feature: LinksPage / Master Links & Navigation Management Panel
  * Description:
- * Compact, tabbed Links Panel layout showing:
- * Top Tabs: 1. INTERNAL REF | 2. DOCUMENTS | 3. CROSS REFERENCES
- * Only ONE active section expanded at a time.
- * Controls below active section:
- *  - SET ALL REFERENCES TO BLUE TEXT (Visual formatting)
- *  - BARE LINKS (Detects raw URLs in doc text & converts to real clickable hyperlinks)
- * Bottom: LINKS HISTORY.
+ * Word-style Navigation & Links Panel:
+ * Top Tabs: 1. NAVIGATION | 2. INTERNAL REFERENCE
+ * - Navigation: Word-style Navigation Pane with Search box, Headings tree,
+ *   Pages thumbnail strip, Search results, and Bookmarks.
+ * - Internal Reference: Web URL, Email links, Bare links convertor & Links history.
  * --------------------------------------------------------
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { Link as LinkIcon, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  FileText,
+  Link as LinkIcon,
+  X,
+  CheckCircle2,
+  AlertCircle,
+} from 'lucide-react';
+import { NavigationPanel } from '../components/navigation';
 import { InternalRefColumn } from '../components/internalRef';
-import { CrossReferenceColumn } from '../components/crossReference';
 import { LinksHistorySection } from '../components/history';
 import { useLinksHistory } from '../hooks/useLinksHistory';
 import { bareLinksService } from '../services/BareLinksService';
@@ -26,11 +30,11 @@ import { cn } from '@/lib/utils';
 import { BookmarkProvider } from '../context/BookmarkContext';
 import type { LinkHistoryType } from '../types';
 
-export type MainSectionTab = 'internal' | 'crossRef';
+export type MainSectionTab = 'navigation' | 'internal';
 
 function LinksPageContent() {
-  const { editorRef } = useEditor();
-  const [activeMainTab, setActiveMainTab] = useState<MainSectionTab>('internal');
+  const { editorRef, setLeftPanelOpen } = useEditor();
+  const [activeMainTab, setActiveMainTab] = useState<MainSectionTab>('navigation');
   const [internalSubTab, setInternalSubTab] = useState<'web' | 'email'>('web');
   const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -145,100 +149,114 @@ function LinksPageContent() {
     setTimeout(() => setFeedbackMsg(null), 3500);
   };
 
-  const mainTabs: { id: MainSectionTab; label: string; number: string }[] = [
-    { id: 'internal', label: 'INTERNAL REFERENCE', number: '1' },
-    { id: 'crossRef', label: 'CROSS REFERENCE', number: '2' },
-  ];
-
   return (
-    <div className="flex h-full w-full flex-col select-none overflow-y-auto bg-white dark:bg-[#0D213D] text-button-primary-foreground dark:text-muted">
-      {/* Top Fixed Area (Tabs + Form + Controls) - Fits neatly without scrollbar */}
-      <div className="shrink-0 p-3 space-y-2.5">
-        {/* Main Selectable Tabs (Side-by-Side: 1. INTERNAL REFERENCE | 2. CROSS REFERENCES) */}
-        <div className="flex gap-1 p-1 rounded-xl bg-[#F1F5F9] dark:bg-[#111D29] border border-[#E2E8F0] dark:border-[#294564]">
-          {mainTabs.map((tab) => {
-            const isActive = activeMainTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveMainTab(tab.id)}
-                className={cn(
-                  'flex-1 min-w-0 flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-lg text-[11px] font-semibold transition-all select-none whitespace-nowrap cursor-pointer',
-                  isActive
-                    ? 'bg-button-primary text-button-primary-foreground shadow-xs font-bold dark:bg-[#1E3A8A] dark:text-white'
-                    : 'text-[#64748B] hover:text-[#1E3A5F] dark:text-slate-400 dark:hover:text-white'
-                )}
-              >
-                <span>{tab.number}.</span>
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
+    <div className="flex h-full w-full flex-col select-none overflow-hidden bg-white dark:bg-[#0D213D] text-slate-800 dark:text-slate-200">
+      {/* TOP HEADER: Navigation | Internal Reference + Close Button (Matches Reference Image) */}
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-2.5 dark:border-[#1E3A5F] dark:bg-[#0E1F36]">
+        {/* Navigation & Internal Reference Tabs */}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('navigation')}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer select-none',
+              activeMainTab === 'navigation'
+                ? 'bg-blue-50 text-[#1967D2] font-bold dark:bg-[#1E3A8A]/40 dark:text-[#60A5FA]'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/50 font-medium'
+            )}
+          >
+            <FileText className="h-4 w-4 shrink-0 stroke-[2]" />
+            <span>Navigation</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('internal')}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer select-none',
+              activeMainTab === 'internal'
+                ? 'bg-blue-50 text-[#1967D2] font-bold dark:bg-[#1E3A8A]/40 dark:text-[#60A5FA]'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/50 font-medium'
+            )}
+          >
+            <LinkIcon className="h-4 w-4 shrink-0 stroke-[2]" />
+            <span>Internal Reference</span>
+          </button>
         </div>
 
-        {/* ACTIVE SECTION CONTENT (Only ONE open at a time) */}
-        <div className="w-full">
-          {activeMainTab === 'internal' && (
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={() => setLeftPanelOpen(false)}
+          className="relative z-40 flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition cursor-pointer"
+          title="Close panel"
+          aria-label="Close panel"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* BODY CONTENT */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-3">
+        {activeMainTab === 'navigation' && (
+          <NavigationPanel />
+        )}
+
+        {activeMainTab === 'internal' && (
+          <div className="flex flex-col space-y-3">
+            {/* Internal Reference (Web URL, Email) */}
             <InternalRefColumn
               activeSubTab={internalSubTab}
               onSubTabChange={setInternalSubTab}
               onLinkInserted={handleLinkInserted}
             />
-          )}
 
-          {activeMainTab === 'crossRef' && (
-            <CrossReferenceColumn onLinkInserted={handleLinkInserted} />
-          )}
-        </div>
+            {/* FEEDBACK TOAST MESSAGE */}
+            {feedbackMsg && (
+              <div
+                className={cn(
+                  'flex items-center gap-1.5 p-2 rounded-xl border text-xs font-medium transition-all',
+                  feedbackMsg.type === 'success'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300'
+                    : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/40 dark:border-red-800 dark:text-red-300'
+                )}
+              >
+                {feedbackMsg.type === 'success' ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
+                )}
+                <span>{feedbackMsg.text}</span>
+              </div>
+            )}
 
-        {/* FEEDBACK TOAST MESSAGE */}
-        {feedbackMsg && (
-          <div
-            className={cn(
-              'flex items-center gap-1.5 p-2 rounded-xl border text-xs font-medium transition-all',
-              feedbackMsg.type === 'success'
-                ? 'bg-success-50 border-success-200 text-success-800 dark:bg-success-950/40 dark:border-success-800 dark:text-success-300'
-                : 'bg-destructive/10 border-destructive/20 text-destructive/60 dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30'
+            {/* BARE LINKS CONVERTOR */}
+            <button
+              type="button"
+              onClick={handleConvertBareLinks}
+              className="w-full h-9 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 transition shadow-xs dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 cursor-pointer"
+            >
+              <LinkIcon className="h-4 w-4 text-[#2563EB] dark:text-[#38BDF8]" />
+              <span>BARE LINKS</span>
+              <span className="font-normal text-slate-500">(Convert Raw URLs)</span>
+            </button>
+
+            {/* BOTTOM SECTION: LINKS HISTORY (Hidden in Email part only) */}
+            {internalSubTab !== 'email' && (
+              <div className="flex flex-col pt-1">
+                <LinksHistorySection
+                  history={history}
+                  isRefreshing={isRefreshing}
+                  onRefresh={refreshHistory}
+                  onExecuteAction={executeHistoryAction}
+                  onRemoveItem={removeHistoryEntry}
+                  onClearHistory={clearAllHistory}
+                />
+              </div>
             )}
-          >
-            {feedbackMsg.type === 'success' ? (
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-success-600 dark:text-success-400" />
-            ) : (
-              <AlertCircle className="h-4 w-4 shrink-0 text-destructive dark:text-destructive" />
-            )}
-            <span>{feedbackMsg.text}</span>
           </div>
         )}
-
-        {/* CONTROLS BELOW MAIN SECTIONS */}
-        <div className="w-full pt-1">
-          {/* BARE LINKS CONVERTOR */}
-          <button
-            type="button"
-            onClick={handleConvertBareLinks}
-            className="w-full h-10 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 transition shadow-xs dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 cursor-pointer"
-          >
-            <LinkIcon className="h-4 w-4 text-[#2563EB] dark:text-[#38BDF8]" />
-            <span>BARE LINKS</span>
-            <span className="font-normal text-slate-500">(Convert Raw URLs)</span>
-          </button>
-        </div>
       </div>
-
-      {/* BOTTOM SECTION: LINKS HISTORY (Hidden in Email part only) */}
-      {!(activeMainTab === 'internal' && internalSubTab === 'email') && (
-        <div className="flex flex-col px-2.5 pb-2.5 pt-0">
-          <LinksHistorySection
-            history={history}
-            isRefreshing={isRefreshing}
-            onRefresh={refreshHistory}
-            onExecuteAction={executeHistoryAction}
-            onRemoveItem={removeHistoryEntry}
-            onClearHistory={clearAllHistory}
-          />
-        </div>
-      )}
     </div>
   );
 }

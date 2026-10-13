@@ -28,6 +28,8 @@ export interface HeaderFooterContextType {
   enterHeaderFooterMode: (type?: HFType, sectionId?: string, pageId?: string) => void;
   exitHeaderFooterMode: () => void;
   setActiveHFType: (type: HFType) => void;
+  setActivePageId: (pageId: string | null) => void;
+  setActiveSectionId: (sectionId: string | null) => void;
   setShowDocumentText: (show: boolean) => void;
   setUnit: (u: HFUnit) => void;
   goToHeader: () => void;
@@ -64,6 +66,9 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
 
       setActivePageId(targetPageId);
       setActiveSectionId(targetSecId);
+      if (targetPageId) {
+        setActivePage(targetPageId);
+      }
 
       // Focus the corresponding header/footer container after DOM paints if not already focused
       setTimeout(() => {
@@ -176,6 +181,8 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
         enterHeaderFooterMode,
         exitHeaderFooterMode,
         setActiveHFType,
+        setActivePageId,
+        setActiveSectionId,
         setShowDocumentText,
         setUnit,
         goToHeader,

@@ -145,8 +145,9 @@ export default function LeftOverlay() {
     <div className="flex h-full min-h-0 flex-col bg-white text-[#324480] dark:bg-[#0E1F36] dark:text-white">
 
       {/* HEADER */}
-      <div
-        className="
+      {panelKey !== "links" && (
+        <div
+          className="
           flex
           h-13
           shrink-0
@@ -214,6 +215,8 @@ export default function LeftOverlay() {
           type="button"
           onClick={() => setLeftPanelOpen(false)}
           className="
+            relative
+            z-40
             flex
             h-6
             w-6
@@ -236,6 +239,7 @@ export default function LeftOverlay() {
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
+      )}
 
       {/* PANEL CONTENT */}
 

@@ -35,6 +35,7 @@ EditorLayout
 
 */
 
+import { useState, useCallback, useRef, useEffect } from "react";
 import EditorHeader from "../components/header/EditorHeader";
 import RibbonToolbar from "../components/ribbon/RibbonToolbar";
 import IconSidebar from "../components/sidebar/IconSidebar";
@@ -49,10 +50,59 @@ import { useEditor } from "../hooks/useEditor";
 export default function EditorLayout() {
   const {
     leftPanelOpen,
+    leftPanelWidth,
+    setLeftPanelWidth,
     aiPanelOpen,
   } = useEditor();
 
   const { isCommentsPanelOpen } = useComments();
+  const [isResizing, setIsResizing] = useState(false);
+
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
+
+  const startResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    isDraggingRef.current = true;
+    startXRef.current = e.clientX;
+    startWidthRef.current = leftPanelWidth;
+    setIsResizing(true);
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      moveEvent.preventDefault();
+      const deltaX = moveEvent.clientX - startXRef.current;
+      // Sensible bounds: minimum 240px for clean tabs & thumbnails; maximum leaves >= 450px for document canvas
+      const minW = 240;
+      const maxW = Math.max(minW, Math.min(760, window.innerWidth - 450));
+      const newWidth = Math.max(minW, Math.min(maxW, Math.round(startWidthRef.current + deltaX)));
+      setLeftPanelWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      isDraggingRef.current = false;
+      setIsResizing(false);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      document.body.style.removeProperty("cursor");
+      document.body.style.removeProperty("user-select");
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, [leftPanelWidth, setLeftPanelWidth]);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.removeProperty("cursor");
+      document.body.style.removeProperty("user-select");
+    };
+  }, []);
 
   return (
     <div className="h-full w-full min-h-0 flex flex-col overflow-hidden">
@@ -77,11 +127,12 @@ export default function EditorLayout() {
 
           {/* MAIN EDITOR CANVAS AREA */}
           <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-[#F0F8FF] dark:bg-[#0B1528] p-3 gap-3.5 relative">
-            {/* LEFT OVERLAY FLOATING CARD */}
+            {/* LEFT OVERLAY RESIZABLE CARD */}
             {leftPanelOpen && (
               <aside
+                style={{ width: `${leftPanelWidth}px` }}
                 className="
-                  w-84
+                  relative
                   shrink-0
                   h-full
                   min-h-0
@@ -96,13 +147,92 @@ export default function EditorLayout() {
                   dark:shadow-xl
                   flex
                   flex-col
+                  group/sidebar
                 "
               >
                 <LeftOverlay />
+
+                {/* SUBTLE RESIZABLE DIVIDER (inside sidebar boundary, blends into white background) */}
+                <div
+                  role="separator"
+                  aria-orientation="vertical"
+                  aria-valuenow={leftPanelWidth}
+                  aria-valuemin={240}
+                  aria-valuemax={760}
+                  tabIndex={0}
+                  title="Drag to resize sidebar (Double-click to reset)"
+                  onMouseDown={startResize}
+                  onDoubleClick={() => setLeftPanelWidth(336)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowLeft") {
+                      e.preventDefault();
+                      setLeftPanelWidth((w) => Math.max(240, w - 20));
+                    } else if (e.key === "ArrowRight") {
+                      e.preventDefault();
+                      const maxW = Math.max(240, Math.min(760, window.innerWidth - 450));
+                      setLeftPanelWidth((w) => Math.min(maxW, w + 20));
+                    }
+                  }}
+                  className="
+                    absolute
+                    top-0
+                    right-0
+                    bottom-0
+                    w-2.5
+                    cursor-col-resize
+                    select-none
+                    flex
+                    items-center
+                    justify-center
+                    z-30
+                    group/handle
+                    hover:bg-slate-100/60
+                    dark:hover:bg-slate-800/40
+                    transition-colors
+                  "
+                >
+                  {/* Subtle 1px divider border line blending into white card edge */}
+                  <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-[#E0E7EF] dark:bg-[#1E3A5F] group-hover/handle:bg-[#CBD5E1] dark:group-hover/handle:bg-[#334E68] transition-colors" />
+
+                  {/* Small subtle drag handle visible on hover */}
+                  <div
+                    className={`
+                      flex
+                      flex-col
+                      items-center
+                      justify-center
+                      gap-0.5
+                      py-2
+                      px-0.5
+                      rounded-full
+                      bg-white
+                      dark:bg-[#0E1F36]
+                      border
+                      border-[#CBD5E1]
+                      dark:border-[#294564]
+                      shadow-xs
+                      opacity-0
+                      group-hover/handle:opacity-100
+                      transition-opacity
+                      duration-150
+                      pointer-events-none
+                      ${isResizing ? "!opacity-100 border-[#94A3B8]" : ""}
+                    `}
+                  >
+                    <div className="w-0.5 h-0.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                    <div className="w-0.5 h-0.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                    <div className="w-0.5 h-0.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                  </div>
+                </div>
               </aside>
             )}
 
-            {/* WORKSPACE */}
+            {/* TRANSPARENT OVERLAY DURING ACTIVE DRAGGING (Guarantees smooth tracking & col-resize cursor everywhere) */}
+            {isResizing && (
+              <div className="fixed inset-0 z-50 cursor-col-resize select-none bg-transparent" />
+            )}
+
+            {/* WORKSPACE CANVAS (Flex-1 expands/shrinks automatically) */}
             <section
               className="
                 relative

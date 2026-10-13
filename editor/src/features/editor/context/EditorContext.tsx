@@ -418,6 +418,9 @@ export interface EditorContextType {
   leftPanelOpen: boolean;
   setLeftPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
+  leftPanelWidth: number;
+  setLeftPanelWidth: React.Dispatch<React.SetStateAction<number>>;
+
   aiPanelOpen: boolean;
   setAiPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -542,6 +545,16 @@ export function EditorProvider({
     }
   });
 
+  const [leftPanelWidth, setLeftPanelWidthState] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem("editor_left_panel_width");
+      const num = stored ? parseInt(stored, 10) : NaN;
+      return !isNaN(num) && num >= 220 && num <= 750 ? num : 336;
+    } catch {
+      return 336;
+    }
+  });
+
   const setActivePanel: React.Dispatch<React.SetStateAction<string>> = (action) => {
     setActivePanelState((prev) => {
       const next = typeof action === "function" ? action(prev) : action;
@@ -563,6 +576,19 @@ export function EditorProvider({
         // ignore
       }
       return next;
+    });
+  };
+
+  const setLeftPanelWidth: React.Dispatch<React.SetStateAction<number>> = (action) => {
+    setLeftPanelWidthState((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      const clamped = Math.max(220, Math.min(750, next));
+      try {
+        localStorage.setItem("editor_left_panel_width", String(clamped));
+      } catch {
+        // ignore
+      }
+      return clamped;
     });
   };
 
@@ -2959,6 +2985,8 @@ useEffect(() => {
 
     leftPanelOpen,
     setLeftPanelOpen,
+    leftPanelWidth,
+    setLeftPanelWidth,
 
     aiPanelOpen,
     setAiPanelOpen,

@@ -4,4 +4,7 @@ export * from "./CrossReferenceService";
 export * from "./ReferenceValidationService";
 export * from "./EmailLinkService";
 export * from "./BareLinksService";
-
+export * from "./NavigationOutlineService";
+export * from "./NavigationSearchService";
+export * from "./NavigationPagesService";
+export * from "./wordSearch";

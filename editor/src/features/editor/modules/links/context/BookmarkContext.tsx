@@ -17,7 +17,7 @@ import { linksRepository } from '../repository/LinksRepository';
 
 export interface BookmarkContextValue {
   bookmarks: BookmarkItem[];
-  addBookmark: (editor: HTMLElement | null, name: string) => BookmarkItem | null;
+  addBookmark: (editor: HTMLElement | null, name: string, savedRange?: Range | null) => BookmarkItem | null;
   removeBookmark: (editor: HTMLElement | null, idOrName: string) => boolean;
   navigateToBookmark: (editor: HTMLElement | null, idOrName: string) => boolean;
   refreshBookmarks: (editor: HTMLElement | null) => BookmarkItem[];
@@ -44,9 +44,9 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
   }, [bookmarks]);
 
   const addBookmark = useCallback(
-    (editor: HTMLElement | null, name: string): BookmarkItem | null => {
+    (editor: HTMLElement | null, name: string, savedRange?: Range | null): BookmarkItem | null => {
       if (!name.trim()) return null;
-      const created = bookmarkService.createBookmark(editor, name);
+      const created = bookmarkService.createBookmark(editor, name, savedRange);
       if (created) {
         setBookmarks((prev) => {
           const filtered = prev.filter((b) => b.name.toLowerCase() !== name.trim().toLowerCase());

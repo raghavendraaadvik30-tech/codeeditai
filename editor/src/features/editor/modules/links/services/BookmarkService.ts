@@ -25,52 +25,63 @@ export class BookmarkService {
    */
   createBookmark(
     editor: HTMLElement | null,
-    bookmarkName: string
+    bookmarkName: string,
+    savedRange?: Range | null
   ): BookmarkItem | null {
     if (!editor || !bookmarkName.trim()) return null;
 
     const trimmedName = bookmarkName.trim();
     const id = generateReferenceId('bookmark', trimmedName);
 
-    editor.focus();
+    // If no savedRange provided, try getting current selection from editor
     const selection = window.getSelection();
+    let range: Range | null = savedRange || null;
+
+    if (!range && selection && selection.rangeCount > 0) {
+      const currentR = selection.getRangeAt(0);
+      if (editor.contains(currentR.commonAncestorContainer)) {
+        range = currentR;
+      }
+    }
+
+    const anchor = document.createElement('a');
+    anchor.id = id;
+    anchor.setAttribute('data-bookmark', trimmedName);
+    anchor.setAttribute('data-bookmark-id', id);
+    anchor.className = 'bookmark-anchor inline-flex items-center gap-0.5 bg-amber-100/90 text-amber-900 dark:bg-amber-950/70 dark:text-amber-200 border-b border-amber-500 font-medium px-1 py-0.5 rounded transition-all duration-300';
+    anchor.title = `Bookmark: ${trimmedName}`;
 
     let bookmarkElement: HTMLElement;
 
-    if (selection && selection.rangeCount > 0 && editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
-      const range = selection.getRangeAt(0);
+    // Check if range has actual non-empty text selected
+    const selectedText = range ? range.toString().trim() : '';
 
-      const anchor = document.createElement('a');
-      anchor.id = id;
-      anchor.setAttribute('data-bookmark', trimmedName);
-      anchor.setAttribute('data-bookmark-id', id);
-      anchor.className = 'bookmark-anchor bg-amber-500/10 dark:bg-amber-400/20 border-b border-dashed border-amber-500 font-medium px-0.5 rounded transition-all duration-300';
-      anchor.title = `Bookmark: ${trimmedName}`;
-
-      if (!range.collapsed) {
-        // Wrap selected text
-        try {
-          range.surroundContents(anchor);
-        } catch {
-          const fragment = range.extractContents();
-          anchor.appendChild(fragment);
-          range.insertNode(anchor);
-        }
-      } else {
-        // Collapsed cursor - insert labeled tag
-        anchor.innerHTML = `🔖 ${escapeHtml(trimmedName)}`;
+    if (range && selectedText.length > 0) {
+      // User actually selected text in the document
+      try {
+        range.surroundContents(anchor);
+      } catch {
+        const fragment = range.extractContents();
+        anchor.appendChild(fragment);
         range.insertNode(anchor);
       }
-
+      if (!anchor.textContent?.trim().startsWith('🔖')) {
+        anchor.prepend(document.createTextNode('🔖 '));
+      }
+      bookmarkElement = anchor;
+    } else if (range) {
+      // Cursor position or empty/whitespace selection
+      // Insert BOTH bookmark symbol 🔖 AND bookmark name so text is always present!
+      anchor.innerHTML = `🔖 ${escapeHtml(trimmedName)}`;
+      try {
+        range.deleteContents();
+        range.insertNode(anchor);
+      } catch {
+        editor.appendChild(anchor);
+      }
       bookmarkElement = anchor;
     } else {
       // Fallback insertion at end of editor
-      const anchor = document.createElement('a');
-      anchor.id = id;
-      anchor.setAttribute('data-bookmark', trimmedName);
-      anchor.setAttribute('data-bookmark-id', id);
-      anchor.className = 'bookmark-anchor bg-amber-500/10 dark:bg-amber-400/20 border-b border-dashed border-amber-500 font-medium px-0.5 rounded transition-all duration-300';
-      anchor.title = `Bookmark: ${trimmedName}`;
       anchor.innerHTML = `🔖 ${escapeHtml(trimmedName)}`;
       editor.appendChild(anchor);
       bookmarkElement = anchor;
@@ -128,7 +139,7 @@ export class BookmarkService {
   }
 
   /**
-   * Navigates to target bookmark, smoothly scrolls into view, and applies highlight flash effect.
+   * Navigates to target bookmark, smoothly scrolls into view, selects text, and applies highlight flash effect.
    */
   navigateToBookmark(container: HTMLElement | null, idOrName: string): boolean {
     const root = container || (typeof document !== 'undefined' ? document.body : null);
@@ -149,6 +160,19 @@ export class BookmarkService {
 
     // Smoothly scroll into center view
     target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+
+    // Select the bookmark element contents in the editor so selection is visually clear
+    try {
+      const sel = window.getSelection();
+      if (sel) {
+        const r = document.createRange();
+        r.selectNodeContents(target);
+        sel.removeAllRanges();
+        sel.addRange(r);
+      }
+    } catch {
+      // ignore
+    }
 
     // Apply temporary highlight flash effect
     this.applyFlashEffect(target);

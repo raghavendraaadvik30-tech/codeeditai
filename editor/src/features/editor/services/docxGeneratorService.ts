@@ -259,6 +259,7 @@ interface ExportContext {
 function sanitizeBookmarkName(name: string | null | undefined): string {
   if (!name) return "bm_ref";
   let clean = name.replace(/^#+/, "").trim();
+  clean = clean.replace(/^[🔖\s]+/, "");
   clean = clean.replace(/[^a-zA-Z0-9_]/g, "_");
   if (!clean) return "bm_ref";
   if (!/^[a-zA-Z_]/.test(clean)) {
@@ -359,31 +360,52 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         return "";
       }
       
+      const buildRPr = (fontOverride?: string) => {
+        let r = "";
+        if (state.isHyperlink) {
+          r += '<w:rStyle w:val="Hyperlink"/>';
+        }
+        const activeFont = fontOverride || state.fontFamily;
+        if (activeFont) {
+          r += `<w:rFonts w:ascii="${esc(activeFont)}" w:hAnsi="${esc(activeFont)}" w:cs="${esc(activeFont)}"/>`;
+        }
+        if (state.bold) r += "<w:b/>";
+        if (state.italic) r += "<w:i/>";
+        if (state.strike) r += "<w:strike/>";
+        if (state.color) {
+          const hex = parseColorToHex(state.color);
+          if (hex) r += `<w:color w:val="${hex}"/>`;
+        }
+        if (state.fontSize) {
+          const val = parseFontSize(state.fontSize);
+          if (val) r += `<w:sz w:val="${val}"/>`;
+        }
+        if (state.underline) r += '<w:u w:val="single"/>';
+        if (state.bg) {
+          const hex = parseColorToHex(state.bg);
+          if (hex) r += `<w:shd w:val="clear" w:color="auto" w:fill="${hex}"/>`;
+        }
+        return r;
+      };
+
+      if (/(🔖|[\uD800-\uDBFF][\uDC00-\uDFFF])/.test(text)) {
+        const parts = text.split(/(🔖|[\uD800-\uDBFF][\uDC00-\uDFFF])/g);
+        let out = "";
+        parts.forEach((p) => {
+          if (!p) return;
+          if (/(🔖|[\uD800-\uDBFF][\uDC00-\uDFFF])/.test(p)) {
+            const emojiRPr = buildRPr("Segoe UI Emoji");
+            out += `<w:r>${emojiRPr ? `<w:rPr>${emojiRPr}</w:rPr>` : ""}<w:t>${p}</w:t></w:r>`;
+          } else {
+            const rPr = buildRPr();
+            out += `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ""}<w:t xml:space="preserve">${esc(p)}</w:t></w:r>`;
+          }
+        });
+        return out;
+      }
+
       const escaped = esc(text);
-      let rPr = "";
-      if (state.isHyperlink) {
-        rPr += '<w:rStyle w:val="Hyperlink"/>';
-      }
-      if (state.fontFamily) {
-        rPr += `<w:rFonts w:ascii="${esc(state.fontFamily)}" w:hAnsi="${esc(state.fontFamily)}"/>`;
-      }
-      if (state.bold) rPr += "<w:b/>";
-      if (state.italic) rPr += "<w:i/>";
-      if (state.strike) rPr += "<w:strike/>";
-      if (state.color) {
-        const hex = parseColorToHex(state.color);
-        if (hex) rPr += `<w:color w:val="${hex}"/>`;
-      }
-      if (state.fontSize) {
-        const val = parseFontSize(state.fontSize);
-        if (val) rPr += `<w:sz w:val="${val}"/>`;
-      }
-      if (state.underline) rPr += '<w:u w:val="single"/>';
-      if (state.bg) {
-        const hex = parseColorToHex(state.bg);
-        if (hex) rPr += `<w:shd w:val="clear" w:color="auto" w:fill="${hex}"/>`;
-      }
-      
+      const rPr = buildRPr();
       xml += "<w:r>";
       if (rPr) xml += `<w:rPr>${rPr}</w:rPr>`;
       xml += `<w:t xml:space="preserve">${escaped}</w:t>`;
@@ -755,6 +777,12 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         const dataCrossRef = el.getAttribute("data-cross-ref");
         const title = el.getAttribute("title") || el.getAttribute("data-tooltip") || "";
 
+        const isBookmark =
+          el.hasAttribute("data-bookmark") ||
+          el.hasAttribute("data-bookmark-id") ||
+          el.classList.contains("bookmark-anchor") ||
+          Boolean(el.id && (el.id.startsWith("bookmark_") || el.id.startsWith("bm_")));
+
         const isInternal =
           Boolean(dataTargetId) ||
           Boolean(dataCrossRef) ||
@@ -790,6 +818,15 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           innerXml += walk(child, linkState);
         });
 
+        // Ensure bookmark has visible bookmark symbol 🔖 in MS Word
+        const hasBookmarkSymbol = el.textContent?.includes("🔖");
+        let bookmarkSymbolXml = "";
+        if (isBookmark && !hasBookmarkSymbol) {
+          const fontSizeVal = linkState.fontSize ? parseFontSize(linkState.fontSize) : null;
+          const szAttr = fontSizeVal ? `<w:sz w:val="${fontSizeVal}"/>` : "";
+          bookmarkSymbolXml = `<w:r><w:rPr><w:rFonts w:ascii="Segoe UI Emoji" w:hAnsi="Segoe UI Emoji" w:cs="Segoe UI Emoji"/>${szAttr}</w:rPr><w:t xml:space="preserve">🔖 </w:t></w:r>`;
+        }
+
         if (!innerXml.trim() && isLink) {
           const displayText = el.innerText?.trim() || el.textContent?.trim() || href || dataTargetId;
           if (displayText) {
@@ -801,6 +838,9 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
             rPr += '<w:color w:val="0563C1"/><w:u w:val="single"/>';
             innerXml = `<w:r><w:rPr>${rPr}</w:rPr><w:t xml:space="preserve">${escaped}</w:t></w:r>`;
           }
+        } else if (!innerXml.trim() && isBookmark) {
+          const bmText = el.getAttribute("data-bookmark") || el.title || "Bookmark";
+          innerXml = `<w:r><w:t xml:space="preserve">${esc(bmText)}</w:t></w:r>`;
         }
 
         const bms = getElementBookmarks(el, ctx);
@@ -831,7 +871,7 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
             targetMode: "External",
           });
 
-          return `${bStarts}<w:hyperlink r:id="${rId}" w:history="1"${tooltipAttr}>${innerXml}</w:hyperlink>${bEnds}`;
+          return `${bStarts}${bookmarkSymbolXml}<w:hyperlink r:id="${rId}" w:history="1"${tooltipAttr}>${innerXml}</w:hyperlink>${bEnds}`;
         }
 
         if (isInternal) {
@@ -841,10 +881,10 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
             ctx.targetMap?.get(rawTarget.toLowerCase()) ||
             sanitizeBookmarkName(rawTarget);
 
-          return `${bStarts}<w:hyperlink w:anchor="${esc(anchorName)}" w:history="1"${tooltipAttr}>${innerXml}</w:hyperlink>${bEnds}`;
+          return `${bStarts}${bookmarkSymbolXml}<w:hyperlink w:anchor="${esc(anchorName)}" w:history="1"${tooltipAttr}>${innerXml}</w:hyperlink>${bEnds}`;
         }
 
-        return `${bStarts}${innerXml}${bEnds}`;
+        return `${bStarts}${bookmarkSymbolXml}${innerXml}${bEnds}`;
       }
 
       const bms = getElementBookmarks(el, ctx);
@@ -1365,10 +1405,25 @@ export async function generateWordDocx(
       const parser = new DOMParser();
       const doc = parser.parseFromString(`<div>${rawHtml}</div>`, "text/html");
       doc.querySelectorAll("[id], [data-bookmark], [data-bookmark-id], [name]").forEach((el) => {
-        registerTarget(el.getAttribute("id"));
-        registerTarget(el.getAttribute("data-bookmark"));
-        registerTarget(el.getAttribute("data-bookmark-id"));
-        registerTarget(el.getAttribute("name"));
+        const bm = el.getAttribute("data-bookmark");
+        if (bm && bm.trim()) {
+          const s = sanitizeBookmarkName(bm.trim());
+          registerTarget(bm);
+          const id = el.getAttribute("id");
+          if (id) {
+            targetMap.set(id.trim(), s);
+            targetMap.set(id.trim().toLowerCase(), s);
+          }
+          const bmId = el.getAttribute("data-bookmark-id");
+          if (bmId) {
+            targetMap.set(bmId.trim(), s);
+            targetMap.set(bmId.trim().toLowerCase(), s);
+          }
+        } else {
+          registerTarget(el.getAttribute("id"));
+          registerTarget(el.getAttribute("data-bookmark-id"));
+          registerTarget(el.getAttribute("name"));
+        }
       });
     } catch {
       // Ignore pre-scan errors

@@ -338,17 +338,43 @@ export default function HeaderFooterTab() {
       targetEl.dispatchEvent(new Event("input", { bubbles: true }));
 
       if (activeSection) {
-        if (activeHFType === "header") {
-          updateSection(activeSection.id, {
-            header: targetEl.innerText,
-            headerHtml: targetEl.innerHTML,
-          });
-        } else {
-          updateSection(activeSection.id, {
-            footer: targetEl.innerText,
-            footerHtml: targetEl.innerHTML,
-          });
+        const targetPage = model.pages.find((p) => p.id === targetPageId) || model.pages[0];
+        const pageIdx = targetPage ? model.pages.indexOf(targetPage) : 0;
+        const isFirstPage = pageIdx === 0 || model.pages.filter((p) => p.sectionId === activeSection.id)[0]?.id === targetPage?.id;
+        const isEvenPage = (pageIdx + 1) % 2 === 0;
+
+        let kind: "first" | "even" | "normal" = "normal";
+        if (activeSection.differentFirstPage && isFirstPage) {
+          kind = "first";
+        } else if (activeSection.differentOddEven && isEvenPage) {
+          kind = "even";
         }
+
+        const patch: Partial<SectionModel> = {};
+        if (activeHFType === "header") {
+          if (kind === "first") {
+            patch.firstHeader = targetEl.innerText;
+            patch.firstHeaderHtml = targetEl.innerHTML;
+          } else if (kind === "even") {
+            patch.evenHeader = targetEl.innerText;
+            patch.evenHeaderHtml = targetEl.innerHTML;
+          } else {
+            patch.header = targetEl.innerText;
+            patch.headerHtml = targetEl.innerHTML;
+          }
+        } else {
+          if (kind === "first") {
+            patch.firstFooter = targetEl.innerText;
+            patch.firstFooterHtml = targetEl.innerHTML;
+          } else if (kind === "even") {
+            patch.evenFooter = targetEl.innerText;
+            patch.evenFooterHtml = targetEl.innerHTML;
+          } else {
+            patch.footer = targetEl.innerText;
+            patch.footerHtml = targetEl.innerHTML;
+          }
+        }
+        updateSection(activeSection.id, patch);
       }
     } else {
       document.execCommand("insertHTML", false, htmlSnippet);

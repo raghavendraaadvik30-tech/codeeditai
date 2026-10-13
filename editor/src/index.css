@@ -702,4 +702,20 @@ ul[data-custom-bullet]>li::before {
   color: #f1f5f9 !important;
 }
 
+/* ==========================================================
+   DOCUMENT SELECTION STYLES
+   Ensures text selection is crisp, clear, and visible
+========================================================== */
+::selection {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+[contenteditable="true"] ::selection,
+[data-editor-page] ::selection,
+.bookmark-anchor::selection {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
 @import "./styles/paraexcel-components.css";

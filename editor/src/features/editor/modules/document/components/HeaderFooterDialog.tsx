@@ -18,10 +18,25 @@ function HeaderFooterDialogContent({ onClose }: { onClose: () => void }) {
   const [footerText, setFooterText] = useState(firstSection?.footer || "");
 
   const handleApply = () => {
-    if (firstSection) {
-      updateSection(firstSection.id, {
-        header: headerText,
-        footer: footerText,
+    const updatedHtmlHeader = headerText ? `<p>${headerText}</p>` : "";
+    const updatedHtmlFooter = footerText ? `<p>${footerText}</p>` : "";
+
+    if (model.sections && model.sections.length > 0) {
+      model.sections.forEach((sec) => {
+        updateSection(sec.id, {
+          header: headerText,
+          headerHtml: updatedHtmlHeader,
+          firstHeader: sec.differentFirstPage ? sec.firstHeader : headerText,
+          firstHeaderHtml: sec.differentFirstPage ? sec.firstHeaderHtml : updatedHtmlHeader,
+          evenHeader: sec.differentOddEven ? sec.evenHeader : headerText,
+          evenHeaderHtml: sec.differentOddEven ? sec.evenHeaderHtml : updatedHtmlHeader,
+          footer: footerText,
+          footerHtml: updatedHtmlFooter,
+          firstFooter: sec.differentFirstPage ? sec.firstFooter : footerText,
+          firstFooterHtml: sec.differentFirstPage ? sec.firstFooterHtml : updatedHtmlFooter,
+          evenFooter: sec.differentOddEven ? sec.evenFooter : footerText,
+          evenFooterHtml: sec.differentOddEven ? sec.evenFooterHtml : updatedHtmlFooter,
+        });
       });
     }
     onClose();

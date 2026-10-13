@@ -355,26 +355,66 @@ export function findOldestDocument(docs: DocumentModel[]): DocumentModel | null 
 function syncActiveDomToDoc(doc: DocumentModel): DocumentModel {
   if (typeof document === "undefined") return doc;
   const pageNodes = document.querySelectorAll<HTMLElement>(
-    '[data-editor-page], [contenteditable][data-page-id]'
+    '[data-editor-page], [contenteditable][data-page-id]:not([data-hf-type]):not([data-hf-container])'
   );
-  if (!pageNodes || pageNodes.length === 0) return doc;
 
   const nextHtml = { ...doc.pageHtml };
   let changed = false;
 
-  pageNodes.forEach((node) => {
-    const pageId =
-      node.getAttribute("data-editor-page") ||
-      node.getAttribute("data-page-id");
-    if (pageId && node.innerHTML !== undefined) {
-      if (nextHtml[pageId] !== node.innerHTML) {
-        nextHtml[pageId] = node.innerHTML;
-        changed = true;
+  if (pageNodes && pageNodes.length > 0) {
+    pageNodes.forEach((node) => {
+      if (node.hasAttribute("data-hf-type") || node.closest("[data-hf-container]")) {
+        return;
       }
-    }
-  });
+      const pageId =
+        node.getAttribute("data-editor-page") ||
+        node.getAttribute("data-page-id");
+      if (pageId && node.innerHTML !== undefined) {
+        if (nextHtml[pageId] !== node.innerHTML) {
+          nextHtml[pageId] = node.innerHTML;
+          changed = true;
+        }
+      }
+    });
+  }
 
-  return changed ? { ...doc, pageHtml: nextHtml } : doc;
+  // Also sync live header & footer edits from active contenteditable if present
+  let nextSections = doc.sections;
+  const activeHeader = document.querySelector<HTMLElement>(
+    '[data-hf-type="header"][contenteditable="true"]'
+  );
+  const activeFooter = document.querySelector<HTMLElement>(
+    '[data-hf-type="footer"][contenteditable="true"]'
+  );
+
+  if (activeHeader || activeFooter) {
+    const pageId = activeHeader?.getAttribute("data-page-id") || activeFooter?.getAttribute("data-page-id");
+    const page = doc.pages.find((p) => p.id === pageId) || doc.pages[0];
+    const secId = page?.sectionId || doc.sections[0]?.id;
+    if (secId) {
+      nextSections = doc.sections.map((sec) => {
+        if (sec.id !== secId && sec.linkToPrevious === false) return sec;
+        return {
+          ...sec,
+          ...(activeHeader
+            ? {
+                header: activeHeader.innerText,
+                headerHtml: activeHeader.innerHTML,
+              }
+            : {}),
+          ...(activeFooter
+            ? {
+                footer: activeFooter.innerText,
+                footerHtml: activeFooter.innerHTML,
+              }
+            : {}),
+        };
+      });
+      changed = true;
+    }
+  }
+
+  return changed ? { ...doc, pageHtml: nextHtml, sections: nextSections } : doc;
 }
 
 function createEmptyDocument(): DocumentModel {
@@ -782,8 +822,23 @@ export function DocumentModelProvider({
 
         const section: SectionModel = {
           ...createDefaultSection(sectionId),
-          header: "Section " + (prev.sections.length + 1),
-          footer: prevSection?.footer ?? "",
+          header: prevSection?.header ?? "",
+          headerHtml: prevSection?.headerHtml,
+          footer: prevSection?.footer ?? "Parexel Smart Authoring Suite",
+          footerHtml: prevSection?.footerHtml,
+          firstHeader: prevSection?.firstHeader,
+          firstHeaderHtml: prevSection?.firstHeaderHtml,
+          firstFooter: prevSection?.firstFooter,
+          firstFooterHtml: prevSection?.firstFooterHtml,
+          evenHeader: prevSection?.evenHeader,
+          evenHeaderHtml: prevSection?.evenHeaderHtml,
+          evenFooter: prevSection?.evenFooter,
+          evenFooterHtml: prevSection?.evenFooterHtml,
+          differentFirstPage: prevSection?.differentFirstPage ?? false,
+          differentOddEven: prevSection?.differentOddEven ?? false,
+          linkToPrevious: true,
+          headerTopDistance: prevSection?.headerTopDistance,
+          footerBottomDistance: prevSection?.footerBottomDistance,
           orientation: prevSection?.orientation,
           marginPreset: prevSection?.marginPreset,
           marginConfig: prevSection?.marginConfig ? { ...prevSection.marginConfig } : undefined,
@@ -836,18 +891,58 @@ export function DocumentModelProvider({
       sectionId: string,
       patch: Partial<SectionModel>
     ) => {
-      setModel((prev) => ({
-        ...prev,
-        sections: prev.sections.map(
-          (section) =>
-            section.id === sectionId
-              ? {
-                ...section,
-                ...patch,
-              }
-              : section
-        ),
-      }));
+      setModel((prev) => {
+        const targetIndex = prev.sections.findIndex((s) => s.id === sectionId);
+        if (targetIndex === -1) return prev;
+
+        const hasHFChanges =
+          patch.header !== undefined ||
+          patch.headerHtml !== undefined ||
+          patch.footer !== undefined ||
+          patch.footerHtml !== undefined ||
+          patch.firstHeader !== undefined ||
+          patch.firstHeaderHtml !== undefined ||
+          patch.firstFooter !== undefined ||
+          patch.firstFooterHtml !== undefined ||
+          patch.evenHeader !== undefined ||
+          patch.evenHeaderHtml !== undefined ||
+          patch.evenFooter !== undefined ||
+          patch.evenFooterHtml !== undefined;
+
+        if (!hasHFChanges) {
+          return {
+            ...prev,
+            sections: prev.sections.map((section) =>
+              section.id === sectionId ? { ...section, ...patch } : section
+            ),
+          };
+        }
+
+        // When updating header/footer:
+        // Find the root section in this linked group
+        let rootIdx = targetIndex;
+        while (rootIdx > 0 && prev.sections[rootIdx].linkToPrevious) {
+          rootIdx--;
+        }
+
+        // Find all sections in this linked cluster
+        const linkedIndices = new Set<number>();
+        linkedIndices.add(rootIdx);
+        for (let i = rootIdx + 1; i < prev.sections.length; i++) {
+          if (prev.sections[i].linkToPrevious) {
+            linkedIndices.add(i);
+          } else {
+            break;
+          }
+        }
+
+        return {
+          ...prev,
+          sections: prev.sections.map((sec, idx) =>
+            linkedIndices.has(idx) ? { ...sec, ...patch } : sec
+          ),
+        };
+      });
     },
     []
   );
@@ -910,7 +1005,7 @@ export function DocumentModelProvider({
           ...currentSection,
           ...patch,
           id: newSectionId,
-          header: "Section " + (prev.sections.length + 1),
+          linkToPrevious: currentSection?.linkToPrevious ?? true,
         };
 
         const pagesBefore = prev.pages.slice(0, pageIndex);
@@ -934,7 +1029,7 @@ export function DocumentModelProvider({
             postSection = {
               ...currentSection,
               id: postSectionId,
-              header: "Section " + (prev.sections.length + 2),
+              linkToPrevious: true,
             };
           }
         }

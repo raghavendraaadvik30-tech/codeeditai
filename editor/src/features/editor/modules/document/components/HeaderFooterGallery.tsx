@@ -8,6 +8,7 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -43,10 +44,22 @@ export function HeaderGallery({
   const handleSelectTemplate = (tmpl: HFTemplate) => {
     if (!activeSection) return;
 
-    // Apply template content to active section
-    updateSection(activeSection.id, {
+    // Apply template content to active section and synchronize
+    const patch = {
       header: tmpl.plainText,
       headerHtml: tmpl.contentHtml,
+      firstHeader: activeSection.differentFirstPage ? activeSection.firstHeader : tmpl.plainText,
+      firstHeaderHtml: activeSection.differentFirstPage ? activeSection.firstHeaderHtml : tmpl.contentHtml,
+      evenHeader: activeSection.differentOddEven ? activeSection.evenHeader : tmpl.plainText,
+      evenHeaderHtml: activeSection.differentOddEven ? activeSection.evenHeaderHtml : tmpl.contentHtml,
+    };
+    updateSection(activeSection.id, patch);
+
+    // If there are other sections linked to this section or in document, keep them synchronized
+    model.sections.forEach((sec) => {
+      if (sec.id !== activeSection.id && sec.linkToPrevious !== false) {
+        updateSection(sec.id, patch);
+      }
     });
 
     // Enter Header & Footer editing mode
@@ -61,13 +74,19 @@ export function HeaderGallery({
 
   const handleRemoveHeader = () => {
     if (activeSection) {
-      updateSection(activeSection.id, {
+      const clearPatch = {
         header: "",
         headerHtml: "",
         firstHeader: "",
         firstHeaderHtml: "",
         evenHeader: "",
         evenHeaderHtml: "",
+      };
+      updateSection(activeSection.id, clearPatch);
+      model.sections.forEach((sec) => {
+        if (sec.id !== activeSection.id && sec.linkToPrevious !== false) {
+          updateSection(sec.id, clearPatch);
+        }
       });
     }
   };
@@ -103,34 +122,36 @@ export function HeaderGallery({
       />
 
       <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-foreground">
-        <DropdownMenuLabel className="text-11px font-semibold uppercase tracking-wider text-muted-foreground pb-1">
-          Built-In Headers
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-11px font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+            Built-In Headers
+          </DropdownMenuLabel>
 
-        {/* Scrollable Gallery Preview List */}
-        <div className="max-h-85 overflow-y-auto space-y-2 pr-1 my-1">
-          {BUILT_IN_HEADERS.map((tmpl) => (
-            <button
-              key={tmpl.id}
-              type="button"
-              onClick={() => handleSelectTemplate(tmpl)}
-              className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
-            >
-              <div className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
-                {tmpl.name}
-              </div>
-              <div
-                className="w-full rounded bg-card p-1.5 shadow-xs border border-muted dark:bg-secondary dark:border-muted"
-                dangerouslySetInnerHTML={{ __html: tmpl.previewHtml }}
-              />
-            </button>
-          ))}
-        </div>
+          {/* Scrollable Gallery Preview List */}
+          <div className="max-h-85 overflow-y-auto space-y-2 pr-1 my-1">
+            {BUILT_IN_HEADERS.map((tmpl) => (
+              <button
+                key={tmpl.id}
+                type="button"
+                onClick={() => handleSelectTemplate(tmpl)}
+                className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
+              >
+                <div className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
+                  {tmpl.name}
+                </div>
+                <div
+                  className="w-full rounded bg-card p-1.5 shadow-xs border border-muted dark:bg-secondary dark:border-muted"
+                  dangerouslySetInnerHTML={{ __html: tmpl.previewHtml }}
+                />
+              </button>
+            ))}
+          </div>
+        </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 
         {/* Bottom Actions */}
-        <div className="pt-1 space-y-0.5">
+        <DropdownMenuGroup className="pt-1 space-y-0.5">
           <DropdownMenuItem
             onClick={handleEditHeader}
             className="flex items-center gap-2 cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground hover:text-brand"
@@ -146,7 +167,7 @@ export function HeaderGallery({
             <Trash2 className="h-3.5 w-3.5" />
             <span>Remove Header</span>
           </DropdownMenuItem>
-        </div>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -173,10 +194,22 @@ export function FooterGallery({
   const handleSelectTemplate = (tmpl: HFTemplate) => {
     if (!activeSection) return;
 
-    // Apply template content to active section
-    updateSection(activeSection.id, {
+    // Apply template content to active section and synchronize
+    const patch = {
       footer: tmpl.plainText,
       footerHtml: tmpl.contentHtml,
+      firstFooter: activeSection.differentFirstPage ? activeSection.firstFooter : tmpl.plainText,
+      firstFooterHtml: activeSection.differentFirstPage ? activeSection.firstFooterHtml : tmpl.contentHtml,
+      evenFooter: activeSection.differentOddEven ? activeSection.evenFooter : tmpl.plainText,
+      evenFooterHtml: activeSection.differentOddEven ? activeSection.evenFooterHtml : tmpl.contentHtml,
+    };
+    updateSection(activeSection.id, patch);
+
+    // If there are other sections linked to this section or in document, keep them synchronized
+    model.sections.forEach((sec) => {
+      if (sec.id !== activeSection.id && sec.linkToPrevious !== false) {
+        updateSection(sec.id, patch);
+      }
     });
 
     // Enter Header & Footer editing mode
@@ -191,13 +224,19 @@ export function FooterGallery({
 
   const handleRemoveFooter = () => {
     if (activeSection) {
-      updateSection(activeSection.id, {
+      const clearPatch = {
         footer: "",
         footerHtml: "",
         firstFooter: "",
         firstFooterHtml: "",
         evenFooter: "",
         evenFooterHtml: "",
+      };
+      updateSection(activeSection.id, clearPatch);
+      model.sections.forEach((sec) => {
+        if (sec.id !== activeSection.id && sec.linkToPrevious !== false) {
+          updateSection(sec.id, clearPatch);
+        }
       });
     }
   };
@@ -233,34 +272,36 @@ export function FooterGallery({
       />
 
       <DropdownMenuContent align="start" className="w-80 p-2 text-xs shadow-xl border border-secondary dark:border-muted bg-card dark:bg-foreground">
-        <DropdownMenuLabel className="text-11px font-semibold uppercase tracking-wider text-muted-foreground pb-1">
-          Built-In Footers
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-11px font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+            Built-In Footers
+          </DropdownMenuLabel>
 
-        {/* Scrollable Gallery Preview List */}
-        <div className="max-h-85 overflow-y-auto space-y-2 pr-1 my-1">
-          {BUILT_IN_FOOTERS.map((tmpl) => (
-            <button
-              key={tmpl.id}
-              type="button"
-              onClick={() => handleSelectTemplate(tmpl)}
-              className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
-            >
-              <div className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
-                {tmpl.name}
-              </div>
-              <div
-                className="w-full rounded bg-card p-1.5 shadow-xs border border-muted dark:bg-secondary dark:border-muted"
-                dangerouslySetInnerHTML={{ __html: tmpl.previewHtml }}
-              />
-            </button>
-          ))}
-        </div>
+          {/* Scrollable Gallery Preview List */}
+          <div className="max-h-85 overflow-y-auto space-y-2 pr-1 my-1">
+            {BUILT_IN_FOOTERS.map((tmpl) => (
+              <button
+                key={tmpl.id}
+                type="button"
+                onClick={() => handleSelectTemplate(tmpl)}
+                className="w-full text-left rounded-md border border-secondary p-2 transition-all hover:border-brand hover:bg-primary/40 dark:border-secondary-foreground dark:hover:border-primary dark:hover:bg-muted/60 group cursor-pointer"
+              >
+                <div className="text-11px font-medium text-secondary-foreground dark:text-muted-foreground mb-1 group-hover:text-brand dark:group-hover:text-primary">
+                  {tmpl.name}
+                </div>
+                <div
+                  className="w-full rounded bg-card p-1.5 shadow-xs border border-muted dark:bg-secondary dark:border-muted"
+                  dangerouslySetInnerHTML={{ __html: tmpl.previewHtml }}
+                />
+              </button>
+            ))}
+          </div>
+        </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 
         {/* Bottom Actions */}
-        <div className="pt-1 space-y-0.5">
+        <DropdownMenuGroup className="pt-1 space-y-0.5">
           <DropdownMenuItem
             onClick={handleEditFooter}
             className="flex items-center gap-2 cursor-pointer font-medium text-secondary-foreground dark:text-muted-foreground hover:text-brand"
@@ -276,7 +317,7 @@ export function FooterGallery({
             <Trash2 className="h-3.5 w-3.5" />
             <span>Remove Footer</span>
           </DropdownMenuItem>
-        </div>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

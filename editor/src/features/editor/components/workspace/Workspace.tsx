@@ -793,13 +793,12 @@ function DocumentPage({
   const isMirroredMarginPage = section?.marginPreset === "mirrored";
   const isRightHandPage = pageNumber % 2 === 1;
   const gutter = section?.gutter ?? 0;
+  const marginT = section?.marginConfig?.top ?? 96;
+  const marginB = section?.marginConfig?.bottom ?? 96;
   const marginL = (section?.marginConfig?.left ?? 96) + (gutter && (!isMirroredMarginPage || isRightHandPage) ? gutter : 0);
   const marginR = (section?.marginConfig?.right ?? 96) + (gutter && isMirroredMarginPage && !isRightHandPage ? gutter : 0);
-  const marginB = section?.marginConfig?.bottom ?? 96;
-  const bodyPaddingTop = isImportedPdfPage ? 0 : 8;
-  const bodyPaddingBottom = isImportedPdfPage
-    ? 0
-    : Math.max(16, Math.min(32, marginB - 64));
+  const bodyPaddingTop = 0;
+  const bodyPaddingBottom = 0;
 
   const { model: docModel, updateSection: docUpdateSection } = useDocumentModel();
   const {
@@ -814,9 +813,23 @@ function DocumentPage({
   const sectionIndex = docModel.sections.findIndex((s) => s.id === section?.id);
   const secNumber = sectionIndex >= 0 ? sectionIndex + 1 : 1;
 
-  // Link to previous section resolution
-  const isLinked = (section?.linkToPrevious ?? false) && sectionIndex > 0;
-  const effectiveSection = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1] : section;
+  // Link to previous section resolution (follows chain recursively to root section)
+  const resolveEffectiveSection = useCallback((sec: SectionModel | undefined): SectionModel | undefined => {
+    if (!sec) return docModel.sections[0];
+    let curr = sec;
+    while (curr.linkToPrevious) {
+      const idx = docModel.sections.findIndex((s) => s.id === curr.id);
+      if (idx > 0) {
+        curr = docModel.sections[idx - 1];
+      } else {
+        break;
+      }
+    }
+    return curr;
+  }, [docModel.sections]);
+
+  const effectiveSection = resolveEffectiveSection(section);
+  const isLinked = Boolean(section?.linkToPrevious && sectionIndex > 0);
 
   // Section pages for first-page check
   const sectionPages = docModel.pages.filter((p) => p.sectionId === section?.id);
@@ -847,25 +860,26 @@ function DocumentPage({
   }
 
   // Footer resolution
+  const defaultFooter = "Parexel Smart Authoring Suite";
   let footerKind: "first" | "even" | "odd" | "normal" = "normal";
   let footerLabel = `FOOTER - SECTION ${secNumber}`;
-  let effectiveFooterText = effectiveSection?.footer || "Parexel Smart Authoring Suite";
+  let effectiveFooterText = effectiveSection?.footer !== undefined ? effectiveSection.footer : defaultFooter;
   let effectiveFooterHtml = effectiveSection?.footerHtml || "";
 
   if (effectiveSection?.differentFirstPage && isFirstPageOfSection) {
     footerKind = "first";
     footerLabel = `FIRST PAGE FOOTER - SECTION ${secNumber}`;
-    effectiveFooterText = effectiveSection.firstFooter || effectiveSection.footer || "";
+    effectiveFooterText = effectiveSection.firstFooter !== undefined ? effectiveSection.firstFooter : (effectiveSection.footer !== undefined ? effectiveSection.footer : defaultFooter);
     effectiveFooterHtml = effectiveSection.firstFooterHtml || effectiveSection.footerHtml || "";
   } else if (effectiveSection?.differentOddEven && isEvenPage) {
     footerKind = "even";
     footerLabel = `EVEN PAGE FOOTER - SECTION ${secNumber}`;
-    effectiveFooterText = effectiveSection.evenFooter || effectiveSection.footer || "";
+    effectiveFooterText = effectiveSection.evenFooter !== undefined ? effectiveSection.evenFooter : (effectiveSection.footer !== undefined ? effectiveSection.footer : defaultFooter);
     effectiveFooterHtml = effectiveSection.evenFooterHtml || effectiveSection.footerHtml || "";
   } else if (effectiveSection?.differentOddEven && !isEvenPage) {
     footerKind = "odd";
     footerLabel = `ODD PAGE FOOTER - SECTION ${secNumber}`;
-    effectiveFooterText = effectiveSection.footer || "";
+    effectiveFooterText = effectiveSection.footer !== undefined ? effectiveSection.footer : defaultFooter;
     effectiveFooterHtml = effectiveSection.footerHtml || "";
   }
 
@@ -877,7 +891,7 @@ function DocumentPage({
   useEffect(() => {
     if (headerContentRef.current && !isEditingHeaderRef.current) {
       const currentHtml = headerContentRef.current.innerHTML;
-      const targetHtml = effectiveHeaderHtml || effectiveHeaderText || "";
+      const targetHtml = effectiveHeaderHtml || (effectiveHeaderText ? `<p>${effectiveHeaderText}</p>` : "");
       if (currentHtml !== targetHtml) {
         headerContentRef.current.innerHTML = targetHtml;
       }
@@ -887,7 +901,7 @@ function DocumentPage({
   useEffect(() => {
     if (footerContentRef.current && !isEditingFooterRef.current) {
       const currentHtml = footerContentRef.current.innerHTML;
-      const targetHtml = effectiveFooterHtml || effectiveFooterText || "";
+      const targetHtml = effectiveFooterHtml || (effectiveFooterText ? `<p>${effectiveFooterText}</p>` : "");
       if (currentHtml !== targetHtml) {
         footerContentRef.current.innerHTML = targetHtml;
       }
@@ -897,8 +911,8 @@ function DocumentPage({
   const handleHeaderUpdate = useCallback(
     (newText: string, newHtml: string) => {
       if (!section) return;
-      const targetSecId = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1]?.id : section.id;
-      if (!targetSecId) return;
+      const targetSec = resolveEffectiveSection(section) || section;
+      const targetSecId = targetSec.id;
 
       if (headerKind === "first") {
         docUpdateSection(targetSecId, { firstHeader: newText, firstHeaderHtml: newHtml });
@@ -908,14 +922,14 @@ function DocumentPage({
         docUpdateSection(targetSecId, { header: newText, headerHtml: newHtml });
       }
     },
-    [section, isLinked, sectionIndex, docModel.sections, headerKind, docUpdateSection]
+    [section, resolveEffectiveSection, headerKind, docUpdateSection]
   );
 
   const handleFooterUpdate = useCallback(
     (newText: string, newHtml: string) => {
       if (!section) return;
-      const targetSecId = isLinked && sectionIndex > 0 ? docModel.sections[sectionIndex - 1]?.id : section.id;
-      if (!targetSecId) return;
+      const targetSec = resolveEffectiveSection(section) || section;
+      const targetSecId = targetSec.id;
 
       if (footerKind === "first") {
         docUpdateSection(targetSecId, { firstFooter: newText, firstFooterHtml: newHtml });
@@ -925,7 +939,7 @@ function DocumentPage({
         docUpdateSection(targetSecId, { footer: newText, footerHtml: newHtml });
       }
     },
-    [section, isLinked, sectionIndex, docModel.sections, footerKind, docUpdateSection]
+    [section, resolveEffectiveSection, footerKind, docUpdateSection]
   );
 
   const handleHFKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -1778,31 +1792,18 @@ function DocumentPage({
     hasPageNumberInHeader
   );
 
-  const headerHeight = isImportedPdfPage ? 0 : isDraft
-    ? 0
-    : isHeaderFooterActive
-      ? Math.max(36, section?.headerTopDistance ?? 48)
-      : hasHeaderContent
-        ? Math.max(28, section?.headerTopDistance ?? 48)
-        : Math.max(18, Math.min(26, (section?.headerTopDistance ?? 48) - 22));
-
+  const headerHeight = isImportedPdfPage || isDraft ? 0 : marginT;
   const headerPaddingTop = isDraft
     ? 0
-    : isHeaderFooterActive
-      ? Math.max(8, (section?.headerTopDistance ?? 48) - 34)
-      : hasHeaderContent
-        ? Math.max(6, (section?.headerTopDistance ?? 48) - 34)
-        : 4;
+    : Math.max(4, (section?.headerTopDistance ?? 48) - 16);
+  const headerPaddingBottom = isDraft ? 0 : 8;
 
-  const headerPaddingBottom = isDraft
+  const footerHeight = isImportedPdfPage || isDraft ? 0 : marginB;
+  const footerPaddingTop = isDraft ? 0 : 8;
+  const footerPaddingBottom = isDraft
     ? 0
-    : isHeaderFooterActive
-      ? 8
-      : hasHeaderContent
-        ? 6
-        : 4;
+    : Math.max(4, (section?.footerBottomDistance ?? 48) - 16);
 
-  const footerHeight = isImportedPdfPage ? 0 : isDraft ? 0 : Math.max(45, section?.footerBottomDistance ?? 48);
   const contentHeight = isImportedPdfPage
     ? pageHeight
     : Math.max(100, pageHeight - headerHeight - footerHeight);
@@ -2197,7 +2198,11 @@ function DocumentPage({
               paddingRight: `${marginR}px`,
               paddingTop: `${headerPaddingTop}px`,
               paddingBottom: `${headerPaddingBottom}px`,
+              height: `${headerHeight}px`,
               minHeight: `${headerHeight}px`,
+              maxHeight: isHeaderFooterActive ? undefined : `${headerHeight}px`,
+              boxSizing: "border-box",
+              overflow: isHeaderFooterActive ? "visible" : "hidden",
               zIndex: 10,
               userSelect: isHeaderFooterActive ? "text" : "none",
               WebkitUserSelect: isHeaderFooterActive ? "text" : "none",
@@ -2516,9 +2521,13 @@ function DocumentPage({
             style={{
               paddingLeft: `${marginL}px`,
               paddingRight: `${marginR}px`,
-              paddingTop: "10px",
-              paddingBottom: `${Math.max(8, (section?.footerBottomDistance ?? 48) - 34)}px`,
+              paddingTop: `${footerPaddingTop}px`,
+              paddingBottom: `${footerPaddingBottom}px`,
+              height: `${footerHeight}px`,
               minHeight: `${footerHeight}px`,
+              maxHeight: isHeaderFooterActive ? undefined : `${footerHeight}px`,
+              boxSizing: "border-box",
+              overflow: isHeaderFooterActive ? "visible" : "hidden",
               zIndex: 10,
               userSelect: isHeaderFooterActive ? "text" : "none",
               WebkitUserSelect: isHeaderFooterActive ? "text" : "none",

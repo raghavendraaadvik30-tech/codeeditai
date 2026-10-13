@@ -12,7 +12,6 @@ Responsive/reusable – The component can be placed anywhere in the application 
 No backend/API logic – This component is purely presentational and does not communicate with the backend or manage application state.
 */
 import docupilotLogo from "@/assets/images/docupilot-logo.png";
-import { Shield } from "lucide-react";
 
 export default function HeaderLogo() {
   return (

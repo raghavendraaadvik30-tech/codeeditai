@@ -29,6 +29,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -963,53 +964,55 @@ export default function LayoutTab() {
             <ChevronDown className="h-3 w-3 text-muted-foreground" />
           </button>} />
         <DropdownMenuContent align="start" className="w-56 p-2 text-xs">
-          <DropdownMenuLabel className="text-11px text-muted-foreground font-semibold mb-2">
-            Page Background Color
-          </DropdownMenuLabel>
-          <div className="grid grid-cols-5 gap-1.5 mb-2">
-            {[
-              { color: "#ffffff", label: "White" },
-              { color: "#f8fafc", label: "Light Gray" },
-              { color: "#eff6ff", label: "Light Blue" },
-              { color: "#fefce8", label: "Light Yellow" },
-              { color: "#f0fdf4", label: "Light Green" },
-              { color: "#faf5ff", label: "Soft Purple" },
-              { color: "#fff1f2", label: "Soft Pink" },
-              { color: "#ffedd5", label: "Soft Orange" },
-              { color: "#f1f5f9", label: "Slate" },
-              { color: "#e2e8f0", label: "Muted" },
-            ].map(({ color, label }) => (
-              <button
-                key={color}
-                type="button"
-                title={label}
-                onClick={() => applyToSection({ pageColor: color })}
-                className={`h-6 w-6 rounded border shadow-xs transition-transform hover:scale-110 cursor-pointer ${
-                  activeSection?.pageColor === color ? "ring-2 ring-primary" : "border-border"
-                }`}
-                style={{ backgroundColor: color }}
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="text-11px text-muted-foreground font-semibold mb-2">
+              Page Background Color
+            </DropdownMenuLabel>
+            <div className="grid grid-cols-5 gap-1.5 mb-2">
+              {[
+                { color: "#ffffff", label: "White" },
+                { color: "#f8fafc", label: "Light Gray" },
+                { color: "#eff6ff", label: "Light Blue" },
+                { color: "#fefce8", label: "Light Yellow" },
+                { color: "#f0fdf4", label: "Light Green" },
+                { color: "#faf5ff", label: "Soft Purple" },
+                { color: "#fff1f2", label: "Soft Pink" },
+                { color: "#ffedd5", label: "Soft Orange" },
+                { color: "#f1f5f9", label: "Slate" },
+                { color: "#e2e8f0", label: "Muted" },
+              ].map(({ color, label }) => (
+                <button
+                  key={color}
+                  type="button"
+                  title={label}
+                  onClick={() => applyToSection({ pageColor: color })}
+                  className={`h-6 w-6 rounded border shadow-xs transition-transform hover:scale-110 cursor-pointer ${
+                    activeSection?.pageColor === color ? "ring-2 ring-primary" : "border-border"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 pt-1 border-t border-muted dark:border-muted">
+              <Label className="text-11px text-muted-foreground">Custom:</Label>
+              <input
+                type="color"
+                value={activeSection?.pageColor || "#ffffff"}
+                onChange={(e) => applyToSection({ pageColor: e.target.value })}
+                className="h-6 w-8 cursor-pointer rounded border border-border"
               />
-            ))}
-          </div>
+            </div>
 
-          <div className="flex items-center gap-2 pt-1 border-t border-muted dark:border-muted">
-            <Label className="text-11px text-muted-foreground">Custom:</Label>
-            <input
-              type="color"
-              value={activeSection?.pageColor || "#ffffff"}
-              onChange={(e) => applyToSection({ pageColor: e.target.value })}
-              className="h-6 w-8 cursor-pointer rounded border border-border"
-            />
-          </div>
+            <DropdownMenuSeparator />
 
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem
-            onClick={() => applyToSection({ pageColor: "#ffffff" })}
-            className="text-secondary-foreground font-medium cursor-pointer"
-          >
-            No Color (Default White)
-          </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => applyToSection({ pageColor: "#ffffff" })}
+              className="text-secondary-foreground font-medium cursor-pointer"
+            >
+              No Color (Default White)
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -1150,7 +1153,15 @@ export default function LayoutTab() {
             <Button
               size="sm"
               onClick={() => {
-                applyToSection({ header: headerInput });
+                const htmlVal = headerInput ? `<p>${headerInput}</p>` : "";
+                applyToSection({
+                  header: headerInput,
+                  headerHtml: htmlVal,
+                  firstHeader: activeSection?.differentFirstPage ? activeSection.firstHeader : headerInput,
+                  firstHeaderHtml: activeSection?.differentFirstPage ? activeSection.firstHeaderHtml : htmlVal,
+                  evenHeader: activeSection?.differentOddEven ? activeSection.evenHeader : headerInput,
+                  evenHeaderHtml: activeSection?.differentOddEven ? activeSection.evenHeaderHtml : htmlVal,
+                });
                 setHeaderDialogOpen(false);
               }}
             >
@@ -1188,7 +1199,15 @@ export default function LayoutTab() {
             <Button
               size="sm"
               onClick={() => {
-                applyToSection({ footer: footerInput });
+                const htmlVal = footerInput ? `<p>${footerInput}</p>` : "";
+                applyToSection({
+                  footer: footerInput,
+                  footerHtml: htmlVal,
+                  firstFooter: activeSection?.differentFirstPage ? activeSection.firstFooter : footerInput,
+                  firstFooterHtml: activeSection?.differentFirstPage ? activeSection.firstFooterHtml : htmlVal,
+                  evenFooter: activeSection?.differentOddEven ? activeSection.evenFooter : footerInput,
+                  evenFooterHtml: activeSection?.differentOddEven ? activeSection.evenFooterHtml : htmlVal,
+                });
                 setFooterDialogOpen(false);
               }}
             >
