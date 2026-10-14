@@ -11,7 +11,7 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
-import { useDocumentModel } from "@/features/editor/store/documentModel";
+import { useDocumentModel, type SectionModel } from "@/features/editor/store/documentModel";
 import { useHeaderFooter, type HFUnit } from "@/features/editor/modules/document/context/HeaderFooterContext";
 import {
   HeaderGallery,

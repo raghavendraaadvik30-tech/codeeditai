@@ -9,8 +9,8 @@ import {
   ArrowRight,
   AlertCircle,
 } from "lucide-react";
+import docupilotLogo from "../../../assets/images/docupilot-logo.png";
 
-import docupilotLogo from "@/assets/images/docupilot-logo.png";
 import { useAuth } from "../hooks/useAuth";
 import { ROUTE_PATHS } from "@/app/router/routePaths";
 import { Role } from "@/app/config/roles";

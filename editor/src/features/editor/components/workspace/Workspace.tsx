@@ -1781,16 +1781,6 @@ function DocumentPage({
   const scaledPageWidth = Math.round((pageWidth * zoom) / 100);
   const scaledPageHeight = Math.round((pageHeight * zoom) / 100);
 
-  const hasPageNumberInHeader = section?.showPageNumbers !== false && pageNumberPosition === "header";
-  const hasHeaderContent = Boolean(
-    (effectiveHeaderText && effectiveHeaderText.trim().length > 0) ||
-    (effectiveHeaderHtml &&
-      effectiveHeaderHtml.trim().length > 0 &&
-      effectiveHeaderHtml.trim() !== "<p><br></p>" &&
-      effectiveHeaderHtml.trim() !== "<p><br/></p>" &&
-      effectiveHeaderHtml.trim() !== "<p></p>") ||
-    hasPageNumberInHeader
-  );
 
   const headerHeight = isImportedPdfPage || isDraft ? 0 : marginT;
   const headerPaddingTop = isDraft

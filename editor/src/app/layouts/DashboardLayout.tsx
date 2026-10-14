@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import docupilotLogo from "@/assets/images/docupilot-logo.png";
+import docupilotLogo from "../../assets/images/docupilot-logo.png";
 
 import { Link, useLocation, Outlet } from "react-router-dom";
 
@@ -147,7 +147,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
               <img
                 src={docupilotLogo}
                 alt="DocuPilot Logo"
-                className="h-12 w-12 object-contain"
+                className="h-30 w-30 object-contain"
               />
             </div>
 
