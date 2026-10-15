@@ -1,9 +1,9 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Undo2, Redo2, ChevronDown } from "lucide-react";
 
-import { FONT_SIZES } from "../constant";
+import { FONT_SIZES, FONTS } from "../constant";
 import RibbonSelect from "../controls/RibbonSelect";
 import RibbonDivider from "../controls/RibbonDivider";
 
@@ -27,20 +27,17 @@ export default function HomeTab() {
     canRedo,
     applyFontSize,
     applyFontFamily,
+    restoreEditorSelection,
   } = useEditor();
 
-  const [fontName, setFontName] = useState("Inter (Modern Clean)");
-  const [fontSize, setFontSize] = useState("10 pt");
+  const [fontName, setFontName] = useState("Calibri");
+  const [fontSize, setFontSize] = useState("11");
 
-  const [fonts, setFonts] = useState<string[]>([
-    "Inter (Modern Clean)",
-    "Calibri",
-    "Arial",
-    "Times New Roman",
-    "Roboto",
-  ]);
-
+  const [fonts, setFonts] = useState<string[]>(FONTS);
   const [fontsLoading, setFontsLoading] = useState(false);
+
+  const isEditingFontRef = useRef(false);
+  const isEditingSizeRef = useRef(false);
 
   const [isUndoDropdownOpen, setIsUndoDropdownOpen] = useState(false);
   const [isRedoDropdownOpen, setIsRedoDropdownOpen] = useState(false);
@@ -141,50 +138,61 @@ export default function HomeTab() {
 
         if (!pageEl) return;
 
-        // Update font size from the selected text.
-        const sizeSpan =
-          targetEl.closest<HTMLElement>("span[style*='font-size']");
+        // Update font size from the selected text (if not actively editing the size field)
+        if (!isEditingSizeRef.current) {
+          const sizeSpan =
+            targetEl.closest<HTMLElement>("span[style*='font-size']");
 
-        if (sizeSpan?.style.fontSize) {
-          const ptMatch = sizeSpan.style.fontSize.match(
-            /(\d+(?:\.\d+)?)\s*pt/i
-          );
+          if (sizeSpan?.style.fontSize) {
+            const ptMatch = sizeSpan.style.fontSize.match(
+              /(\d+(?:\.\d+)?)\s*pt/i
+            );
 
-          if (ptMatch) {
-            setFontSize(ptMatch[1]);
+            if (ptMatch) {
+              setFontSize(ptMatch[1]);
+            } else {
+              const pxVal = parseFloat(sizeSpan.style.fontSize);
+
+              if (!isNaN(pxVal)) {
+                const ptVal = pxVal * 0.75;
+                const rounded = Math.round(ptVal * 2) / 2;
+                setFontSize(String(rounded));
+              }
+            }
           } else {
-            const pxVal = parseFloat(sizeSpan.style.fontSize);
+            const computed = window.getComputedStyle(targetEl).fontSize;
+            const pxVal = parseFloat(computed);
 
             if (!isNaN(pxVal)) {
-              setFontSize(String(Math.round(pxVal * 0.75)));
+              const ptVal = pxVal * 0.75;
+              const rounded = Math.round(ptVal * 2) / 2;
+              setFontSize(String(rounded));
             }
-          }
-        } else {
-          const computed = window.getComputedStyle(targetEl).fontSize;
-          const pxVal = parseFloat(computed);
-
-          if (!isNaN(pxVal)) {
-            setFontSize(String(Math.round(pxVal * 0.75)));
           }
         }
 
-        // Update font family from the selected text.
-        const fontSpan =
-          targetEl.closest<HTMLElement>("span[style*='font-family']");
+        // Update font family from the selected text (if not actively editing the font field)
+        if (!isEditingFontRef.current) {
+          const fontSpan =
+            targetEl.closest<HTMLElement>("span[style*='font-family']");
 
-        const rawFont =
-          fontSpan?.style.fontFamily ||
-          window.getComputedStyle(targetEl).fontFamily;
+          const rawFont =
+            fontSpan?.style.fontFamily ||
+            window.getComputedStyle(targetEl).fontFamily;
 
-        const firstFont = rawFont.split(",")[0].replace(/['"]/g, "").trim();
+          const firstFont = rawFont.split(",")[0].replace(/['"]/g, "").trim();
 
-        const matchedFont = fonts.find(
-          (font) => font.toLowerCase() === firstFont.toLowerCase()
-        );
+          if (firstFont && firstFont !== "inherit") {
+            const matchedFont = fonts.find(
+              (font) => font.toLowerCase() === firstFont.toLowerCase()
+            );
 
-        if (matchedFont) {
-          setFontName(matchedFont);
-          loadGoogleFont(matchedFont);
+            if (matchedFont) {
+              setFontName(matchedFont);
+            } else {
+              setFontName(firstFont);
+            }
+          }
         }
       } catch {
         // Ignore selection changes outside the editor.
@@ -198,6 +206,47 @@ export default function HomeTab() {
     };
   }, [fonts]);
 
+  const validateFontSize = useCallback((val: string): boolean => {
+    if (!val || !val.trim()) return false;
+    const clean = val.replace(/pt$/i, "").trim();
+    const num = Number(clean);
+    return !isNaN(num) && isFinite(num) && num > 0 && num <= 500;
+  }, []);
+
+  const validateFontFamily = useCallback((val: string): boolean => {
+    if (!val || !val.trim()) return false;
+    const trimmed = val.trim();
+    return trimmed.length > 0 && trimmed.length <= 100 && !/[<>{}\\]/.test(trimmed);
+  }, []);
+
+  const handleFontFamilyCommit = useCallback(
+    (font: string) => {
+      const trimmed = font.trim();
+      if (!trimmed) return;
+      setFontName(trimmed);
+      loadGoogleFont(trimmed);
+      applyFontFamily(trimmed);
+      setFonts((prev) =>
+        prev.some((f) => f.toLowerCase() === trimmed.toLowerCase())
+          ? prev
+          : [trimmed, ...prev]
+      );
+      restoreEditorSelection();
+    },
+    [applyFontFamily, restoreEditorSelection]
+  );
+
+  const handleFontSizeCommit = useCallback(
+    (sizeVal: string) => {
+      const clean = sizeVal.replace(/pt$/i, "").trim();
+      if (!validateFontSize(clean)) return;
+      setFontSize(clean);
+      applyFontSize(clean);
+      restoreEditorSelection();
+    },
+    [applyFontSize, restoreEditorSelection, validateFontSize]
+  );
+
   const preventFocusLoss = (
     e: React.MouseEvent<HTMLElement>
   ) => {
@@ -206,31 +255,55 @@ export default function HomeTab() {
 
   return (
     <div className="flex items-center gap-2 select-none text-secondary-foreground dark:text-muted-foreground">
-      {/* Font Family */}
+      {/* Font Family - Editable Combobox */}
       <RibbonSelect
+        editable
         width={190}
         label={fontsLoading ? "Loading fonts..." : fontName}
+        placeholder="Font family"
+        title="Font Family (Type or select)"
+        ariaLabel="Font Family"
+        filterOptions
+        validate={validateFontFamily}
+        onFocusChange={(focused) => {
+          isEditingFontRef.current = focused;
+        }}
+        onCommit={handleFontFamilyCommit}
+        onCancel={() => {
+          restoreEditorSelection();
+        }}
         options={fonts.map((font) => ({
           label: font,
           style: { fontFamily: font },
           onSelect: () => {
-            setFontName(font);
-            loadGoogleFont(font);
-            applyFontFamily(font);
+            handleFontFamilyCommit(font);
           },
         }))}
         disabled={fontsLoading}
       />
 
-      {/* Font Size */}
+      {/* Font Size - Editable Combobox */}
       <RibbonSelect
-        width={70}
+        editable
+        width={68}
         label={fontSize}
+        placeholder="Size"
+        title="Font Size (Type or select)"
+        ariaLabel="Font Size"
+        inputMode="decimal"
+        filterOptions={false}
+        validate={validateFontSize}
+        onFocusChange={(focused) => {
+          isEditingSizeRef.current = focused;
+        }}
+        onCommit={handleFontSizeCommit}
+        onCancel={() => {
+          restoreEditorSelection();
+        }}
         options={FONT_SIZES.map((size) => ({
           label: size.label,
           onSelect: () => {
-            setFontSize(size.label);
-            applyFontSize(size.label);
+            handleFontSizeCommit(size.label);
           },
         }))}
       />

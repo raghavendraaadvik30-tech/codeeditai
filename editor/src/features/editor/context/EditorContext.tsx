@@ -951,7 +951,8 @@ useEffect(() => {
     const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
     if (saved) savedSelectionRef.current = saved;
 
-    const sizePt = `${size}pt`;
+    const cleanSize = String(size).replace(/pt$/i, "").trim();
+    const sizePt = `${cleanSize}pt`;
 
     // Collapsed selection on single page
     if (fullRange.collapsed) {

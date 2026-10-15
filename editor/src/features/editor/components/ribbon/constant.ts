@@ -51,38 +51,32 @@ export const FONTS = [
   "Times New Roman",
   "Georgia",
   "Verdana",
+  "Tahoma",
   "Courier New",
+  "Garamond",
+  "Trebuchet MS",
+  "Comic Sans MS",
+  "Impact",
 ];
 
 export const FONT_SIZES = [
-  {
-    command: "1",
-    label: "8",
-  },
-  {
-    command: "2",
-    label: "10",
-  },
-  {
-    command: "3",
-    label: "12",
-  },
-  {
-    command: "4",
-    label: "14",
-  },
-  {
-    command: "5",
-    label: "18",
-  },
-  {
-    command: "6",
-    label: "24",
-  },
-  {
-    command: "7",
-    label: "32",
-  },
+  { command: "1", label: "8" },
+  { command: "1.5", label: "9" },
+  { command: "2", label: "10" },
+  { command: "2.5", label: "11" },
+  { command: "3", label: "12" },
+  { command: "4", label: "14" },
+  { command: "4.5", label: "16" },
+  { command: "5", label: "18" },
+  { command: "5.5", label: "20" },
+  { command: "6", label: "22" },
+  { command: "6.5", label: "24" },
+  { command: "6.8", label: "26" },
+  { command: "7", label: "28" },
+  { command: "7.5", label: "32" },
+  { command: "8", label: "36" },
+  { command: "8.5", label: "48" },
+  { command: "9", label: "72" },
 ];
 
 export interface BlockOption {

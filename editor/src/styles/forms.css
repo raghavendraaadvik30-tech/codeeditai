@@ -1,0 +1,286 @@
+/* ==========================================================
+   FORMS.CSS
+   Form and input styles, field wrappers, search, filter selects, and checkboxes.
+   ========================================================== */
+
+.futuristic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2D435F;
+  letter-spacing: 0.1px;
+}
+
+.field-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: #EAF7FC;
+  border: 1.5px solid rgba(66, 191, 234, 0.35);
+  border-radius: 12px;
+  font-size: 13px;
+  color: #142C4A;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.field-input::placeholder {
+  color: #8CA2B7;
+  font-size: 12px;
+}
+
+.field-input:focus {
+  background: #FFFFFF;
+  border-color: #2698E8;
+  box-shadow: 0 0 0 3.5px rgba(66, 191, 234, 0.22);
+}
+
+.form-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1px;
+  font-size: 12px;
+}
+
+.custom-checkbox {
+  accent-color: #2698E8;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .field-label {
+  color: #CBD5E1;
+}
+
+[data-theme="dark"] .field-input-wrapper {
+  background: rgba(15, 34, 54, 0.85);
+  border-color: rgba(66, 191, 234, 0.25);
+}
+
+[data-theme="dark"] .field-input-wrapper:focus-within {
+  border-color: rgba(70, 189, 240, 0.7);
+  background: rgba(17, 41, 68, 0.95);
+  box-shadow: 0 0 0 3px rgba(70, 189, 240, 0.15);
+}
+
+[data-theme="dark"] .field-input {
+  color: #E0F2FE;
+  background: transparent;
+}
+
+[data-theme="dark"] .field-input::placeholder {
+  color: #4A6785;
+}
+
+.directory-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.toolbar-left {
+  flex: 1;
+  max-width: 360px;
+  min-width: 240px;
+}
+
+.search-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input-field {
+  width: 100%;
+  padding: 9.5px 12px 9.5px 36px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: var(--text-main);
+  outline: none;
+  box-shadow: var(--shadow-subtle);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 9px 32px 9px 12px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-main);
+  outline: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235F7488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: border-color var(--transition-fast);
+}
+
+.filter-select:focus {
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .admin-main-wrapper .filter-select {
+  border-color: #3B5051;
+  background-color: #192729;
+  color: #EDF4F2;
+  box-shadow: 0 3px 10px rgba(2, 13, 15, 0.16);
+}
+
+[data-theme="dark"] .admin-main-wrapper .search-input-field::placeholder {
+  color: #849B97;
+}
+
+[data-theme="dark"] .admin-main-wrapper .filter-select:focus {
+  border-color: #83D2EB;
+  box-shadow: 0 0 0 3px rgba(131, 210, 235, 0.16);
+}
+
+[data-theme="dark"] .admin-main-wrapper .filter-select {
+  color-scheme: dark;
+}
+
+[data-theme="dark"] .admin-users-view .filter-select {
+  border-color: rgba(93, 207, 235, 0.22);
+  background-color: rgba(12, 48, 65, 0.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #F2F8FA;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+}
+
+[data-theme="dark"] .admin-users-view .search-input-field::placeholder {
+  color: #A9C7D2;
+}
+
+.add-user-label {
+  color: #35536B;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.add-user-field::placeholder {
+  color: #91A1AF;
+}
+
+.add-user-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.glass-form-submit {
+  min-width: 170px;
+  min-height: 42px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #8CCEEB 0%, #67C0E5 100%);
+  color: #FFF;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(104, 192, 229, 0.26);
+}
+
+[data-theme="light"] .author-page-shell .doc-search-input {
+  color: #102A43;
+}
+
+[data-theme="light"] .author-page-shell .doc-search-input::placeholder {
+  color: #94A3B8;
+}
+
+.doc-search-icon {
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.doc-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  color: #F1F5F9;
+  width: 100%;
+}
+
+.doc-search-input::placeholder {
+  color: #64748B;
+}
+
+.link-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #526985;
+  font-size: 10px;
+}
+
+.link-field-label select {
+  padding: 5px 8px;
+}
+
+.link-field-label textarea {
+  width: 100%;
+  min-height: 52px;
+  resize: vertical;
+  padding: 6px 8px;
+  border: 1px solid #DCE6F0;
+  border-radius: 7px;
+  color: #526985;
+  font: inherit;
+  font-size: 10px;
+}
+
+.link-field-label textarea::placeholder {
+  color: #8293A8;
+}

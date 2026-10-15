@@ -1,0 +1,102 @@
+/* ==========================================================
+   PRINT.CSS
+   Print and PDF export styles.
+   Ensures ONLY the document pages print, hiding all editor chrome.
+   ========================================================== */
+
+@media print {
+  @page {
+    margin: 0mm;
+  }
+
+  /* When printing-active, hide the entire editor shell */
+  body.printing-active #root {
+    display: none !important;
+  }
+
+  /* Hide all editor chrome and navigation controls */
+  header,
+  aside,
+  nav,
+  [role="toolbar"],
+  [data-editor-ui],
+  [data-table-control],
+  .print\:hidden,
+  .absolute.-left-12,
+  button,
+  input,
+  dialog {
+    display: none !important;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #print-root,
+  .print-area {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .print-page,
+  .print-preview-page {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    background: #ffffff !important;
+    transform: none !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .print-last-page {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  /* Ensure background colors and borders render in print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Print overrides for editor breaks */
+  .page-break {
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  .column-break {
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    break-after: column !important;
+    -webkit-column-break-after: always !important;
+    page-break-after: column !important;
+  }
+}

@@ -1,0 +1,183 @@
+/* ==========================================================
+   GLOBAL.CSS
+   Body, root layout, base styles, box sizing, and global scrollbars.
+   ========================================================== */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@keyframes aiSlideIn {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Thin custom scrollbar */
+.thin-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 4px;
+}
+
+.thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
+/* Hide selected workspace section scrollbars without disabling scrolling. */
+.settings-page-scroll,
+.tables-page-scroll,
+.document-page-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.settings-page-scroll::-webkit-scrollbar,
+.tables-page-scroll::-webkit-scrollbar,
+.document-page-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Global scrollbars & base animation keyframes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loginPop {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes beaconBlink {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  50% {
+    opacity: 0.2;
+    transform: scale(0.65);
+    box-shadow: 0 0 2px currentColor;
+  }
+}
+
+@keyframes softGlowPulse {
+
+  0%,
+  100% {
+    box-shadow: none;
+  }
+
+  50% {
+    box-shadow: 0 0 0 1px rgba(211, 227, 253, 1), 0 0 26px rgba(102, 153, 255, 0.36), 0 12px 24px rgba(65, 123, 255, 0.24);
+  }
+}
+
+@keyframes cardLoaderProgress {
+  0% {
+    width: 0%;
+    opacity: 1;
+  }
+
+  90% {
+    width: 100%;
+    opacity: 1;
+  }
+
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,385 @@
+/* ==========================================================
+   LOGIN.CSS
+   Login-page-specific styles, layouts, ambient backgrounds,
+   cards, form icons, and dark theme.
+   ========================================================== */
+
+/* ==========================================================
+   1. LOGIN PAGE BACKGROUND
+   ========================================================== */
+
+.login-page-wrapper-v2 {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg,
+      #F8FAFF 0%,
+      #EEF4FF 35%,
+      #D3E3FD 75%,
+      #F5F8FF 100%);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  font-family: var(--font-family, "Manrope", "Inter", sans-serif);
+  color: #142C4A;
+}
+
+/* Ambient background effects */
+
+.ambient-bg-light-sweep {
+  position: absolute;
+  top: -10%;
+  left: 20%;
+  width: 70vw;
+  height: 60vh;
+  background: radial-gradient(ellipse at 50% 30%,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(211, 227, 253, 0.45) 50%,
+      transparent 80%);
+  pointer-events: none;
+  filter: blur(40px);
+  z-index: 1;
+}
+
+.ambient-bg-radial-1 {
+  position: absolute;
+  top: 15%;
+  left: -5%;
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle,
+      rgba(147, 181, 235, 0.18) 0%,
+      rgba(211, 227, 253, 0.14) 50%,
+      transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ambient-bg-radial-2 {
+  position: absolute;
+  bottom: -10%;
+  right: 5%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle,
+      rgba(147, 181, 235, 0.16) 0%,
+      rgba(238, 244, 255, 0.2) 50%,
+      transparent 70%);
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ambient-bg-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right,
+      rgba(80, 120, 190, 0.035) 1px,
+      transparent 1px),
+    linear-gradient(to bottom,
+      rgba(80, 120, 190, 0.035) 1px,
+      transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ==========================================================
+   2. LOGIN CARD LAYOUT
+   ========================================================== */
+
+.login-main-layout {
+  position: relative;
+  z-index: 10;
+  width: min(100%, 600px);
+  margin: auto;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1.5px solid rgba(255, 255, 255, 0.92);
+  border-radius: 28px;
+  box-shadow:
+    0 25px 70px rgba(80, 120, 190, 0.12),
+    0 8px 28px rgba(20, 44, 74, 0.07);
+  overflow: hidden;
+}
+
+.login-layout-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card-futuristic {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: none;
+  border-radius: 28px;
+  padding: 34px 32px 28px;
+  box-shadow: none;
+  position: relative;
+  box-sizing: border-box;
+  animation: loginPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================
+   3. BRAND LOGO AND HEADER
+   ========================================================== */
+
+.card-brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.card-shield-badge {
+  width: 70px;
+  height: 70px;
+  border-radius: 22px;
+  background: #D3E3FD;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #324480;
+  box-shadow:
+    0 0 0 1px rgba(211, 227, 253, 0.9),
+    0 0 20px rgba(102, 153, 255, 0.2),
+    0 10px 24px rgba(88, 130, 190, 0.2);
+  margin-bottom: 20px;
+  animation: softGlowPulse 2.6s ease-in-out infinite;
+}
+
+.card-brand-title {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #0F2942;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.card-brand-subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: #64748B;
+  letter-spacing: 0;
+  margin: 2px 0 0;
+}
+
+/* ==========================================================
+   4. LOGIN HEADING AND DESCRIPTION
+   ========================================================== */
+
+.card-greeting-block {
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.card-welcome-title {
+  font-size: 21px;
+  font-weight: 800;
+  color: #142C4A;
+  margin: 0 0 3px;
+  letter-spacing: -0.3px;
+}
+
+.card-welcome-sub {
+  font-size: 12px;
+  color: #64748B;
+  margin: 0;
+}
+
+/* ==========================================================
+   5. EMAIL AND PASSWORD INPUT ICONS
+   Brand dark blue: #324480
+   ========================================================== */
+
+/* Common icon wrappers inside login inputs */
+
+.login-page-wrapper-v2 .login-input-icon {
+  color: #324480 !important;
+}
+
+.login-page-wrapper-v2 .login-input-icon svg {
+  color: #324480 !important;
+  stroke: currentColor !important;
+}
+
+/* Lucide email icon */
+
+.login-page-wrapper-v2 svg.lucide-mail {
+  color: #070809 !important;
+  stroke: #070809 !important;
+}
+
+/* Lucide password lock icon */
+
+.login-page-wrapper-v2 svg.lucide-lock,
+.login-page-wrapper-v2 svg.lucide-lock-keyhole {
+  color: #324480 !important;
+  stroke: #324480 !important;
+}
+
+/* Password visibility icons */
+
+.login-page-wrapper-v2 svg.lucide-eye,
+.login-page-wrapper-v2 svg.lucide-eye-off,
+.login-page-wrapper-v2 svg.lucide-eye-closed {
+  color: #324480 !important;
+  stroke: #324480 !important;
+}
+
+/* Icon color when hovering over an input */
+
+.login-page-wrapper-v2 .login-input-icon:hover,
+.login-page-wrapper-v2 .login-input-icon:hover svg {
+  color: #324480 !important;
+  stroke: #324480 !important;
+}
+
+/* ==========================================================
+   6. LOGIN ERROR MESSAGE
+   ========================================================== */
+
+.login-error-banner-v2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #FFF1F2;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: #E11D48;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+/* ==========================================================
+   7. DARK THEME
+   ========================================================== */
+
+[data-theme="dark"] .login-page-wrapper-v2 {
+  background: linear-gradient(135deg,
+      #122137 0%,
+      #162B44 35%,
+      #1B3554 75%,
+      #101E33 100%);
+  color: #E0F2FE;
+}
+
+[data-theme="dark"] .ambient-bg-grid-overlay {
+  background-image:
+    linear-gradient(to right,
+      rgba(66, 191, 234, 0.06) 1px,
+      transparent 1px),
+    linear-gradient(to bottom,
+      rgba(66, 191, 234, 0.06) 1px,
+      transparent 1px);
+}
+
+[data-theme="dark"] .login-main-layout {
+  background: rgba(18, 33, 54, 0.88);
+  border-color: rgba(66, 191, 234, 0.25);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.45),
+    0 8px 28px rgba(66, 191, 234, 0.12);
+}
+
+[data-theme="dark"] .card-welcome-title {
+  color: #E0F2FE;
+}
+
+[data-theme="dark"] .login-card-futuristic {
+  background: rgba(15, 28, 47, 0.95);
+}
+
+/* Keep input icons consistent in dark mode */
+
+[data-theme="dark"] .login-page-wrapper-v2 .login-input-icon,
+[data-theme="dark"] .login-page-wrapper-v2 .login-input-icon svg,
+[data-theme="dark"] .login-page-wrapper-v2 svg.lucide-mail,
+[data-theme="dark"] .login-page-wrapper-v2 svg.lucide-lock,
+[data-theme="dark"] .login-page-wrapper-v2 svg.lucide-lock-keyhole,
+[data-theme="dark"] .login-page-wrapper-v2 svg.lucide-eye,
+[data-theme="dark"] .login-page-wrapper-v2 svg.lucide-eye-off,
+[data-theme="dark"] .login-page-wrapper-v2 svg.lucide-eye-closed {
+  color: #D3E3FD !important;
+  stroke: #D3E3FD !important;
+}
+
+[data-theme="dark"] .login-error-banner-v2 {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #FCA5A5;
+}
+
+/* ==========================================================
+   8. RESPONSIVE LOGIN LAYOUT
+   ========================================================== */
+
+@media (max-width: 480px) {
+  .login-page-wrapper-v2 {
+    padding: 16px;
+  }
+
+  .login-main-layout {
+    width: 100%;
+    border-radius: 22px;
+  }
+
+  .login-card-futuristic {
+    padding: 28px 20px 24px;
+    border-radius: 22px;
+  }
+
+  .card-brand-title {
+    font-size: 26px;
+  }
+}
+
+
+
+/* ==========================================================
+   LOGIN PAGE — FORCE BRAND COLORS ON INPUT ICONS
+   ========================================================== */
+
+/* Email, lock, and password visibility icons */
+.login-page-wrapper-v2 svg.lucide-mail,
+.login-page-wrapper-v2 svg.lucide-lock,
+.login-page-wrapper-v2 svg.lucide-lock-keyhole,
+.login-page-wrapper-v2 svg.lucide-eye,
+.login-page-wrapper-v2 svg.lucide-eye-off,
+.login-page-wrapper-v2 svg.lucide-eye-closed {
+  color: #324480 !important;
+  stroke: #324480 !important;
+}
+
+/* Icons inside common input wrappers */
+.login-page-wrapper-v2 .login-input-icon,
+.login-page-wrapper-v2 .login-input-icon svg {
+  color: #324480 !important;
+  stroke: #324480 !important;
+}
+
+/* If icons inherit cyan from their parent */
+.login-page-wrapper-v2 .relative>svg {
+  color: #324480 !important;
+  stroke: #324480 !important;
+}
+
+/* Keep password visibility button icon consistent */
+.login-page-wrapper-v2 button svg {
+  color: #324480 !important;
+  stroke: #324480 !important;
+}
