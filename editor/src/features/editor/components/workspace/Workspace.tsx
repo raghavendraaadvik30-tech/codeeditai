@@ -242,26 +242,26 @@ export default function Workspace() {
       "
     >
       {/* WORD HORIZONTAL RULER */}
-      {Boolean(settings?.showRuler) && viewMode !== "read" && (
-        <DocumentRuler
-          pageWidth={activePageWidth}
-          zoom={zoom}
-          marginLeft={activeMarginLeft}
-          marginRight={activeMarginRight}
-          onMarginChange={(newLeft, newRight) => {
-            if (activeSection?.id) {
-              updateSection(activeSection.id, {
-                marginConfig: {
-                  top: activeSection.marginConfig?.top ?? 96,
-                  bottom: activeSection.marginConfig?.bottom ?? 96,
-                  left: newLeft,
-                  right: newRight,
-                },
-              });
-            }
-          }}
-        />
-      )}
+{settings?.showRuler !== false && viewMode !== "read" && (
+  <DocumentRuler
+    pageWidth={activePageWidth || 794}
+    zoom={zoom || 100}
+    marginLeft={activeMarginLeft ?? 96}
+    marginRight={activeMarginRight ?? 96}
+    onMarginChange={(newLeft, newRight) => {
+      if (activeSection?.id) {
+        updateSection(activeSection.id, {
+          marginConfig: {
+            top: activeSection.marginConfig?.top ?? 96,
+            bottom: activeSection.marginConfig?.bottom ?? 96,
+            left: newLeft,
+            right: newRight,
+          },
+        });
+      }
+    }}
+  />
+)}
 
       {/* DOCUMENT AREA */}
       <div

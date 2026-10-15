@@ -79,7 +79,8 @@ export default function LoginUI() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden select-none p-4"
+
+      className="login-page-wrapper-v2 relative flex min-h-screen w-full items-center justify-center overflow-hidden select-none p-4"
       style={{
         background:
           "radial-gradient(ellipse at 50% 40%, #FFFFFF 0%, #EEF5FF 45%, #DCE8FA 100%)",
@@ -111,14 +112,14 @@ export default function LoginUI() {
             className="h-auto w-[140px] object-contain"
           />
 
-          <h4 className="-mt-1 text-center text-sm font-medium tracking-wide text-[#1E3A5F]">
+          <h4 className="-mt-1 text-center text-sm font-medium tracking-wide text-[#324480]">
             Doc. Prep. Reimagined!
           </h4>
         </div>
 
         {/* Login Header */}
         <div className="mb-6 text-center">
-          <h1 className="text-xl font-bold tracking-wide text-[#1E3A5F]">
+          <h1 className="text-xl font-bold tracking-wide text-[##324480]">
             LOGIN
           </h1>
 
@@ -135,13 +136,6 @@ export default function LoginUI() {
           </div>
         )}
 
-        {/* Keep your existing email field, password field,
-      remember-me checkbox, forgot-password link,
-      and login button here unchanged. */}
-
-
-
-
         {/* Login Form */}
         <form
           onSubmit={(e) => {
@@ -154,12 +148,12 @@ export default function LoginUI() {
           <div className="space-y-1.5">
             <label
               htmlFor="email"
-              className="block text-xs font-semibold text-slate-700"
+              className="block text-xs font-semibold text-#324480-700"
             >
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#38BDF8]" />
+              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#324480]" />
               <input
                 id="email"
                 type="email"
@@ -171,7 +165,8 @@ export default function LoginUI() {
                   if (emailError) setEmailError("");
                 }}
                 aria-invalid={Boolean(emailError)}
-                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-4 text-xs font-medium text-[#1E3A5F] outline-none transition-colors placeholder:text-slate-400 focus:border-[#60A5FA] focus:bg-white"
+
+                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FF] pl-10 pr-4 text-xs font-medium text-[#142C4A] outline-none transition-colors placeholder:text-[#8BA0B8] hover:bg-[#EAF2FF] focus:border-[#324480] focus:bg-[#EAF2FF] focus:ring-2 focus:ring-[#324480]/10 autofill:bg-[#EAF2FF]"
               />
             </div>
             {emailError && (
@@ -183,12 +178,12 @@ export default function LoginUI() {
           <div className="space-y-1.5">
             <label
               htmlFor="password"
-              className="block text-xs font-semibold text-slate-700"
+              className="block text-xs font-semibold text-#324480"
             >
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#38BDF8]" />
+              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#324480]" />
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -200,7 +195,10 @@ export default function LoginUI() {
                   if (passwordError) setPasswordError("");
                 }}
                 aria-invalid={Boolean(passwordError)}
-                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-10 text-xs font-medium text-[#1E3A5F] outline-none transition-colors placeholder:text-slate-400 focus:border-[#60A5FA] focus:bg-white"
+
+                className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FF] pl-10 pr-10 text-xs font-medium text-[#142C4A] outline-none transition-colors placeholder:text-[#8BA0B8] hover:bg-[#EAF2FF] focus:border-[#324480] focus:bg-[#EAF2FF] focus:ring-2 focus:ring-[#324480]/10 autofill:bg-[#EAF2FF]"
+
+              //className="h-11 w-full rounded-xl border border-[#D3E3FD] bg-[#EAF2FD] pl-10 pr-10 text-xs font-medium text-[#1E3A5F] outline-none transition-colors placeholder:text-slate-400 focus:border-[#60A5FA] focus:bg-white"
               />
               <button
                 type="button"
@@ -230,14 +228,14 @@ export default function LoginUI() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 cursor-pointer rounded border-[#D3E3FD] accent-[#2563EB]"
               />
-              <span className="text-xs font-medium text-slate-600">
+              <span className="text-xs font-medium text-#324480">
                 Remember me
               </span>
             </label>
             <button
               type="button"
               onClick={() => navigate(ROUTE_PATHS.FORGOT_PASSWORD)}
-              className="cursor-pointer text-xs font-semibold text-[#0284C7] hover:underline"
+              className="cursor-pointer text-xs font-semibold text-[#324480] hover:underline"
             >
               Forgot Password?
             </button>
@@ -247,7 +245,7 @@ export default function LoginUI() {
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-2 flex h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-button-primary text-xs font-semibold text-button-primary-foreground shadow-xs transition-colors hover:bg-button-primary-hover active:bg-button-primary-active disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 flex h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-button-primary text-xs font-semibold text-button-primary-foreground shadow-xs transition-colors hover:bg-button-primary-hover active:bg-button-primary-active disabled:cursor-not-allowed disabled:opacity-60 text-#324480"
           >
             {isLoading ? (
               <>

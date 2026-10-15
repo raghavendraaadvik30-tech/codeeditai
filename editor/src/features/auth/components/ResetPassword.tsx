@@ -1,40 +1,7 @@
-/**
- * Reset Password Confirmation Page
- * ---------------------------------
- * Displays the confirmation screen after a password recovery request
- * has been successfully submitted.
- *
- * Responsibilities:
- * - Reads the user's email from React Router location state.
- * - Displays a confirmation message that the recovery email was sent.
- * - Shows the email address associated with the recovery request.
- * - Informs the user that the recovery link should be used within 15 minutes.
- * - Provides navigation back to the Login page.
- *
- * Navigation Flow:
- *
- * Forgot Password
- *       ↓
- * Password Recovery Request
- *       ↓
- * Reset Password Confirmation
- *       ↓
- * User receives recovery email
- *       ↓
- * Back to Login
- *
- * Backend:
- * This component does not directly communicate with the backend.
- * The actual password recovery request should be handled by the
- * authentication service/repository before this page is displayed.
- *
- * The email displayed here is received through React Router location state.
- * When the backend is connected, the recovery flow should be handled by
- * the authentication layer rather than by this component.
- */
-import { useLocation, useNavigate } from "react-router-dom";
-import { ShieldCheck } from "lucide-react";
 
+import { useLocation, useNavigate } from "react-router-dom";
+import { ShieldCheck, ArrowLeft, MailCheck } from "lucide-react";
+import docupilotLogo from "../../../assets/images/docupilot-logo.png";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -50,88 +17,143 @@ export default function ResetPassword() {
   const location = useLocation();
 
   const email =
-    (location.state as { email?: string })?.email ??
-    "user@example.com";
+    (location.state as { email?: string } | null)?.email ??
+    "";
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-muted px-4">
+    <main
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8"
+      style={{
+        background:
+          "linear-gradient(135deg, #F8FAFF 0%, #EEF4FF 35%, #D3E3FD 75%, #F5F8FF 100%)",
+        color: "#142C4A",
+        fontFamily: 'var(--font-family, "Manrope", "Inter", sans-serif)',
+      }}
+    >
+      {/* Background effects */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.85), rgba(211,227,253,0.3) 50%, transparent 80%)",
+        }}
+      />
 
-      {/* Background */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-      <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 top-10 h-80 w-80 rounded-full blur-3xl"
+        style={{ background: "rgba(147,181,235,0.20)" }}
+      />
 
-      <div className="relative z-10 w-full max-w-md">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-24 -right-20 h-96 w-96 rounded-full blur-3xl"
+        style={{ background: "rgba(147,181,235,0.22)" }}
+      />
 
-        {/* Logo */}
-        <div className="mb-8 text-center">
+      <section className="relative z-10 w-full max-w-[560px]">
+        {/* Page heading */}
+        <header className="mb-8 text-center">
+          <div className="mb-5 flex flex-col items-center">
+            <img
+              src={docupilotLogo}
+              alt="DocuPilot Logo"
+              className="h-auto w-[140px] object-contain"
+            />
 
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg">
-            <ShieldCheck className="h-7 w-7" />
+            <h4 className="-mt-1 text-center text-sm font-medium tracking-wide text-[#324480]">
+              Doc. Prep. Reimagined!
+            </h4>
           </div>
 
-          <h1 className="mt-4 text-3xl font-black tracking-wide">
-            LOGIN
-            <span className="ml-1 text-lg font-bold text-primary">
-              PORTAL
-            </span>
-          </h1>
 
-        </div>
+        </header>
 
-        <Card className="rounded-2xl border border-secondary shadow-xl">
-
-          <CardHeader>
-
-            <CardTitle className="text-center text-xl">
-              Login
+        {/* Confirmation card */}
+        <Card
+          className="overflow-hidden rounded-[28px] border p-5 shadow-xl sm:p-7"
+          style={{
+            background: "rgba(255,255,255,0.96)",
+            borderColor: "rgba(211,227,253,0.95)",
+            boxShadow:
+              "0 25px 70px rgba(80,120,190,0.15), 0 8px 28px rgba(20,44,74,0.07)",
+          }}
+        >
+          <CardHeader className="px-0 pb-5 pt-0">
+            <CardTitle
+              className="text-center text-xl font-bold"
+              style={{ color: "#324480" }}
+            >
+              Password Reset
             </CardTitle>
-
           </CardHeader>
 
-          <CardContent className="space-y-5">
-
-            <div className="rounded-xl border border-success-200 bg-success-50 p-6 text-center">
-
-              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-success-100">
-
-                <ShieldCheck className="h-7 w-7 text-success-600" />
-
+          <CardContent className="space-y-5 px-0 pb-0">
+            <div
+              className="rounded-2xl border p-5 text-center sm:p-6"
+              style={{
+                background: "#EAF2FF",
+                borderColor: "#D3E3FD",
+              }}
+            >
+              <div
+                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+                style={{ background: "#D3E3FD" }}
+              >
+                <MailCheck
+                  className="h-7 w-7"
+                  style={{ color: "#324480" }}
+                />
               </div>
 
-              <h3 className="text-xl font-bold text-foreground">
-                Recovery Link Dispatched
-              </h3>
+              <h2
+                className="text-xl font-bold"
+                style={{ color: "#324480" }}
+              >
+                Recovery Request Submitted
+              </h2>
 
-              <p className="mt-3 text-sm text-secondary-foreground">
-                A secure password recovery email has been sent to:
+              <p className="mt-3 text-sm leading-6" style={{ color: "#64748B" }}>
+                Your recovery request has been processed by the
+                current demo flow.
               </p>
 
-              <p className="mt-2 break-all font-bold text-primary">
-                {email}
-              </p>
+              {email && (
+                <>
+                  <p
+                    className="mt-4 text-sm"
+                    style={{ color: "#64748B" }}
+                  >
+                    Email address
+                  </p>
 
-              <p className="mt-5 text-sm leading-6 text-muted-foreground">
-                Please follow the instructions in the email within
-                <span className="font-semibold"> 15 minutes </span>
-                to reset your password.
-              </p>
+                  <p
+                    className="mt-1 break-all font-bold"
+                    style={{ color: "#324480" }}
+                  >
+                    {email}
+                  </p>
+                </>
+              )}
 
             </div>
 
             <Button
-              className="w-full bg-foreground hover:bg-foreground"
+              type="button"
               onClick={() => navigate(ROUTE_PATHS.LOGIN)}
+              className="h-12 w-full rounded-xl border-0 font-semibold"
+              style={{
+                background: "#D3E3FD",
+                color: "#324480",
+              }}
             >
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Login
             </Button>
-
           </CardContent>
-
         </Card>
-
-      </div>
-
-    </div>
+      </section>
+    </main>
   );
 }
