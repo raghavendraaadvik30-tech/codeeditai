@@ -1,6 +1,6 @@
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { ShieldCheck, ArrowLeft, MailCheck } from "lucide-react";
+import { ArrowLeft, MailCheck } from "lucide-react";
 import docupilotLogo from "../../../assets/images/docupilot-logo.png";
 import { Button } from "@/shared/components/ui/button";
 import {
