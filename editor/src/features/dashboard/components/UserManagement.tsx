@@ -1,70 +1,9 @@
-/*
-
-Purpose:
-
-DashboardOverview displays a summary of the system's users and their roles.
-
-
-
-What each part does:
-
-useUsersStore – Gets the current users list from the shared user store.
-
-totalUsers – Calculates the total number of registered users.
-
-activeUsers – Counts users whose status is "Active".
-
-adminUsers – Counts users with the Admin role.
-
-authorUsers – Counts users with the Author role.
-
-
-
-
-
-cardDetails – Defines the statistics displayed in the dashboard cards:
-
-- Total Registered Users
-
-- Active Workspace Access Keys
-
-- Admin Accounts
-
-
-
-Statistics Cards – Displays the calculated user counts with
-
-icons, descriptions, and styled cards.
-
-
-
-User Role Distribution – Displays the number of Admin,
-
-Author, users separately.
-
-
-
-UI:
-
-Uses reusable Shadcn Card components and Lucide icons.
-
-The layout is responsive for different screen sizes.
-
-
-
-Data Source:
-
-User data comes from useUsersStore().
-
-This component only reads and displays the data; it does not
-
-directly call the backend API or modify users.
-
-
-
-*/ 
-
-
+/**
+ * UserManagement.tsx
+ * The Status column has been removed from the users table.
+ * Status data and status display in the View User dialog are preserved.
+ * Reconstructed from the supplied Markdown code dump; verify in your project.
+ */
 
 import React, { useState } from "react";
 
@@ -76,13 +15,9 @@ import * as z from "zod";
 
 import * as XLSX from "xlsx";
 
-
-
 import { useUsersStore } from "@/shared/stores/usersStore";
 
 import type { User } from "../types/dashboard.types";
-
-
 
 import {
 
@@ -117,11 +52,10 @@ import {
   ExternalLink,
 
   Share2,
+
   EyeOff,
 
 } from "lucide-react";
-
-
 
 import { Card } from "@/shared/components/ui/card";
 
@@ -130,8 +64,6 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 
 import { Label } from "@/shared/components/ui/label";
-
-
 
 import {
 
@@ -147,8 +79,6 @@ import {
 
 } from "@/shared/components/ui/dialog";
 
-
-
 import {
 
   Select,
@@ -163,133 +93,37 @@ import {
 
 } from "@/shared/components/ui/select";
 
+/* ADD USER FORM */
 
-
-/**
-
- * ============================================================
-
- * UserManagement.tsx
-
- * ============================================================
-
- *
-
- * PURPOSE:
-
- * Provides the complete User Directory interface.
-
- *
-
- * RESPONSIBILITIES:
-
- * - Display users
-
- * - Search users
-
- * - Filter users by role
-
- * - Export users to Excel
-
- * - Add users
-
- * - Edit users
-
- * - View user details
-
- * - Delete users
-
- * - Prepare/send invitation through the current frontend UI
-
- *
-
- * CURRENT DATA SOURCE:
-
- * useUsersStore() is currently used for local/mock state.
-
- *
-
- * BACKEND:
-
- * When the backend is connected, CRUD operations should move to:
-
- *
-
- * UserManagement
-
- *      ↓
-
- * userService
-
- *      ↓
-
- * apiClient
-
- *      ↓
-
- * backend
-
- *
-
- * SECURITY:
-
- * Passwords are intentionally NOT stored, displayed, copied,
-
- * or included in the User model on the frontend.
-
- *
-
- */
-
-
-
-
-
-/* ============================================================
-
-   ADD USER FORM
-
-   ============================================================ */
-
-
+type UserRole = "Admin" | "Author";
 
 interface AddUserFormInput {
+
   fullName: string;
+
   email: string;
+
   password: string;
-  role: "Admin" | "Author" | "Reviewer";
+
+  role: UserRole;
+
 }
 
-
-
-
-
-/* ============================================================
-
-   EDIT USER FORM
-
-   ============================================================ */
-
-
+/* EDIT USER FORM */
 
 interface EditUserFormInput {
+
   fullName: string;
+
   email: string;
+
   password?: string;
-  role: "Admin" | "Author" | "Reviewer";
+
+  role: UserRole;
+
 }
 
-
-
-
-
-/* ============================================================
-
-   ADD USER VALIDATION
-
-   ============================================================ */
-
-
+/* ADD USER VALIDATION */
 
 const addUserFormSchema = z.object({
 
@@ -302,8 +136,6 @@ const addUserFormSchema = z.object({
       message: "Full Name must contain at least 3 characters",
 
     }),
-
-
 
   email: z
 
@@ -322,28 +154,16 @@ const addUserFormSchema = z.object({
     }),
 
   password: z.string().min(6, {
+
     message: "Password must contain at least 6 characters",
+
   }),
 
-
-
-
-
-  role: z.enum(["Admin", "Author", "Reviewer"]),
+  role: z.enum(["Admin", "Author"]),
 
 });
 
-
-
-
-
-/* ============================================================
-
-   EDIT USER VALIDATION
-
-   ============================================================ */
-
-
+/* EDIT USER VALIDATION */
 
 const editUserFormSchema = z.object({
 
@@ -356,8 +176,6 @@ const editUserFormSchema = z.object({
       message: "Full Name must contain at least 3 characters",
 
     }),
-
-
 
   email: z
 
@@ -376,37 +194,22 @@ const editUserFormSchema = z.object({
     }),
 
   password: z.string().optional().refine(
+
     (value) => !value || value.length >= 6,
+
     { message: "Password must contain at least 6 characters" }
+
   ),
 
-
-
-  role: z.enum(["Admin", "Author", "Reviewer"]),
+  role: z.enum(["Admin", "Author"]),
 
 });
 
-
-
-
-
-/* ============================================================
-
-   COMPONENT
-
-   ============================================================ */
-
-
+/* COMPONENT */
 
 export default function UsersManagement() {
 
-  /* ----------------------------------------------------------
-
-     USER STORE
-
-     ---------------------------------------------------------- */
-
-
+  /* USER STORE */
 
   const {
 
@@ -428,23 +231,14 @@ export default function UsersManagement() {
 
   } = useUsersStore();
 
-
-
-
-
-  /* ----------------------------------------------------------
-
-     MODAL STATE
-
-     ---------------------------------------------------------- */
-
-
+  /* MODAL STATE */
 
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const [showAddPassword, setShowAddPassword] = useState(false);
+
   const [showEditPassword, setShowEditPassword] = useState(false);
 
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -453,90 +247,27 @@ export default function UsersManagement() {
 
   const [isInviteOpen, setIsInviteOpen] = useState(false);
 
+  /* SELECTED USER STATE */
 
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+  const [userToDelete, setUserToDelete] = useState<{ id: string; name: string } | null>(null);
 
-
-  /* ----------------------------------------------------------
-
-     SELECTED USER STATE
-
-     ---------------------------------------------------------- */
-
-
-
-  const [selectedUser, setSelectedUser] =
-
-    useState<User | null>(null);
-
-
-
-  const [userToDelete, setUserToDelete] =
-
-    useState<{ id: string; name: string } | null>(null);
-
-
-
-  const [inviteUser, setInviteUser] =
-
-    useState<User | null>(null);
-
+  const [inviteUser, setInviteUser] = useState<User | null>(null);
   // Temporarily retain the password for the invitation preview.
   const [invitePassword, setInvitePassword] = useState<string>("");
-
-  // Passwords are retained only in component memory so the invitation
-  // opened for a newly provisioned user can display and copy the password.
+  // Passwords are retained only in component memory so the invitation// opened for a newly provisioned user can display and copy the password.
   const [userPasswords, setUserPasswords] = useState<Record<string, string>>({});
 
+  /* COPY STATE */
 
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
+  /* SEARCH */
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => { setSearchQuery(e.target.value); };
 
-  /* ----------------------------------------------------------
-
-     COPY STATE
-
-     ---------------------------------------------------------- */
-
-
-
-  const [copiedField, setCopiedField] =
-
-    useState<string | null>(null);
-
-
-
-
-
-  /* ==========================================================
-
-     SEARCH
-
-     ========================================================== */
-
-
-
-  const handleSearchChange = (
-
-    e: React.ChangeEvent<HTMLInputElement>
-
-  ) => {
-
-    setSearchQuery(e.target.value);
-
-  };
-
-
-
-
-
-  /* ==========================================================
-
-     ADD USER FORM
-
-     ========================================================== */
-
-
+  /* ADD USER FORM */
 
   const {
 
@@ -554,13 +285,12 @@ export default function UsersManagement() {
 
     resolver: zodResolver(addUserFormSchema),
 
-
-
     defaultValues: {
 
       fullName: "",
 
       email: "",
+
       password: "",
 
       role: "Author",
@@ -569,17 +299,7 @@ export default function UsersManagement() {
 
   });
 
-
-
-
-
-  /* ==========================================================
-
-     EDIT USER FORM
-
-     ========================================================== */
-
-
+  /* EDIT USER FORM */
 
   const {
 
@@ -599,8 +319,6 @@ export default function UsersManagement() {
 
     resolver: zodResolver(editUserFormSchema),
 
-
-
     defaultValues: {
 
       fullName: "",
@@ -615,17 +333,7 @@ export default function UsersManagement() {
 
   });
 
-
-
-
-
-  /* ==========================================================
-
-     ADD USER
-
-     ========================================================== */
-
-
+  /* ADD USER */
 
   const onAddSubmit = (data: AddUserFormInput) => {
 
@@ -643,33 +351,19 @@ export default function UsersManagement() {
 
     });
 
-
-
     setIsAddOpen(false);
-
     // Keep the entered password for the invitation preview.
     setInvitePassword(data.password);
 
     resetAdd();
+
     setShowAddPassword(false);
 
-
-
-    /*
-
-     * Open invitation preview for the newly created user.
-
-     *
-
-     * The password entered during provisioning is shown in the invitation preview so it can be copied.
-
-     */
+    /* Open invitation preview for the newly created user.The password entered during provisioning is shown in the invitation preview so it can be copied. */
 
     setTimeout(() => {
 
       const allUsers = useUsersStore.getState().users;
-
-
 
       const newlyAdded = allUsers.find(
 
@@ -677,35 +371,31 @@ export default function UsersManagement() {
 
       );
 
-
-
       if (newlyAdded) {
+
         setUserPasswords((current) => ({
+
           ...current,
+
           [newlyAdded.id]: data.password,
+
         }));
 
         setInvitePassword(data.password);
+
         setInviteUser(newlyAdded);
+
         setCopiedField(null);
+
         setIsInviteOpen(true);
+
       }
 
     }, 100);
 
   };
 
-
-
-
-
-  /* ==========================================================
-
-     EDIT USER
-
-     ========================================================== */
-
-
+  /* EDIT USER */
 
   const onEditSubmit = (data: EditUserFormInput) => {
 
@@ -714,8 +404,6 @@ export default function UsersManagement() {
       return;
 
     }
-
-
 
     updateUser(selectedUser.id, {
 
@@ -729,34 +417,21 @@ export default function UsersManagement() {
 
     });
 
-
-
     setIsEditOpen(false);
 
     setSelectedUser(null);
 
     resetEdit();
+
     setShowEditPassword(false);
 
   };
 
-
-
-
-
-  /* ==========================================================
-
-     OPEN EDIT MODAL
-
-     ========================================================== */
-
-
+  /* OPEN EDIT MODAL */
 
   const openEditModal = (user: User) => {
 
     setSelectedUser(user);
-
-
 
     setEditValue("fullName", user.fullName);
 
@@ -764,25 +439,13 @@ export default function UsersManagement() {
 
     setEditValue("password", "");
 
-    setEditValue("role", user.role);
-
-
+    setEditValue("role", user.role === "Admin" ? "Admin" : "Author");
 
     setIsEditOpen(true);
 
   };
 
-
-
-
-
-  /* ==========================================================
-
-     OPEN VIEW MODAL
-
-     ========================================================== */
-
-
+  /* OPEN VIEW MODAL */
 
   const openViewModal = (user: User) => {
 
@@ -792,25 +455,13 @@ export default function UsersManagement() {
 
   };
 
-
-
-
-
-  /* ==========================================================
-
-     DELETE
-
-     ========================================================== */
-
-
+  /* DELETE */
 
   const handleDeleteClick = (
 
     id: string,
 
-    name: string
-
-  ) => {
+    name: string) => {
 
     setUserToDelete({
 
@@ -820,15 +471,9 @@ export default function UsersManagement() {
 
     });
 
-
-
     setIsDeleteOpen(true);
 
   };
-
-
-
-
 
   const confirmDeleteAction = () => {
 
@@ -838,11 +483,7 @@ export default function UsersManagement() {
 
     }
 
-
-
     deleteUser(userToDelete.id);
-
-
 
     setIsDeleteOpen(false);
 
@@ -850,17 +491,7 @@ export default function UsersManagement() {
 
   };
 
-
-
-
-
-  /* ==========================================================
-
-     EXPORT TO EXCEL
-
-     ========================================================== */
-
-
+  /* EXPORT TO EXCEL */
 
   const handleExportToExcel = () => {
 
@@ -878,19 +509,13 @@ export default function UsersManagement() {
 
     }));
 
-
-
     const worksheet =
 
       XLSX.utils.json_to_sheet(dataToExport);
 
-
-
     const workbook =
 
       XLSX.utils.book_new();
-
-
 
     XLSX.utils.book_append_sheet(
 
@@ -902,8 +527,6 @@ export default function UsersManagement() {
 
     );
 
-
-
     XLSX.writeFile(
 
       workbook,
@@ -914,23 +537,11 @@ export default function UsersManagement() {
 
   };
 
-
-
-
-
-  /* ==========================================================
-
-     SEARCH + ROLE FILTER
-
-     ========================================================== */
-
-
+  /* SEARCH + ROLE FILTER */
 
   const filteredUsers = users.filter((user) => {
 
     const query = searchQuery.trim().toLowerCase();
-
-
 
     const matchesSearch =
 
@@ -946,31 +557,17 @@ export default function UsersManagement() {
 
         .includes(query);
 
-
-
     const matchesRole =
 
       roleFilter === "All" ||
 
       user.role === roleFilter;
 
-
-
     return matchesSearch && matchesRole;
 
   });
 
-
-
-
-
-  /* ==========================================================
-
-     COPY HELPER
-
-     ========================================================== */
-
-
+  /* COPY HELPER */
 
   const handleCopy = async (
 
@@ -984,19 +581,13 @@ export default function UsersManagement() {
 
       await navigator.clipboard.writeText(value);
 
-
-
       setCopiedField(field);
-
-
 
       setTimeout(() => {
 
         setCopiedField(null);
 
       }, 2000);
-
-
 
     } catch (error) {
 
@@ -1012,39 +603,27 @@ export default function UsersManagement() {
 
   };
 
-
-
-
-
-  /* ==========================================================
-
-     INVITATION CONTENT
-
-     ========================================================== */
-
-
+  /* INVITATION CONTENT */
 
   const invitationText = inviteUser
+
     ? `Dear ${inviteUser.fullName},
 
 You have been provisioned as a ${inviteUser.role} on our clinical platform.
 
 Secure Portal Link: ${window.location.origin}
+
 Registered Email: ${inviteUser.email}
+
 Password: ${invitePassword}
+
 Assigned Role: ${inviteUser.role}
 
 Please use the credentials above to access the secure portal.`
+
     : "";
 
-
-  /* ==========================================================
-
-     RENDER
-
-     ========================================================== */
-
-
+  /* RENDER */
 
   return (
 
@@ -1056,67 +635,29 @@ Please use the credentials above to access the secure portal.`
 
     >
 
-
-
-      {/* ======================================================
-
-          HEADER
-
-          ====================================================== */}
-
-
+      {/* HEADER */}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-
-
 
         <div>
 
 
-
-          <h1 className="text-2xl font-black text-foreground tracking-tight">
-
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#172033] dark:text-white  text-foreground tracking-tight">
             User Directory
 
           </h1>
 
-
-
-          <p className="text-xs text-muted-foreground">
-
-            Provision, manage, and audit user registry accounts.
-
-          </p>
-
-
-
         </div>
-
-
 
       </div>
 
-
-
-
-
-      {/* ======================================================
-
-          SEARCH / FILTER / ACTIONS
-
-          ====================================================== */}
-
-
+      {/* SEARCH / FILTER / ACTIONS */}
 
       <div className="flex flex-col md:flex-row gap-3 items-center w-full">
-
-
 
         {/* Search */}
 
         <div className="relative flex-1 w-full">
-
-
 
           <Search
 
@@ -1140,8 +681,6 @@ Please use the credentials above to access the secure portal.`
 
           />
 
-
-
           <Input
 
             value={searchQuery}
@@ -1154,29 +693,27 @@ Please use the credentials above to access the secure portal.`
 
             className="
 
-              h-10
+          h-10
 
-              pl-10
+          pl-10
 
-              border-secondary
+          border-secondary
 
-              bg-card
+          bg-card
 
-              rounded-xl
+          rounded-xl
 
-              text-xs
+          text-xs
 
-              sm:text-sm
+          sm:text-sm
 
-              focus-visible:ring-primary/20
+          focus-visible:ring-primary/20
 
-            "
+          "
 
             id="system-users-search-input"
 
           />
-
-
 
           {searchQuery && (
 
@@ -1196,7 +733,7 @@ Please use the credentials above to access the secure portal.`
 
                 -translate-y-1/2
 
-                text-muted-foreground
+                 text-muted-foreground
 
                 hover:text-secondary-foreground
 
@@ -1216,25 +753,15 @@ Please use the credentials above to access the secure portal.`
 
           )}
 
-
-
         </div>
-
-
-
-
 
         {/* Filters + Actions */}
 
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 items-center shrink-0">
 
-
-
           {/* Role Filter */}
 
           <div className="w-full sm:w-44 shrink-0">
-
-
 
             <Select
 
@@ -1242,15 +769,13 @@ Please use the credentials above to access the secure portal.`
 
               onValueChange={(value) => {
 
-                if(value)
+                if (value)
 
-                setRoleFilter(value);
+                  setRoleFilter(value);
 
               }}
 
             >
-
-
 
               <SelectTrigger
 
@@ -1280,11 +805,7 @@ Please use the credentials above to access the secure portal.`
 
               </SelectTrigger>
 
-
-
               <SelectContent className="bg-card border-secondary">
-
-
 
                 <SelectItem value="All">
 
@@ -1292,15 +813,11 @@ Please use the credentials above to access the secure portal.`
 
                 </SelectItem>
 
-
-
                 <SelectItem value="Admin">
 
                   Admin
 
                 </SelectItem>
-
-
 
                 <SelectItem value="Author">
 
@@ -1308,25 +825,11 @@ Please use the credentials above to access the secure portal.`
 
                 </SelectItem>
 
-
-
-
-
-
-
               </SelectContent>
-
-
 
             </Select>
 
-
-
           </div>
-
-
-
-
 
           {/* Export */}
 
@@ -1386,10 +889,6 @@ Please use the credentials above to access the secure portal.`
 
           </Button>
 
-
-
-
-
           {/* Add User */}
 
           <Button
@@ -1444,25 +943,11 @@ Please use the credentials above to access the secure portal.`
 
           </Button>
 
-
-
         </div>
-
-
 
       </div>
 
-
-
-
-
-      {/* ======================================================
-
-          USERS TABLE
-
-          ====================================================== */}
-
-
+      {/* ====================================================== USERS TABLE ====================================================== */}
 
       <Card
 
@@ -1486,656 +971,168 @@ Please use the credentials above to access the secure portal.`
 
       >
 
-
-
         <div className="overflow-x-auto">
 
 
 
+
           <table
-
-            className="w-full text-left border-collapse"
-
+            className="w-full table-fixed border-collapse text-left"
             id="users-data-table-node"
-
           >
+            <colgroup>
+              <col className="w-[12%]" />
+              <col className="w-[12%]" />
+              <col className="w-[8%]" />
+              <col className="w-[8%]" />
+              <col className="w-[12%]" />
+              <col className="w-[12%]" />
 
+            </colgroup>
 
-
+            {/* Table Header */}
             <thead>
-
-
-
-              <tr
-
-                className="
-
-                  bg-muted/70
-
-                  border-b
-
-                  border-secondary
-
-                "
-
-              >
-
-
-
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
-
+              <tr className="bg-muted/60 border-b border-secondary">
+                <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Full Name
-
                 </th>
-
-
-
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
-
+                <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Email Address
-
                 </th>
-
-
-
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
-
+                <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Role
-
                 </th>
-
-
-
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
-
-                  Status
-
-                </th>
-
-
-
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
-
+                <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Created Date
-
                 </th>
-
-
-
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase">
-
+                <th className="px-2 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Invitation
-
                 </th>
-
-
-
-                <th className="py-3.5 px-6 text-xs font-bold tracking-wider text-muted-foreground uppercase text-right">
-
+                <th className="px-2 py-2.5 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Actions
-
                 </th>
-
-
-
               </tr>
-
-
-
             </thead>
 
-
-
-
-
-            <tbody className="divide-y divide-secondary">
-
-
-
+            {/* Table Body */}
+            <tbody className="divide-y divide-secondary bg-card">
               {filteredUsers.length > 0 ? (
-
-
-
                 filteredUsers.map((user) => (
-
-
-
                   <tr
-
                     key={user.id}
-
-                    className="
-
-                      hover:bg-muted/70
-
-                      transition-all
-
-                      duration-150
-
-                    "
-
+                    className="transition-colors duration-150 hover:bg-muted/40"
                   >
-
-
-
-                    {/* Name */}
-
-                    <td className="py-4 px-6 text-xs font-bold text-foreground">
-
+                    {/* Full Name */}
+                    <td className="px-3 py-2.5 text-xs font-bold text-foreground">
                       {user.fullName}
-
                     </td>
 
-
-
-
-
-                    {/* Email */}
-
-                    <td className="py-4 px-6 text-xs text-secondary-foreground">
-
+                    {/* Email Address */}
+                    <td className="break-all px-3 py-2.5 text-xs text-secondary-foreground font-normal">
                       {user.email}
-
                     </td>
-
-
-
-
 
                     {/* Role */}
-
-                    <td className="py-4 px-6">
-
-
-
-                      <span
-
-                        className={`
-
-                          inline-flex
-
-                          items-center
-
-                          gap-1.5
-
-                          px-2.5
-
-                          py-0.5
-
-                          rounded-full
-
-                          text-10px
-
-                          font-bold
-
-                          tracking-wide
-
-                          uppercase
-
-                          ${
-
-                            user.role === "Admin"
-
-                              ? "bg-primary/10 text-primary"
-
-                              : user.role === "Author"
-
-                                ? "bg-primary/10 text-primary"
-
-                                : "bg-warning-50 text-warning-700"
-
-                          }
-
-                        `}
-
-                      >
-
-                        <Layers className="h-2.5 w-2.5" />
-
-                        {user.role}
-
-                      </span>
-
-
-
+                    <td className="px-3 py-2.5 text-xs font-medium text-foreground">
+                      {user.role}
                     </td>
-
-
-
-
-
-                    {/* Status */}
-
-                    <td className="py-4 px-6">
-
-
-
-                      <span
-
-                        className={`
-
-                          inline-flex
-
-                          items-center
-
-                          gap-1.5
-
-                          px-2.5
-
-                          py-0.5
-
-                          rounded-full
-
-                          text-10px
-
-                          font-bold
-
-                          tracking-wide
-
-                          uppercase
-
-                          ${
-
-                            user.status === "Active"
-
-                              ? "bg-success-50 text-success-700"
-
-                              : user.status === "Inactive"
-
-                                ? "bg-muted text-secondary-foreground"
-
-                                : "bg-ember-50 text-ember-700"
-
-                          }
-
-                        `}
-
-                      >
-
-
-
-                        <span
-
-                          className={`
-
-                            h-1.5
-
-                            w-1.5
-
-                            rounded-full
-
-                            ${
-
-                              user.status === "Active"
-
-                                ? "bg-success-500 animate-pulse"
-
-                                : user.status === "Inactive"
-
-                                  ? "bg-muted-foreground"
-
-                                  : "bg-ember-500"
-
-                            }
-
-                          `}
-
-                        />
-
-
-
-                        {user.status || "Active"}
-
-
-
-                      </span>
-
-
-
-                    </td>
-
-
-
-
 
                     {/* Created Date */}
-
-                    <td className="py-4 px-6 text-xs text-muted-foreground font-mono">
-
+                    <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs text-muted-foreground">
                       {user.createdDate}
-
                     </td>
-
-
-
-
 
                     {/* Invitation */}
-
-                    <td className="py-4 px-6">
-
-
-
+                    <td className="px-2 py-2.5">
                       <Button
-
                         size="sm"
-
                         variant="outline"
-
                         onClick={() => {
-
                           setInviteUser(user);
                           setInvitePassword(userPasswords[user.id] || "");
-
                           setCopiedField(null);
-
                           setIsInviteOpen(true);
-
                         }}
-
-                        className="
-
-                          h-7
-
-                          px-2.5
-
-                          rounded-lg
-
-                          border-primary/30
-
-                          hover:border-primary
-
-                          bg-primary/10
-
-                          hover:bg-primary/10
-
-                          text-primary
-
-                          font-bold
-
-                          text-10px
-
-                          sm:text-11px
-
-                          flex
-
-                          items-center
-
-                          gap-1
-
-                        "
-
+                        className="inline-flex h-7.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-primary/25 bg-[#F0F4F8] px-3 text-[11px] font-semibold text-primary shadow-none transition-colors hover:bg-primary/10"
                         title="Prepare email invitation"
-
                         id={`invite-action-btn-${user.id}`}
-
                       >
-
-                        <Mail className="h-3 w-3 text-primary" />
-
+                        <Mail className="h-3 w-3 shrink-0" />
                         <span>Invite</span>
-
                       </Button>
-
-
-
                     </td>
-
-
-
-
 
                     {/* Actions */}
-
-                    <td className="py-4 px-6 text-right">
-
-
-
-                      <div className="inline-flex items-center gap-1">
-
-
-
-                        {/* View */}
-
+                    <td className="px-2 py-2.5">
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
-
                           type="button"
-
-                          onClick={() => openViewModal(user)}
-
-                          className="
-
-                            p-1.5
-
-                            rounded-lg
-
-                            border
-
-                            border-secondary
-
-                            bg-card
-
-                            text-secondary-foreground
-
-                            hover:text-foreground
-
-                            hover:bg-muted
-
-                            transition-all
-
-                          "
-
-                          title="View user"
-
-                          id={`view-action-btn-${user.id}`}
-
-                        >
-
-                          <Eye className="h-3.5 w-3.5" />
-
-                        </button>
-
-
-
-
-
-                        {/* Edit */}
-
-                        <button
-
-                          type="button"
-
                           onClick={() => openEditModal(user)}
-
-                          className="
-
-                            p-1.5
-
-                            rounded-lg
-
-                            border
-
-                            border-secondary
-
-                            bg-card
-
-                            text-primary
-
-                            hover:text-primary
-
-                            hover:bg-muted
-
-                            transition-all
-
-                          "
-
+                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-secondary bg-card text-primary transition-colors hover:bg-muted"
                           title="Edit user"
-
+                          aria-label={`Edit ${user.fullName}`}
                           id={`edit-action-btn-${user.id}`}
-
                         >
-
                           <Edit3 className="h-3.5 w-3.5" />
-
                         </button>
-
-
-
-
-
-                        {/* Delete */}
 
                         <button
-
                           type="button"
-
                           onClick={() =>
-
-                            handleDeleteClick(
-
-                              user.id,
-
-                              user.fullName
-
-                            )
-
+                            handleDeleteClick(user.id, user.fullName)
                           }
-
-                          className="
-
-                            p-1.5
-
-                            rounded-lg
-
-                            border
-
-                            border-secondary
-
-                            bg-card
-
-                            text-destructive
-
-                            hover:text-destructive
-
-                            hover:bg-muted
-
-                            transition-all
-
-                          "
-
+                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-secondary bg-card text-destructive transition-colors hover:bg-muted"
                           title="Delete user"
-
+                          aria-label={`Delete ${user.fullName}`}
                           id={`delete-action-btn-${user.id}`}
-
                         >
-
                           <Trash2 className="h-3.5 w-3.5" />
-
                         </button>
-
-
-
                       </div>
-
-
-
                     </td>
-
-
-
                   </tr>
-
-
-
                 ))
-
-
-
               ) : (
-
-
-
                 <tr>
-
-
-
                   <td
-
-                    colSpan={7}
-
-                    className="
-
-                      p-8
-
-                      text-center
-
-                      text-xs
-
-                      sm:text-sm
-
-                      text-muted-foreground
-
-                      font-medium
-
-                    "
-
+                    colSpan={6}
+                    className="p-6 text-center text-sm font-medium text-muted-foreground"
                   >
-
                     No users found matching your search or filter.
-
                   </td>
-
-
-
                 </tr>
-
-
-
               )}
-
-
-
             </tbody>
-
-
-
           </table>
+
 
 
 
         </div>
 
-
-
       </Card>
 
-
-
-
-
-      {/* ======================================================
-
-          ADD USER MODAL
-
-          ====================================================== */}
-
-
+      {/* ====================================================== ADD USER MODAL ====================================================== */}
 
       <Dialog
 
         open={isAddOpen}
 
         onOpenChange={(open) => {
+
           setIsAddOpen(open);
+
           if (!open) {
+
             resetAdd();
+
             setShowAddPassword(false);
+
           }
+
         }}
 
       >
-
-
 
         <DialogContent
 
@@ -2161,11 +1158,7 @@ Please use the credentials above to access the secure portal.`
 
         >
 
-
-
           <DialogHeader className="border-b border-muted pb-3">
-
-
 
             <DialogTitle className="text-lg font-extrabold text-foreground">
 
@@ -2173,21 +1166,7 @@ Please use the credentials above to access the secure portal.`
 
             </DialogTitle>
 
-
-
-            <p className="text-xs text-muted-foreground">
-
-              Add an approved user to the registry.
-
-            </p>
-
-
-
           </DialogHeader>
-
-
-
-
 
           <form
 
@@ -2197,21 +1176,15 @@ Please use the credentials above to access the secure portal.`
 
           >
 
-
-
             {/* Full Name */}
 
             <div className="space-y-1">
-
-
 
               <Label htmlFor="add-fullName">
 
                 Full Name
 
               </Label>
-
-
 
               <Input
 
@@ -2225,8 +1198,6 @@ Please use the credentials above to access the secure portal.`
 
               />
 
-
-
               {errorsAdd.fullName && (
 
                 <p className="text-11px text-destructive flex items-center gap-1">
@@ -2239,27 +1210,17 @@ Please use the credentials above to access the secure portal.`
 
               )}
 
-
-
             </div>
-
-
-
-
 
             {/* Email */}
 
             <div className="space-y-1">
-
-
 
               <Label htmlFor="add-email">
 
                 Email Address
 
               </Label>
-
-
 
               <Input
 
@@ -2273,8 +1234,6 @@ Please use the credentials above to access the secure portal.`
 
               />
 
-
-
               {errorsAdd.email && (
 
                 <p className="text-11px text-destructive flex items-center gap-1">
@@ -2287,73 +1246,95 @@ Please use the credentials above to access the secure portal.`
 
               )}
 
-
-
             </div>
 
-
-
-
-
- {/* Password */}
+            {/* Password */}
 
             <div className="space-y-1">
 
               <Label htmlFor="add-password">
+
                 Password
+
               </Label>
 
               <div className="relative">
+
                 <Input
+
                   id="add-password"
+
                   type={showAddPassword ? "text" : "password"}
+
                   placeholder="Enter password"
+
                   className="pr-10"
+
                   {...registerAdd("password")}
+
                 />
 
                 <button
+
                   type="button"
+
                   onClick={() =>
+
                     setShowAddPassword((value) => !value)
+
                   }
+
                   aria-label={
+
                     showAddPassword
+
                       ? "Hide password"
+
                       : "Show password"
+
                   }
+
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground transition-colors"
+
                 >
+
                   {showAddPassword ? (
+
                     <Eye className="h-4 w-4" />
+
                   ) : (
+
                     <EyeOff className="h-4 w-4" />
+
                   )}
+
                 </button>
+
               </div>
 
               {errorsAdd.password && (
+
                 <p className="text-11px text-destructive flex items-center gap-1">
+
                   <AlertCircle className="h-3 w-3" />
+
                   {errorsAdd.password.message}
+
                 </p>
+
               )}
 
             </div>
 
-                       {/* Role */}
+            {/* Role */}
 
             <div className="space-y-1">
-
-
 
               <Label>
 
                 Role
 
               </Label>
-
-
 
               <Controller
 
@@ -2371,19 +1352,13 @@ Please use the credentials above to access the secure portal.`
 
                   >
 
-
-
                     <SelectTrigger>
 
                       <SelectValue placeholder="Select role" />
 
                     </SelectTrigger>
 
-
-
                     <SelectContent>
-
-
 
                       <SelectItem value="Admin">
 
@@ -2391,31 +1366,19 @@ Please use the credentials above to access the secure portal.`
 
                       </SelectItem>
 
-
-
                       <SelectItem value="Author">
 
                         Author
 
                       </SelectItem>
 
-
-
-
-
-
-
                     </SelectContent>
-
-
 
                   </Select>
 
                 )}
 
               />
-
-
 
               {errorsAdd.role && (
 
@@ -2429,17 +1392,9 @@ Please use the credentials above to access the secure portal.`
 
               )}
 
-
-
             </div>
 
-
-
-
-
             <DialogFooter className="pt-3 border-t border-muted mt-2">
-
-
 
               <Button
 
@@ -2452,6 +1407,7 @@ Please use the credentials above to access the secure portal.`
                   setIsAddOpen(false);
 
                   resetAdd();
+
                   setShowAddPassword(false);
 
                 }}
@@ -2461,8 +1417,6 @@ Please use the credentials above to access the secure portal.`
                 Cancel
 
               </Button>
-
-
 
               <Button
 
@@ -2476,50 +1430,37 @@ Please use the credentials above to access the secure portal.`
 
               </Button>
 
-
-
             </DialogFooter>
-
-
 
           </form>
 
-
-
         </DialogContent>
-
-
 
       </Dialog>
 
-
-
-
-
-      {/* ======================================================
-
-          EDIT USER MODAL
-
-          ====================================================== */}
-
-
+      {/* ====================================================== EDIT USER MODAL ====================================================== */}
 
       <Dialog
 
         open={isEditOpen}
 
         onOpenChange={(open) => {
+
           setIsEditOpen(open);
+
           if (!open) {
+
             setSelectedUser(null);
+
             resetEdit();
+
             setShowEditPassword(false);
+
           }
+
         }}
 
       >
-
-
 
         <DialogContent
 
@@ -2545,33 +1486,14 @@ Please use the credentials above to access the secure portal.`
 
         >
 
-
-
           <DialogHeader className="border-b border-muted pb-3">
-
-
 
             <DialogTitle className="text-lg font-extrabold text-foreground">
 
               Edit User
 
             </DialogTitle>
-
-
-
-            <p className="text-xs text-muted-foreground">
-
-              Modify the workspace account details.
-
-            </p>
-
-
-
           </DialogHeader>
-
-
-
-
 
           <form
 
@@ -2581,21 +1503,15 @@ Please use the credentials above to access the secure portal.`
 
           >
 
-
-
             {/* Full Name */}
 
             <div className="space-y-1">
-
-
 
               <Label htmlFor="edit-fullName">
 
                 Full Name
 
               </Label>
-
-
 
               <Input
 
@@ -2609,8 +1525,6 @@ Please use the credentials above to access the secure portal.`
 
               />
 
-
-
               {errorsEdit.fullName && (
 
                 <p className="text-11px text-destructive flex items-center gap-1">
@@ -2623,27 +1537,17 @@ Please use the credentials above to access the secure portal.`
 
               )}
 
-
-
             </div>
-
-
-
-
 
             {/* Email */}
 
             <div className="space-y-1">
-
-
 
               <Label htmlFor="edit-email">
 
                 Email Address
 
               </Label>
-
-
 
               <Input
 
@@ -2657,8 +1561,6 @@ Please use the credentials above to access the secure portal.`
 
               />
 
-
-
               {errorsEdit.email && (
 
                 <p className="text-11px text-destructive flex items-center gap-1">
@@ -2671,51 +1573,82 @@ Please use the credentials above to access the secure portal.`
 
               )}
 
-
-
             </div>
 
             {/* Password */}
+
             <div className="space-y-1">
 
               <Label htmlFor="edit-password">
+
                 Password
+
               </Label>
 
               <div className="relative">
+
                 <Input
+
                   id="edit-password"
+
                   type={showEditPassword ? "text" : "password"}
+
                   placeholder="Enter new password"
+
                   className="pr-10"
+
                   {...registerEdit("password")}
+
                 />
 
                 <button
+
                   type="button"
+
                   onClick={() =>
+
                     setShowEditPassword((value) => !value)
+
                   }
+
                   aria-label={
+
                     showEditPassword
+
                       ? "Hide password"
+
                       : "Show password"
+
                   }
+
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground transition-colors"
+
                 >
+
                   {showEditPassword ? (
+
                     <Eye className="h-4 w-4" />
+
                   ) : (
+
                     <EyeOff className="h-4 w-4" />
+
                   )}
+
                 </button>
+
               </div>
 
               {errorsEdit.password && (
+
                 <p className="text-11px text-destructive flex items-center gap-1">
+
                   <AlertCircle className="h-3 w-3" />
+
                   {errorsEdit.password.message}
+
                 </p>
+
               )}
 
             </div>
@@ -2724,15 +1657,11 @@ Please use the credentials above to access the secure portal.`
 
             <div className="space-y-1">
 
-
-
               <Label>
 
                 Role
 
               </Label>
-
-
 
               <Controller
 
@@ -2750,19 +1679,13 @@ Please use the credentials above to access the secure portal.`
 
                   >
 
-
-
                     <SelectTrigger>
 
                       <SelectValue placeholder="Select role" />
 
                     </SelectTrigger>
 
-
-
                     <SelectContent>
-
-
 
                       <SelectItem value="Admin">
 
@@ -2770,29 +1693,19 @@ Please use the credentials above to access the secure portal.`
 
                       </SelectItem>
 
-
-
                       <SelectItem value="Author">
 
                         Author
 
                       </SelectItem>
 
-
-
-
-
                     </SelectContent>
-
-
 
                   </Select>
 
                 )}
 
               />
-
-
 
               {errorsEdit.role && (
 
@@ -2806,17 +1719,9 @@ Please use the credentials above to access the secure portal.`
 
               )}
 
-
-
             </div>
 
-
-
-
-
             <DialogFooter className="pt-3 border-t border-muted mt-2">
-
-
 
               <Button
 
@@ -2831,6 +1736,7 @@ Please use the credentials above to access the secure portal.`
                   setSelectedUser(null);
 
                   resetEdit();
+
                   setShowEditPassword(false);
 
                 }}
@@ -2840,8 +1746,6 @@ Please use the credentials above to access the secure portal.`
                 Cancel
 
               </Button>
-
-
 
               <Button
 
@@ -2855,33 +1759,15 @@ Please use the credentials above to access the secure portal.`
 
               </Button>
 
-
-
             </DialogFooter>
-
-
 
           </form>
 
-
-
         </DialogContent>
-
-
 
       </Dialog>
 
-
-
-
-
-      {/* ======================================================
-
-          VIEW USER MODAL
-
-          ====================================================== */}
-
-
+      {/* ====================================================== VIEW USER MODAL ====================================================== */}
 
       <Dialog
 
@@ -2890,8 +1776,6 @@ Please use the credentials above to access the secure portal.`
         onOpenChange={setIsViewOpen}
 
       >
-
-
 
         <DialogContent
 
@@ -2917,15 +1801,9 @@ Please use the credentials above to access the secure portal.`
 
         >
 
-
-
           <DialogHeader className="border-b border-muted pb-4">
 
-
-
             <div className="flex items-center gap-3">
-
-
 
               <div
 
@@ -2955,11 +1833,7 @@ Please use the credentials above to access the secure portal.`
 
               </div>
 
-
-
               <div className="overflow-hidden">
-
-
 
                 <DialogTitle
 
@@ -2981,37 +1855,21 @@ Please use the credentials above to access the secure portal.`
 
                 </DialogTitle>
 
-
-
                 <span className="text-10px text-muted-foreground font-semibold font-mono">
 
                   USER ACCOUNT {selectedUser?.id}
 
                 </span>
 
-
-
               </div>
-
-
 
             </div>
 
-
-
           </DialogHeader>
-
-
-
-
 
           <div className="py-4 space-y-3.5 text-xs">
 
-
-
             <div className="flex items-center justify-between border-b border-muted pb-2">
-
-
 
               <span className="text-muted-foreground font-semibold flex items-center gap-1">
 
@@ -3021,25 +1879,15 @@ Please use the credentials above to access the secure portal.`
 
               </span>
 
-
-
               <span className="font-medium text-foreground">
 
                 {selectedUser?.email}
 
               </span>
 
-
-
             </div>
 
-
-
-
-
             <div className="flex items-center justify-between border-b border-muted pb-2">
-
-
 
               <span className="text-muted-foreground font-semibold flex items-center gap-1">
 
@@ -3048,8 +1896,6 @@ Please use the credentials above to access the secure portal.`
                 Role
 
               </span>
-
-
 
               <span
 
@@ -3081,25 +1927,15 @@ Please use the credentials above to access the secure portal.`
 
               </span>
 
-
-
             </div>
 
-
-
-
-
             <div className="flex items-center justify-between border-b border-muted pb-2">
-
-
 
               <span className="text-muted-foreground font-semibold">
 
                 Status
 
               </span>
-
-
 
               <span
 
@@ -3123,25 +1959,21 @@ Please use the credentials above to access the secure portal.`
 
                   uppercase
 
-                  ${
+                  ${selectedUser?.status === "Active"
 
-                    selectedUser?.status === "Active"
+                    ? "bg-success-50 text-success-700"
 
-                      ? "bg-success-50 text-success-700"
+                    : selectedUser?.status === "Inactive"
 
-                      : selectedUser?.status === "Inactive"
+                      ? "bg-muted text-secondary-foreground"
 
-                        ? "bg-muted text-secondary-foreground"
-
-                        : "bg-ember-50 text-ember-700"
+                      : "bg-ember-50 text-ember-700"
 
                   }
 
                 `}
 
               >
-
-
 
                 <span
 
@@ -3153,17 +1985,15 @@ Please use the credentials above to access the secure portal.`
 
                     rounded-full
 
-                    ${
+                    ${selectedUser?.status === "Active"
 
-                      selectedUser?.status === "Active"
+                      ? "bg-success-500"
 
-                        ? "bg-success-500"
+                      : selectedUser?.status === "Inactive"
 
-                        : selectedUser?.status === "Inactive"
+                        ? "bg-muted-foreground"
 
-                          ? "bg-muted-foreground"
-
-                          : "bg-ember-500"
+                        : "bg-ember-500"
 
                     }
 
@@ -3171,25 +2001,13 @@ Please use the credentials above to access the secure portal.`
 
                 />
 
-
-
                 {selectedUser?.status || "Active"}
-
-
 
               </span>
 
-
-
             </div>
 
-
-
-
-
             <div className="flex items-center justify-between">
-
-
 
               <span className="text-muted-foreground font-semibold flex items-center gap-1">
 
@@ -3199,29 +2017,17 @@ Please use the credentials above to access the secure portal.`
 
               </span>
 
-
-
               <span className="font-mono text-foreground">
 
                 {selectedUser?.createdDate}
 
               </span>
 
-
-
             </div>
-
-
 
           </div>
 
-
-
-
-
           <DialogFooter className="pt-3 border-t border-muted">
-
-
 
             <Button
 
@@ -3253,29 +2059,13 @@ Please use the credentials above to access the secure portal.`
 
             </Button>
 
-
-
           </DialogFooter>
-
-
 
         </DialogContent>
 
-
-
       </Dialog>
 
-
-
-
-
-      {/* ======================================================
-
-          DELETE CONFIRMATION
-
-          ====================================================== */}
-
-
+      {/* ====================================================== DELETE CONFIRMATION ====================================================== */}
 
       <Dialog
 
@@ -3284,8 +2074,6 @@ Please use the credentials above to access the secure portal.`
         onOpenChange={setIsDeleteOpen}
 
       >
-
-
 
         <DialogContent
 
@@ -3311,15 +2099,9 @@ Please use the credentials above to access the secure portal.`
 
         >
 
-
-
           <DialogHeader className="border-b border-destructive/10 pb-4">
 
-
-
             <div className="flex items-center gap-3">
-
-
 
               <div
 
@@ -3349,45 +2131,21 @@ Please use the credentials above to access the secure portal.`
 
               </div>
 
-
-
               <div>
-
-
 
                 <DialogTitle className="text-base font-extrabold text-foreground">
 
-                  Revoke & Delete Access
+                  Delete
 
                 </DialogTitle>
 
-
-
-                <span className="text-10px text-destructive font-semibold">
-
-                  ACTION CANNOT BE UNDONE
-
-                </span>
-
-
-
               </div>
-
-
 
             </div>
 
-
-
           </DialogHeader>
 
-
-
-
-
           <div className="py-4 space-y-3.5 text-xs">
-
-
 
             <p className="text-secondary-foreground font-medium leading-relaxed">
 
@@ -3405,53 +2163,9 @@ Please use the credentials above to access the secure portal.`
 
 
 
-            <p
-
-              className="
-
-                text-muted-foreground
-
-                text-11px
-
-                leading-relaxed
-
-                bg-muted
-
-                p-3
-
-                rounded-lg
-
-                border
-
-                border-muted
-
-              "
-
-            >
-
-              User ID{" "}
-
-              <strong className="font-mono text-primary">
-
-                {userToDelete?.id}
-
-              </strong>{" "}
-
-              will lose access to the Clinical Workspace.
-
-            </p>
-
-
-
           </div>
 
-
-
-
-
           <DialogFooter className="pt-3 border-t border-muted">
-
-
 
             <Button
 
@@ -3470,8 +2184,6 @@ Please use the credentials above to access the secure portal.`
               Cancel
 
             </Button>
-
-
 
             <Button
 
@@ -3493,51 +2205,39 @@ Please use the credentials above to access the secure portal.`
 
             >
 
-              Revoke and Delete
+              Delete
 
             </Button>
 
-
-
           </DialogFooter>
-
-
 
         </DialogContent>
 
-
-
       </Dialog>
 
-
-
-
-
-      {/* ======================================================
-
-          INVITATION MODAL
-
-          ====================================================== */}
-
-
+      {/* ====================================================== INVITATION MODAL ====================================================== */}
 
       <Dialog
 
         open={isInviteOpen}
 
         onOpenChange={(open) => {
+
           setIsInviteOpen(open);
 
           if (!open) {
+
             setInviteUser(null);
+
             setInvitePassword("");
+
             setCopiedField(null);
+
           }
+
         }}
 
       >
-
-
 
         <DialogContent
 
@@ -3563,15 +2263,9 @@ Please use the credentials above to access the secure portal.`
 
         >
 
-
-
           <DialogHeader className="pb-2">
 
-
-
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
-
-
 
               <div
 
@@ -3593,33 +2287,19 @@ Please use the credentials above to access the secure portal.`
 
               </div>
 
-
-
               <span>
 
                 Send Invitation
 
               </span>
 
-
-
             </DialogTitle>
-
-
 
           </DialogHeader>
 
-
-
-
-
           {inviteUser && (
 
-
-
             <div className="space-y-4">
-
-
 
               {/* Email Preview */}
 
@@ -3645,8 +2325,6 @@ Please use the credentials above to access the secure portal.`
 
               >
 
-
-
                 {/* Invitation Header */}
 
                 <div
@@ -3669,11 +2347,7 @@ Please use the credentials above to access the secure portal.`
 
                 >
 
-
-
                   <div className="flex items-center gap-2">
-
-
 
                     <span className="text-muted-foreground font-medium w-12">
 
@@ -3681,11 +2355,7 @@ Please use the credentials above to access the secure portal.`
 
                     </span>
 
-
-
                     <div className="flex items-center gap-1.5 overflow-hidden">
-
-
 
                       <span className="font-semibold text-foreground truncate">
 
@@ -3693,37 +2363,23 @@ Please use the credentials above to access the secure portal.`
 
                       </span>
 
-
-
                       <span className="text-muted-foreground font-mono truncate">
 
                         {inviteUser.email}
 
                       </span>
 
-
-
                     </div>
-
-
 
                   </div>
 
-
-
-
-
                   <div className="flex items-center gap-2">
-
-
 
                     <span className="text-muted-foreground font-medium w-12">
 
                       Role:
 
                     </span>
-
-
 
                     <span
 
@@ -3753,17 +2409,9 @@ Please use the credentials above to access the secure portal.`
 
                     </span>
 
-
-
                   </div>
 
-
-
-
-
                   <div className="flex items-center gap-2">
-
-
 
                     <span className="text-muted-foreground font-medium w-12">
 
@@ -3771,25 +2419,15 @@ Please use the credentials above to access the secure portal.`
 
                     </span>
 
-
-
                     <span className="text-secondary-foreground font-semibold truncate">
 
                       Invitation to join Clinical Workspace
 
                     </span>
 
-
-
                   </div>
 
-
-
                 </div>
-
-
-
-
 
                 {/* Invitation Body */}
 
@@ -3811,8 +2449,6 @@ Please use the credentials above to access the secure portal.`
 
                 >
 
-
-
                   <p>
 
                     Dear{" "}
@@ -3826,10 +2462,6 @@ Please use the credentials above to access the secure portal.`
                     ,
 
                   </p>
-
-
-
-
 
                   <p>
 
@@ -3848,10 +2480,6 @@ Please use the credentials above to access the secure portal.`
                     complete account activation and password setup.
 
                   </p>
-
-
-
-
 
                   {/* Secure Invitation Details */}
 
@@ -3877,8 +2505,6 @@ Please use the credentials above to access the secure portal.`
 
                   >
 
-
-
                     {/* Portal Link */}
 
                     <div
@@ -3903,19 +2529,13 @@ Please use the credentials above to access the secure portal.`
 
                     >
 
-
-
                       <div className="overflow-hidden min-w-0">
-
-
 
                         <span className="text-muted-foreground font-medium uppercase text-9px block">
 
                           Secure Portal Link
 
                         </span>
-
-
 
                         <span
 
@@ -3939,13 +2559,7 @@ Please use the credentials above to access the secure portal.`
 
                         </span>
 
-
-
                       </div>
-
-
-
-
 
                       <Button
 
@@ -3985,13 +2599,7 @@ Please use the credentials above to access the secure portal.`
 
                       </Button>
 
-
-
                     </div>
-
-
-
-
 
                     {/* Email */}
 
@@ -4017,19 +2625,13 @@ Please use the credentials above to access the secure portal.`
 
                     >
 
-
-
                       <div className="overflow-hidden min-w-0">
-
-
 
                         <span className="text-muted-foreground font-medium uppercase text-9px block">
 
                           Registered Email
 
                         </span>
-
-
 
                         <span
 
@@ -4043,13 +2645,7 @@ Please use the credentials above to access the secure portal.`
 
                         </span>
 
-
-
                       </div>
-
-
-
-
 
                       <Button
 
@@ -4089,55 +2685,84 @@ Please use the credentials above to access the secure portal.`
 
                       </Button>
 
-
-
                     </div>
 
-
-
-
-
                     {/* Password */}
+
                     <div
+
                       className="flex items-center justify-between gap-3 pb-1.5 border-b border-muted"
+
                     >
+
                       <div className="overflow-hidden min-w-0">
+
                         <span className="text-muted-foreground font-medium uppercase text-9px block">
+
                           Password
+
                         </span>
+
                         <span
-                          className={`font-mono truncate block ${
-                            invitePassword
-                              ? "text-secondary-foreground"
-                              : "text-muted-foreground italic"
-                          }`}
+
+                          className={`font-mono truncate block ${invitePassword
+
+                            ? "text-secondary-foreground"
+
+                            : "text-muted-foreground italic"
+
+                            }`}
+
                           title={invitePassword || "Password not available"}
+
                         >
+
                           {invitePassword || "Password not available"}
+
                         </span>
+
                       </div>
 
                       <Button
+
                         type="button"
+
                         onClick={() => {
+
                           if (invitePassword) {
+
                             handleCopy(invitePassword, "password");
+
                           }
+
                         }}
+
                         size="icon"
+
                         variant="ghost"
-                        className={`h-6 w-6 ${
-                          !invitePassword ? "opacity-40 cursor-not-allowed" : ""
-                        }`}
+
+                        className={`h-6 w-6 ${!invitePassword ? "opacity-40 cursor-not-allowed" : ""
+
+                          }`}
+
                         disabled={!invitePassword}
+
                         title={invitePassword ? "Copy password" : "Password not available"}
+
                       >
+
                         {copiedField === "password" ? (
+
                           <Check className="h-3.5 w-3.5 text-success-600" />
+
                         ) : (
+
                           <Copy className="h-3 w-3" />
+
                         )}
+
                       </Button>
+
                     </div>
 
                     {/* Role */}
@@ -4158,11 +2783,7 @@ Please use the credentials above to access the secure portal.`
 
                     >
 
-
-
                       <div className="overflow-hidden min-w-0">
-
-
 
                         <span className="text-muted-foreground font-medium uppercase text-9px block">
 
@@ -4170,21 +2791,13 @@ Please use the credentials above to access the secure portal.`
 
                         </span>
 
-
-
                         <span className="text-secondary-foreground font-semibold block">
 
                           {inviteUser.role}
 
                         </span>
 
-
-
                       </div>
-
-
-
-
 
                       <Button
 
@@ -4224,39 +2837,23 @@ Please use the credentials above to access the secure portal.`
 
                       </Button>
 
-
-
                     </div>
-
-
 
                   </div>
 
-
-
-
-
                   <p className="text-[10.5px] text-muted-foreground leading-normal">
+
                     Copy the password above and share these credentials with the user through a secure channel.
+
                   </p>
-
-
 
                 </div>
 
-
-
               </div>
-
-
-
-
 
               {/* Invitation Actions */}
 
               <div className="grid grid-cols-2 gap-2">
-
-
 
                 {/* Copy Invitation */}
 
@@ -4306,8 +2903,6 @@ Please use the credentials above to access the secure portal.`
 
                 >
 
-
-
                   {copiedField === "full-invite" ? (
 
                     <>
@@ -4330,13 +2925,7 @@ Please use the credentials above to access the secure portal.`
 
                   )}
 
-
-
                 </Button>
-
-
-
-
 
                 {/* Open Email Client */}
 
@@ -4346,8 +2935,6 @@ Please use the credentials above to access the secure portal.`
 
                   onClick={() => {
 
-
-
                     const subject =
 
                       encodeURIComponent(
@@ -4355,8 +2942,6 @@ Please use the credentials above to access the secure portal.`
                         "Invitation to join Clinical Workspace"
 
                       );
-
-
 
                     const body =
 
@@ -4366,8 +2951,6 @@ Please use the credentials above to access the secure portal.`
 
                       );
 
-
-
                     const mailtoUrl =
 
                       `mailto:${inviteUser.email}` +
@@ -4375,8 +2958,6 @@ Please use the credentials above to access the secure portal.`
                       `?subject=${subject}` +
 
                       `&body=${body}`;
-
-
 
                     window.location.href =
 
@@ -4420,19 +3001,11 @@ Please use the credentials above to access the secure portal.`
 
                 </Button>
 
-
-
               </div>
-
-
-
-
 
               {/* Close */}
 
               <div className="flex justify-end pt-1 border-t border-muted">
-
-
 
                 <Button
 
@@ -4441,6 +3014,7 @@ Please use the credentials above to access the secure portal.`
                   onClick={() => {
 
                     setIsInviteOpen(false);
+
                     setInvitePassword("");
 
                     setInviteUser(null);
@@ -4469,27 +3043,15 @@ Please use the credentials above to access the secure portal.`
 
                 </Button>
 
-
-
               </div>
-
-
 
             </div>
 
-
-
           )}
-
-
 
         </DialogContent>
 
-
-
       </Dialog>
-
-
 
     </div>
 

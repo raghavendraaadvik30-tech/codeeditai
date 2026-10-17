@@ -143,12 +143,14 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
           <div className="flex items-center gap-3">
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+
+            <div className="flex items-center gap-2">
               <img
                 src={docupilotLogo}
                 alt="DocuPilot Logo"
-                className="h-30 w-30 object-contain"
+                className="h-12 w-12 shrink-0 object-contain"
               />
+
             </div>
 
             <div>
@@ -158,13 +160,6 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
                 Admin Profile &amp; Security
 
               </h2>
-
-              <p className="mt-0.5 text-xs text-muted-foreground">
-
-                System Administrator Settings
-
-              </p>
-
             </div>
 
           </div>
@@ -220,33 +215,6 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
             Profile Overview
 
           </button>
-
-
-
-          {/*           <button
-
-            type="button"
-
-            onClick={openPasswordTab}
-
-            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition ${
-
-              activeTab === "password"
-
-                ? "bg-button-primary text-button-primary-foreground shadow-sm"
-
-                : "border border-secondary bg-card text-secondary-foreground hover:bg-muted"
-
-            }`}
-
-          >
-
-            <KeyRound className="h-3.5 w-3.5" />
-
-            Change Password
-
-          </button> */}
-
         </div>
 
 
@@ -288,26 +256,6 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
                   <span className="text-xs font-bold uppercase text-primary">
 
                     {role}
-
-                  </span>
-
-                </div>
-
-
-
-                <div className="flex items-center justify-between gap-4">
-
-                  <span className="text-xs font-medium text-muted-foreground">
-
-                    Account Status
-
-                  </span>
-
-                  <span className="flex items-center gap-1.5 text-xs font-bold text-success-600">
-
-                    <span className="h-2 w-2 rounded-full bg-success-500" />
-
-                    ACTIVE SESSION
 
                   </span>
 
@@ -371,7 +319,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
 
                   <label className="mb-1.5 block text-xs font-bold text-foreground">
 
-                    Account Email
+                    Email
 
                   </label>
 
@@ -400,13 +348,16 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
                   </label>
 
                   <div className="relative">
+
                     <input
                       type={showNewPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(event) => setNewPassword(event.target.value)}
                       placeholder="At least 6 characters"
-                      className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      autoComplete="new-password"
+                      className="w-full rounded-xl border border-secondary bg-muted px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
                     />
+
 
                     <button
                       type="button"
@@ -416,7 +367,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
                           ? "Hide new password"
                           : "Show new password"
                       }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground "
                     >
                       {showNewPassword ? (
                         <Eye className="h-4 w-4" />
@@ -440,7 +391,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       placeholder="Re-enter new password"
-                      className="w-full rounded-xl border border-secondary px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      className="w-full rounded-xl border border-secondary bg-muted px-4 py-2.5 pr-10 text-xs text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
                     />
 
                     <button
@@ -569,22 +520,6 @@ export const DashboardLayout: React.FC = () => {
             className={`flex h-14 shrink-0 items-center border-b border-[#DCE7F2] dark:border-[#294564] ${isExpanded ? "justify-between px-3.5" : "justify-center"
               }`}
           >
-            {/* <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#DCE7F2] bg-white text-[#324480] shadow-xs dark:border-[#294564] dark:bg-[#132742] dark:text-[#38BDF8]">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-
-              {isExpanded && (
-                <div className="leading-tight">
-                  <span className="block text-[8px] font-bold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
-                    SYSTEM
-                  </span>
-                  <span className="block text-[11px] font-black uppercase tracking-wide text-[#172033] dark:text-white">
-                    ADMIN PORTAL
-                  </span>
-                </div>
-              )}
-            </div> */}
 
 
 
@@ -651,21 +586,15 @@ export const DashboardLayout: React.FC = () => {
           >
             <div className="flex items-center gap-2.5">
               <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#DCE7F2] bg-white text-xs font-bold text-[#172033] shadow-xs dark:border-[#294564] dark:bg-[#132742] dark:text-white">
-                {user?.name ? user.name[0].toUpperCase() : "S"}
+                {/* {user?.name ? user.name[0].toUpperCase() : "S"} */}
                 <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-white bg-[#10B981] dark:border-[#132742]" />
               </div>
 
               {isExpanded && (
                 <div className="min-w-0 overflow-hidden leading-tight">
-                  <p className="truncate text-xs font-bold text-[#172033] dark:text-white">
-                    {user?.name || "Sarah Jenkins"} {user?.role ? `(${user.role})` : "(Admin)"}
-                  </p>
-                  <p className="truncate text-[10px] text-[#64748B] dark:text-slate-400">
-                    {user?.email || "admin@gmail.com"}
-                  </p>
-                  <p className="truncate text-[9px] text-[#94A3B8] dark:text-slate-500">
-                    Workspace: default-sec
-                  </p>
+                  <h5 className="truncate text-[12px] text-[#94A3B8] dark:text-slate-500">
+                    Workspace
+                  </h5>
                 </div>
               )}
             </div>

@@ -8,7 +8,6 @@ import {
   Users,
   ShieldCheck,
   FileText,
-  UserCheck,
   Pencil,
 } from "lucide-react";
 
@@ -38,17 +37,13 @@ export default function DashboardOverview() {
     <div className="space-y-6">
       {/* Eyebrow and Page Heading */}
       <div>
-        <span className="block text-[11px] font-bold uppercase tracking-wider text-[#2563EB] dark:text-[#38BDF8] mb-1">
-          ADMINISTRATION OVERVIEW
-        </span>
 
-        <h1 className="text-2xl md:text-3xl font-extrabold text-[#172033] dark:text-white tracking-tight">
+
+        <h1 className="text-2xl md:text-3xl font-extrabold text-[#172033] dark:text-white  text-foreground tracking-tight">
           System Administration Overview
         </h1>
 
-        <p className="mt-1 text-xs md:text-sm text-[#64748B] dark:text-slate-400">
-          Global user authority directories, status ledgers and trial access matrices.
-        </p>
+
       </div>
 
       {/* 3 Summary Cards */}
@@ -68,23 +63,9 @@ export default function DashboardOverview() {
             <h2 className="text-4xl font-extrabold text-[#172033] dark:text-white my-1">
               {totalUsers}
             </h2>
-
-            <p className="text-xs text-[#64748B] dark:text-slate-400">
-              Active master accounts
+            <p className="text-11px text-[#64748B] dark:text-slate-400">
+              All registered users in the system
             </p>
-          </div>
-
-          <div className="mt-5 flex items-center justify-between pt-3 border-t border-[#F1F5F9] dark:border-slate-800 text-[11px]">
-            <div className="flex items-center gap-1.5 font-medium text-[#059669] dark:text-[#34D399]">
-              <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-              <span>Live Registry Synced</span>
-            </div>
-            <button
-              type="button"
-              className="text-[10px] text-[#94A3B8] hover:text-[#64748B] dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer"
-            >
-              Click for details
-            </button>
           </div>
         </div>
 
@@ -103,23 +84,9 @@ export default function DashboardOverview() {
             <h2 className="text-4xl font-extrabold text-[#172033] dark:text-white my-1">
               {adminUsers}
             </h2>
-
-            <p className="text-xs text-[#64748B] dark:text-slate-400">
-              Accounts with directory authority
+            <p className="text-11px text-[#64748B] dark:text-slate-400">
+              Full system management
             </p>
-          </div>
-
-          <div className="mt-5 flex items-center justify-between pt-3 border-t border-[#F1F5F9] dark:border-slate-800 text-[11px]">
-            <div className="flex items-center gap-1.5 font-medium text-[#059669] dark:text-[#34D399]">
-              <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-              <span>Live Registry Synced</span>
-            </div>
-            <button
-              type="button"
-              className="text-[10px] text-[#94A3B8] hover:text-[#64748B] dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer"
-            >
-              Click for details
-            </button>
           </div>
         </div>
 
@@ -131,30 +98,16 @@ export default function DashboardOverview() {
                 Author Accounts
               </span>
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#FECDD3] bg-[#FFF1F2] text-[#E11D48] dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
-                <UserCheck className="h-5 w-5" />
+                <FileText className="h-5 w-5" />
               </div>
             </div>
 
             <h2 className="text-4xl font-extrabold text-[#172033] dark:text-white my-1">
               {authorUsers}
             </h2>
-
-            <p className="text-xs text-[#64748B] dark:text-slate-400">
-              Accounts with document access
+            <p className="text-11px text-[#64748B] dark:text-slate-400">
+              Document access and contribution
             </p>
-          </div>
-
-          <div className="mt-5 flex items-center justify-between pt-3 border-t border-[#F1F5F9] dark:border-slate-800 text-[11px]">
-            <div className="flex items-center gap-1.5 font-medium text-[#059669] dark:text-[#34D399]">
-              <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-              <span>Live Registry Synced</span>
-            </div>
-            <button
-              type="button"
-              className="text-[10px] text-[#94A3B8] hover:text-[#64748B] dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer"
-            >
-              Click for details
-            </button>
           </div>
         </div>
       </div>
@@ -220,78 +173,6 @@ export default function DashboardOverview() {
                 <span className="text-[#CBD5E1] dark:text-slate-600 font-normal">|</span>
                 <span className="text-[#64748B] dark:text-slate-400">{authorPct}%</span>
               </div>
-            </div>
-          </div>
-
-          {/* Active / Inactive Summary Box */}
-          <div className="w-full lg:w-56 shrink-0 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 flex flex-col justify-center gap-3.5 dark:border-[#294564] dark:bg-[#111D29]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-                <span className="text-xs font-medium text-[#64748B] dark:text-slate-400">
-                  Active Users
-                </span>
-              </div>
-              <span className="text-sm font-bold text-[#172033] dark:text-white">
-                {activeUsers}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#64748B]" />
-                <span className="text-xs font-medium text-[#64748B] dark:text-slate-400">
-                  Inactive Users
-                </span>
-              </div>
-              <span className="text-sm font-bold text-[#172033] dark:text-white">
-                {inactiveUsers}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Role Descriptions 3-column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-[#E0E7EF] dark:border-[#294564] mt-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0284C7] dark:bg-sky-950/80 dark:text-sky-300">
-              <ShieldCheck className="h-4.5 w-4.5" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-[#172033] dark:text-white">
-                Admin Role
-              </h4>
-              <p className="text-11px text-[#64748B] dark:text-slate-400">
-                Full system management
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF] text-[#2563EB] dark:bg-blue-950/80 dark:text-blue-300">
-              <FileText className="h-4.5 w-4.5" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-[#172033] dark:text-white">
-                Author Role
-              </h4>
-              <p className="text-11px text-[#64748B] dark:text-slate-400">
-                Document access and contribution
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3E8FF] text-[#9333EA] dark:bg-purple-950/80 dark:text-purple-300">
-              <Users className="h-4.5 w-4.5" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-[#172033] dark:text-white">
-                Total Users
-              </h4>
-              <p className="text-11px text-[#64748B] dark:text-slate-400">
-                All registered users in the system
-              </p>
             </div>
           </div>
         </div>
