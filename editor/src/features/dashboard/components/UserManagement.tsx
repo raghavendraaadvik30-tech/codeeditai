@@ -981,12 +981,12 @@ Please use the credentials above to access the secure portal.`
             id="users-data-table-node"
           >
             <colgroup>
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
               <col className="w-[8%]" />
               <col className="w-[8%]" />
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
+              <col className="w-[8%]" />
+              <col className="w-[8%]" />
+              <col className="w-[8%]" />
+              <col className="w-[8%]" />
 
             </colgroup>
 
@@ -2421,7 +2421,7 @@ Please use the credentials above to access the secure portal.`
 
                     <span className="text-secondary-foreground font-semibold truncate">
 
-                      Invitation to join Clinical Workspace
+                      Invitation to Workspace
 
                     </span>
 
@@ -2473,7 +2473,7 @@ Please use the credentials above to access the secure portal.`
 
                     </strong>{" "}
 
-                    on our clinical platform.
+                    on our  platform.
 
                     Please use the secure portal link below to
 
