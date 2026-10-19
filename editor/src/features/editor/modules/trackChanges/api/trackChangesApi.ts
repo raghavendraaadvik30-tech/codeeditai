@@ -3,7 +3,7 @@
  * Module: Track Changes
  * Feature: Remote API Client & Persistence Adapter
  * Description:
- * API service communicating tracked change records, revisions, and comments
+ * API service communicating tracked change records, revisions
  * with remote backend endpoints, providing localStorage persistence fallback.
  * --------------------------------------------------------
  */
@@ -43,12 +43,6 @@ export const trackChangesApi = {
             original_content: c.originalText,
             new_content: c.newText,
             review_status: c.status,
-            comments_list: c.comments.map((cm) => ({
-              comment_id: cm.id,
-              author_name: cm.author,
-              comment_text: cm.text,
-              timestamp_unix: cm.timestamp,
-            })),
             readable_label: c.label,
           }));
         }
@@ -74,7 +68,6 @@ export const trackChangesApi = {
       original_content: payload.originalText || "",
       new_content: payload.newText || "",
       review_status: "pending",
-      comments_list: [],
       readable_label: payload.label,
     };
 
@@ -92,7 +85,7 @@ export const trackChangesApi = {
   },
 
   /**
-   * Updates an existing change record status or comments.
+   * Updates an existing change record status.
    */
   async updateTrackedChange(
     docId: string,

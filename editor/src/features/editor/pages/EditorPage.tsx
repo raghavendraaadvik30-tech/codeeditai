@@ -26,8 +26,6 @@ import { ChartProvider } from "../modules/figures/modules/chart/context";
 import { SmartArtProvider } from "../modules/figures/modules/smartart/context";
 
 import { ReferencesProvider } from "../modules/reference/components/ReferencesContext";
-import { CommentsProvider } from "../components/comments";
-
 import EditorLayout from "../layouts/EditorLayout";
 
 export default function EditorPage() {
@@ -42,9 +40,9 @@ export default function EditorPage() {
                   <ChartProvider>
                     <SmartArtProvider>
                       <ReferencesProvider>
-                        <CommentsProvider>
-                          <EditorLayout />
-                        </CommentsProvider>
+
+                        <EditorLayout />
+
                       </ReferencesProvider>
                     </SmartArtProvider>
                   </ChartProvider>

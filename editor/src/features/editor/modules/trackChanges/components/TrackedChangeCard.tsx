@@ -9,10 +9,10 @@
  * --------------------------------------------------------
  */
 
-import React, { useState } from "react";
-import { Check, X as XIcon, MessageSquare, Plus } from "lucide-react";
+
+import { Check, X as XIcon } from "lucide-react";
 import { useTrackChanges } from "../hooks";
-import type { TrackedChange, Comment } from "../types";
+import type { TrackedChange } from "../types";
 import { cn } from "@/lib/utils";
 
 interface TrackedChangeCardProps {
@@ -20,10 +20,9 @@ interface TrackedChangeCardProps {
 }
 
 export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
-  const { acceptChange, rejectChange, addCommentToChange, activeChangeId, setActiveChangeId } =
+  const { acceptChange, rejectChange,  activeChangeId, setActiveChangeId } =
     useTrackChanges();
-  const [commentText, setCommentText] = useState("");
-  const [showComments, setShowComments] = useState(false);
+  
 
   const isSelected = activeChangeId === change.id;
 
@@ -40,12 +39,7 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
     }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    addCommentToChange(change.id, commentText);
-    setCommentText("");
-  };
+
 
   const formattedTime = new Date(change.timestamp).toLocaleTimeString([], {
     hour: "numeric",
@@ -152,73 +146,8 @@ export function TrackedChangeCard({ change }: TrackedChangeCardProps) {
         </button>
       </div>
 
-      {/* 5. Comments Section */}
-      <div
-        className="border-t border-muted dark:border-muted pt-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between text-xs text-muted-foreground dark:text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <MessageSquare className="h-3.5 w-3.5" />
-            <span>Comments ({change.comments?.length || 0})</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowComments(!showComments)}
-            className="text-xs text-muted-foreground hover:text-secondary-foreground dark:text-muted-foreground dark:hover:text-muted-foreground transition-colors font-medium"
-          >
-            {showComments ? "Hide" : "Show"}
-          </button>
-        </div>
 
-        {showComments && (
-          <div className="mt-2.5 space-y-2">
-            {change.comments && change.comments.length > 0 ? (
-              <div className="space-y-1.5 max-h-36 overflow-y-auto thin-scroll pr-1">
-                {change.comments.map((c: Comment) => (
-                  <div
-                    key={c.id}
-                    className="rounded-lg border border-secondary bg-muted/80 p-2 text-xs text-secondary-foreground dark:border-muted dark:bg-[#07131E] dark:text-muted-foreground"
-                  >
-                    <div className="flex items-center justify-between text-10px font-semibold text-muted-foreground dark:text-muted-foreground mb-1">
-                      <span>{c.author}</span>
-                      <span>
-                        {new Date(c.timestamp).toLocaleTimeString([], {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </span>
-                    </div>
-                    <div className="text-foreground dark:text-muted-foreground break-words leading-relaxed">
-                      {c.text}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-11px text-muted-foreground italic">No comments on this change yet.</p>
-            )}
 
-            <form onSubmit={handleAddComment} className="flex gap-1.5 pt-1">
-              <input
-                type="text"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add a comment..."
-                className="h-8 flex-1 rounded-md border border-secondary bg-muted px-2.5 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-brand focus:bg-card dark:border-secondary-foreground dark:bg-[#07131E] dark:text-primary-foreground"
-              />
-              <button
-                type="submit"
-                className="flex h-8 w-8 items-center justify-center rounded-md bg-brand text-primary-foreground hover:bg-brand transition-colors shrink-0"
-                title="Add Comment"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

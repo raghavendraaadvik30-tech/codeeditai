@@ -22,7 +22,6 @@ import { useDocumentModel } from "@/features/editor/store/documentModel";
 import { useEditor } from "@/features/editor/context/EditorContext";
 import type {
   TrackedChange,
-  Comment,
   TrackChangesContextType,
 } from "../types";
 import {
@@ -247,8 +246,6 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
             originalText = item.delText;
           }
 
-          const existing = prev.find((c) => c.id === item.id);
-          const comments = existing ? existing.comments : [];
           const label = getHumanReadableChangeLabel(
             type,
             originalText,
@@ -264,7 +261,6 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
             originalText,
             newText,
             status: "pending" as const,
-            comments,
             label,
             pageId: item.pageId,
           };
@@ -275,8 +271,8 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
           c.type === "edit"
             ? Boolean((c.newText && c.newText.length > 0) || (c.originalText && c.originalText.length > 0))
             : c.type === "insert"
-            ? Boolean(c.newText && c.newText.length > 0)
-            : Boolean(c.originalText && c.originalText.length > 0)
+              ? Boolean(c.newText && c.newText.length > 0)
+              : Boolean(c.originalText && c.originalText.length > 0)
       );
 
       return [...nextNonPending, ...validPending];
@@ -340,18 +336,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
     setTrackedChanges((prev) => [...prev.filter((c) => c.id !== change.id), change]);
   }, []);
 
-  const addCommentToChange = useCallback((changeId: string, text: string) => {
-    if (!text.trim()) return;
-    const newComment: Comment = {
-      id: `c-${Math.random().toString(36).slice(2, 9)}`,
-      author: userRef.current,
-      text: text.trim(),
-      timestamp: Date.now(),
-    };
-    setTrackedChanges((prev) =>
-      prev.map((c) => (c.id === changeId ? { ...c, comments: [...c.comments, newComment] } : c))
-    );
-  }, []);
+
 
   /**
    * Accepts a specific tracked change by ID:
@@ -654,7 +639,6 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
           originalText: origText,
           newText: text,
           status: "pending",
-          comments: [],
           label,
           pageId,
         };
@@ -814,7 +798,6 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
             originalText: text,
             newText: "",
             status: "pending",
-            comments: [],
             label,
             pageId,
           };
@@ -904,7 +887,6 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
             originalText: text,
             newText: "",
             status: "pending",
-            comments: [],
             label,
             pageId,
           };
@@ -1016,8 +998,8 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
         activeChangeId,
         setActiveChangeId,
 
+
         addTrackedChange,
-        addCommentToChange,
         acceptChange,
         rejectChange,
         acceptAll,

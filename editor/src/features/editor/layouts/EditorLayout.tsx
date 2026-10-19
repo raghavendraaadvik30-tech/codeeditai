@@ -43,7 +43,7 @@ import LeftOverlay from "../components/overlay/LeftOverlay";
 import Workspace from "../components/workspace/Workspace";
 import AIPanel from "../components/ai/AIPanel";
 import EditorStatusBar from "../components/statusbar/EditorStatusBar";
-import { CommentsPanel, useComments } from "../components/comments";
+
 
 import { useEditor } from "../hooks/useEditor";
 
@@ -55,7 +55,6 @@ export default function EditorLayout() {
     aiPanelOpen,
   } = useEditor();
 
-  const { isCommentsPanelOpen } = useComments();
   const [isResizing, setIsResizing] = useState(false);
 
   const isDraggingRef = useRef(false);
@@ -246,30 +245,7 @@ export default function EditorLayout() {
               <Workspace />
             </section>
 
-            {/* COMMENTS PANEL */}
-            {isCommentsPanelOpen && (
-              <aside
-                className="
-                  w-84
-                  shrink-0
-                  h-full
-                  min-h-0
-                  overflow-hidden
-                  rounded-2xl
-                  border
-                  border-[#E0E7EF]
-                  bg-white
-                  shadow-xs
-                  dark:border-[#1E3A5F]
-                  dark:bg-[#0E1F36]
-                  dark:shadow-xl
-                  flex
-                  flex-col
-                "
-              >
-                <CommentsPanel />
-              </aside>
-            )}
+           
 
             {/* AI PANEL */}
             {aiPanelOpen && (

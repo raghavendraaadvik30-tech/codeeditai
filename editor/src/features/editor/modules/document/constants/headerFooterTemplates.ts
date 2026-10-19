@@ -91,17 +91,17 @@ export const BUILT_IN_HEADERS: HFTemplate[] = [
     name: "Company / Corporate",
     category: "Corporate",
     type: "header",
-    plainText: "PAREXEL INTERNATIONAL | Regulatory Affairs",
+    plainText: "Medical Reports | Regulatory & Clinical Operations",
     contentHtml: `
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 9pt; border-bottom: 1.5px solid #1e3a8a; padding-bottom: 4px;">
-        <span style="font-weight: 700; color: #1e3a8a; letter-spacing: 0.5px;">PAREXEL INTERNATIONAL</span>
+        <span style="font-weight: 700; color: #1e3a8a; letter-spacing: 0.5px;">Medical Reports</span>
         <span style="font-size: 8pt; color: #64748b; font-style: italic;">Regulatory & Clinical Operations</span>
       </div>
     `,
     previewHtml: `
       <div style="display: flex; justify-content: space-between; font-size: 8px; border-bottom: 1.5px solid #1e3a8a; padding: 3px 4px;">
-        <span style="font-weight: 700; color: #1e3a8a;">PAREXEL</span>
-        <span style="font-size: 7px; color: #64748b; font-style: italic;">Clinical Ops</span>
+        <span style="font-weight: 700; color: #1e3a8a;"> Medical Reports </span>
+        <span style="font-size: 7px; color: #64748b; font-style: italic;">Regulatory & Clinical Operations</span>
       </div>
     `,
   },
@@ -133,13 +133,13 @@ export const BUILT_IN_HEADERS: HFTemplate[] = [
     contentHtml: `
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 2px solid #0078d4; padding-bottom: 4px; font-family: Arial, sans-serif;">
         <span style="font-size: 9pt; font-weight: 700; color: #0078d4; letter-spacing: 0.5px;">CLINICAL STUDY REPORT</span>
-        <span style="font-size: 8pt; color: #334155; font-weight: 500;">Protocol: PXL-2026-001</span>
+       
       </div>
     `,
     previewHtml: `
       <div style="display: flex; justify-content: space-between; font-size: 8px; border-bottom: 2px solid #0078d4; padding: 3px 4px;">
         <span style="font-weight: 700; color: #0078d4;">CLINICAL REPORT</span>
-        <span style="font-size: 7px; color: #334155;">PXL-2026-001</span>
+       
       </div>
     `,
   },
@@ -186,14 +186,14 @@ export const BUILT_IN_FOOTERS: HFTemplate[] = [
     plainText: "Company | Confidential | Page 1",
     contentHtml: `
       <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; font-size: 9pt; color: #64748b;">
-        <span style="flex: 1; text-align: left;">Parexel</span>
+        <span style="flex: 1; text-align: left;">Company</span>
         <span style="flex: 1; text-align: center; font-style: italic;">Confidential</span>
         <span style="flex: 1; text-align: right;">Page</span>
       </div>
     `,
     previewHtml: `
       <div style="display: flex; justify-content: space-between; font-size: 8px; color: #64748b; padding: 4px; border-top: 1px solid #e2e8f0;">
-        <span>Parexel</span>
+        <span>Company</span>
         <span style="font-style: italic;">Confidential</span>
         <span>Page</span>
       </div>
@@ -204,16 +204,16 @@ export const BUILT_IN_FOOTERS: HFTemplate[] = [
     name: "Simple Line",
     category: "Built-In",
     type: "footer",
-    plainText: "Parexel Smart Authoring Suite",
+    plainText: "Word",
     contentHtml: `
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px solid #cbd5e1; padding-top: 4px; font-size: 9pt; color: #64748b;">
-        <span>Parexel Smart Authoring Suite</span>
+        <span>Word</span>
         <span>Confidential</span>
       </div>
     `,
     previewHtml: `
       <div style="display: flex; justify-content: space-between; font-size: 8px; color: #64748b; border-top: 1px solid #cbd5e1; padding: 3px 4px;">
-        <span>Parexel Suite</span>
+        <span>Word</span>
         <span>Confidential</span>
       </div>
     `,
@@ -223,16 +223,16 @@ export const BUILT_IN_FOOTERS: HFTemplate[] = [
     name: "Page Number (Accent Bar)",
     category: "Built-In",
     type: "footer",
-    plainText: "Parexel Smart Authoring Suite",
+    plainText: "Author",
     contentHtml: `
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px solid #e2e8f0; padding-top: 4px; font-size: 9pt; color: #64748b;">
-        <span>Parexel Smart Authoring Suite</span>
+        <span>Author</span>
         <span style="background-color: #f1f5f9; padding: 1px 8px; border-radius: 4px; font-weight: 600; color: #0078d4; border-left: 2px solid #0078d4;">Document</span>
       </div>
     `,
     previewHtml: `
       <div style="display: flex; justify-content: space-between; font-size: 8px; color: #64748b; border-top: 1px solid #e2e8f0; padding: 3px 4px;">
-        <span>Parexel Suite</span>
+        <span>Author</span>
         <span style="background-color: #f1f5f9; color: #0078d4; padding: 1px 4px; border-left: 2px solid #0078d4; font-weight: 600;">Doc</span>
       </div>
     `,
@@ -259,17 +259,17 @@ export const BUILT_IN_FOOTERS: HFTemplate[] = [
     name: "Clinical Report",
     category: "Clinical",
     type: "footer",
-    plainText: "Parexel International | Final Report | Confidential",
+    plainText: "Author | Final Report | Confidential",
     contentHtml: `
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1.5px solid #0078d4; padding-top: 4px; font-size: 8.5pt; color: #475569; font-family: Arial, sans-serif;">
-        <span style="font-weight: 600; color: #0078d4;">PAREXEL INTERNATIONAL</span>
+        <span style="font-weight: 600; color: #0078d4;">Author</span>
         <span>Clinical Study Report — Final</span>
         <span style="font-style: italic;">Confidential</span>
       </div>
     `,
     previewHtml: `
       <div style="display: flex; justify-content: space-between; font-size: 8px; border-top: 1.5px solid #0078d4; padding: 3px 4px;">
-        <span style="font-weight: 600; color: #0078d4;">PAREXEL</span>
+        <span style="font-weight: 600; color: #0078d4;">Author</span>
         <span>Final CSR</span>
         <span style="font-style: italic;">Confidential</span>
       </div>
@@ -280,16 +280,16 @@ export const BUILT_IN_FOOTERS: HFTemplate[] = [
     name: "Banded Accent",
     category: "Built-In",
     type: "footer",
-    plainText: "PAREXEL SMART AUTHORING SUITE | ALL RIGHTS RESERVED",
+    plainText: "Company | ALL RIGHTS RESERVED",
     contentHtml: `
       <div style="background-color: #0f172a; color: #f8fafc; padding: 4px 10px; border-radius: 3px; display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 8.5pt; font-weight: 500;">
-        <span>Parexel Smart Authoring Suite</span>
+        <span>Company</span>
         <span style="opacity: 0.8; font-size: 8pt;">All Rights Reserved</span>
       </div>
     `,
     previewHtml: `
       <div style="background-color: #0f172a; color: #f8fafc; padding: 3px 6px; border-radius: 2px; display: flex; justify-content: space-between; font-size: 8px; font-weight: 500;">
-        <span>Parexel Suite</span>
+        <span>Company</span>
         <span style="opacity: 0.8; font-size: 7px;">All Rights</span>
       </div>
     `,

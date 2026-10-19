@@ -26,13 +26,7 @@ export class TrackChangesRepository {
       originalText: dto.original_content,
       newText: dto.new_content,
       status: dto.review_status,
-      comments: dto.comments_list.map((c) => ({
-        id: c.comment_id,
-        author: c.author_name,
-        text: c.comment_text,
-        timestamp: c.timestamp_unix,
-      })),
-      label: dto.readable_label,
+     label: dto.readable_label,
     };
   }
 

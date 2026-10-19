@@ -3,19 +3,14 @@
  * Module: Track Changes
  * Feature: Zod Validation Schemas
  * Description:
- * Runtime data validation schemas for tracked changes, comments,
+ * Runtime data validation schemas for tracked changes, 
  * and payloads.
  * --------------------------------------------------------
  */
 
 import { z } from "zod";
 
-export const CommentSchema = z.object({
-  id: z.string().min(1, "Comment ID is required"),
-  author: z.string().min(1, "Author name is required"),
-  text: z.string().min(1, "Comment text is required"),
-  timestamp: z.number().int().positive("Invalid timestamp"),
-});
+
 
 export const TrackedChangeSchema = z.object({
   id: z.string().min(1, "Change ID is required"),
@@ -25,7 +20,6 @@ export const TrackedChangeSchema = z.object({
   originalText: z.string().default(""),
   newText: z.string().default(""),
   status: z.enum(["pending", "accepted", "rejected"]).default("pending"),
-  comments: z.array(CommentSchema).default([]),
   label: z.string().optional(),
   pageId: z.string().optional(),
   selector: z.string().optional(),
@@ -43,5 +37,4 @@ export const CreateTrackedChangePayloadSchema = z.object({
 export const UpdateTrackedChangePayloadSchema = z.object({
   status: z.enum(["pending", "accepted", "rejected"]).optional(),
   label: z.string().optional(),
-  comments: z.array(CommentSchema).optional(),
 });

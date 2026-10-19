@@ -217,8 +217,8 @@ export default function HeaderActions() {
     setTimeout(() => {
       const firstPageEl = firstPageId
         ? (document.querySelector(
-            `section[data-page-id="${firstPageId}"] [contenteditable="true"]`
-          ) as HTMLElement | null)
+          `section[data-page-id="${firstPageId}"] [contenteditable="true"]`
+        ) as HTMLElement | null)
         : null;
 
       const editor =
@@ -306,17 +306,17 @@ export default function HeaderActions() {
         sections: model.sections && model.sections.length > 0
           ? model.sections
           : [{
-              id: "s1",
-              header: "",
-              footer: "",
-              differentFirstPage: false,
-              differentOddEven: false,
-              firstHeader: "",
-              firstFooter: "",
-              evenHeader: "",
-              evenFooter: "",
-              showPageNumbers: false,
-            }],
+            id: "s1",
+            header: "",
+            footer: "",
+            differentFirstPage: false,
+            differentOddEven: false,
+            firstHeader: "",
+            firstFooter: "",
+            evenHeader: "",
+            evenFooter: "",
+            showPageNumbers: false,
+          }],
         pageHtml: updatedPageHtml,
       };
 
@@ -404,11 +404,11 @@ export default function HeaderActions() {
         }}
       >
         <DialogTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="
+          render={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="
               h-7.5
               gap-1.5
               px-2.5
@@ -428,13 +428,13 @@ export default function HeaderActions() {
               transition-colors
               cursor-pointer
             "
-            title="Save As"
-          >
-            <FilePlus2 className="h-3.5 w-3.5 text-[#324480] dark:text-[#38BDF8]" />
+              title="Save As"
+            >
+              <FilePlus2 className="h-3.5 w-3.5 text-[#324480] dark:text-[#38BDF8]" />
 
-            <span>Save As</span>
-          </Button>
-        }
+              <span>Save As</span>
+            </Button>
+          }
         />
 
         <DialogContent
@@ -656,7 +656,7 @@ export default function HeaderActions() {
               </div>
             </div>
 
-            <div className="mb-4 rounded-xl bg-destructive/80 p-3.5 text-xs leading-relaxed text-destructive/40 dark:bg-destructive/30 dark:text-destructive/20 border border-destructive/80 dark:border-destructive/40">
+            <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-3.5 text-xs leading-relaxed text-black dark:border-gray-700 dark:bg-gray-800 dark:text-white">
               <p>{uploadError}</p>
             </div>
 

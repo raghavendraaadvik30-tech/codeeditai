@@ -14,11 +14,11 @@ import type {
   Comment,
   CreateTrackedChangePayload,
 } from "../types";
-import { CreateTrackedChangePayloadSchema, CommentSchema } from "../schemas";
+import { CreateTrackedChangePayloadSchema } from "../schemas";
 import { getHumanReadableChangeLabel } from "../utils";
 
 export class TrackChangesService {
-  constructor(private repo: TrackChangesRepository = trackChangesRepository) {}
+  constructor(private repo: TrackChangesRepository = trackChangesRepository) { }
 
   async getTrackedChanges(docId: string): Promise<TrackedChange[]> {
     if (!docId) return [];
@@ -48,10 +48,7 @@ export class TrackChangesService {
       timestamp: Date.now(),
     };
 
-    const validated = CommentSchema.safeParse(newComment);
-    if (!validated.success) {
-      throw new Error("Invalid comment payload");
-    }
+
 
     return newComment;
   }
