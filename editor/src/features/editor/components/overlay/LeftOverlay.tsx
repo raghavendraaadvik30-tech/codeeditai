@@ -64,7 +64,7 @@ const PANEL_DESCRIPTIONS: Partial<Record<PanelType, string>> = {
   figures: "Images and figures",
   references: "References and citations",
   symbols: "Greek, math & regulatory",
-  document: "Manage clinical documents & records",
+  document: "Manage documents & records",
   settings: "Editor settings",
   trackChanges: "Review and tracking",
   appendices: "Document appendices and annexes",
@@ -160,11 +160,11 @@ export default function LeftOverlay() {
           dark:border-[#1E3A5F]
           dark:bg-[#0E1F36]
         "
-      >
-        {/* TITLE + ICON */}
-        <div className="flex items-center gap-2.5">
-          <div
-            className="
+        >
+          {/* TITLE + ICON */}
+          <div className="flex items-center gap-2.5">
+            <div
+              className="
               flex
               h-8
               w-8
@@ -180,41 +180,41 @@ export default function LeftOverlay() {
               dark:text-[#38BDF8]
               dark:border-[#1E3A5F]
             "
-          >
-            <HeaderIcon className="h-4 w-4" />
-          </div>
+            >
+              <HeaderIcon className="h-4 w-4" />
+            </div>
 
-          <div>
-            <h2
-              className="
+            <div>
+              <h2
+                className="
                 text-xs
                 font-bold
                 text-[#324480]
                 leading-tight
                 dark:text-white
               "
-            >
-              {title}
-            </h2>
+              >
+                {title}
+              </h2>
 
-            <p
-              className="
+              <p
+                className="
                 text-[10px]
                 text-[#64748B]
                 leading-tight
                 dark:text-[#8BA0B8]
               "
-            >
-              {description}
-            </p>
+              >
+                {description}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* CLOSE */}
-        <button
-          type="button"
-          onClick={() => setLeftPanelOpen(false)}
-          className="
+          {/* CLOSE */}
+          <button
+            type="button"
+            onClick={() => setLeftPanelOpen(false)}
+            className="
             relative
             z-40
             flex
@@ -233,12 +233,12 @@ export default function LeftOverlay() {
             transition-colors
             cursor-pointer
           "
-          aria-label="Close panel"
-          title="Close"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
-      </div>
+            aria-label="Close panel"
+            title="Close"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
       )}
 
       {/* PANEL CONTENT */}

@@ -713,19 +713,20 @@ export default function HeaderActions() {
           DOCUMENT LIMIT REACHED MODAL (MAX 10 DOCUMENTS ON UPLOAD)
       ============================================================ */}
       {showLimitAlert && (
+
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="upload-limit-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-xs animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in"
         >
-          <div className="w-full max-w-md rounded-2xl border border-warning-200 bg-card p-5 shadow-2xl dark:border-warning-900/60 dark:bg-[#0c1929]">
+          <div className="w-full max-w-md rounded-2xl border border-destructive/20 bg-white p-5 shadow-2xl dark:border-destructive/60 dark:bg-[#0c1929]">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-100 text-warning-600 dark:bg-warning-950/60 dark:text-warning-400">
-                <AlertTriangle className="h-5 w-5" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive dark:bg-destructive/60 dark:text-destructive">
+                <AlertCircle className="h-5 w-5" />
               </div>
               <div>
-                <h3 id="upload-limit-dialog-title" className="text-sm font-bold text-foreground dark:text-primary-foreground">
+                <h3 id="upload-error-dialog-title" className="text-sm font-bold text-foreground dark:text-white">
                   Document Limit Reached
                 </h3>
                 <p className="text-xs text-muted-foreground">
@@ -734,33 +735,24 @@ export default function HeaderActions() {
               </div>
             </div>
 
-            <div className="mb-4 rounded-xl bg-warning-50/80 p-3.5 text-xs leading-relaxed text-warning-950 dark:bg-warning-950/30 dark:text-warning-200 border border-warning-200/80 dark:border-warning-900/40">
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle className="h-4 w-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5" />
-                <span>
-                  You have reached the maximum limit of 10 documents. To insert a new document, the oldest document will be removed. If you want to keep any existing document, please save it in the File Manager before continuing.
-                </span>
-              </div>
+            <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-3.5 text-xs leading-relaxed text-black dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+              <p>You have reached the maximum limit of 10 documents. To insert a new document, the oldest document will be removed. If you want to keep any existing document, please save it in the File Manager before continuing.
+              </p>
             </div>
 
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={handleCancelUpload}
-                className="rounded-xl border border-secondary bg-card px-3.5 py-2 text-xs font-semibold text-secondary-foreground hover:bg-muted dark:border-secondary-foreground dark:bg-secondary dark:text-muted-foreground dark:hover:bg-muted transition-colors shadow-sm"
+                onClick={() => setUploadError(null)}
+                className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-white hover:bg-brand-deep transition-colors shadow-sm"
               >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmUpload}
-                className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-brand-deep transition-colors shadow-sm"
-              >
-                <span>Continue</span>
+                <span>OK</span>
               </button>
             </div>
           </div>
+
         </div>
+
       )}
 
     </div>

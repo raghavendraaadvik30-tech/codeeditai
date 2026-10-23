@@ -488,19 +488,19 @@ export default function HeaderFooterTab() {
           {/* 3. Page Number Dropdown Button */}
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
-                type="button"
-                className="flex flex-col items-center justify-center w-13 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
-                title="Page Number: Insert page numbers into document"
-              >
-                <WordPageNumberIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
-                  <span>Page</span>
-                  <span className="flex items-center gap-0.5">
-                    Number
-                    <ChevronDown className="w-2.5 h-2.5 text-muted-foreground" />
-                  </span>
+              type="button"
+              className="flex flex-col items-center justify-center w-13 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
+              title="Page Number: Insert page numbers into document"
+            >
+              <WordPageNumberIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
+              <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
+                <span>Page</span>
+                <span className="flex items-center gap-0.5">
+                  Number
+                  <ChevronDown className="w-2.5 h-2.5 text-muted-foreground" />
                 </span>
-              </button>} />
+              </span>
+            </button>} />
             <DropdownMenuContent align="start" className="w-56 text-xs p-1 shadow-lg bg-card dark:bg-[#0B1620]">
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="cursor-pointer">
@@ -579,19 +579,19 @@ export default function HeaderFooterTab() {
           {/* Quick Parts Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
-                type="button"
-                className="flex flex-col items-center justify-center w-12 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
-                title="Quick Parts: Insert reusable pieces of content"
-              >
-                <WordQuickPartsIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
-                <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
-                  <span>Quick</span>
-                  <span className="flex items-center gap-0.5">
-                    Parts
-                    <ChevronDown className="w-2 h-2 text-muted-foreground" />
-                  </span>
+              type="button"
+              className="flex flex-col items-center justify-center w-12 h-15 rounded hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground active:bg-secondary/70 transition-colors p-0.5 cursor-pointer group"
+              title="Quick Parts: Insert reusable pieces of content"
+            >
+              <WordQuickPartsIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
+              <span className="text-10px leading-3 text-foreground dark:text-muted mt-0.5 text-center flex flex-col items-center">
+                <span>Quick</span>
+                <span className="flex items-center gap-0.5">
+                  Parts
+                  <ChevronDown className="w-2 h-2 text-muted-foreground" />
                 </span>
-              </button>} />
+              </span>
+            </button>} />
             <DropdownMenuContent align="start" className="w-48 text-xs p-1 shadow-lg bg-card dark:bg-[#0B1620]">
               <DropdownMenuItem onClick={handleInsertDocTitle} className="cursor-pointer">
                 Document Title
@@ -625,11 +625,10 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={goToHeader}
-            className={`flex flex-col items-center justify-center w-12 h-15 rounded p-0.5 transition-colors cursor-pointer group ${
-              activeHFType === "header"
-                ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
-                : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
-            }`}
+            className={`flex flex-col items-center justify-center w-12 h-15 rounded p-0.5 transition-colors cursor-pointer group ${activeHFType === "header"
+              ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
+              : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
+              }`}
             title="Go to Header"
           >
             <WordGoToHeaderIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
@@ -643,11 +642,10 @@ export default function HeaderFooterTab() {
           <button
             type="button"
             onClick={goToFooter}
-            className={`flex flex-col items-center justify-center w-12 h-15 rounded p-0.5 transition-colors cursor-pointer group ${
-              activeHFType === "footer"
-                ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
-                : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
-            }`}
+            className={`flex flex-col items-center justify-center w-12 h-15 rounded p-0.5 transition-colors cursor-pointer group ${activeHFType === "footer"
+              ? "bg-primary/10 border border-navy-300 dark:bg-navy-950/60 dark:border-primary/90"
+              : "hover:bg-muted hover:border hover:border-border dark:hover:bg-muted dark:hover:border-secondary-foreground"
+              }`}
             title="Go to Footer"
           >
             <WordGoToFooterIcon className="w-7 h-7 group-hover:scale-105 transition-transform" />
@@ -808,13 +806,13 @@ export default function HeaderFooterTab() {
           {/* Insert Alignment Tab Button / Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger render={<button
-                type="button"
-                className="flex items-center gap-1 px-1 py-0.5 rounded text-11px text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer transition-colors"
-                title="Insert Alignment Tab"
-              >
-                <WordAlignmentTabIcon className="w-3.5 h-3.5 text-primary" />
-                <span>Insert Alignment Tab</span>
-              </button>} />
+              type="button"
+              className="flex items-center gap-1 px-1 py-0.5 rounded text-11px text-secondary-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted cursor-pointer transition-colors"
+              title="Insert Alignment Tab"
+            >
+              <WordAlignmentTabIcon className="w-3.5 h-3.5 text-primary" />
+              <span>Insert Alignment Tab</span>
+            </button>} />
             <DropdownMenuContent align="start" className="w-44 text-xs p-1 shadow-lg bg-card dark:bg-[#0B1620]">
               <DropdownMenuItem onClick={() => handleInsertAlignmentTab("center")} className="cursor-pointer">
                 Center Tab
@@ -849,15 +847,19 @@ export default function HeaderFooterTab() {
       {/* ============================================================
           GROUP 6: CLOSE HEADER AND FOOTER
       ============================================================ */}
+
+
+
       <div className="flex flex-col justify-between items-center px-2 shrink-0">
         <div className="flex items-center justify-center flex-1">
           <button
             type="button"
             onClick={exitHeaderFooterMode}
-            className="flex flex-col items-center justify-center w-13.5 h-15 rounded hover:bg-destructive/10 hover:border hover:border-destructive/30 dark:hover:bg-destructive/40 dark:hover:border-destructive/60 active:bg-destructive/10 transition-colors p-0.5 cursor-pointer group"
+            className="flex flex-col items-center justify-center w-13.5 h-15 rounded hover:bg-muted/50 dark:hover:bg-muted/20 active:bg-muted/30 transition-colors p-0.5 cursor-pointer group"
             title="Close Header and Footer (Esc)"
           >
-            <WordCloseIcon className="w-6 h-6 group-hover:scale-105 transition-transform" />
+            <X className="w-6 h-6 text-foreground group-hover:scale-105 transition-transform" />
+
             <span className="text-10px leading-3 text-foreground dark:text-muted mt-1 text-center flex flex-col items-center font-medium">
               <span>Close Header</span>
               <span>and Footer</span>
@@ -870,6 +872,7 @@ export default function HeaderFooterTab() {
           Close
         </div>
       </div>
+
 
     </div>
   );
