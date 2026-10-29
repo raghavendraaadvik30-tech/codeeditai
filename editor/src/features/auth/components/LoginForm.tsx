@@ -58,7 +58,7 @@ export default function LoginUI() {
       localStorage.removeItem("rememberMe");
     }
 
-    const success = await login({ email, password });
+    const success = await login({ workspace:"superadmin",email, password });
     if (!success) return;
 
     const user = JSON.parse(localStorage.getItem("user") || "null");

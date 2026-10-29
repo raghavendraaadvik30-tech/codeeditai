@@ -1,16 +1,31 @@
+
 import { Role } from "./roles";
-// Maps each Role to the permissions that role is allowed to have.
-// This is the central place to maintain role-based access rules.
+
+// Central place to maintain role-based access rules.
 export enum Permission {
   ManageUsers = "MANAGE_USERS",
   ViewDashboard = "VIEW_DASHBOARD",
   EditDocuments = "EDIT_DOCUMENTS",
 }
-// Admin → Can manage users, access dashboard and edit documents.
-// Author → Can access dashboard and edit documents.  --> Cannot manage users.
 
+// Admin can manage users, view the dashboard, and edit documents.
+// Author can view the dashboard and edit documents.
+// SuperAdmin has all permissions defined here.
 export const RolePermissions: Record<Role, Permission[]> = {
-  [Role.Admin]: [Permission.ManageUsers, Permission.ViewDashboard, Permission.EditDocuments],
-  [Role.Author]: [Permission.EditDocuments, Permission.ViewDashboard],
-  [Role.Reviewer]: [Permission.ViewDashboard],
+  [Role.SuperAdmin]: [
+    Permission.ManageUsers,
+    Permission.ViewDashboard,
+    Permission.EditDocuments,
+  ],
+
+  [Role.Admin]: [
+    Permission.ManageUsers,
+    Permission.ViewDashboard,
+    Permission.EditDocuments,
+  ],
+
+  [Role.Author]: [
+    Permission.ViewDashboard,
+    Permission.EditDocuments,
+  ],
 };

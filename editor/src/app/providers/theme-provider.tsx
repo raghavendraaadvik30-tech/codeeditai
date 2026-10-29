@@ -1,4 +1,4 @@
-/*  ThemeProvider.tsx
+ /*  ThemeProvider.tsx
    PURPOSE:
    This file manages the application's visual theme.
 

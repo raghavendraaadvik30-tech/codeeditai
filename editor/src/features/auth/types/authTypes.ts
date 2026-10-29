@@ -37,7 +37,7 @@ import { Role } from "@/app/config/roles";
 export interface LoginRequest {
   email: string;
   password: string;
-  workspace?: string;
+  workspace: string;
 } 
 
 export interface User {

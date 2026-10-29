@@ -6,5 +6,5 @@
 export enum Role {
   Admin = "admin",
   Author = "author",
-  Reviewer = "reviewer"
+  SuperAdmin="Super_Admin"
  }
