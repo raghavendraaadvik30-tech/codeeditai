@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, type FunctionDeclaration } from "@google/genai";
 
 let genai: GoogleGenAI | null = null;
 let cachedKey: string | null = null;
@@ -48,7 +48,7 @@ export type AIResponse =
   | { kind: "text"; text: string }
   | { kind: "tool"; call: ToolCall; confirmText: string };
 
-const TOOL_DECLARATIONS = [
+const TOOL_DECLARATIONS: FunctionDeclaration[] = [
   {
     name: "createTable", description: "Creates EMPTY table on new page.",
     parameters: {
@@ -649,7 +649,7 @@ export async function sendMessageWithTools(message: string, selectedDocText?: st
         contents: effectiveMessage,
         config: {
           systemInstruction: SYSTEM_INSTRUCTION,
-          tools: [{ functionDeclarations: TOOL_DECLARATIONS }] as any,
+          tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
         },
       });
 

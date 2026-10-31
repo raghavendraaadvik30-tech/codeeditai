@@ -48,7 +48,7 @@ export const AIChat: React.FC = () => {
           <span className="truncate">
             Selected: <span className="font-semibold italic">"{selectedDocText.slice(0, 30)}..."</span>
           </span>
-          <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.2 rounded shrink-0">
+          <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded shrink-0">
             Active
           </span>
         </div>
@@ -99,8 +99,8 @@ export const AIChat: React.FC = () => {
                   msg.role === 'error'
                     ? 'bg-destructive/15 text-destructive'
                     : msg.role === 'tool'
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
-                    : 'bg-primary/10 text-primary'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
+                      : 'bg-primary/10 text-primary'
                 )}
               >
                 {msg.role === 'error' ? (
@@ -119,10 +119,10 @@ export const AIChat: React.FC = () => {
                 msg.role === 'user'
                   ? 'bg-primary text-primary-foreground whitespace-pre-wrap'
                   : msg.role === 'error'
-                  ? 'bg-destructive/10 border border-destructive/30 text-destructive whitespace-pre-wrap'
-                  : msg.role === 'tool'
-                  ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-800 dark:text-emerald-200 whitespace-pre-wrap'
-                  : 'bg-muted/60 border border-border whitespace-pre-wrap text-foreground'
+                    ? 'bg-destructive/10 border border-destructive/30 text-destructive whitespace-pre-wrap'
+                    : msg.role === 'tool'
+                      ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-800 dark:text-emerald-200 whitespace-pre-wrap'
+                      : 'bg-muted/60 border border-border whitespace-pre-wrap text-foreground'
               )}
             >
               <div>{msg.text}</div>

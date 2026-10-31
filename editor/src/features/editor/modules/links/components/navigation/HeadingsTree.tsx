@@ -106,7 +106,7 @@ function HeadingItemRow({
 
         {/* Search match badge */}
         {isMatch && (
-          <span className="shrink-0 text-[10px] px-1 py-0.2 rounded bg-amber-200/80 text-amber-900 dark:bg-amber-900/60 dark:text-amber-200 font-medium ml-1">
+          <span className="shrink-0 text-[10px] px-1 py-0.5 rounded bg-amber-200/80 text-amber-900 dark:bg-amber-900/60 dark:text-amber-200 font-medium ml-1">
             match
           </span>
         )}

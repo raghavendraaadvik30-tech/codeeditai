@@ -14,7 +14,7 @@ import { useDocumentModel } from "../../store/documentModel";
 import { useTrackChanges } from "../../modules/trackChanges";
 
 // Only Read Mode has a footer button for now.
-const VIEW_MODES = [{ id: "read", label: "Read Mode", Icon: BookOpen }];
+const VIEW_MODES = [{ id: "read", label: "Read Mode", Icon: BookOpen }] as const;
 
 // A4 at 96 dpi. Change if your pages use another size.
 const PAGE_W = 794;
@@ -32,15 +32,29 @@ const TOOLBAR_H = 36;
    Reads pages straight from the document model, so it needs
    no changes in your editor canvas.
    ========================================================= */
-function ReadModeView({ pages, pageHtml, initialIndex, onClose }) {
+type ReadModePage = { id: string };
+
+type ReadModeViewProps = {
+  pages: ReadModePage[];
+  pageHtml: Record<string, string | undefined>;
+  initialIndex: number;
+  onClose: () => void;
+};
+
+function ReadModeView({
+  pages,
+  pageHtml,
+  initialIndex,
+  onClose,
+}: ReadModeViewProps) {
   const [start, setStart] = useState(initialIndex);
   const [size, setSize] = useState({
     w: typeof window !== "undefined" ? window.innerWidth : 1280,
     h: typeof window !== "undefined" ? window.innerHeight - TOOLBAR_H : 720,
   });
-  const areaRef = useRef(null);
-  const rootRef = useRef(null);
-  const wheelLock = useRef(0);
+  const areaRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const wheelLock = useRef<number>(0);
 
   const total = Math.max(1, pages.length);
   const perScreen = size.w >= 900 ? 2 : 1;
@@ -74,7 +88,7 @@ function ReadModeView({ pages, pageHtml, initialIndex, onClose }) {
 
   // Keyboard navigation
   useEffect(() => {
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
       } else if (["ArrowRight", "PageDown", " "].includes(e.key)) {
@@ -97,7 +111,7 @@ function ReadModeView({ pages, pageHtml, initialIndex, onClose }) {
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
-    const onWheel = (e) => {
+    const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const now = Date.now();
       if (now - wheelLock.current < 350 || Math.abs(e.deltaY) < 4) return;
@@ -215,7 +229,8 @@ function ReadModeView({ pages, pageHtml, initialIndex, onClose }) {
               style={{ width: PAGE_W * scale, height: PAGE_H * scale }}
             >
               <div
-                className="read-page-content absolute top-0 left-0 overflow-hidden text-black"
+                data-read-page-content=""
+                className="absolute top-0 left-0 overflow-hidden text-black"
                 style={{
                   width: PAGE_W,
                   height: PAGE_H,
@@ -258,9 +273,9 @@ function ReadModeView({ pages, pageHtml, initialIndex, onClose }) {
 
       {/* keeps images/tables inside the page */}
       <style>{`
-        .read-page-content img,
-        .read-page-content table { max-width: 100%; }
-        .read-page-content a { color: #0563c1; text-decoration: underline; }
+        [data-read-page-content] img,
+        [data-read-page-content] table { max-width: 100%; }
+        [data-read-page-content] a { color: #0563c1; text-decoration: underline; }
       `}</style>
     </div>,
     document.body

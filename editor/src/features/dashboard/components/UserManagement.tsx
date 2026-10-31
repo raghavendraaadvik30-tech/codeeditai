@@ -1067,6 +1067,15 @@ Please use the credentials above to access the secure portal.`
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           type="button"
+                          onClick={() => openViewModal(user)}
+                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-secondary bg-card text-primary transition-colors hover:bg-muted"
+                          title="View user"
+                          aria-label={`View ${user.fullName}`}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => openEditModal(user)}
                           className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-secondary bg-card text-primary transition-colors hover:bg-muted"
                           title="Edit user"

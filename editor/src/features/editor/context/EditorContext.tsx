@@ -11,7 +11,7 @@ import type { ReactNode, RefObject } from "react";
 
 import type { StyleToken } from "@/features/editor/modules/styles/types/styles.types";
 import { updateHeadingNumbers } from "../modules/styles/utils/headingNumbering";
-import { useDocumentModel } from "../store/documentModel";
+import { useDocumentModel, type PageModel } from "../store/documentModel";
 import { loadGoogleFont } from "../modules/document/api/fontapi";
 
 interface SavedSelectionData {
@@ -73,8 +73,8 @@ function saveSelectionData(
   const startPageId = startPageEl.getAttribute("data-page-id") || "";
   const endPageId = endPageEl.getAttribute("data-page-id") || "";
   const hfType = (startPageEl.getAttribute("data-hf-type") as "header" | "footer" | null) ||
-                 (startPageEl.closest("[data-hf-type]")?.getAttribute("data-hf-type") as "header" | "footer" | null) ||
-                 null;
+    (startPageEl.closest("[data-hf-type]")?.getAttribute("data-hf-type") as "header" | "footer" | null) ||
+    null;
 
   return {
     range: range.cloneRange(),
@@ -347,7 +347,7 @@ export interface PageBreakHistoryData {
 }
 
 export interface DocumentClearHistoryData {
-  pagesBefore: any[];
+  pagesBefore: PageModel[];
   pageHtmlBefore: Record<string, string>;
   activePageBefore: string | null;
 }
@@ -356,7 +356,7 @@ export interface HistorySnapshot {
   pageId: string;
   html: string;
   allPagesHtml?: Record<string, string>;
-  pages?: any[];
+  pages?: PageModel[];
   caretOffset: number;
   label?: string;
   actionType?: "edit" | "page-break" | "document-clear";
@@ -447,9 +447,9 @@ export interface EditorContextType {
   applyFormatCommand: (command: string, value?: string) => void;
   exec: (command: string, value?: string) => void;
   applyBulletStyle: (
-  bulletChar: string,
-  styleType: string
-) => void;
+    bulletChar: string,
+    styleType: string
+  ) => void;
   applyNumberingStyle: (style?: string) => void;
   applyMultilevelStyle: (style?: string) => void;
   toggleMultilevelList: (type?: string) => void;
@@ -612,134 +612,186 @@ export function EditorProvider({
 
   // Saved selection tracking for active editor contenteditable pages
   const savedSelectionRef = useRef<SavedSelectionData | null>(null);
-const preserveSelectionRef = useRef(false);
+  const preserveSelectionRef = useRef(false);
 
-useEffect(() => {
-  const handleSelectionChange = () => {
-    /*
-     * IMPORTANT:
-     * While formatting is being applied, the browser can fire
-     * selectionchange several times. Do NOT overwrite the
-     * original selected range during that period.
-     */
-    if (preserveSelectionRef.current) {
-      return;
-    }
-
-    const sel = window.getSelection();
-
-    if (!sel || sel.rangeCount === 0) {
-      return;
-    }
-
-    const range = sel.getRangeAt(0);
-
-    const startAnc = range.startContainer.nodeType === Node.ELEMENT_NODE
-      ? (range.startContainer as HTMLElement)
-      : range.startContainer.parentElement;
-    const endAnc = range.endContainer.nodeType === Node.ELEMENT_NODE
-      ? (range.endContainer as HTMLElement)
-      : range.endContainer.parentElement;
-
-    // 1. Check if selection is within Header or Footer editable container
-    const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
-    const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
-
-    if (startHf && endHf && startHf === endHf) {
-      const saved = saveSelectionData(startHf, endHf, range);
-      if (saved) {
-        savedSelectionRef.current = saved;
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      /*
+       * IMPORTANT:
+       * While formatting is being applied, the browser can fire
+       * selectionchange several times. Do NOT overwrite the
+       * original selected range during that period.
+       */
+      if (preserveSelectionRef.current) {
+        return;
       }
-      return;
-    }
 
-    // 2. Check if selection is within Body page editable container
-    const startPageEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])');
-    const endPageEl = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+      const sel = window.getSelection();
 
-    if (!startPageEl || !endPageEl) {
-      return;
-    }
+      if (!sel || sel.rangeCount === 0) {
+        return;
+      }
 
-    if (startPageEl.closest("[data-hf-container]") && !startPageEl.hasAttribute("data-hf-type")) {
-      return;
-    }
+      const range = sel.getRangeAt(0);
 
-    const saved = saveSelectionData(startPageEl, endPageEl, range);
-    if (saved) {
-      savedSelectionRef.current = saved;
-    }
-  };
+      const startAnc = range.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (range.startContainer as HTMLElement)
+        : range.startContainer.parentElement;
+      const endAnc = range.endContainer.nodeType === Node.ELEMENT_NODE
+        ? (range.endContainer as HTMLElement)
+        : range.endContainer.parentElement;
 
-  document.addEventListener("selectionchange", handleSelectionChange);
+      // 1. Check if selection is within Header or Footer editable container
+      const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+      const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
 
-  return () => {
-    document.removeEventListener("selectionchange", handleSelectionChange);
-  };
-}, []);
-
-  const restoreEditorSelection = useCallback((): boolean => {
-  const sel = window.getSelection();
-  if (!sel) return false;
-
-  const saved = savedSelectionRef.current;
-
-  if (!saved) {
-    if (sel.rangeCount > 0) {
-      const currentRange = sel.getRangeAt(0);
-
-      const startAnc = currentRange.startContainer.nodeType === Node.ELEMENT_NODE
-        ? (currentRange.startContainer as HTMLElement)
-        : currentRange.startContainer.parentElement;
-      const endAnc = currentRange.endContainer.nodeType === Node.ELEMENT_NODE
-        ? (currentRange.endContainer as HTMLElement)
-        : currentRange.endContainer.parentElement;
-
-      const hfEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
-      if (hfEl && !currentRange.collapsed) {
-        const currentSaved = saveSelectionData(hfEl, hfEl, currentRange);
-        if (currentSaved) {
-          savedSelectionRef.current = currentSaved;
+      if (startHf && endHf && startHf === endHf) {
+        const saved = saveSelectionData(startHf, endHf, range);
+        if (saved) {
+          savedSelectionRef.current = saved;
         }
-        return true;
+        return;
       }
 
+      // 2. Check if selection is within Body page editable container
       const startPageEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])');
       const endPageEl = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
 
-      if (startPageEl && endPageEl && !currentRange.collapsed) {
-        const currentSaved = saveSelectionData(startPageEl, endPageEl, currentRange);
-        if (currentSaved) {
-          savedSelectionRef.current = currentSaved;
+      if (!startPageEl || !endPageEl) {
+        return;
+      }
+
+      if (startPageEl.closest("[data-hf-container]") && !startPageEl.hasAttribute("data-hf-type")) {
+        return;
+      }
+
+      const saved = saveSelectionData(startPageEl, endPageEl, range);
+      if (saved) {
+        savedSelectionRef.current = saved;
+      }
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+    };
+  }, []);
+
+  const restoreEditorSelection = useCallback((): boolean => {
+    const sel = window.getSelection();
+    if (!sel) return false;
+
+    const saved = savedSelectionRef.current;
+
+    if (!saved) {
+      if (sel.rangeCount > 0) {
+        const currentRange = sel.getRangeAt(0);
+
+        const startAnc = currentRange.startContainer.nodeType === Node.ELEMENT_NODE
+          ? (currentRange.startContainer as HTMLElement)
+          : currentRange.startContainer.parentElement;
+        const endAnc = currentRange.endContainer.nodeType === Node.ELEMENT_NODE
+          ? (currentRange.endContainer as HTMLElement)
+          : currentRange.endContainer.parentElement;
+
+        const hfEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+        if (hfEl && !currentRange.collapsed) {
+          const currentSaved = saveSelectionData(hfEl, hfEl, currentRange);
+          if (currentSaved) {
+            savedSelectionRef.current = currentSaved;
+          }
+          return true;
         }
+
+        const startPageEl = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])');
+        const endPageEl = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+
+        if (startPageEl && endPageEl && !currentRange.collapsed) {
+          const currentSaved = saveSelectionData(startPageEl, endPageEl, currentRange);
+          if (currentSaved) {
+            savedSelectionRef.current = currentSaved;
+          }
+          return true;
+        }
+      }
+
+      if (editorRef.current) {
+        editorRef.current.focus({ preventScroll: true });
         return true;
       }
+
+      return false;
     }
 
-    if (editorRef.current) {
-      editorRef.current.focus({ preventScroll: true });
-      return true;
+    // 1. Header or Footer selection restoration
+    if (saved.hfType) {
+      const hfEl = document.querySelector<HTMLElement>(
+        `[contenteditable="true"][data-hf-type="${saved.hfType}"][data-page-id="${saved.pageId || saved.startPageId}"]`
+      ) || document.querySelector<HTMLElement>(
+        `[contenteditable="true"][data-hf-type="${saved.hfType}"]`
+      );
+
+      if (!hfEl) return false;
+
+      hfEl.focus({ preventScroll: true });
+
+      try {
+        if (saved.startTextOffset !== undefined && saved.endTextOffset !== undefined) {
+          const startPoint = getTextPointAtOffset(hfEl, saved.startTextOffset);
+          const endPoint = getTextPointAtOffset(hfEl, saved.endTextOffset);
+
+          if (startPoint && endPoint) {
+            const newRange = document.createRange();
+            newRange.setStart(startPoint.node, startPoint.offset);
+            newRange.setEnd(endPoint.node, endPoint.offset);
+
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            return true;
+          }
+        }
+
+        if (hfEl.contains(saved.startContainer) && hfEl.contains(saved.endContainer)) {
+          const newRange = document.createRange();
+          newRange.setStart(saved.startContainer, saved.startOffset);
+          newRange.setEnd(saved.endContainer, saved.endOffset);
+
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+          return true;
+        }
+
+        if (saved.range) {
+          sel.removeAllRanges();
+          sel.addRange(saved.range);
+          return true;
+        }
+      } catch (err) {
+        console.warn("Failed to restore header/footer selection:", err);
+      }
+      return false;
     }
 
-    return false;
-  }
+    // 2. Body selection restoration
+    const startPage = document.querySelector<HTMLElement>(
+      `[contenteditable="true"][data-editor-page="${saved.startPageId}"], [contenteditable="true"][data-page-id="${saved.startPageId}"]:not([data-hf-type])`
+    ) || editorRef.current;
 
-  // 1. Header or Footer selection restoration
-  if (saved.hfType) {
-    const hfEl = document.querySelector<HTMLElement>(
-      `[contenteditable="true"][data-hf-type="${saved.hfType}"][data-page-id="${saved.pageId || saved.startPageId}"]`
-    ) || document.querySelector<HTMLElement>(
-      `[contenteditable="true"][data-hf-type="${saved.hfType}"]`
-    );
+    const endPage = document.querySelector<HTMLElement>(
+      `[contenteditable="true"][data-editor-page="${saved.endPageId}"], [contenteditable="true"][data-page-id="${saved.endPageId}"]:not([data-hf-type])`
+    ) || startPage;
 
-    if (!hfEl) return false;
+    if (!startPage || !endPage) {
+      return false;
+    }
 
-    hfEl.focus({ preventScroll: true });
+    startPage.focus({ preventScroll: true });
 
     try {
       if (saved.startTextOffset !== undefined && saved.endTextOffset !== undefined) {
-        const startPoint = getTextPointAtOffset(hfEl, saved.startTextOffset);
-        const endPoint = getTextPointAtOffset(hfEl, saved.endTextOffset);
+        const startPoint = getTextPointAtOffset(startPage, saved.startTextOffset);
+        const endPoint = getTextPointAtOffset(endPage, saved.endTextOffset);
 
         if (startPoint && endPoint) {
           const newRange = document.createRange();
@@ -752,7 +804,10 @@ useEffect(() => {
         }
       }
 
-      if (hfEl.contains(saved.startContainer) && hfEl.contains(saved.endContainer)) {
+      if (
+        startPage.contains(saved.startContainer) &&
+        endPage.contains(saved.endContainer)
+      ) {
         const newRange = document.createRange();
         newRange.setStart(saved.startContainer, saved.startOffset);
         newRange.setEnd(saved.endContainer, saved.endOffset);
@@ -767,67 +822,12 @@ useEffect(() => {
         sel.addRange(saved.range);
         return true;
       }
-    } catch (err) {
-      console.warn("Failed to restore header/footer selection:", err);
+    } catch (error) {
+      console.warn("Failed to restore editor selection:", error);
     }
+
     return false;
-  }
-
-  // 2. Body selection restoration
-  const startPage = document.querySelector<HTMLElement>(
-    `[contenteditable="true"][data-editor-page="${saved.startPageId}"], [contenteditable="true"][data-page-id="${saved.startPageId}"]:not([data-hf-type])`
-  ) || editorRef.current;
-
-  const endPage = document.querySelector<HTMLElement>(
-    `[contenteditable="true"][data-editor-page="${saved.endPageId}"], [contenteditable="true"][data-page-id="${saved.endPageId}"]:not([data-hf-type])`
-  ) || startPage;
-
-  if (!startPage || !endPage) {
-    return false;
-  }
-
-  startPage.focus({ preventScroll: true });
-
-  try {
-    if (saved.startTextOffset !== undefined && saved.endTextOffset !== undefined) {
-      const startPoint = getTextPointAtOffset(startPage, saved.startTextOffset);
-      const endPoint = getTextPointAtOffset(endPage, saved.endTextOffset);
-
-      if (startPoint && endPoint) {
-        const newRange = document.createRange();
-        newRange.setStart(startPoint.node, startPoint.offset);
-        newRange.setEnd(endPoint.node, endPoint.offset);
-
-        sel.removeAllRanges();
-        sel.addRange(newRange);
-        return true;
-      }
-    }
-
-    if (
-      startPage.contains(saved.startContainer) &&
-      endPage.contains(saved.endContainer)
-    ) {
-      const newRange = document.createRange();
-      newRange.setStart(saved.startContainer, saved.startOffset);
-      newRange.setEnd(saved.endContainer, saved.endOffset);
-
-      sel.removeAllRanges();
-      sel.addRange(newRange);
-      return true;
-    }
-
-    if (saved.range) {
-      sel.removeAllRanges();
-      sel.addRange(saved.range);
-      return true;
-    }
-  } catch (error) {
-    console.warn("Failed to restore editor selection:", error);
-  }
-
-  return false;
-}, [editorRef]);
+  }, [editorRef]);
 
   const getEditorSelection = useCallback((): Range | null => {
     const sel = window.getSelection();
@@ -889,8 +889,8 @@ useEffect(() => {
         caretOffset !== undefined
           ? caretOffset
           : editorRef.current
-          ? getCaretCharacterOffsetWithin(editorRef.current)
-          : 0;
+            ? getCaretCharacterOffsetWithin(editorRef.current)
+            : 0;
 
       // Avoid recording if identical to current snapshot
       if (idx >= 0 && stack[idx] && stack[idx].pageId === pageId && stack[idx].html === html) {
@@ -1272,26 +1272,16 @@ useEffect(() => {
     if (!pageEl) return;
 
     const lowerName = token.name.toLowerCase();
-    let blockTag = "<p>";
-    if (lowerName === "heading 1") {
-      blockTag = "<h1>";
-    } else if (lowerName === "heading 2") {
-      blockTag = "<h2>";
-    } else if (lowerName === "heading 3") {
-      blockTag = "<h3>";
-    } else if (lowerName === "heading 4") {
-      blockTag = "<h4>";
-    } else if (lowerName === "heading 5") {
-      blockTag = "<h5>";
-    } else if (lowerName === "heading 6") {
-      blockTag = "<h6>";
-    } else if (lowerName.includes("quote")) {
-      blockTag = "<blockquote>";
-    } else if (lowerName === "title" || lowerName === "heading") {
-      blockTag = "<h1>";
-    } else {
-      blockTag = "<p>";
-    }
+    const blockTag =
+      lowerName === "heading 1" ? "<h1>" :
+        lowerName === "heading 2" ? "<h2>" :
+          lowerName === "heading 3" ? "<h3>" :
+            lowerName === "heading 4" ? "<h4>" :
+              lowerName === "heading 5" ? "<h5>" :
+                lowerName === "heading 6" ? "<h6>" :
+                  lowerName.includes("quote") ? "<blockquote>" :
+                    lowerName === "title" || lowerName === "heading" ? "<h1>" :
+                      "<p>";
 
     document.execCommand("formatBlock", false, blockTag);
 
@@ -1528,12 +1518,12 @@ useEffect(() => {
     } else if (
       !/^<(?:\/?[a-z]+)[^>]*>/i.test(trailingHtml.trim()) ||
       (!trailingHtml.trim().startsWith("<p") &&
-       !trailingHtml.trim().startsWith("<div") &&
-       !trailingHtml.trim().startsWith("<h") &&
-       !trailingHtml.trim().startsWith("<table") &&
-       !trailingHtml.trim().startsWith("<ul") &&
-       !trailingHtml.trim().startsWith("<ol") &&
-       !trailingHtml.trim().startsWith("<blockquote"))
+        !trailingHtml.trim().startsWith("<div") &&
+        !trailingHtml.trim().startsWith("<h") &&
+        !trailingHtml.trim().startsWith("<table") &&
+        !trailingHtml.trim().startsWith("<ul") &&
+        !trailingHtml.trim().startsWith("<ol") &&
+        !trailingHtml.trim().startsWith("<blockquote"))
     ) {
       trailingHtml = `<p>${trailingHtml}</p>`;
     }
@@ -2519,7 +2509,7 @@ useEffect(() => {
             selectedText = pageElements.map((el) => el.innerText || el.textContent || "").join("\n");
           }
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(selectedText).catch(() => {});
+            navigator.clipboard.writeText(selectedText).catch(() => { });
           }
         }
 
@@ -2938,12 +2928,12 @@ useEffect(() => {
             styleType === "lower-alpha"
               ? "a"
               : styleType === "upper-alpha"
-              ? "A"
-              : styleType === "lower-roman"
-              ? "i"
-              : styleType === "upper-roman"
-              ? "I"
-              : "1";
+                ? "A"
+                : styleType === "lower-roman"
+                  ? "i"
+                  : styleType === "upper-roman"
+                    ? "I"
+                    : "1";
           currentList.setAttribute("type", htmlType);
 
           currentList.querySelectorAll(":scope > li").forEach((li) => {
@@ -3023,7 +3013,7 @@ useEffect(() => {
     pendingPermissionFile,
     setPendingPermissionFile,
 
-   exec: applyFormatCommand,
+    exec: applyFormatCommand,
 
     applyBulletStyle,
     applyNumberingStyle,

@@ -17,7 +17,42 @@ import type { SearchResultItem, SearchOptions } from '../types/navigation.types'
 import { navigationOutlineService } from './NavigationOutlineService';
 
 // Declaration for optional Office.js global Word object
-declare const Word: any;
+interface WordParagraph {
+  text: string;
+  load(property: 'text'): void;
+}
+
+interface WordSearchRange {
+  text: string;
+  paragraphs: {
+    getFirst(): WordParagraph;
+  };
+  load(property: 'text'): void;
+  select(): void;
+}
+
+interface WordSearchCollection {
+  items: WordSearchRange[];
+  load(property: 'items'): void;
+}
+
+interface WordRequestContext {
+  document: {
+    body: {
+      search(
+        query: string,
+        options: { matchCase: boolean; matchWholeWord: boolean }
+      ): WordSearchCollection;
+    };
+  };
+  sync(): Promise<void>;
+}
+
+interface WordApi {
+  run<T>(callback: (context: WordRequestContext) => Promise<T>): Promise<T>;
+}
+
+declare const Word: WordApi;
 
 export interface SnippetResult {
   snippetPre: string;
@@ -106,9 +141,10 @@ export class WordSearchService {
       // 2. Browser DOM Editor Environment (Vite standalone workspace)
       const results = await this.searchDom(trimmed, effectiveOptions, currentRequestId, container);
       return results;
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (store.requestId === currentRequestId) {
-        store.setStatus('error', err?.message || 'An error occurred while searching.');
+        const message = err instanceof Error ? err.message : 'An error occurred while searching.';
+        store.setStatus('error', message);
       }
       return [];
     }
@@ -124,7 +160,7 @@ export class WordSearchService {
   ): Promise<SearchResultItem[]> {
     const store = useNavigationStore.getState();
 
-    return await Word.run(async (context: any) => {
+    return await Word.run(async (context) => {
       const searchOptions = {
         matchCase: options.matchCase,
         matchWholeWord: options.matchWholeWord,
@@ -143,7 +179,7 @@ export class WordSearchService {
       const itemsToLoad = searchResults.items.slice(0, 500);
 
       // Batch all paragraphs and text loads in ONE pass
-      const paras: any[] = [];
+      const paras: WordParagraph[] = [];
       for (const item of itemsToLoad) {
         item.load('text');
         const para = item.paragraphs.getFirst();
@@ -297,10 +333,11 @@ export class WordSearchService {
     store.setCurrentIndex(effectiveIndex);
 
     // 1. Word API Range Selection
-    if (result.range && typeof Word !== 'undefined' && typeof Word.run === 'function') {
+    const wordRange = result.range;
+    if (wordRange && typeof Word !== 'undefined' && typeof Word.run === 'function') {
       try {
-        await Word.run(async (context: any) => {
-          result.range.select();
+        await Word.run(async (context) => {
+          wordRange.select();
           await context.sync();
         });
         return true;

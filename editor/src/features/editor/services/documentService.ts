@@ -132,7 +132,7 @@ export const documentService = {
 
 
     const cleanText = (editor.innerText ?? "")
-      .replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, "")
+      .replace(/[\u200B-\u200D\uFEFF\u00AD]/gu, "")
       .replace(/\r?\n/g, " ");
 
 
@@ -155,15 +155,15 @@ export const documentService = {
 
       ? Math.max(
 
-          1,
+        1,
 
-          Array.from(editor.querySelectorAll("p,h1,h2,h3,h4,h5,h6,li")).filter(
+        Array.from(editor.querySelectorAll("p,h1,h2,h3,h4,h5,h6,li")).filter(
 
-            (el) => (el.textContent || "").trim().length > 0
+          (el) => (el.textContent || "").trim().length > 0
 
-          ).length
+        ).length
 
-        )
+      )
 
       : 0;
 
@@ -242,11 +242,11 @@ export const documentService = {
 
         heading.id =
 
-          "heading\_" +
+          "heading_" +
 
           index +
 
-          "\_" +
+          "_" +
 
           Math.random()
 
@@ -284,16 +284,16 @@ export const documentService = {
 
   },
 
-      /* ==========================================================
-     Recalculate Heading Numbering
+  /* ==========================================================
+ Recalculate Heading Numbering
 
-     Displays hierarchical numbering without changing the actual
-     heading text:
-       1 Heading-1
-       1.1 Heading-2
-       1.1.1 Heading-3
-       1.1.1.1 Heading-4
-  ========================================================== */
+ Displays hierarchical numbering without changing the actual
+ heading text:
+   1 Heading-1
+   1.1 Heading-2
+   1.1.1 Heading-3
+   1.1.1.1 Heading-4
+========================================================== */
 
   recalculateDOMNumbering(editor?: HTMLElement | null): void {
     const target =
@@ -350,11 +350,11 @@ export const documentService = {
     }
   },
 
-/* ==========================================================
-
-     Save Document
-
-  ========================================================== */
+  /* ==========================================================
+  
+       Save Document
+  
+    ========================================================== */
 
 
   save(
@@ -769,11 +769,11 @@ ${html}
 
   },
 
-    /* ==========================================================
+  /* ==========================================================
 
-     Clear Search Marks
+   Clear Search Marks
 
-  ========================================================== */
+========================================================== */
 
 
   clearSearchMarks(editor: HTMLElement | null) {
@@ -1216,7 +1216,7 @@ ${escapeHtml(label)} Break
 
     const id =
 
-      "bookmark\_" +
+      "bookmark_" +
 
       Math.random()
 

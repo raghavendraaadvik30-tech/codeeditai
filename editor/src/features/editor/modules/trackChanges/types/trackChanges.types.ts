@@ -4,7 +4,7 @@
  * Feature: Domain Types & Interface Definitions
  * Description:
  * Strongly-typed domain models and interface contracts for track changes,
- * revision records,visual markups, diff tokens, and context state.
+ * revision records, visual markups, diff tokens, and context state.
  * --------------------------------------------------------
  */
 
@@ -27,10 +27,11 @@ export interface TrackedChange {
   originalText: string;
   newText: string;
   status: TrackChangeStatus;
-  
-  label?: string; // Human-readable change label (e.g., "Paragraph edited", "Text deleted", "Table modified")
+
+  label?: string;
   pageId?: string;
   selector?: string;
+  comments?: Comment[];
 }
 
 export interface TrackedChangeDTO {

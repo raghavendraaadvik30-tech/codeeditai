@@ -17,10 +17,6 @@ export default function DashboardOverview() {
 
   const totalUsers = users.length;
 
-  const activeUsers = users.filter(
-    (u) => u.status === "Active"
-  ).length;
-
   const adminUsers = users.filter(
     (u) => u.role === "Admin"
   ).length;
@@ -29,7 +25,6 @@ export default function DashboardOverview() {
     (u) => u.role === "Author"
   ).length;
 
-  const inactiveUsers = Math.max(0, totalUsers - activeUsers);
   const adminPct = totalUsers > 0 ? Math.round((adminUsers / totalUsers) * 100) : 0;
   const authorPct = totalUsers > 0 ? Math.round((authorUsers / totalUsers) * 100) : 0;
 

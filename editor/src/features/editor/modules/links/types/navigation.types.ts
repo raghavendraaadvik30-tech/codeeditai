@@ -16,6 +16,14 @@ export interface HeadingNode {
   hasMatch?: boolean;
 }
 
+/**
+ * Minimal Office.js range shape used by the navigation service.
+ * Keeping this structural avoids depending on global Office.js type declarations.
+ */
+export interface OfficeSearchRange {
+  select(): void;
+}
+
 export interface SearchMatchItem {
   id: string;
   matchText: string;
@@ -25,7 +33,7 @@ export interface SearchMatchItem {
   pageNumber: number;
   pageLabel?: string;
   element?: HTMLElement;
-  range?: any; // Word.Range in Office.js context
+  range?: OfficeSearchRange;
   index: number;
 }
 
@@ -48,4 +56,3 @@ export interface SearchOptions {
   matchCase: boolean;
   matchWholeWord: boolean;
 }
-

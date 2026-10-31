@@ -318,7 +318,7 @@ export default function HomeTab() {
           onClick={() => undo()}
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
-          className={`flex h - 7 w - 7 items - center justify - center rounded - l - md transition - colors hover: bg - primary / 70 dark: hover: bg - muted ${!canUndo
+          className={`flex h-7 w-7 items-center justify-center rounded-l-md transition-colors hover:bg-primary/70 dark:hover:bg-muted ${!canUndo
               ? "cursor-not-allowed opacity-35"
               : "cursor-pointer text-secondary-foreground dark:text-muted-foreground"
             } `}
@@ -340,7 +340,7 @@ export default function HomeTab() {
           }}
           disabled={!canUndo}
           title="Undo History"
-          className={`flex h - 7 w - 4 items - center justify - center rounded - r - md border - l border - secondary transition - colors hover: bg - primary / 70 dark: border - secondary - foreground dark: hover: bg - muted ${!canUndo
+          className={`flex h-7 w-4 items-center justify-center rounded-r-md border-l border-secondary transition-colors hover:bg-primary/70 dark:border-secondary-foreground dark:hover:bg-muted ${!canUndo
               ? "cursor-not-allowed opacity-35"
               : "cursor-pointer text-secondary-foreground dark:text-muted-foreground"
             } `}
@@ -372,7 +372,7 @@ export default function HomeTab() {
                         setIsUndoDropdownOpen(false);
                         setUndoHoverIndex(null);
                       }}
-                      className={`cursor - pointer px - 3 py - 1 text - xs transition - colors ${isHighlighted
+                      className={`cursor-pointer px-3 py-1 text-xs transition-colors ${isHighlighted
                           ? "bg-brand font-medium text-primary-foreground"
                           : "text-foreground dark:text-muted"
                         } `}
@@ -432,7 +432,7 @@ export default function HomeTab() {
           onClick={() => redo()}
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
-          className={`flex h - 7 w - 7 items - center justify - center rounded - l - md transition - colors hover: bg - primary / 70 dark: hover: bg - muted ${!canRedo
+          className={`flex h-7 w-7 items-center justify-center rounded-l-md transition-colors hover:bg-primary/70 dark:hover:bg-muted ${!canRedo
               ? "cursor-not-allowed opacity-35"
               : "cursor-pointer text-secondary-foreground dark:text-muted-foreground"
             } `}
@@ -454,7 +454,7 @@ export default function HomeTab() {
           }}
           disabled={!canRedo}
           title="Redo History"
-          className={`flex h - 7 w - 4 items - center justify - center rounded - r - md border - l border - secondary transition - colors hover: bg - primary / 70 dark: border - secondary - foreground dark: hover: bg - muted ${!canRedo
+          className={`flex h-7 w-4 items-center justify-center rounded-r-md border-l border-secondary transition-colors hover:bg-primary/70 dark:border-secondary-foreground dark:hover:bg-muted ${!canRedo
               ? "cursor-not-allowed opacity-35"
               : "cursor-pointer text-secondary-foreground dark:text-muted-foreground"
             } `}
@@ -486,7 +486,7 @@ export default function HomeTab() {
                         setIsRedoDropdownOpen(false);
                         setRedoHoverIndex(null);
                       }}
-                      className={`cursor - pointer px - 3 py - 1 text - xs transition - colors ${isHighlighted
+                      className={`cursor-pointer px-3 py-1 text-xs transition-colors ${isHighlighted
                           ? "bg-brand font-medium text-primary-foreground"
                           : "text-foreground dark:text-muted"
                         } `}

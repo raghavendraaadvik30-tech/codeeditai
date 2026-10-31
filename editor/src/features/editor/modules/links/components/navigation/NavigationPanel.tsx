@@ -206,16 +206,16 @@ export function NavigationPanel({ initialSubTab = 'headings' }: NavigationPanelP
     icon: typeof FileText;
     count?: string | number;
   }[] = [
-    { id: 'headings', label: 'Headings', icon: FileText },
-    { id: 'pages', label: 'Pages', icon: File, count: pages.length },
-    {
-      id: 'results',
-      label: 'Results',
-      icon: Search,
-      count: totalCount > 0 ? formattedResultCount : undefined,
-    },
-    { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
-  ];
+      { id: 'headings', label: 'Headings', icon: FileText },
+      { id: 'pages', label: 'Pages', icon: File, count: pages.length },
+      {
+        id: 'results',
+        label: 'Results',
+        icon: Search,
+        count: totalCount > 0 ? formattedResultCount : undefined,
+      },
+      { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
+    ];
 
   return (
     <div className="flex flex-col w-full h-full select-none space-y-3">
@@ -243,7 +243,7 @@ export function NavigationPanel({ initialSubTab = 'headings' }: NavigationPanelP
               <Icon className="h-3.5 w-3.5 shrink-0 stroke-[2]" />
               <span className="truncate">{tab.label}</span>
               {tab.id === 'results' && totalCount > 0 && (
-                <span className="text-[9px] px-1 py-0.2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200 font-bold">
+                <span className="text-[9px] px-1 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200 font-bold">
                   {formattedResultCount}
                 </span>
               )}

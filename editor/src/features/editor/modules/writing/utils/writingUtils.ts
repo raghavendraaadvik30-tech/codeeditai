@@ -57,7 +57,7 @@ export function transformCurrentSelection(
     const textLen = textNode.data.length;
     if (textLen === 0) continue;
 
-    let intersects = false;
+    let intersects: boolean;
     try {
       intersects = range.intersectsNode(textNode);
     } catch {

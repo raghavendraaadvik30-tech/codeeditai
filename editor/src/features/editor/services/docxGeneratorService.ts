@@ -174,7 +174,7 @@ function parseBorder(borderStr: string | null | undefined): BorderStyle | null {
   let widthPx = 1;
   let style = "single";
   let color = "000000";
-  
+
   parts.forEach((p) => {
     if (p.endsWith("px") || p.endsWith("pt") || /^\d+$/.test(p)) {
       widthPx = parsePxVal(p) ?? 1;
@@ -185,13 +185,13 @@ function parseBorder(borderStr: string | null | undefined): BorderStyle | null {
       if (hex) color = hex;
     }
   });
-  
+
   if (color === "auto" || ["CCCCCC", "D3D3D3", "E0E0E0", "F0F0F0", "EFEFEF", "AEAEAE"].includes(color.toUpperCase())) {
     color = "000000";
   }
-  
+
   const sz = Math.max(2, Math.min(96, Math.round(widthPx * 6)));
-  
+
   return {
     val: style,
     sz: String(sz),
@@ -227,10 +227,10 @@ interface ParseState {
   color?: string;
   bg?: string;
   isHyperlink?: boolean;
-  
+
   listType?: "ul" | "ol" | null;
   listIndex?: number;
-  
+
   partRels: RelationshipItem[];
   forceInline?: boolean;
 }
@@ -259,8 +259,8 @@ interface ExportContext {
 function sanitizeBookmarkName(name: string | null | undefined): string {
   if (!name) return "bm_ref";
   let clean = name.replace(/^#+/, "").trim();
-  clean = clean.replace(/^[🔖\s]+/, "");
-  clean = clean.replace(/[^a-zA-Z0-9_]/g, "_");
+  clean = clean.replace(/^[🔖\s]+/u, "");
+  clean = clean.replace(/[^a-zA-Z0-9_]/gu, "_");
   if (!clean) return "bm_ref";
   if (!/^[a-zA-Z_]/.test(clean)) {
     clean = `bm_${clean}`;
@@ -307,9 +307,9 @@ function handleImage(src: string, partRels: RelationshipItem[], ctx: ExportConte
       const base64Data = match[2];
       const ext = contentType.split("/")[1]?.split("+")[0] || "png";
       const filename = `media/image_${ctx.imgCounter.value++}.${ext}`;
-      
+
       ctx.mediaFiles.push({ filename: `word/${filename}`, data: base64Data, base64: true });
-      
+
       const rId = ctx.getNextRelId();
       partRels.push({
         id: rId,
@@ -333,14 +333,14 @@ function handleImage(src: string, partRels: RelationshipItem[], ctx: ExportConte
 
 function parseHtmlToOOXML(html: string, options: { cw: number; partRels: RelationshipItem[] }, ctx: ExportContext): string {
   if (!html) return "<w:p/>";
-  
+
   const parser = new DOMParser();
   const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
   const root = doc.body.firstElementChild || doc.body;
-  
+
   let ooxml = "";
   let currentInlineNodes: Node[] = [];
-  
+
   function flushInlineNodes() {
     if (currentInlineNodes.length === 0) return;
     ooxml += "<w:p>";
@@ -350,16 +350,16 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
     ooxml += "</w:p>";
     currentInlineNodes = [];
   }
-  
+
   function walk(node: Node, state: ParseState): string {
     let xml = "";
-    
+
     if (node.nodeType === Node.TEXT_NODE) {
       const text = node.nodeValue || "";
       if (text.trim() === "" && !text.includes(" ")) {
         return "";
       }
-      
+
       const buildRPr = (fontOverride?: string) => {
         let r = "";
         if (state.isHyperlink) {
@@ -412,13 +412,13 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
       xml += "</w:r>";
       return xml;
     }
-    
+
     if (node.nodeType === Node.ELEMENT_NODE) {
       const el = node as HTMLElement;
       const tag = el.tagName.toLowerCase();
       const styleAttr = el.getAttribute("style");
       const styles = parseStyleAttr(styleAttr);
-      
+
       const newState: ParseState = {
         ...state,
         bold: el.tagName === "STRONG" || el.tagName === "B" || styles["font-weight"] === "bold" || state.bold,
@@ -436,12 +436,12 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         const ts = el.getAttribute("data-ts");
         const dateStr = ts ? new Date(Number(ts)).toISOString() : new Date().toISOString();
         const id = Math.round(Math.random() * 100000);
-        
+
         let innerXml = "";
         Array.from(el.childNodes).forEach((child) => {
           innerXml += walk(child, newState);
         });
-        
+
         const bms = getElementBookmarks(el, ctx);
         let bmStarts = "";
         let bmEnds = "";
@@ -449,7 +449,7 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           bmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
           bmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bmEnds;
         });
-        
+
         if (tag === "ins") {
           return `${bmStarts}<w:ins w:id="${id}" w:author="${esc(user)}" w:date="${dateStr}">${innerXml}</w:ins>${bmEnds}`;
         } else {
@@ -482,8 +482,8 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         if (lh) {
           const lhVal = parseFloat(lh);
           if (!isNaN(lhVal)) {
-            const lineTwips = lh.endsWith("px") || lh.endsWith("pt") 
-              ? Math.round((parsePxVal(lh) ?? 16) * 15) 
+            const lineTwips = lh.endsWith("px") || lh.endsWith("pt")
+              ? Math.round((parsePxVal(lh) ?? 16) * 15)
               : Math.round(lhVal * 240);
             spAttrs += ` w:line="${lineTwips}" w:lineRule="auto"`;
           }
@@ -501,7 +501,7 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           const wAlign = align === "justify" ? "both" : align;
           pPr += `<w:jc w:val="${esc(wAlign)}"/>`;
         }
-        
+
         const bms = getElementBookmarks(el, ctx);
         let bmStarts = "";
         let bmEnds = "";
@@ -513,11 +513,11 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         xml += "<w:p>";
         if (pPr) xml += `<w:pPr>${pPr}</w:pPr>`;
         xml += bmStarts;
-        
+
         Array.from(el.childNodes).forEach((child) => {
           xml += walk(child, newState);
         });
-        
+
         xml += bmEnds;
         xml += "</w:p>";
         return xml;
@@ -544,8 +544,8 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           if (lh) {
             const lhVal = parseFloat(lh);
             if (!isNaN(lhVal)) {
-              const lineTwips = lh.endsWith("px") || lh.endsWith("pt") 
-                ? Math.round((parsePxVal(lh) ?? 16) * 15) 
+              const lineTwips = lh.endsWith("px") || lh.endsWith("pt")
+                ? Math.round((parsePxVal(lh) ?? 16) * 15)
                 : Math.round(lhVal * 240);
               spAttrs += ` w:line="${lineTwips}" w:lineRule="auto"`;
             }
@@ -606,7 +606,7 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
       if (tag === "hr") {
         return '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="CCCCCC"/></w:pBdr></w:pPr></w:p>';
       }
-      
+
       if (tag === "ul" || tag === "ol") {
         if (state.forceInline) {
           let innerXml = "";
@@ -626,14 +626,14 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         });
         return xml;
       }
-      
+
       if (tag === "li") {
         if (state.listType === "ol") {
           state.listIndex = (state.listIndex ?? 0) + 1;
         }
-        
+
         const prefix = state.listType === "ol" ? `${state.listIndex}. ` : "• ";
-        
+
         if (state.forceInline) {
           let innerXml = "";
           innerXml += `<w:r><w:t xml:space="preserve">${prefix}</w:t></w:r>`;
@@ -642,7 +642,7 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           });
           return innerXml + "<w:r><w:br/></w:r>";
         }
-        
+
         const pPr = '<w:ind w:left="720" w:hanging="360"/>';
         const bms = getElementBookmarks(el, ctx);
         let bmStarts = "";
@@ -651,26 +651,26 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
           bmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
           bmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + bmEnds;
         });
-        
+
         xml += "<w:p>";
         xml += `<w:pPr>${pPr}</w:pPr>`;
         xml += bmStarts;
-        
+
         xml += "<w:r>";
         if (newState.bold) xml += "<w:b/>";
         if (newState.italic) xml += "<w:i/>";
         xml += `<w:t xml:space="preserve">${prefix}</w:t>`;
         xml += "</w:r>";
-        
+
         Array.from(el.childNodes).forEach((child) => {
           xml += walk(child, newState);
         });
-        
+
         xml += bmEnds;
         xml += "</w:p>";
         return xml;
       }
-      
+
       if (tag === "table") {
         if (state.forceInline) {
           let innerXml = "";
@@ -683,14 +683,14 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         xml += parseTableToOpenXML(el as HTMLTableElement, newState, options.cw, ctx);
         return xml;
       }
-      
+
       if (tag === "img") {
         const src = el.getAttribute("src") || "";
         const styleW = styles["width"] || el.getAttribute("width");
         const styleH = styles["height"] || el.getAttribute("height");
         const wPx = parsePxVal(styleW) ?? 300;
         const hPx = parsePxVal(styleH) ?? 200;
-        
+
         const bms = getElementBookmarks(el, ctx);
         let bStarts = "";
         let bEnds = "";
@@ -738,12 +738,12 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
               </a:graphic>
             </wp:inline>
           </w:drawing>`;
-          
+
           xml += `${bStarts}<w:r>${drawXml}</w:r>${bEnds}`;
         }
         return xml;
       }
-      
+
       const fieldType = el.getAttribute("data-field") || el.getAttribute("data-field-type") || (el.className?.includes("editor-field") || el.className?.includes("hf-field") ? el.getAttribute("data-field") : null);
       if (fieldType) {
         if (fieldType === "page-number") {
@@ -803,14 +803,14 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
 
         const linkState: ParseState = isLink
           ? {
-              ...newState,
-              isHyperlink: true,
-              forceInline: true,
-              color: styles["color"] || state.color || "0563C1",
-              underline: styles["text-decoration"]
-                ? styles["text-decoration"].includes("underline")
-                : (state.underline ?? true),
-            }
+            ...newState,
+            isHyperlink: true,
+            forceInline: true,
+            color: styles["color"] || state.color || "0563C1",
+            underline: styles["text-decoration"]
+              ? styles["text-decoration"].includes("underline")
+              : (state.underline ?? true),
+          }
           : { ...newState, forceInline: true };
 
         let innerXml = "";
@@ -889,15 +889,15 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
 
       const bms = getElementBookmarks(el, ctx);
       let innerXml = "";
-      
+
       Array.from(el.childNodes).forEach((child) => {
         innerXml += walk(child, newState);
       });
-      
+
       if (tag === "br") {
         innerXml += "<w:r><w:br/></w:r>";
       }
-      
+
       if (bms.length > 0) {
         let bmStarts = "";
         let bmEnds = "";
@@ -907,13 +907,13 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
         });
         return `${bmStarts}${innerXml}${bmEnds}`;
       }
-      
+
       return innerXml;
     }
-    
+
     return xml;
   }
-  
+
   Array.from(root.childNodes).forEach((node) => {
     if (isBlockElement(node)) {
       flushInlineNodes();
@@ -923,18 +923,18 @@ function parseHtmlToOOXML(html: string, options: { cw: number; partRels: Relatio
     }
   });
   flushInlineNodes();
-  
+
   if (!ooxml.trim() || !ooxml.includes("<w:p")) {
     ooxml = "<w:p/>" + ooxml;
   }
-  
+
   return ooxml;
 }
 
 function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, parentWidthPx: number, ctx: ExportContext): string {
   const rows = Array.from(tableEl.rows);
   if (rows.length === 0) return "";
-  
+
   const tableBms = getElementBookmarks(tableEl, ctx);
   let tblBmStarts = "";
   let tblBmEnds = "";
@@ -942,40 +942,40 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
     tblBmStarts += `<w:bookmarkStart w:id="${b.id}" w:name="${esc(b.name)}"/>`;
     tblBmEnds = `<w:bookmarkEnd w:id="${b.id}"/>` + tblBmEnds;
   });
-  
+
   const styleAttr = tableEl.getAttribute("style");
   const styles = parseStyleAttr(styleAttr);
   const st = styleAttr || "";
   const isCenter = /margin(-left)?\s*:\s*auto/i.test(st) && /margin(-right)?\s*:\s*auto/i.test(st);
   const isRight = /margin-left\s*:\s*auto/i.test(st) && !/margin-right\s*:\s*auto/i.test(st);
   const align = isCenter ? "center" : isRight ? "right" : "left";
-  
+
   const tblExplicitW = parsePxVal(styles["width"]) ?? parsePxVal(tableEl.getAttribute("width"));
   const targetWidthPx = Math.min(tblExplicitW && tblExplicitW > 10 ? tblExplicitW : parentWidthPx, parentWidthPx);
   const tblWTwips = Math.round(targetWidthPx * 15);
-  
+
   const R = rows.length;
   let maxCols = 0;
-  
+
   const grid: GridCell[][] = Array.from({ length: R }, () => []);
-  
+
   for (let r = 0; r < R; r++) {
     let c = 0;
     const tr = rows[r];
     const cells = Array.from(tr.cells);
-    
+
     for (let cellIdx = 0; cellIdx < cells.length; cellIdx++) {
       const td = cells[cellIdx];
       const colSpan = td.colSpan || 1;
       const rowSpan = td.rowSpan || 1;
-      
+
       while (grid[r][c] !== undefined) {
         c++;
       }
-      
+
       const wStr = td.style.width || td.getAttribute("width") || "";
       const widthPx = parsePxVal(wStr) ?? (targetWidthPx / colSpan);
-      
+
       const cellData: GridCell = {
         element: td,
         isRowSpanStart: rowSpan > 1,
@@ -983,7 +983,7 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
         rowSpan,
         widthPx,
       };
-      
+
       for (let i = 0; i < rowSpan; i++) {
         for (let j = 0; j < colSpan; j++) {
           if (r + i < R) {
@@ -1006,7 +1006,7 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
     }
     if (c > maxCols) maxCols = c;
   }
-  
+
   const colWidthsPx: number[] = Array.from({ length: maxCols }, () => 0);
   for (let c = 0; c < maxCols; c++) {
     let foundWidth = 0;
@@ -1028,7 +1028,7 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
     }
     colWidthsPx[c] = foundWidth || (targetWidthPx / maxCols);
   }
-  
+
   const sum = colWidthsPx.reduce((a, b) => a + b, 0);
   if (sum > 0) {
     const ratio = targetWidthPx / sum;
@@ -1036,18 +1036,18 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
       colWidthsPx[i] *= ratio;
     }
   }
-  
+
   let tblGrid = "<w:tblGrid>";
   colWidthsPx.forEach((w) => {
     tblGrid += `<w:gridCol w:w="${Math.round(w * 15)}"/>`;
   });
   tblGrid += "</w:tblGrid>";
-  
+
   let tblPr = "";
   tblPr += `<w:tblW w:w="${tblWTwips}" w:type="dxa"/>`;
   tblPr += `<w:jc w:val="${align}"/>`;
   tblPr += '<w:tblLayout w:type="fixed"/>';
-  
+
   const tblBorders = `<w:tblBorders>
     <w:top w:val="single" w:sz="6" w:space="0" w:color="000000"/>
     <w:left w:val="single" w:sz="6" w:space="0" w:color="000000"/>
@@ -1057,23 +1057,23 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
     <w:insideV w:val="single" w:sz="6" w:space="0" w:color="000000"/>
   </w:tblBorders>`;
   tblPr += tblBorders;
-  
+
   const hexBg = parseColorToHex(styles["background-color"]);
   if (hexBg) {
     tblPr += `<w:shd w:val="clear" w:color="auto" w:fill="${hexBg}"/>`;
   }
-  
+
   let rowsXml = "";
   for (let r = 0; r < R; r++) {
     const tr = rows[r];
     const trStyles = parseStyleAttr(tr.getAttribute("style"));
-    
+
     const trHPx = parsePxVal(trStyles["height"]) ?? parsePxVal(tr.getAttribute("height"));
     let trPr = "";
     if (trHPx) {
       trPr += `<w:trHeight w:val="${Math.round(trHPx * 15)}" w:hRule="atLeast"/>`;
     }
-    
+
     let cellsXml = "";
     for (let c = 0; c < maxCols; c++) {
       const cell = grid[r][c];
@@ -1081,7 +1081,7 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
         cellsXml += `<w:tc><w:tcPr><w:tcW w:w="${Math.round(colWidthsPx[c] * 15)}" w:type="dxa"/></w:tcPr><w:p/></w:tc>`;
         continue;
       }
-      
+
       if (cell.isMerged) {
         if (cell.isVMergeContinue) {
           if (!cell.isHMergeContinue) {
@@ -1096,41 +1096,41 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
         }
         continue;
       }
-      
+
       const td = cell.element!;
       const tdStyles = parseStyleAttr(td.getAttribute("style"));
-      
+
       let tcPr = "";
       const cellWTwips = Math.round(cell.widthPx * cell.colSpan * 15);
       tcPr += `<w:tcW w:w="${cellWTwips}" w:type="dxa"/>`;
-      
+
       if (cell.colSpan > 1) {
         tcPr += `<w:gridSpan w:val="${cell.colSpan}"/>`;
       }
       if (cell.rowSpan > 1) {
         tcPr += '<w:vMerge w:val="restart"/>';
       }
-      
+
       const cellBg = parseColorToHex(tdStyles["background-color"]) || parseColorToHex(td.getAttribute("bgcolor"));
       if (cellBg) {
         tcPr += `<w:shd w:val="clear" w:color="auto" w:fill="${cellBg}"/>`;
       }
-      
+
       let tcBorders = "";
       const borderTop = parseBorder(tdStyles["border-top"] || tdStyles["border"]);
       const borderBottom = parseBorder(tdStyles["border-bottom"] || tdStyles["border"]);
       const borderLeft = parseBorder(tdStyles["border-left"] || tdStyles["border"]);
       const borderRight = parseBorder(tdStyles["border-right"] || tdStyles["border"]);
-      
+
       if (borderTop) tcBorders += `<w:top w:val="${borderTop.val}" w:sz="${borderTop.sz}" w:space="0" w:color="${borderTop.color}"/>`;
       if (borderBottom) tcBorders += `<w:bottom w:val="${borderBottom.val}" w:sz="${borderBottom.sz}" w:space="0" w:color="${borderBottom.color}"/>`;
       if (borderLeft) tcBorders += `<w:left w:val="${borderLeft.val}" w:sz="${borderLeft.sz}" w:space="0" w:color="${borderLeft.color}"/>`;
       if (borderRight) tcBorders += `<w:right w:val="${borderRight.val}" w:sz="${borderRight.sz}" w:space="0" w:color="${borderRight.color}"/>`;
-      
+
       if (tcBorders) {
         tcPr += `<w:tcBorders>${tcBorders}</w:tcBorders>`;
       }
-      
+
       const vAlign = tdStyles["vertical-align"] || td.getAttribute("valign");
       if (vAlign) {
         const wVAlign = vAlign === "middle" ? "center" : vAlign;
@@ -1138,7 +1138,7 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
           tcPr += `<w:vAlign w:val="${wVAlign}"/>`;
         }
       }
-      
+
       const padTop = tdStyles["padding-top"] || tdStyles["padding"];
       const padBottom = tdStyles["padding-bottom"] || tdStyles["padding"];
       const padLeft = tdStyles["padding-left"] || tdStyles["padding"];
@@ -1151,7 +1151,7 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
       if (tcMar) {
         tcPr += `<w:tcMar>${tcMar}</w:tcMar>`;
       }
-      
+
       const cellContentWidth = cell.widthPx * cell.colSpan;
       const cellHtml = td.innerHTML;
       let cellOOXML = parseHtmlToOOXML(cellHtml, { cw: cellContentWidth, partRels: state.partRels }, ctx);
@@ -1161,16 +1161,16 @@ function parseTableToOpenXML(tableEl: HTMLTableElement, state: ParseState, paren
       if (r === 0 && c === 0 && tblBmStarts) {
         cellOOXML = cellOOXML.replace("<w:p>", `<w:p>${tblBmStarts}`).replace("</w:p>", `${tblBmEnds}</w:p>`);
       }
-      
+
       cellsXml += `<w:tc><w:tcPr>${tcPr}</w:tcPr>${cellOOXML}</w:tc>`;
     }
-    
+
     rowsXml += `<w:tr>`;
     if (trPr) rowsXml += `<w:trPr>${trPr}</w:trPr>`;
     rowsXml += cellsXml;
     rowsXml += `</w:tr>`;
   }
-  
+
   return `<w:tbl><w:tblPr>${tblPr}</w:tblPr>${tblGrid}${rowsXml}</w:tbl>`;
 }
 
@@ -1178,7 +1178,7 @@ function cleanHtmlChanges(html: string, accept: boolean): string {
   if (!html || typeof document === "undefined") return html || "";
   const temp = document.createElement("div");
   temp.innerHTML = html;
-  
+
   temp.querySelectorAll("ins, del, [data-tc]").forEach((node) => {
     const el = node as HTMLElement;
     const tc = el.getAttribute("data-tc") || el.tagName.toLowerCase();
@@ -1251,7 +1251,7 @@ function cleanHtmlChanges(html: string, accept: boolean): string {
       }
     }
   });
-  
+
   return temp.innerHTML;
 }
 
@@ -1264,10 +1264,10 @@ function buildPgBordersXml(sec: SectionModel): string {
     (pb.style === "box"
       ? "box"
       : pb.style === "shadow"
-      ? "shadow"
-      : pb.style === "3d"
-      ? "3d"
-      : "custom");
+        ? "shadow"
+        : pb.style === "3d"
+          ? "3d"
+          : "custom");
 
   let display = "allPages";
   if (pb.applyTo === "firstPage") display = "firstPage";
@@ -1280,10 +1280,10 @@ function buildPgBordersXml(sec: SectionModel): string {
     (pb.style === "dashed"
       ? "dashed"
       : pb.style === "dotted"
-      ? "dotted"
-      : pb.style === "double"
-      ? "double"
-      : "solid");
+        ? "dotted"
+        : pb.style === "double"
+          ? "double"
+          : "solid");
 
   const sideBorder = {
     style: lineStyle,
@@ -1379,13 +1379,13 @@ export async function generateWordDocx(
     }
     return html;
   };
-  
+
   const ctxMediaFiles: { filename: string; data: string; base64: boolean }[] = [];
   const imageCounterRef = { value: 1 };
   const bookmarkCounterRef = { value: 0 };
   const usedBookmarkNames = new Set<string>();
   const targetMap = new Map<string, string>();
-  
+
   let relIdCounter = 10;
   const getNextRelId = () => `rId${relIdCounter++}`;
 
@@ -1429,7 +1429,7 @@ export async function generateWordDocx(
       // Ignore pre-scan errors
     }
   });
-  
+
   const ctx: ExportContext = {
     mediaFiles: ctxMediaFiles,
     getNextRelId,
@@ -1457,16 +1457,16 @@ export async function generateWordDocx(
   const sectionHFRels = model.sections.map((sec) => {
     const src = getSourceSection(model, sec);
     const cw = sectionContentWidthPx(sec);
-    
+
     const normalH = preprocessHtml(src.headerHtml || src.header || "");
     const normalF = preprocessHtml(src.footerHtml || src.footer || "");
     const firstH = sec.differentFirstPage ? preprocessHtml(src.firstHeaderHtml || src.firstHeader || "") : "";
     const firstF = sec.differentFirstPage ? preprocessHtml(src.firstFooterHtml || src.firstFooter || "") : "";
     const evenH = sec.differentOddEven ? preprocessHtml(src.evenHeaderHtml || src.evenHeader || "") : "";
     const evenF = sec.differentOddEven ? preprocessHtml(src.evenFooterHtml || src.evenFooter || "") : "";
-    
+
     const result: Record<string, string> = {};
-    
+
     const writeHFPart = (html: string, name: string, type: string) => {
       if (html.trim()) {
         const rId = getNextRelId();
@@ -1476,10 +1476,10 @@ export async function generateWordDocx(
           type: `http://schemas.openxmlformats.org/officeDocument/2006/relationships/${type}`,
           target: filename,
         });
-        
+
         const partRels: RelationshipItem[] = [];
         const contentXml = parseHtmlToOOXML(html, { cw, partRels }, ctx);
-        
+
         const wrapperTag = type === "header" ? "w:hdr" : "w:ftr";
         const partXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <${wrapperTag} xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -1489,9 +1489,9 @@ export async function generateWordDocx(
                xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
   ${contentXml}
 </${wrapperTag}>`;
-        
+
         zip.file(`word/${filename}`, partXml);
-        
+
         if (partRels.length > 0) {
           let relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
@@ -1502,34 +1502,34 @@ export async function generateWordDocx(
           relsXml += "\n</Relationships>";
           zip.file(`word/_rels/${filename}.rels`, relsXml);
         }
-        
+
         return rId;
       }
       return "";
     };
-    
+
     const nHId = writeHFPart(normalH, "header", "header");
     if (nHId) result.normalHeader = nHId;
-    
+
     const nFId = writeHFPart(normalF, "footer", "footer");
     if (nFId) result.normalFooter = nFId;
-    
+
     if (sec.differentFirstPage) {
       const fHId = writeHFPart(firstH, "first_header", "header");
       if (fHId) result.firstHeader = fHId;
-      
+
       const fFId = writeHFPart(firstF, "first_footer", "footer");
       if (fFId) result.firstFooter = fFId;
     }
-    
+
     if (sec.differentOddEven) {
       const eHId = writeHFPart(evenH, "even_header", "header");
       if (eHId) result.evenHeader = eHId;
-      
+
       const eFId = writeHFPart(evenF, "even_footer", "footer");
       if (eFId) result.evenFooter = eFId;
     }
-    
+
     return { sectionId: sec.id, rels: result };
   });
 
@@ -1545,19 +1545,19 @@ export async function generateWordDocx(
     const hDist = sec.headerTopDistance ?? 48;
     const fDist = sec.footerBottomDistance ?? 48;
     const cw = sectionContentWidthPx(sec);
-    
+
     const pages = sectionPagesMap[sec.id] ?? [];
     if (!pages.length) return;
-    
+
     let sectionBodyXml = "";
     pages.forEach((page, pi) => {
       const ph = preprocessHtml(model.pageHtml[page.id] ?? "");
       const pageXml = parseHtmlToOOXML(ph, { cw, partRels: docRels }, ctx);
-      
+
       const pageBreak = pi === 0 ? "" : '<w:p><w:pPr></w:pPr><w:r><w:br w:type="page"/></w:r></w:p>\n';
       sectionBodyXml += `${pageBreak}${pageXml}\n`;
     });
-    
+
     const cfg = sec.pageNumberConfig;
     const rawFmt = cfg?.format ?? (sec.pageNumberFormat ? (sec.pageNumberFormat === "1" ? "arabic" : sec.pageNumberFormat === "i" ? "roman-lower" : sec.pageNumberFormat === "I" ? "roman-upper" : sec.pageNumberFormat === "a" ? "alpha-lower" : "alpha-upper") : "arabic");
     const fmt = rawFmt ?? "arabic";
@@ -1600,7 +1600,7 @@ export async function generateWordDocx(
       ${pgNumTypeXml}
       ${titlePgXml}
     </w:sectPr>`;
-    
+
     const isLastSection = idx === model.sections.length - 1;
     if (isLastSection) {
       bodyXml += `${sectionBodyXml}\n${sectPrXml}`;
@@ -1787,7 +1787,7 @@ export async function generateWordDocx(
   });
   contentTypesXml += `\n</Types>`;
   zip.file("[Content_Types].xml", contentTypesXml);
-  
+
   return zip.generateAsync({
     type: "blob",
     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

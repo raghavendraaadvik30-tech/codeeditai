@@ -107,7 +107,7 @@ export function isDirectImageUrl(str: string): boolean {
 export function extractImageUrlFromText(text: string): string | null {
   if (!text) return null;
   const match = text.match(
-    /(https?:\/\/[^\s"'<>\[\]]+|data:image\/[a-zA-Z0-9+.-]+;base64,[^\s"'<>\[\]]+|blob:[^\s"'<>\[\]]+)/i
+    /(https?:\/\/[^\s"'<>[\]]+|data:image\/[a-zA-Z0-9+.-]+;base64,[^\s"'<>[\]]+|blob:[^\s"'<>[\]]+)/i
   );
   if (!match) return null;
   let url = match[0];
@@ -155,7 +155,7 @@ export function buildList(items: string[], type: string): string {
 }
 
 export const MARK_ATTR = "data-ai-target";
-export let markedCursor = { rowIndex: -1, colIndex: -1 };
+export const markedCursor = { rowIndex: -1, colIndex: -1 };
 
 export function clearAllMarks(): void {
   document.querySelectorAll<HTMLElement>(`[${MARK_ATTR}]`).forEach((el) => {
@@ -237,8 +237,8 @@ export async function executeToolCall(
     case "addTableData": {
       const data = Array.isArray(args.data)
         ? (args.data as unknown[]).map((row) =>
-            Array.isArray(row) ? (row as unknown[]).map(String) : [String(row)]
-          )
+          Array.isArray(row) ? (row as unknown[]).map(String) : [String(row)]
+        )
         : [];
       ctx.addTableData(data);
       break;
@@ -308,11 +308,11 @@ export async function executeToolCall(
       const html = `
         <figure style="margin:12px 0;border:1px solid #d6dbe5;border-radius:6px;overflow:hidden;background:linear-gradient(135deg,#eef2f9,#f7f9fc)">
           <div style="aspect-ratio:16/9;display:grid;place-items:center;color:#6b7a99;font-size:11pt">[ ${escapeHtml(
-            figureName
-          )} ]</div>
+        figureName
+      )} ]</div>
           <figcaption style="padding:6px 10px;font-size:10pt;font-style:italic;color:#555;border-top:1px solid #e6eaf2">Figure — ${escapeHtml(
-            figureName
-          )}</figcaption>
+        figureName
+      )}</figcaption>
         </figure><p>&nbsp;</p>
       `;
       return { preview: { html, label: `Figure: ${figureName}` } };
@@ -389,7 +389,7 @@ export async function executeToolCall(
       const docText =
         lastDocSelection ||
         (typeof args.text === "string" &&
-        !/^(this|rewrite this|it|selected text|the selected text)$/i.test(args.text.trim())
+          !/^(this|rewrite this|it|selected text|the selected text)$/i.test(args.text.trim())
           ? args.text.trim()
           : "");
       if (!docText) throw new Error("⚠️ Please select some text in the document first.");
@@ -408,7 +408,7 @@ export async function executeToolCall(
       const docText =
         lastDocSelection ||
         (typeof args.text === "string" &&
-        !/^(this|improve this|it|selected text|the selected text)$/i.test(args.text.trim())
+          !/^(this|improve this|it|selected text|the selected text)$/i.test(args.text.trim())
           ? args.text.trim()
           : "");
       if (!docText) throw new Error("⚠️ Please select some text in the document first.");
@@ -426,8 +426,8 @@ export async function executeToolCall(
     case "generateHeading": {
       const topic = String(
         (lastDocSelection && lastDocSelection.length < 300 ? lastDocSelection : null) ||
-          args.topic ||
-          "Clinical Evaluation"
+        args.topic ||
+        "Clinical Evaluation"
       );
       const r = await sendMessage(
         `Generate a relevant, professional heading based on the selected text:\n\n"${topic}"\n\nReturn ONLY the heading text.`
@@ -452,7 +452,7 @@ export async function executeToolCall(
       const docText =
         lastDocSelection ||
         (typeof args.text === "string" &&
-        !/^(this|summarize this|it|selected text)$/i.test(args.text.trim())
+          !/^(this|summarize this|it|selected text)$/i.test(args.text.trim())
           ? args.text.trim()
           : "");
       if (!docText) throw new Error("⚠️ Please select some text in the document first.");
@@ -466,7 +466,7 @@ export async function executeToolCall(
       const docText =
         lastDocSelection ||
         (typeof args.text === "string" &&
-        !/^(this|fix this|it|selected text)$/i.test(args.text.trim())
+          !/^(this|fix this|it|selected text)$/i.test(args.text.trim())
           ? args.text.trim()
           : "");
       if (!docText) throw new Error("⚠️ Please select some text in the document first.");
@@ -485,7 +485,7 @@ export async function executeToolCall(
       const docText =
         lastDocSelection ||
         (typeof args.text === "string" &&
-        !/^(this|adjust this|it|selected text)$/i.test(args.text.trim())
+          !/^(this|adjust this|it|selected text)$/i.test(args.text.trim())
           ? args.text.trim()
           : "");
       if (!docText) throw new Error("⚠️ Please select some text in the document first.");

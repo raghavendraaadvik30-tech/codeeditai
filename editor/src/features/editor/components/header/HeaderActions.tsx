@@ -38,7 +38,6 @@ import {
   CheckCircle2,
   Upload,
   ShieldAlert,
-  AlertTriangle,
   AlertCircle,
 } from "lucide-react";
 
@@ -743,10 +742,18 @@ export default function HeaderActions() {
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setUploadError(null)}
-                className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-white hover:bg-brand-deep transition-colors shadow-sm"
+                onClick={handleCancelUpload}
+                className="rounded-xl border px-4 py-2 text-xs font-semibold"
               >
-                <span>OK</span>
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmUpload}
+                className="rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-white"
+              >
+                Continue
               </button>
             </div>
           </div>

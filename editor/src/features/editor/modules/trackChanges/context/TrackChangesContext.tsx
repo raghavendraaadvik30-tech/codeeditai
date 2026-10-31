@@ -21,6 +21,7 @@ import type { ReactNode } from "react";
 import { useDocumentModel } from "@/features/editor/store/documentModel";
 import { useEditor } from "@/features/editor/context/EditorContext";
 import type {
+  Comment,
   TrackedChange,
   TrackChangesContextType,
 } from "../types";
@@ -252,6 +253,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
             newText,
             item.contextTag
           );
+          const existingChange = prev.find((change) => change.id === item.id);
 
           return {
             id: item.id,
@@ -263,6 +265,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
             status: "pending" as const,
             label,
             pageId: item.pageId,
+            comments: existingChange?.comments ?? [],
           };
         });
 
@@ -336,7 +339,31 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
     setTrackedChanges((prev) => [...prev.filter((c) => c.id !== change.id), change]);
   }, []);
 
+  const addCommentToChange = useCallback(
+    (changeId: string, text: string) => {
+      const trimmedText = text.trim();
+      if (!trimmedText) return;
 
+      const comment: Comment = {
+        id: generateChangeId(),
+        author: userRef.current,
+        text: trimmedText,
+        timestamp: Date.now(),
+      };
+
+      setTrackedChanges((prev) =>
+        prev.map((change) =>
+          change.id === changeId
+            ? {
+                ...change,
+                comments: [...(change.comments ?? []), comment],
+              }
+            : change
+        )
+      );
+    },
+    []
+  );
 
   /**
    * Accepts a specific tracked change by ID:
@@ -1000,6 +1027,7 @@ export function TrackChangesProvider({ children }: { children: ReactNode }) {
 
 
         addTrackedChange,
+        addCommentToChange,
         acceptChange,
         rejectChange,
         acceptAll,
