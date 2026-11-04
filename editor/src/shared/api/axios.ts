@@ -50,22 +50,23 @@ export const axiosInstance = axios.create({
  // becomes: http://localhost:8000/api/users
 
 
-  baseURL: env.apiUrl,
+  baseURL: env.apiUrl || "http://localhost:8088",
 
-
-  // timeout
-  // Maximum time Axios waits for a response before treating the request as timed out.
-  // 10000 milliseconds = 10 seconds. If the backend does not respond within 10 seconds, Axios will throw a timeout error.
-  
-
-  timeout: 10000,
-
-
-  // default headers
-  // Headers provide information about the request.
-  // Content-Type: application/json means: "The request body is being sent as JSON." This is commonly used for REST APIs.
+  timeout: 15000,
 
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// REQUEST INTERCEPTOR: Inject Bearer token from localStorage
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);

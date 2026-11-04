@@ -5,7 +5,7 @@ export const env = {
   // Set VITE_API_URL in .env when backend is connected.
   apiUrl:
     import.meta.env?.VITE_API_URL ||
-    "https://api.example.com",
+    "http://localhost:8088",
 
   // Google Fonts API key.
   googleFontsApiKey:

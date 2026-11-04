@@ -9,9 +9,9 @@
  */
 import React from "react";
 import { Navigate } from "react-router-dom";
-import  {useAuth} from "@/features/auth/index";
-
-
+import { useAuth } from "@/features/auth/index";
+import { Role, isSuperAdmin, normalizeRole } from "../config/roles";
+import { ROUTE_PATHS } from "../router/routePaths";
 
 interface GuestGuardProps {
   children: React.ReactNode;
@@ -21,10 +21,14 @@ export const GuestGuard: React.FC<GuestGuardProps> = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
 
   if (isAuthenticated) {
-    if (user?.role === "admin") { 
-      return <Navigate to="/admin/dashboard" replace />;
+    const role = normalizeRole(user?.role);
+    if (role === Role.SuperAdmin || isSuperAdmin(user?.role)) {
+      return <Navigate to={ROUTE_PATHS.SUPER_ADMIN_DASHBOARD} replace />;
     }
-    return <Navigate to="/editor" replace />;
+    if (role === Role.Admin) {
+      return <Navigate to={ROUTE_PATHS.DASHBOARD} replace />;
+    }
+    return <Navigate to={ROUTE_PATHS.EDITOR} replace />;
   }
 
   return <>{children}</>;

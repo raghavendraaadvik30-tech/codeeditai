@@ -22,7 +22,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/index";
-import { Role } from "../config/roles";
+import { Role, normalizeRole } from "../config/roles";
 import { ROUTE_PATHS } from "../router/routePaths";
 
 interface RoleGuardProps {
@@ -44,7 +44,10 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
     return null;
   }
 
-  if (!allowedRoles.includes(user.role as Role)) {
+  const userRole = normalizeRole(user.role);
+  const isAllowed = allowedRoles.some((r) => normalizeRole(r) === userRole);
+
+  if (!isAllowed) {
     return <Navigate to={ROUTE_PATHS.EDITOR} replace />;
   }
 

@@ -13,7 +13,7 @@ import docupilotLogo from "../../../assets/images/docupilot-logo.png";
 
 import { useAuth } from "../hooks/useAuth";
 import { ROUTE_PATHS } from "@/app/router/routePaths";
-import { Role } from "@/app/config/roles";
+import { Role, normalizeRole } from "@/app/config/roles";
 
 export default function LoginUI() {
   const navigate = useNavigate();
@@ -58,13 +58,18 @@ export default function LoginUI() {
       localStorage.removeItem("rememberMe");
     }
 
-    const success = await login({ workspace:"superadmin",email, password });
+    const success = await login({ email: email.trim(), password });
     if (!success) return;
 
     const user = JSON.parse(localStorage.getItem("user") || "null");
     if (!user) return;
 
-    switch (user.role) {
+    const userRole = normalizeRole(user.role);
+
+    switch (userRole) {
+      case Role.SuperAdmin:
+        navigate(ROUTE_PATHS.SUPER_ADMIN_DASHBOARD, { replace: true });
+        break;
       case Role.Admin:
         navigate(ROUTE_PATHS.DASHBOARD, { replace: true });
         break;

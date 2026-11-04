@@ -13,7 +13,7 @@ import { AuthGuard } from "../guards/AuthGuard";
 import { GuestGuard } from "../guards/GuestGuard";
 import { RoleGuard } from "../guards/RoleGuard";
 
-import { Role } from "../config/roles";
+import { Role, normalizeRole } from "../config/roles";
 import { ROUTE_PATHS } from "./routePaths";
 import { useAuth } from "@/features/auth/index";
 
@@ -30,21 +30,23 @@ import {
 } from "./LazyRoutes";
 
 // Super Admin pages
-import SuperAdminLoginPage from "@/features/superAdmin/pages/SuperAdminLoginPage";
-import SuperAdminDashboardPage from "@/features/superAdmin/pages/SuperAdminDashboardPage";
-import SuperAdminUsersPage from "@/features/superAdmin/pages/SuperAdminUsersPage";
-import AdminsPage from "@/features/superAdmin/pages/AdminsPage";
-import BranchesPage from "@/features/superAdmin/pages/BranchesPage";
-import ClientsPage from "@/features/superAdmin/pages/ClientsPage";
-import WorkspacesPage from "@/features/superAdmin/pages/WorkspacesPage";
-import ActivityTrackingPage from "@/features/superAdmin/pages/ActivityTrackingPage";
-import NotificationPage from "@/features/superAdmin/pages/NotificationPage";
-import RegisterAdminPage from "@/features/superAdmin/pages/RegisterAdminPage";
-import ReportPage from "@/features/superAdmin/pages/ReportPage";
-import SecuritySessionPage from "@/features/superAdmin/pages/SecuritySessionPage";
-import SubBranchPage from "@/features/superAdmin/pages/SubBranchPage";
-import SubscriptionsPage from "@/features/superAdmin/pages/SubscriptionsPage";
-import SystemSettingsPage from "@/features/superAdmin/pages/SystemSettingsPage";
+import {
+  SuperAdminLogin,
+  SuperAdminDashboard,
+  SuperAdminUsersPage,
+  AdminsPage,
+  BranchesPage,
+  ClientsPage,
+  WorkspacesPage,
+  ActivityTrackingPage,
+  NotificationsPage,
+  RegisterAdminPage,
+  ReportsPage,
+  SecuritySessionsPage,
+  SubBranchesPage,
+  SubscriptionsPage,
+  SystemSettingsPage,
+} from "@/features/super-admin";
 
 // --------------------------------------------------
 // ROOT REDIRECTOR
@@ -57,7 +59,9 @@ const RootRedirector: React.FC = () => {
     return <Navigate to={ROUTE_PATHS.LOGIN} replace />;
   }
 
-  switch (user?.role) {
+  const userRole = normalizeRole(user?.role);
+
+  switch (userRole) {
     case Role.SuperAdmin:
       return (
         <Navigate
@@ -123,7 +127,7 @@ export const routes: RouteObject[] = [
         path: ROUTE_PATHS.SUPER_ADMIN_LOGIN,
         element: (
           <GuestGuard>
-            <SuperAdminLoginPage />
+            <SuperAdminLogin />
           </GuestGuard>
         ),
       },
@@ -185,7 +189,6 @@ export const routes: RouteObject[] = [
       // ----------------------------------------------
 
       {
-        path: "/super-admin",
         element: (
           <AuthGuard>
             <RoleGuard allowedRoles={[Role.SuperAdmin]}>
@@ -195,7 +198,7 @@ export const routes: RouteObject[] = [
         ),
         children: [
           {
-            index: true,
+            path: "/super-admin",
             element: (
               <Navigate
                 to={ROUTE_PATHS.SUPER_ADMIN_DASHBOARD}
@@ -205,7 +208,7 @@ export const routes: RouteObject[] = [
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_DASHBOARD,
-            element: <SuperAdminDashboardPage />,
+            element: <SuperAdminDashboard />,
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_USERS,
@@ -220,6 +223,10 @@ export const routes: RouteObject[] = [
             element: <BranchesPage />,
           },
           {
+            path: "/super-admin/admins/branches",
+            element: <BranchesPage />,
+          },
+          {
             path: ROUTE_PATHS.SUPER_ADMIN_CLIENTS,
             element: <ClientsPage />,
           },
@@ -228,12 +235,16 @@ export const routes: RouteObject[] = [
             element: <WorkspacesPage />,
           },
           {
+            path: "/super-admin/admins/workspaces",
+            element: <WorkspacesPage />,
+          },
+          {
             path: ROUTE_PATHS.SUPER_ADMIN_ACTIVITY,
             element: <ActivityTrackingPage />,
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_NOTIFICATIONS,
-            element: <NotificationPage />,
+            element: <NotificationsPage />,
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_REGISTER_ADMIN,
@@ -241,15 +252,23 @@ export const routes: RouteObject[] = [
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_REPORTS,
-            element: <ReportPage />,
+            element: <ReportsPage />,
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_SESSIONS,
-            element: <SecuritySessionPage />,
+            element: <SecuritySessionsPage />,
+          },
+          {
+            path: "/super-admin/security",
+            element: <SecuritySessionsPage />,
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_SUB_BRANCHES,
-            element: <SubBranchPage />,
+            element: <SubBranchesPage />,
+          },
+          {
+            path: "/super-admin/admins/sub-branches",
+            element: <SubBranchesPage />,
           },
           {
             path: ROUTE_PATHS.SUPER_ADMIN_SUBSCRIPTIONS,
