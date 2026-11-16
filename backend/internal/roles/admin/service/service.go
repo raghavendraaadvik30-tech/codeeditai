@@ -22,6 +22,8 @@ type AdminService interface {
 	ActivateUser(ctx context.Context, actorID, targetID uuid.UUID, reason string) error
 	GetAuditTrail(ctx context.Context, from, to time.Time) ([]adminmodel.AuditTrailEntry, error)
 	AssignRole(ctx context.Context, actorID, targetID uuid.UUID, role string) error
+
+	ChangeUserPassword(ctx context.Context, actorID uuid.UUID, targetID uuid.UUID, newPassword string) error
 }
 
 type adminService struct {
@@ -204,5 +206,60 @@ func (s *adminService) AssignRole(
 			"Role changed to '"+role+"'",
 		)
 	}
+	return nil
+}
+
+// -------------------------------------------------------
+// ChangeUserPassword – Admin changes a user's password
+// -------------------------------------------------------
+
+func (s *adminService) ChangeUserPassword(
+	ctx context.Context,
+	actorID uuid.UUID,
+	targetID uuid.UUID,
+	newPassword string,
+) error {
+
+	// Validate target user
+	if targetID == uuid.Nil {
+		return errors.New("invalid user ID")
+	}
+
+	// Validate password
+	newPassword = strings.TrimSpace(newPassword)
+
+	if len(newPassword) < 8 {
+		return errors.New("password must contain at least 8 characters")
+	}
+
+	// Hash new password
+	hash, err := bcrypt.GenerateFromPassword(
+		[]byte(newPassword),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		return shared.ErrInternalServerError
+	}
+
+	// Update password in database
+	if err := s.repo.UpdateUserPassword(
+		ctx,
+		targetID,
+		string(hash),
+	); err != nil {
+		return err
+	}
+
+	// Audit log
+	if actorID != uuid.Nil {
+		_ = s.repo.InsertAuditLog(
+			ctx,
+			actorID,
+			targetID,
+			"CHANGE_USER_PASSWORD",
+			"Admin changed the user's password",
+		)
+	}
+
 	return nil
 }

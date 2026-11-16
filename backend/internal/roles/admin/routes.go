@@ -33,6 +33,7 @@ func RegisterRoutes(
 	r.Post("/admin/users/deactivate", h.DeactivateUser)
 	r.Post("/admin/users/activate", h.ActivateUser)
 	r.Post("/admin/users/assign-role", h.AssignRole)
+	r.Patch("/admin/users/{user_id}/password", h.ChangeUserPassword)
 
 	// -------------------------------------------------------
 	// Audit Trail

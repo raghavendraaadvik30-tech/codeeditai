@@ -91,6 +91,7 @@ export default function UsersManagement() {
     setSearchQuery,
     roleFilter,
     setRoleFilter,
+    changeUserPassword,
   } = useUsersStore()
 
   /* LOAD USERS FROM BACKEND */
@@ -120,6 +121,14 @@ export default function UsersManagement() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
   }
+
+  const [isPasswordOpen, setIsPasswordOpen] = useState(false)
+  const [passwordUser, setPasswordUser] = useState<User | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState("")
 
   /* ADD USER FORM */
   const {
@@ -225,6 +234,79 @@ export default function UsersManagement() {
       setTimeout(() => setCopiedField(null), 2000)
     } catch (copyError) {
       console.error("Failed to copy value:", copyError)
+    }
+  }
+
+  const handleChangePassword = async () => {
+    if (!passwordUser) return
+
+    setPasswordError("")
+
+    // Password validation
+    if (newPassword.length < 8) {
+      setPasswordError("Password must contain at least 8 characters.")
+      return
+    }
+
+    if (new TextEncoder().encode(newPassword).length > 72) {
+      setPasswordError("Password must not exceed 72 bytes.")
+      return
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      setPasswordError("Password must contain at least one uppercase letter.")
+      return
+    }
+
+    if (!/[a-z]/.test(newPassword)) {
+      setPasswordError("Password must contain at least one lowercase letter.")
+      return
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      setPasswordError("Password must contain at least one number.")
+      return
+    }
+
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      setPasswordError("Password must contain at least one special character.")
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match.")
+      return
+    }
+
+    setIsChangingPassword(true)
+
+    try {
+      await changeUserPassword(passwordUser.id, newPassword)
+
+      setIsPasswordOpen(false)
+      setPasswordUser(null)
+      setNewPassword("")
+      setConfirmPassword("")
+      setShowNewPassword(false)
+    } catch (err: unknown) {
+      const error = err as {
+        response?: {
+          data?: {
+            message?: string
+            detail?: string
+          }
+        }
+        message?: string
+      }
+
+      setPasswordError(
+        error.response?.data?.message ||
+          error.response?.data?.detail ||
+          error.message ||
+          "Failed to change password."
+      )
+    } finally {
+      setIsChangingPassword(false)
     }
   }
 
@@ -365,36 +447,46 @@ Please use the credentials above to access the secure portal.`
       <Card className="overflow-hidden rounded-2xl border border-secondary bg-card shadow-sm shadow-muted/50">
         <div className="overflow-x-auto">
           <table
-            className="w-full table-fixed border-collapse text-left"
+            className="w-full min-w-[950px] table-auto border-collapse text-left"
             id="users-data-table-node"
           >
             <colgroup>
-              <col className="w-[8%]" />
-              <col className="w-[8%]" />
-              <col className="w-[8%]" />
-              <col className="w-[8%]" />
-              <col className="w-[8%]" />
-              <col className="w-[8%]" />
+              <col className="w-[19%]" />
+              <col className="w-[25%]" />
+              <col className="w-[10%]" />
+              <col className="w-[16%]" />
+              <col className="w-[10%]" />
+              <col className="w-[13%]" />
+              <col className="w-[7%]" />
             </colgroup>
 
             <thead>
               <tr className="border-b border-secondary bg-muted/60">
-                <th className="px-3 py-2.5 text-xs font-bold tracking-wider whitespace-nowrap text-muted-foreground uppercase">
+                <th className="px-4 py-3 text-left text-xs font-bold tracking-wider uppercase">
                   Full Name
                 </th>
-                <th className="px-3 py-2.5 text-xs font-bold tracking-wider whitespace-nowrap text-muted-foreground uppercase">
+
+                <th className="px-4 py-3 text-left text-xs font-bold tracking-wider uppercase">
                   Email Address
                 </th>
-                <th className="px-3 py-2.5 text-xs font-bold tracking-wider whitespace-nowrap text-muted-foreground uppercase">
+
+                <th className="px-4 py-3 text-left text-xs font-bold tracking-wider uppercase">
                   Role
                 </th>
-                <th className="px-3 py-2.5 text-xs font-bold tracking-wider whitespace-nowrap text-muted-foreground uppercase">
+
+                <th className="px-4 py-3 text-left text-xs font-bold tracking-wider uppercase">
                   Created Date
                 </th>
-                <th className="px-2 py-2.5 text-xs font-bold tracking-wider whitespace-nowrap text-muted-foreground uppercase">
+
+                <th className="px-3 py-3 text-center text-xs font-bold tracking-wider uppercase">
                   Invitation
                 </th>
-                <th className="px-2 py-2.5 text-right text-xs font-bold tracking-wider whitespace-nowrap text-muted-foreground uppercase">
+
+                <th className="px-3 py-3 text-center text-xs font-bold tracking-wider uppercase">
+                  Password
+                </th>
+
+                <th className="px-3 py-3 text-center text-xs font-bold tracking-wider uppercase">
                   Actions
                 </th>
               </tr>
@@ -404,7 +496,7 @@ Please use the credentials above to access the secure portal.`
               {isLoading && users.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="p-6 text-center text-sm font-medium text-muted-foreground"
                   >
                     <span className="inline-flex items-center gap-2">
@@ -459,13 +551,30 @@ Please use the credentials above to access the secure portal.`
                       </Button>
                     </td>
 
+                    <td className="px-2 py-2.5 text-center">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setPasswordUser(user)
+                          setNewPassword("")
+                          setConfirmPassword("")
+                          setPasswordError("")
+                          setIsPasswordOpen(true)
+                        }}
+                        className="h-7 rounded-full border-secondary px-3 text-[11px]"
+                      >
+                        Change Password
+                      </Button>
+                    </td>
+
                     {/* Actions */}
-                    <td className="px-2 py-2.5">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="px-3 py-2.5 text-center">
+                      <div className="flex items-center justify-center">
                         <button
                           type="button"
                           onClick={() => openViewModal(user)}
-                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-secondary bg-card text-primary transition-colors hover:bg-muted"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-secondary bg-card text-primary transition-colors hover:bg-muted"
                           title="View user"
                           aria-label={`View ${user.fullName}`}
                         >
@@ -478,7 +587,7 @@ Please use the credentials above to access the secure portal.`
               ) : (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="p-6 text-center text-sm font-medium text-muted-foreground"
                   >
                     No users found matching your search or filter.
@@ -1010,6 +1119,109 @@ Please use the credentials above to access the secure portal.`
                   Close
                 </Button>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isPasswordOpen}
+        onOpenChange={(open) => {
+          if (isChangingPassword) return
+
+          setIsPasswordOpen(open)
+
+          if (!open) {
+            setPasswordUser(null)
+            setNewPassword("")
+            setConfirmPassword("")
+            setPasswordError("")
+            setShowNewPassword(false)
+          }
+        }}
+      >
+        <DialogContent className={dialogClass}>
+          <DialogHeader className="border-b border-muted pb-3">
+            <DialogTitle className="text-lg font-extrabold">
+              Change User Password
+            </DialogTitle>
+          </DialogHeader>
+
+          {passwordUser && (
+            <div className="space-y-4 pt-3">
+              <div className="rounded-lg bg-muted p-3 text-xs">
+                <p className="font-semibold">{passwordUser.fullName}</p>
+                <p className="text-muted-foreground">{passwordUser.email}</p>
+              </div>
+
+              <div className="space-y-1">
+                <Label>New Password</Label>
+                <div className="relative">
+                  <Input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    className="pr-10"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((v) => !v)}
+                    className="absolute top-1/2 right-3 -translate-y-1/2"
+                  >
+                    {showNewPassword ? (
+                      <Eye className="h-4 w-4" />
+                    ) : (
+                      <EyeOff className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label>Confirm New Password</Label>
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                />
+              </div>
+
+              {passwordError && (
+                <p className="flex items-center gap-2 text-xs text-destructive">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  {passwordError}
+                </p>
+              )}
+
+              <DialogFooter className="border-t border-muted pt-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsPasswordOpen(false)
+                    setPasswordUser(null)
+                    setNewPassword("")
+                    setConfirmPassword("")
+                    setPasswordError("")
+                    setShowNewPassword(false)
+                  }}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  onClick={handleChangePassword}
+                  disabled={isChangingPassword}
+                  className="gap-2 bg-button-primary text-button-primary-foreground"
+                >
+                  {isChangingPassword && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
+                  {isChangingPassword ? "Updating..." : "Update Password"}
+                </Button>
+              </DialogFooter>
             </div>
           )}
         </DialogContent>

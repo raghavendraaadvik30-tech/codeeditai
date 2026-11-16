@@ -237,13 +237,6 @@ export default function LoginUI() {
                 Remember me
               </span>
             </label>
-            <button
-              type="button"
-              onClick={() => navigate(ROUTE_PATHS.FORGOT_PASSWORD)}
-              className="cursor-pointer text-xs font-semibold text-[#324480] hover:underline"
-            >
-              Forgot Password?
-            </button>
           </div>
 
           {/* Login Button */}

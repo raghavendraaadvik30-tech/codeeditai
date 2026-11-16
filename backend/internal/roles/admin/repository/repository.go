@@ -29,6 +29,8 @@ type AdminRepository interface {
 	GetRoleIDByName(ctx context.Context, roleName string) (uuid.UUID, error)
 	AssignRoleToUser(ctx context.Context, userID, roleID uuid.UUID) error
 	ReplaceUserRole(ctx context.Context, userID, newRoleID uuid.UUID) error
+
+	UpdateUserPassword(ctx context.Context, userID uuid.UUID, passwordHash string) error
 }
 
 type adminRepository struct {
@@ -432,6 +434,36 @@ func (r *adminRepository) UpdateUserStatus(
 		WHERE user_id = $1
 	`, userID, isActive)
 	return err
+}
+
+// UpdateUserPassword updates a user's password hash
+func (r *adminRepository) UpdateUserPassword(
+	ctx context.Context,
+	userID uuid.UUID,
+	passwordHash string,
+) error {
+
+	result, err := r.db.ExecContext(ctx, `
+        UPDATE user_login
+        SET password_hash = $2,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = $1
+    `, userID, passwordHash)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return shared.ErrUserNotFound
+	}
+
+	return nil
 }
 
 // InsertAuditLog
