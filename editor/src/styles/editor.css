@@ -1288,3 +1288,12 @@ ul[data-custom-bullet] > li::before {
   flex-direction: column;
   overflow-y: auto;
 }
+
+/* Document Editor Base Text Color - Defaults to #000000 in light mode, #ffffff in dark mode */
+[data-editor-page][contenteditable="true"] {
+  color: #000000;
+}
+
+.dark [data-editor-page][contenteditable="true"] {
+  color: #ffffff;
+}

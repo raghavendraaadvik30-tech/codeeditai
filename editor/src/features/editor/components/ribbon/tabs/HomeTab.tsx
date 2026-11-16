@@ -115,11 +115,69 @@ export default function HomeTab() {
     };
   }, []);
 
+  // ---------------------------------------------------------------------------
+  // Helper: Extract font size in points from element or its ancestors up to page
+  // ---------------------------------------------------------------------------
+  const getElementFontSizePt = useCallback((el: HTMLElement, pageEl: HTMLElement): string => {
+    let curr: HTMLElement | null = el;
+    while (curr && curr !== pageEl.parentElement) {
+      if (curr.style?.fontSize) {
+        const ptMatch = curr.style.fontSize.match(/(\d+(?:\.\d+)?)\s*pt/i);
+        if (ptMatch) return ptMatch[1];
+        const pxVal = parseFloat(curr.style.fontSize);
+        if (!isNaN(pxVal) && pxVal > 0) {
+          const pt = Math.round(pxVal * 0.75 * 2) / 2;
+          return String(pt);
+        }
+      }
+      curr = curr.parentElement;
+    }
+    try {
+      const computed = window.getComputedStyle(el).fontSize;
+      const pxVal = parseFloat(computed);
+      if (!isNaN(pxVal) && pxVal > 0) {
+        const pt = Math.round(pxVal * 0.75 * 2) / 2;
+        return String(pt);
+      }
+    } catch {
+      // ignore
+    }
+    return "11";
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Helper: Extract font family name from element or its ancestors up to page
+  // ---------------------------------------------------------------------------
+  const getElementFontFamily = useCallback((el: HTMLElement, pageEl: HTMLElement, fontsList: string[]): string => {
+    let curr: HTMLElement | null = el;
+    while (curr && curr !== pageEl.parentElement) {
+      if (curr.style?.fontFamily) {
+        const raw = curr.style.fontFamily;
+        const first = raw.split(",")[0].replace(/['"]/g, "").trim();
+        if (first && first !== "inherit") {
+          const matched = fontsList.find((f) => f.toLowerCase() === first.toLowerCase());
+          return matched || first;
+        }
+      }
+      curr = curr.parentElement;
+    }
+    try {
+      const raw = window.getComputedStyle(el).fontFamily;
+      const first = raw.split(",")[0].replace(/['"]/g, "").trim();
+      if (first && first !== "inherit") {
+        const matched = fontsList.find((f) => f.toLowerCase() === first.toLowerCase());
+        return matched || first;
+      }
+    } catch {
+      // ignore
+    }
+    return "Calibri";
+  }, []);
+
   useEffect(() => {
     const updateToolbar = () => {
       try {
         const sel = window.getSelection();
-
         if (!sel || sel.rangeCount === 0) return;
 
         const range = sel.getRangeAt(0);
@@ -132,65 +190,110 @@ export default function HomeTab() {
 
         if (!targetEl) return;
 
-        const pageEl = targetEl.closest(
-          '[contenteditable="true"][data-page-id]'
+        const pageEl = targetEl.closest<HTMLElement>(
+          '[contenteditable="true"][data-page-id], [contenteditable="true"][data-editor-page], [contenteditable="true"][data-hf-type]'
         );
 
         if (!pageEl) return;
 
-        // Update font size from the selected text (if not actively editing the size field)
-        if (!isEditingSizeRef.current) {
-          const sizeSpan =
-            targetEl.closest<HTMLElement>("span[style*='font-size']");
-
-          if (sizeSpan?.style.fontSize) {
-            const ptMatch = sizeSpan.style.fontSize.match(
-              /(\d+(?:\.\d+)?)\s*pt/i
-            );
-
-            if (ptMatch) {
-              setFontSize(ptMatch[1]);
+        if (range.collapsed) {
+          // Cursor placed inside text or empty line
+          let cursorEl: HTMLElement | null = null;
+          if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+            const el = range.startContainer as HTMLElement;
+            const child = el.childNodes[range.startOffset];
+            if (child && child.nodeType === Node.ELEMENT_NODE) {
+              cursorEl = child as HTMLElement;
+            } else if (child && child.nodeType === Node.TEXT_NODE) {
+              cursorEl = child.parentElement;
             } else {
-              const pxVal = parseFloat(sizeSpan.style.fontSize);
-
-              if (!isNaN(pxVal)) {
-                const ptVal = pxVal * 0.75;
-                const rounded = Math.round(ptVal * 2) / 2;
-                setFontSize(String(rounded));
-              }
+              cursorEl = el;
             }
           } else {
-            const computed = window.getComputedStyle(targetEl).fontSize;
-            const pxVal = parseFloat(computed);
-
-            if (!isNaN(pxVal)) {
-              const ptVal = pxVal * 0.75;
-              const rounded = Math.round(ptVal * 2) / 2;
-              setFontSize(String(rounded));
-            }
+            cursorEl = range.startContainer.parentElement;
           }
-        }
+          cursorEl = cursorEl || targetEl;
 
-        // Update font family from the selected text (if not actively editing the font field)
-        if (!isEditingFontRef.current) {
-          const fontSpan =
-            targetEl.closest<HTMLElement>("span[style*='font-family']");
+          if (!isEditingSizeRef.current) {
+            setFontSize(getElementFontSizePt(cursorEl, pageEl));
+          }
 
-          const rawFont =
-            fontSpan?.style.fontFamily ||
-            window.getComputedStyle(targetEl).fontFamily;
+          if (!isEditingFontRef.current) {
+            setFontName(getElementFontFamily(cursorEl, pageEl, fonts));
+          }
+        } else {
+          // User selected text range (word, sentence, or multiple paragraphs)
+          const textNodes: Text[] = [];
+          const root = anc.nodeType === Node.TEXT_NODE ? (anc.parentElement || anc) : anc;
 
-          const firstFont = rawFont.split(",")[0].replace(/['"]/g, "").trim();
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+              if (!node.textContent || node.textContent.length === 0) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              try {
+                if (range.intersectsNode(node)) {
+                  return NodeFilter.FILTER_ACCEPT;
+                }
+              } catch {
+                return NodeFilter.FILTER_REJECT;
+              }
+              return NodeFilter.FILTER_REJECT;
+            },
+          });
 
-          if (firstFont && firstFont !== "inherit") {
-            const matchedFont = fonts.find(
-              (font) => font.toLowerCase() === firstFont.toLowerCase()
-            );
+          let currentNode = walker.nextNode();
+          while (currentNode) {
+            const tn = currentNode as Text;
+            let isIncluded = true;
+            if (tn === range.startContainer && tn === range.endContainer) {
+              isIncluded = range.endOffset > range.startOffset;
+            } else if (tn === range.startContainer) {
+              isIncluded = range.startOffset < (tn.textContent?.length || 0);
+            } else if (tn === range.endContainer) {
+              isIncluded = range.endOffset > 0;
+            }
+            if (isIncluded && tn.textContent && tn.textContent.trim().length > 0) {
+              textNodes.push(tn);
+            }
+            currentNode = walker.nextNode();
+          }
 
-            if (matchedFont) {
-              setFontName(matchedFont);
-            } else {
-              setFontName(firstFont);
+          if (textNodes.length === 0) {
+            if (!isEditingSizeRef.current) {
+              setFontSize(getElementFontSizePt(targetEl, pageEl));
+            }
+            if (!isEditingFontRef.current) {
+              setFontName(getElementFontFamily(targetEl, pageEl, fonts));
+            }
+          } else {
+            const detectedFonts = new Set<string>();
+            const detectedSizes = new Set<string>();
+
+            for (const tn of textNodes) {
+              const parent = tn.parentElement;
+              if (parent) {
+                detectedFonts.add(getElementFontFamily(parent, pageEl, fonts));
+                detectedSizes.add(getElementFontSizePt(parent, pageEl));
+              }
+            }
+
+            if (!isEditingFontRef.current) {
+              if (detectedFonts.size === 1) {
+                setFontName(Array.from(detectedFonts)[0]);
+              } else if (detectedFonts.size > 1) {
+                // Selection has mixed font families: display blank/placeholder state
+                setFontName("");
+              }
+            }
+
+            if (!isEditingSizeRef.current) {
+              if (detectedSizes.size === 1) {
+                setFontSize(Array.from(detectedSizes)[0]);
+              } else if (detectedSizes.size > 1) {
+                // Selection has mixed font sizes: display blank/placeholder state
+                setFontSize("");
+              }
             }
           }
         }
@@ -200,11 +303,15 @@ export default function HomeTab() {
     };
 
     document.addEventListener("selectionchange", updateToolbar);
+    document.addEventListener("mouseup", updateToolbar);
+    document.addEventListener("keyup", updateToolbar);
 
     return () => {
       document.removeEventListener("selectionchange", updateToolbar);
+      document.removeEventListener("mouseup", updateToolbar);
+      document.removeEventListener("keyup", updateToolbar);
     };
-  }, [fonts]);
+  }, [fonts, getElementFontFamily, getElementFontSizePt]);
 
   const validateFontSize = useCallback((val: string): boolean => {
     if (!val || !val.trim()) return false;

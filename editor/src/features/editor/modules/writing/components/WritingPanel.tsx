@@ -171,9 +171,8 @@ export default function WritingPanel() {
               </span>
 
               <ChevronDown
-                className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-150 ${
-                  isLineSpacingOpen ? "rotate-180" : ""
-                }`}
+                className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-150 ${isLineSpacingOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -224,10 +223,9 @@ export default function WritingPanel() {
                         text-xs
                         transition
                         cursor-pointer
-                        ${
-                          isSelected
-                            ? "bg-primary/10 font-bold text-primary dark:bg-primary/20"
-                            : "text-foreground hover:bg-muted font-medium"
+                        ${isSelected
+                          ? "bg-primary/10 font-bold text-primary dark:bg-primary/20"
+                          : "text-foreground hover:bg-muted font-medium"
                         }
                       `}
                     >
@@ -251,8 +249,8 @@ export default function WritingPanel() {
           tools={listTools}
           onApplyBullets={applyBullets}
           onApplyNumbering={applyNumbering}
-          //onApplyMultilevel={applyMultilevel}
-          // onToggleMultilevel={toggleMultilevel}
+        //onApplyMultilevel={applyMultilevel}
+        // onToggleMultilevel={toggleMultilevel}
         />
 
       </div>
@@ -268,10 +266,7 @@ export default function WritingPanel() {
           py-2.5
         "
       >
-        <p className="text-xs text-muted-foreground">
-          Tip: Select text first, then choose a
-          writing tool.
-        </p>
+
       </div>
 
     </div>
