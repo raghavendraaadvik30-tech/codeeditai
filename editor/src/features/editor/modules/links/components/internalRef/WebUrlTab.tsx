@@ -116,10 +116,10 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
   };
 
   return (
-    <div className="space-y-3 pt-1">
+    <div className="space-y-3 pt-1 select-none">
       {/* Link Text */}
       <div>
-        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
           Link Text
         </label>
         <input
@@ -127,13 +127,13 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
           value={displayText}
           onChange={(e) => setDisplayText(e.target.value)}
           placeholder="Enter display text (or select text in document)"
-          className="w-full h-10 px-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-white transition-colors"
+          className="w-full h-9.5 px-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 transition-colors"
         />
       </div>
 
       {/* Web Address */}
       <div>
-        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
           Web Address
         </label>
         <div className="relative">
@@ -146,7 +146,7 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
               if (error) setError(null);
             }}
             placeholder="https://example.com"
-            className="w-full h-10 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-white transition-colors"
+            className="w-full h-9.5 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 transition-colors"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleInsert();
             }}
@@ -184,18 +184,20 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
       )}
 
       {/* Insert Button */}
-      <button
-        type="button"
-        onMouseDown={(e) => {
-          // Prevent losing selection on click
-          e.preventDefault();
-        }}
-        onClick={handleInsert}
-        className="w-full h-10 rounded-xl bg-button-primary hover:bg-button-primary-hover active:bg-button-primary-active text-button-primary-foreground font-semibold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-      >
-        <span>Insert Link</span>
-        <ArrowRight className="h-4 w-4" />
-      </button>
+      <div className="pt-0.5">
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            // Prevent losing selection on click
+            e.preventDefault();
+          }}
+          onClick={handleInsert}
+          className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-[#2A437E] hover:bg-[#203463] active:bg-[#1A2A50] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer dark:bg-[#1E3A8A] dark:hover:bg-[#1D357A]"
+        >
+          <span>Insert Link</span>
+          <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }

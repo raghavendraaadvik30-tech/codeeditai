@@ -40,6 +40,13 @@ export function useWriting() {
     useState<string | null>(null);
 
   /*
+   * Currently active paragraph line spacing.
+   * Default: "1.15" (Word standard)
+   */
+  const [activeLineSpacing, setActiveLineSpacing] =
+    useState<string>("1.15");
+
+  /*
    * Stores the actual text that is currently selected.
    *
    * This allows us to keep the active button while the
@@ -253,6 +260,52 @@ export function useWriting() {
   );
 
   /**
+   * Applies line spacing.
+   */
+  const applyLineSpacing = useCallback(
+    (spacing: string) => {
+      setActiveLineSpacing(spacing);
+      if (editor.applyLineSpacing) {
+        editor.applyLineSpacing(spacing);
+      }
+    },
+    [editor]
+  );
+
+  /**
+   * Detect currently active line spacing on selection change.
+   */
+  useEffect(() => {
+    const handleLineSpacingCheck = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const node = sel.anchorNode;
+      const elem = node?.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node?.parentElement;
+      const block = elem?.closest<HTMLElement>("p, h1, h2, h3, h4, h5, h6, li, blockquote, div");
+      if (block) {
+        const lh = block.style.lineHeight;
+        if (lh) {
+          const num = parseFloat(lh);
+          if (!isNaN(num)) {
+            const standardValues = ["1.0", "1.15", "1.5", "2.0", "2.5", "3.0"];
+            for (const sv of standardValues) {
+              if (Math.abs(num - parseFloat(sv)) < 0.05) {
+                setActiveLineSpacing(sv);
+                return;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    document.addEventListener("selectionchange", handleLineSpacingCheck);
+    return () => {
+      document.removeEventListener("selectionchange", handleLineSpacingCheck);
+    };
+  }, []);
+
+  /**
    * Applies font color.
    */
 /**
@@ -433,6 +486,8 @@ const applyFontColor = useCallback(
      */
     applyFormatting,
     applyAlignment,
+    activeLineSpacing,
+    applyLineSpacing,
 
     /*
      * COLORS

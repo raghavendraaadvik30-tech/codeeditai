@@ -234,7 +234,7 @@ function LinksPageContent() {
             <button
               type="button"
               onClick={handleConvertBareLinks}
-              className="w-full h-9 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 transition shadow-xs dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 cursor-pointer"
+              className="w-full h-10 flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 transition shadow-xs dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 cursor-pointer"
             >
               <LinkIcon className="h-4 w-4 text-[#2563EB] dark:text-[#38BDF8]" />
               <span>BARE LINKS</span>
