@@ -460,6 +460,11 @@ export interface EditorContextType {
   applyBlockStyle: (tag: string) => void;
 
   /**
+   * Applies line spacing (1.0, 1.15, 1.5, 2.0, 2.5, 3.0) to current paragraph(s) preserving selection.
+   */
+  applyLineSpacing: (spacing: string) => void;
+
+  /**
    * Restores editor focus and selection from the last known valid range within active page.
    */
   restoreEditorSelection: () => boolean;
@@ -1259,6 +1264,118 @@ export function EditorProvider({
       restoreEditorSelection();
     });
   }, [restoreEditorSelection, editorRef]);
+
+  const applyLineSpacing = useCallback(
+    (spacing: string) => {
+      const restored = restoreEditorSelection();
+      if (!restored) return;
+
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const fullRange = sel.getRangeAt(0);
+
+      const startAnc = fullRange.startContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.startContainer as HTMLElement)
+        : fullRange.startContainer.parentElement;
+      const endAnc = fullRange.endContainer.nodeType === Node.ELEMENT_NODE
+        ? (fullRange.endContainer as HTMLElement)
+        : fullRange.endContainer.parentElement;
+
+      const startHf = startAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]');
+      const endHf = endAnc?.closest<HTMLElement>('[contenteditable="true"][data-hf-type]') || startHf;
+
+      const startPageEl = startHf || startAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || editorRef.current;
+      const endPageEl = endHf || endAnc?.closest<HTMLElement>('[contenteditable="true"][data-page-id]:not([data-hf-type])') || startPageEl;
+
+      if (!startPageEl || !endPageEl) return;
+
+      const saved = saveSelectionData(startPageEl, endPageEl, fullRange);
+      if (saved) savedSelectionRef.current = saved;
+
+      preserveSelectionRef.current = true;
+      const pagesToFormat = getPagesInSelection(startPageEl, endPageEl);
+
+      try {
+        pagesToFormat.forEach((pEl) => {
+          const subRange = createPageSubRange(pEl, fullRange, startPageEl!, endPageEl!);
+          const blockSelector = "p, h1, h2, h3, h4, h5, h6, li, blockquote, div";
+          const allCandidateBlocks = Array.from(pEl.querySelectorAll<HTMLElement>(blockSelector))
+            .filter((el) => {
+              if (el.tagName === "DIV") {
+                return !el.querySelector("p, h1, h2, h3, h4, h5, h6, li, blockquote");
+              }
+              return true;
+            });
+
+          const matchedBlocks: HTMLElement[] = [];
+          for (const block of allCandidateBlocks) {
+            if (subRange.intersectsNode(block)) {
+              matchedBlocks.push(block);
+            }
+          }
+
+          if (matchedBlocks.length === 0) {
+            const startBlock = (subRange.startContainer.nodeType === Node.ELEMENT_NODE
+              ? (subRange.startContainer as HTMLElement)
+              : subRange.startContainer.parentElement)?.closest<HTMLElement>(blockSelector);
+            if (startBlock && pEl.contains(startBlock)) {
+              matchedBlocks.push(startBlock);
+            }
+          }
+
+          if (matchedBlocks.length > 0) {
+            matchedBlocks.forEach((block) => {
+              block.style.lineHeight = spacing;
+            });
+          } else {
+            sel.removeAllRanges();
+            sel.addRange(subRange);
+            document.execCommand("formatBlock", false, "<p>");
+            const selNow = window.getSelection();
+            if (selNow && selNow.rangeCount > 0) {
+              const r = selNow.getRangeAt(0);
+              const node = r.commonAncestorContainer;
+              const elem = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+              const createdBlock = elem?.closest<HTMLElement>(blockSelector);
+              if (createdBlock) {
+                createdBlock.style.lineHeight = spacing;
+              }
+            }
+          }
+
+          pEl.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      } catch (err) {
+        console.warn("Line spacing command failed:", err);
+      }
+
+      const isHeaderOrFooter = startPageEl.hasAttribute("data-hf-type");
+      if (!isHeaderOrFooter && docModel) {
+        const allPageEls = document.querySelectorAll<HTMLElement>("[data-editor-page][contenteditable='true']");
+        allPageEls.forEach((p) => {
+          const pid = p.getAttribute("data-page-id") || p.getAttribute("data-editor-page");
+          if (pid) {
+            docModel.setPageHtml(pid, p.innerHTML);
+          }
+        });
+        const pageId = startPageEl.getAttribute("data-page-id") || "";
+        if (pageId) {
+          recordSnapshot(pageId, startPageEl.innerHTML, undefined, `Line Spacing ${spacing}`);
+        }
+      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          preserveSelectionRef.current = true;
+          restoreEditorSelection();
+          setTimeout(() => {
+            preserveSelectionRef.current = false;
+          }, 0);
+        });
+      });
+    },
+    [restoreEditorSelection, editorRef, docModel, recordSnapshot]
+  );
 
   const applyStyleToken = useCallback((token: StyleToken) => {
     restoreEditorSelection();
@@ -3014,6 +3131,7 @@ export function EditorProvider({
     setPendingPermissionFile,
 
     exec: applyFormatCommand,
+    applyLineSpacing,
 
     applyBulletStyle,
     applyNumberingStyle,

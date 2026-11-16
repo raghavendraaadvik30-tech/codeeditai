@@ -708,7 +708,7 @@ export default function DocumentPage() {
             {openSections.navigation && (
               <div className="mt-2 space-y-2.5 pl-5">
                 {/* Find & Replace Card */}
-                <div className="rounded-lg border border-secondary bg-card p-2.5 space-y-2.5 dark:border-muted dark:bg-[#0E1A29] shadow-2xs">
+                <div className="@container rounded-lg border border-secondary bg-card p-2.5 space-y-2.5 dark:border-muted dark:bg-[#0E1A29] shadow-2xs">
                   {/* Card Header & Mode Switcher */}
                   <div className="flex items-center justify-between border-b border-muted pb-1.5 dark:border-muted">
                     <div className="flex items-center gap-1">
@@ -813,16 +813,16 @@ export default function DocumentPage() {
 
                   {/* Action Buttons matching Microsoft Word */}
                   {navTab === "replace" ? (
-                    <div className="grid grid-cols-4 gap-1.5 pt-1 border-t border-muted dark:border-muted">
+                    <div className="grid grid-cols-2 @[310px]:grid-cols-4 gap-1.5 pt-1.5 border-t border-muted dark:border-muted">
                       <button
                         type="button"
                         onClick={handleReplace}
                         disabled={!findText.trim()}
                         className={cn(
-                          "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none",
+                          "h-7.5 w-full min-w-0 flex items-center justify-center rounded-[4px] border px-1.5 text-center text-[11px] font-medium transition-colors select-none whitespace-nowrap",
                           !findText.trim()
-                            ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                            : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                            ? "border-secondary bg-muted/40 text-muted-foreground/60 cursor-not-allowed dark:border-secondary-foreground dark:bg-muted/30 dark:text-muted-foreground/40 shadow-none"
+                            : "border-primary/80 bg-card text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer"
                         )}
                       >
                         Replace
@@ -832,10 +832,10 @@ export default function DocumentPage() {
                         onClick={handleReplaceAll}
                         disabled={!findText.trim()}
                         className={cn(
-                          "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none whitespace-nowrap",
+                          "h-7.5 w-full min-w-0 flex items-center justify-center rounded-[4px] border px-1.5 text-center text-[11px] font-medium transition-colors select-none whitespace-nowrap",
                           !findText.trim()
-                            ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                            : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                            ? "border-secondary bg-muted/40 text-muted-foreground/60 cursor-not-allowed dark:border-secondary-foreground dark:bg-muted/30 dark:text-muted-foreground/40 shadow-none"
+                            : "border-primary/80 bg-card text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer"
                         )}
                       >
                         Replace All
@@ -845,10 +845,10 @@ export default function DocumentPage() {
                         onClick={handleFindNext}
                         disabled={!findText.trim()}
                         className={cn(
-                          "rounded-[3px] border py-1 px-1 text-center text-11px transition-colors font-normal select-none whitespace-nowrap",
+                          "h-7.5 w-full min-w-0 flex items-center justify-center rounded-[4px] border px-1.5 text-center text-[11px] font-medium transition-colors select-none whitespace-nowrap",
                           !findText.trim()
-                            ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                            : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                            ? "border-secondary bg-muted/40 text-muted-foreground/60 cursor-not-allowed dark:border-secondary-foreground dark:bg-muted/30 dark:text-muted-foreground/40 shadow-none"
+                            : "border-primary/80 bg-card text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer"
                         )}
                       >
                         Find Next
@@ -856,22 +856,22 @@ export default function DocumentPage() {
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="rounded-[3px] border border-primary/80 bg-card py-1 px-1 text-center text-11px font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
+                        className="h-7.5 w-full min-w-0 flex items-center justify-center rounded-[4px] border border-primary/80 bg-card px-1.5 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none whitespace-nowrap"
                       >
                         Cancel
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 pt-1 border-t border-muted dark:border-muted">
+                    <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-muted dark:border-muted">
                       <button
                         type="button"
                         onClick={handleFindNext}
                         disabled={!findText.trim()}
                         className={cn(
-                          "flex-1 rounded-[3px] border py-1 text-center text-11px font-normal transition-colors select-none",
+                          "h-7.5 w-full min-w-0 flex items-center justify-center rounded-[4px] border px-1.5 text-center text-[11px] font-medium transition-colors select-none whitespace-nowrap",
                           !findText.trim()
-                            ? "border-secondary bg-card text-muted-foreground dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground cursor-not-allowed"
-                            : "border-border bg-card text-foreground hover:bg-muted hover:border-muted-foreground active:bg-muted dark:border-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-secondary-foreground cursor-pointer shadow-2xs"
+                            ? "border-secondary bg-muted/40 text-muted-foreground/60 cursor-not-allowed dark:border-secondary-foreground dark:bg-muted/30 dark:text-muted-foreground/40 shadow-none"
+                            : "border-primary/80 bg-card text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer"
                         )}
                       >
                         Find Next
@@ -879,7 +879,7 @@ export default function DocumentPage() {
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="flex-1 rounded-[3px] border border-primary/80 bg-card py-1 text-center text-11px font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none"
+                        className="h-7.5 w-full min-w-0 flex items-center justify-center rounded-[4px] border border-primary/80 bg-card px-1.5 text-center text-[11px] font-medium text-foreground shadow-2xs hover:bg-muted hover:border-primary active:bg-muted dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground cursor-pointer select-none whitespace-nowrap"
                       >
                         Cancel
                       </button>

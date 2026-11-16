@@ -79,14 +79,14 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
   };
 
   return (
-    <div className="space-y-2.5 pt-1 select-none">
+    <div className="space-y-3 pt-1 select-none">
       {/* Recipient Email */}
       <div>
-        <label className="block text-[9px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
           Recipient Email <span className="text-destructive">*</span>
         </label>
         <div className="relative">
-          <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="email"
             value={toEmail}
@@ -96,18 +96,18 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
               if (success) setSuccess(null);
             }}
             placeholder="recipient@example.com"
-            className="w-full h-6 pl-8 pr-2.5 text-[10px] rounded-md border border-secondary bg-card text-foreground placeholder:text-[10px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
+            className="w-full h-9.5 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200"
           />
         </div>
       </div>
 
       {/* Subject */}
       <div>
-        <label className="block text-[9px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
           Subject
         </label>
         <div className="relative">
-          <Type className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Type className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
             value={subject}
@@ -116,18 +116,18 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
               if (success) setSuccess(null);
             }}
             placeholder="Enter subject..."
-            className="w-full h-6 pl-8 pr-2.5 text-[10px] rounded-md border border-secondary bg-card text-foreground placeholder:text-[10px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted"
+            className="w-full h-9.5 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200"
           />
         </div>
       </div>
 
       {/* Message */}
       <div>
-        <label className="block text-[9px] font-semibold text-secondary-foreground dark:text-muted-foreground mb-0.5">
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
           Message
         </label>
         <div className="relative">
-          <FileText className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+          <FileText className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
           <textarea
             value={message}
             onChange={(e) => {
@@ -136,23 +136,23 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
             }}
             rows={3}
             placeholder="Write your email message..."
-            className="w-full pl-8 pr-2.5 py-1 text-[10px] rounded-md border border-secondary bg-card text-foreground placeholder:text-[10px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary dark:border-secondary-foreground dark:bg-[#111D29] dark:text-muted resize-none"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-[#2563EB] dark:border-[#294564] dark:bg-[#111D29] dark:text-slate-200 resize-none"
           />
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-10px dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
-          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs dark:bg-destructive/40 dark:border-destructive/60 dark:text-destructive/30">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Success */}
       {success && (
-        <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-success-50 border border-success-200 text-success-700 text-10px dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-success-50 border border-success-200 text-success-700 text-xs dark:bg-success-950/40 dark:border-success-800 dark:text-success-300">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>{success}</span>
         </div>
       )}
@@ -163,15 +163,15 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={handleSendToGmail}
-          className="w-full h-7 flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold hover:bg-primary/90 active:bg-primary transition shadow-sm active:scale-99"
+          className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-[#2A437E] hover:bg-[#203463] active:bg-[#1A2A50] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer dark:bg-[#1E3A8A] dark:hover:bg-[#1D357A]"
         >
-          <Send className="h-3.5 w-3.5" />
+          <Send className="h-4 w-4" />
           <span>Send to Gmail</span>
         </button>
       </div>
 
       {/* Helper text */}
-      <p className="text-[9px] text-muted-foreground dark:text-muted-foreground leading-relaxed">
+      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
         Opens Gmail in a new browser tab with recipient, subject, and message ready to send.
       </p>
     </div>

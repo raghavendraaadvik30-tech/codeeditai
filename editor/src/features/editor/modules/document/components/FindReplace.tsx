@@ -26,25 +26,11 @@ export function FindReplace() {
 
   // Responsive button styling
   const actionButtonClass = cn(
-    "min-h-10 sm:min-h-[46px] w-full min-w-0",
-    "rounded-lg border border-[#243B82]",
-    "bg-white px-2 py-2",
-    "text-center text-xs sm:text-sm font-semibold",
-    "whitespace-normal break-words leading-tight",
-    "text-[#243B82] shadow-sm transition-colors",
-    "hover:bg-[#F3F5FB]",
-    "active:bg-[#E8ECF8]",
-    "disabled:cursor-not-allowed",
-    "disabled:border-slate-300",
-    "disabled:bg-white",
-    "disabled:text-slate-400"
+    "h-8 w-full min-w-0 flex items-center justify-center rounded-[4px] border border-primary/80 bg-card px-1.5 text-center text-xs font-medium text-foreground shadow-2xs transition-colors select-none whitespace-nowrap cursor-pointer",
+    "hover:bg-muted hover:border-primary active:bg-muted",
+    "disabled:cursor-not-allowed disabled:border-secondary disabled:bg-muted/40 disabled:text-muted-foreground/60 disabled:shadow-none",
+    "dark:border-primary dark:bg-muted dark:text-muted dark:hover:bg-secondary-foreground dark:disabled:border-secondary-foreground dark:disabled:bg-muted/30 dark:disabled:text-muted-foreground/40"
   );
-
-  // Responsive button grid
-  const buttonGridStyle = {
-    gridTemplateColumns:
-      "repeat(auto-fit, minmax(min(100%, 105px), 1fr))",
-  };
 
   // Clear existing search highlights
   const clearFindHighlights = () => {
@@ -397,7 +383,7 @@ export function FindReplace() {
   return (
     <div
       className={cn(
-        "w-full min-w-0 max-w-full",
+        "w-full min-w-0 max-w-full @container",
         "rounded-lg border border-secondary",
         "bg-card p-3 shadow-2xs",
         "dark:border-muted dark:bg-[#111D29]"
@@ -526,10 +512,7 @@ export function FindReplace() {
 
         {/* Replace Buttons */}
         {navTab === "replace" ? (
-          <div
-            className="grid min-w-0 gap-2 border-t border-muted pt-3 dark:border-muted"
-            style={buttonGridStyle}
-          >
+          <div className="grid grid-cols-2 @[310px]:grid-cols-4 min-w-0 gap-1.5 border-t border-muted pt-2.5 dark:border-muted">
             <button
               type="button"
               onClick={handleReplace}
@@ -568,10 +551,7 @@ export function FindReplace() {
         ) : (
 
           /* Find Buttons */
-          <div
-            className="grid min-w-0 gap-2 border-t border-muted pt-3 dark:border-muted"
-            style={buttonGridStyle}
-          >
+          <div className="grid grid-cols-2 min-w-0 gap-1.5 border-t border-muted pt-2.5 dark:border-muted">
             <button
               type="button"
               onClick={handleFindNext}
