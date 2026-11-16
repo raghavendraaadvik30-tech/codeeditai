@@ -192,7 +192,7 @@ export function WebUrlTab({ onLinkInserted }: WebUrlTabProps) {
             e.preventDefault();
           }}
           onClick={handleInsert}
-          className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-[#2A437E] hover:bg-[#203463] active:bg-[#1A2A50] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer dark:bg-[#1E3A8A] dark:hover:bg-[#1D357A]"
+          className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-[#D9E8FF] hover:bg-[#C8DEFF] active:bg-[#B5D2FC] text-[#1E3A8A] text-xs font-semibold shadow-xs transition-colors cursor-pointer dark:bg-[#1E3A8A] dark:hover:bg-[#1D357A] dark:text-white"
         >
           <span>Insert Link</span>
           <ArrowRight className="h-4 w-4" />

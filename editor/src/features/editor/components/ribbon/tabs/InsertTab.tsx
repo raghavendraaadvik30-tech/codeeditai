@@ -6,7 +6,7 @@
    tables, images, links, and symbols.
    ========================================================================== */
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import {
   FilePlus,
   Trash2,
@@ -39,7 +39,6 @@ import RibbonButton from "../controls/RibbonButton";
 import RibbonDivider from "../controls/RibbonDivider";
 
 import { useDocumentModel } from "../../../store/documentModel";
-import { useEditor } from "../../../context/EditorContext";
 
 
 export default function InsertTab() {
@@ -52,13 +51,6 @@ export default function InsertTab() {
     updateSection,
   } = useDocumentModel();
 
-  const {
-    editorRef,
-    insertHTML,
-  } = useEditor();
-
-  const savedRangeRef = useRef<Range | null>(null);
-
   // Format modal dialog state
   const [formatModalOpen, setFormatModalOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"1" | "a" | "A" | "i" | "I">("1");
@@ -70,48 +62,6 @@ export default function InsertTab() {
   const activeSectionId = currentPageObj?.sectionId || model.sections[0]?.id;
   const activeSection = model.sections.find((s) => s.id === activeSectionId);
 
-  // Active page index (1-based)
-  const activePageIndex = model.pages.findIndex((p) => p.id === activePage);
-
-  // ------------------------------------------------------------------------
-  // Helper: HTML insertion
-  // ------------------------------------------------------------------------
-  const handleInsertHTML = (html: string) => {
-    if (insertHTML) {
-      insertHTML(html);
-    } else {
-      editorRef.current?.focus();
-      document.execCommand("insertHTML", false, html);
-    }
-  };
-
-  // ------------------------------------------------------------------------
-  // Cursor Preservation
-  // ------------------------------------------------------------------------
-  const saveSelection = () => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      const range = sel.getRangeAt(0);
-      const container = range.commonAncestorContainer;
-      const el =
-        container.nodeType === Node.ELEMENT_NODE
-          ? (container as Element)
-          : container.parentElement;
-      if (el?.closest('[contenteditable="true"]')) {
-        savedRangeRef.current = range.cloneRange();
-      }
-    }
-  };
-
-  const restoreSelection = () => {
-    if (savedRangeRef.current) {
-      const sel = window.getSelection();
-      if (sel) {
-        sel.removeAllRanges();
-        sel.addRange(savedRangeRef.current);
-      }
-    }
-  };
 
   // ------------------------------------------------------------------------
   // Page Number Handlers
@@ -136,14 +86,6 @@ export default function InsertTab() {
     }
   };
 
-  const handleInsertCurrentPosition = (alignment: "left" | "center" | "right") => {
-    restoreSelection();
-    const pageIndex = activePageIndex >= 0 ? activePageIndex : 0;
-    const pNum = pageIndex + 1;
-    const htmlSnippet = `<p style="text-align: ${alignment};"><span class="page-number-field" data-field="page-number" contenteditable="false" style="padding: 1px 6px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 10pt; user-select: none;">Page ${pNum}</span></p>`;
-
-    handleInsertHTML(htmlSnippet);
-  };
 
   const handleRemovePageNumbers = () => {
     if (activeSectionId) {
@@ -177,12 +119,12 @@ export default function InsertTab() {
   };
 
   const isTopActive = (alignment: "left" | "center" | "right") =>
-    activeSection?.showPageNumbers !== false &&
+    Boolean(activeSection?.showPageNumbers) &&
     activeSection?.pageNumberPosition === "header" &&
     activeSection?.pageNumberAlignment === alignment;
 
   const isBottomActive = (alignment: "left" | "center" | "right") =>
-    activeSection?.showPageNumbers !== false &&
+    Boolean(activeSection?.showPageNumbers) &&
     activeSection?.pageNumberPosition === "footer" &&
     activeSection?.pageNumberAlignment === alignment;
 
@@ -231,7 +173,6 @@ export default function InsertTab() {
       <DropdownMenu>
         <DropdownMenuTrigger render={<button
             type="button"
-            onMouseDown={saveSelection}
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 h-8 text-xs font-medium transition-colors hover:bg-muted dark:hover:bg-muted active:bg-secondary text-secondary-foreground dark:text-muted-foreground cursor-pointer"
             title="Page Number"
           >
@@ -312,36 +253,9 @@ export default function InsertTab() {
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 
-          {/* 3. Current Position Submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <span>Current Position</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("left")}
-                className="cursor-pointer"
-              >
-                <span>Left</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("center")}
-                className="cursor-pointer"
-              >
-                <span>Center</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleInsertCurrentPosition("right")}
-                className="cursor-pointer"
-              >
-                <span>Right</span>
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
           <DropdownMenuSeparator />
 
-          {/* 4. Format Page Numbers */}
+          {/* 3. Format Page Numbers */}
           <DropdownMenuItem
             onClick={handleOpenFormatModal}
             className="cursor-pointer text-primary font-medium"

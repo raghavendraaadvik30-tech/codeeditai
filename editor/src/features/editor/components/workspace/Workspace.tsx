@@ -340,7 +340,7 @@ export default function Workspace() {
                 section={section}
                 pageBorders={effectivePageBorders}
                 headerText={section?.header || ""}
-                footerText={section?.footer || "Parexel Smart Authoring Suite"}
+                footerText={section?.footer ?? ""}
                 pageNumberPosition={section?.pageNumberPosition}
                 pageNumberAlignment={section?.pageNumberAlignment}
                 pageNumberFormat={section?.pageNumberFormat}
@@ -860,7 +860,7 @@ function DocumentPage({
   }
 
   // Footer resolution
-  const defaultFooter = "Parexel Smart Authoring Suite";
+  const defaultFooter = "";
   let footerKind: "first" | "even" | "odd" | "normal" = "normal";
   let footerLabel = `FOOTER - SECTION ${secNumber}`;
   let effectiveFooterText = effectiveSection?.footer !== undefined ? effectiveSection.footer : defaultFooter;
@@ -2212,7 +2212,7 @@ function DocumentPage({
             )}
 
             <div className="flex items-center justify-between w-full h-full">
-              {section?.showPageNumbers !== false && pageNumberPosition === "header" ? (
+              {Boolean(section?.showPageNumbers) && pageNumberPosition === "header" ? (
                 <>
                   {pageNumberAlignment === "left" ? (
                     <>
@@ -2383,7 +2383,7 @@ function DocumentPage({
           cursor-text
           text-sm
           leading-7
-          text-foreground
+          text-black dark:text-white
 
           [&_p]:my-2
           [&_>_*:first-child]:mt-0
@@ -2537,7 +2537,7 @@ function DocumentPage({
             )}
 
             <div className="flex items-center justify-between w-full h-full">
-              {section?.showPageNumbers !== false && pageNumberPosition === "footer" ? (
+              {Boolean(section?.showPageNumbers) && pageNumberPosition === "footer" ? (
                 <>
                   {pageNumberAlignment === "left" ? (
                     <>

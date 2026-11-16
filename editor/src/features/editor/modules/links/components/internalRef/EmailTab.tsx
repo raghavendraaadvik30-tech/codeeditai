@@ -12,7 +12,7 @@
  */
 
 import { useState } from 'react';
-import { Mail, Send, AlertCircle, CheckCircle2, Type, FileText } from 'lucide-react';
+import { Mail, Send, AlertCircle, CheckCircle2, Type, FileText,ArrowRight  } from 'lucide-react';
 import { buildGmailWebUri } from '../../utils/emailParser';
 
 interface EmailTabProps {
@@ -158,17 +158,24 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
       )}
 
       {/* Send to Gmail Button */}
+      
+          
+     
+
       <div className="pt-0.5">
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={handleSendToGmail}
-          className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-[#2A437E] hover:bg-[#203463] active:bg-[#1A2A50] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer dark:bg-[#1E3A8A] dark:hover:bg-[#1D357A]"
-        >
-          <Send className="h-4 w-4" />
-          <span>Send to Gmail</span>
-        </button>
-      </div>
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  // Prevent losing selection on click
+                  e.preventDefault();
+                }}
+                onClick={handleSendToGmail}
+                className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-[#D9E8FF] hover:bg-[#C8DEFF] active:bg-[#B5D2FC] text-[#1E3A8A] text-xs font-semibold shadow-xs transition-colors cursor-pointer dark:bg-[#1E3A8A] dark:hover:bg-[#1D357A] dark:text-white"
+              >
+                <span>Send to Gmail</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
 
       {/* Helper text */}
       <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
