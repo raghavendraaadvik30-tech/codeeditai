@@ -67,9 +67,9 @@ export default function LoginUI() {
     const userRole = normalizeRole(user.role);
 
     switch (userRole) {
-      case Role.SuperAdmin:
-        navigate(ROUTE_PATHS.SUPER_ADMIN_DASHBOARD, { replace: true });
-        break;
+      // case Role.SuperAdmin:
+      //   navigate(ROUTE_PATHS.SUPER_ADMIN_DASHBOARD, { replace: true });
+      //   break;
       case Role.Admin:
         navigate(ROUTE_PATHS.DASHBOARD, { replace: true });
         break;

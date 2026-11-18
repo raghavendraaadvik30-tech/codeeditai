@@ -7,7 +7,7 @@ import { RootLayout } from "../layouts/RootLayout";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { DashboardLayout } from "../layouts/DashboardLayout";
 import { EditorLayout } from "../layouts/EditorLayout";
-import SuperAdminLayout from "../layouts/SuperAdminLayout";
+// import SuperAdminLayout from "../layouts/SuperAdminLayout";
 
 import { AuthGuard } from "../guards/AuthGuard";
 import { GuestGuard } from "../guards/GuestGuard";
@@ -30,23 +30,23 @@ import {
 } from "./LazyRoutes";
 
 // Super Admin pages
-import {
-  SuperAdminLogin,
-  SuperAdminDashboard,
-  SuperAdminUsersPage,
-  AdminsPage,
-  BranchesPage,
-  ClientsPage,
-  WorkspacesPage,
-  ActivityTrackingPage,
-  NotificationsPage,
-  RegisterAdminPage,
-  ReportsPage,
-  SecuritySessionsPage,
-  SubBranchesPage,
-  SubscriptionsPage,
-  SystemSettingsPage,
-} from "@/features/super-admin";
+// import {
+//   SuperAdminLogin,
+//   SuperAdminDashboard,
+//   SuperAdminUsersPage,
+//   AdminsPage,
+//   BranchesPage,
+//   ClientsPage,
+//   WorkspacesPage,
+//   ActivityTrackingPage,
+//   NotificationsPage,
+//   RegisterAdminPage,
+//   ReportsPage,
+//   SecuritySessionsPage,
+//   SubBranchesPage,
+//   SubscriptionsPage,
+//   SystemSettingsPage,
+// } from "@/features/super-admin";
 
 // --------------------------------------------------
 // ROOT REDIRECTOR
@@ -62,13 +62,13 @@ const RootRedirector: React.FC = () => {
   const userRole = normalizeRole(user?.role);
 
   switch (userRole) {
-    case Role.SuperAdmin:
-      return (
-        <Navigate
-          to={ROUTE_PATHS.SUPER_ADMIN_DASHBOARD}
-          replace
-        />
-      );
+    // case Role.SuperAdmin:
+    //   return (
+    //     <Navigate
+    //       to={ROUTE_PATHS.SUPER_ADMIN_DASHBOARD}
+    //       replace
+    //     />
+    //   );
 
     case Role.Admin:
       return <Navigate to={ROUTE_PATHS.DASHBOARD} replace />;
@@ -123,14 +123,14 @@ export const routes: RouteObject[] = [
       },
 
       // Super Admin login uses its own login page layout.
-      {
-        path: ROUTE_PATHS.SUPER_ADMIN_LOGIN,
-        element: (
-          <GuestGuard>
-            <SuperAdminLogin />
-          </GuestGuard>
-        ),
-      },
+      // {
+      //   path: ROUTE_PATHS.SUPER_ADMIN_LOGIN,
+      //   element: (
+      //     <GuestGuard>
+      //       <SuperAdminLogin />
+      //     </GuestGuard>
+      //   ),
+      // },
 
       // ----------------------------------------------
       // ADMIN DASHBOARD ROUTES
@@ -188,98 +188,98 @@ export const routes: RouteObject[] = [
       // SUPER ADMIN ROUTES
       // ----------------------------------------------
 
-      {
-        element: (
-          <AuthGuard>
-            <RoleGuard allowedRoles={[Role.SuperAdmin]}>
-              <SuperAdminLayout />
-            </RoleGuard>
-          </AuthGuard>
-        ),
-        children: [
-          {
-            path: "/super-admin",
-            element: (
-              <Navigate
-                to={ROUTE_PATHS.SUPER_ADMIN_DASHBOARD}
-                replace
-              />
-            ),
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_DASHBOARD,
-            element: <SuperAdminDashboard />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_USERS,
-            element: <SuperAdminUsersPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_ADMINS,
-            element: <AdminsPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_BRANCHES,
-            element: <BranchesPage />,
-          },
-          {
-            path: "/super-admin/admins/branches",
-            element: <BranchesPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_CLIENTS,
-            element: <ClientsPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_WORKSPACES,
-            element: <WorkspacesPage />,
-          },
-          {
-            path: "/super-admin/admins/workspaces",
-            element: <WorkspacesPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_ACTIVITY,
-            element: <ActivityTrackingPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_NOTIFICATIONS,
-            element: <NotificationsPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_REGISTER_ADMIN,
-            element: <RegisterAdminPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_REPORTS,
-            element: <ReportsPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_SESSIONS,
-            element: <SecuritySessionsPage />,
-          },
-          {
-            path: "/super-admin/security",
-            element: <SecuritySessionsPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_SUB_BRANCHES,
-            element: <SubBranchesPage />,
-          },
-          {
-            path: "/super-admin/admins/sub-branches",
-            element: <SubBranchesPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_SUBSCRIPTIONS,
-            element: <SubscriptionsPage />,
-          },
-          {
-            path: ROUTE_PATHS.SUPER_ADMIN_SETTINGS,
-            element: <SystemSettingsPage />,
-          },
-        ],
-      },
+      // {
+      //   element: (
+      //     <AuthGuard>
+      //       <RoleGuard allowedRoles={[Role.SuperAdmin]}>
+      //         <SuperAdminLayout />
+      //       </RoleGuard>
+      //     </AuthGuard>
+      //   ),
+      //   children: [
+      //     {
+      //       path: "/super-admin",
+      //       element: (
+      //         <Navigate
+      //           to={ROUTE_PATHS.SUPER_ADMIN_DASHBOARD}
+      //           replace
+      //         />
+      //       ),
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_DASHBOARD,
+      //       element: <SuperAdminDashboard />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_USERS,
+      //       element: <SuperAdminUsersPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_ADMINS,
+      //       element: <AdminsPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_BRANCHES,
+      //       element: <BranchesPage />,
+      //     },
+      //     {
+      //       path: "/super-admin/admins/branches",
+      //       element: <BranchesPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_CLIENTS,
+      //       element: <ClientsPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_WORKSPACES,
+      //       element: <WorkspacesPage />,
+      //     },
+      //     {
+      //       path: "/super-admin/admins/workspaces",
+      //       element: <WorkspacesPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_ACTIVITY,
+      //       element: <ActivityTrackingPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_NOTIFICATIONS,
+      //       element: <NotificationsPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_REGISTER_ADMIN,
+      //       element: <RegisterAdminPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_REPORTS,
+      //       element: <ReportsPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_SESSIONS,
+      //       element: <SecuritySessionsPage />,
+      //     },
+      //     {
+      //       path: "/super-admin/security",
+      //       element: <SecuritySessionsPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_SUB_BRANCHES,
+      //       element: <SubBranchesPage />,
+      //     },
+      //     {
+      //       path: "/super-admin/admins/sub-branches",
+      //       element: <SubBranchesPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_SUBSCRIPTIONS,
+      //       element: <SubscriptionsPage />,
+      //     },
+      //     {
+      //       path: ROUTE_PATHS.SUPER_ADMIN_SETTINGS,
+      //       element: <SystemSettingsPage />,
+      //     },
+      //   ],
+      // },
 
       // ----------------------------------------------
       // UNKNOWN ROUTES

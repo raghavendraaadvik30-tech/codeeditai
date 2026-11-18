@@ -10,7 +10,7 @@ import (
 	"parexelbackend/internal/auth"
 	internaldb "parexelbackend/internal/db"
 	"parexelbackend/internal/roles/admin"
-	"parexelbackend/internal/roles/superadmin"
+	// "parexelbackend/internal/roles/superadmin"
 	"parexelbackend/internal/storage"
 	"parexelbackend/internal/templates"
 
@@ -67,7 +67,7 @@ func main() {
 		Password  string
 		Role      string
 	}{
-		{"SuperAdmin HQ", "superadmin@gmail.com", "superadmin123", "super_admin"},
+		// {"SuperAdmin HQ", "superadmin@gmail.com", "superadmin123", "super_admin"},
 		{"Global HQ", "varshinicm952@gmail.com", "Admin@123", "admin"},
 		{"admin", "admin@gmail.com", "admin123", "admin"},
 		{"author", "author@gmail.com", "author123", "author"},
@@ -126,9 +126,11 @@ func main() {
 
 		// Ensure user_profiles has profile entry with sub_branch_id
 		profileName := "System Admin"
-		if u.Email == "superadmin@gmail.com" {
-			profileName = "Super Admin HQ"
-		} else if u.Email == "admin@gmail.com" {
+		// if u.Email == "superadmin@gmail.com" {
+		// 	profileName = "Super Admin HQ"
+		// }  
+		
+		if u.Email == "admin@gmail.com" {
 			profileName = "Client Admin"
 		} else if u.Email == "author@gmail.com" {
 			profileName = "Author Account"
@@ -193,7 +195,7 @@ func main() {
 
 	// Register Auth, Super Admin, Admin & Template routes
 	auth.RegisterRoutes(r, db)
-	superadmin.RegisterRoutes(r, db)
+	// superadmin.RegisterRoutes(r, db)
 	admin.RegisterRoutes(r, db)
 	templates.RegisterRoutes(r, db, r2StorageClient)
 
@@ -209,7 +211,7 @@ func main() {
 	fmt.Printf("API Server running on http://localhost:%s\n", port)
 	fmt.Println("Health API       : GET  /health")
 	fmt.Println("Login API        : POST /auth/login")
-	fmt.Println("Super Admin API  : POST/GET /super-admin/branches, /super-admin/clients")
+	// fmt.Println("Super Admin API  : POST/GET /super-admin/branches, /super-admin/clients")
 	fmt.Println("Client Admin API : POST/GET /admin/users, /admin/users/list")
 	fmt.Println("Templates API    : POST/GET/DELETE /templates")
 	fmt.Println("========================================")
