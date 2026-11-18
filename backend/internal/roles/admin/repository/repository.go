@@ -31,6 +31,8 @@ type AdminRepository interface {
 	ReplaceUserRole(ctx context.Context, userID, newRoleID uuid.UUID) error
 
 	UpdateUserPassword(ctx context.Context, userID uuid.UUID, passwordHash string) error
+
+	DeleteUser(ctx context.Context, userID uuid.UUID) error
 }
 
 type adminRepository struct {
@@ -589,4 +591,64 @@ func (r *adminRepository) ReplaceUserRole(
 	}
 
 	return tx.Commit()
+}
+
+// DeleteUser permanently deletes a user account and its associated records.
+// Audit history is preserved.
+func (r *adminRepository) DeleteUser(
+    ctx context.Context,
+    userID uuid.UUID,
+) error {
+    tx, err := r.db.BeginTx(ctx, nil)
+    if err != nil {
+        return err
+    }
+
+    defer tx.Rollback()
+
+    // Remove records where the user was added by this admin
+    // or was the user being added.
+    _, err = tx.ExecContext(ctx, `
+        DELETE FROM added_users
+        WHERE admin_user_id = $1
+           OR user_id = $1
+    `, userID)
+    if err != nil {
+        return err
+    }
+
+    // Remove workspace memberships.
+    _, err = tx.ExecContext(ctx, `
+        DELETE FROM user_workspace
+        WHERE user_id = $1
+    `, userID)
+    if err != nil {
+        return err
+    }
+
+    // Delete the actual user account.
+    // user_profiles and user_roles are handled by CASCADE.
+    result, err := tx.ExecContext(ctx, `
+        DELETE FROM user_login
+        WHERE user_id = $1
+    `, userID)
+    if err != nil {
+        return err
+    }
+
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return err
+    }
+
+    if rowsAffected == 0 {
+        return shared.ErrUserNotFound
+    }
+
+    // Commit all deletion operations together.
+    if err := tx.Commit(); err != nil {
+        return err
+    }
+
+    return nil
 }

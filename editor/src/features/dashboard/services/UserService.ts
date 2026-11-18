@@ -1,3 +1,4 @@
+
 import { axiosInstance } from "@/shared/api/axios"
 
 export type CreateUserInput = {
@@ -47,6 +48,15 @@ class UserService {
       {
         new_password: newPassword,
       }
+    )
+
+    return response.data
+  }
+
+  // DELETE /admin/users/:user_id
+  async deleteUser(userId: string) {
+    const response = await axiosInstance.delete(
+      `/admin/users/${userId}`
     )
 
     return response.data

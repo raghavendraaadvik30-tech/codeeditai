@@ -3,48 +3,55 @@ Purpose:
 DashboardOverview.tsx displays the main administrative dashboard overview matching Screenshot 2.
 It reads user information from useUsersStore() and calculates user statistics dynamically.
 */
-import { useUsersStore } from "@/shared/stores/usersStore";
-import {
-  Users,
-  ShieldCheck,
-  FileText,
-  Pencil,
-} from "lucide-react";
-
+import { useEffect } from "react"
+import { useUsersStore } from "@/shared/stores/usersStore"
+import { Users, ShieldCheck, FileText, Pencil } from "lucide-react"
 
 export default function DashboardOverview() {
-  const { users } = useUsersStore();
+  const { users, fetchUsers, isLoading, error } = useUsersStore()
 
-  const totalUsers = users.length;
+  // Fetch actual users from the Go backend
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
+
+  // Calculate dashboard statistics
+  const totalUsers = users.length
 
   const adminUsers = users.filter(
-    (u) => u.role === "Admin"
-  ).length;
+    (u) => u.role?.toLowerCase() === "admin"
+  ).length
 
   const authorUsers = users.filter(
-    (u) => u.role === "Author"
-  ).length;
+    (u) => u.role?.toLowerCase() === "author"
+  ).length
 
-  const adminPct = totalUsers > 0 ? Math.round((adminUsers / totalUsers) * 100) : 0;
-  const authorPct = totalUsers > 0 ? Math.round((authorUsers / totalUsers) * 100) : 0;
+  const adminPct =
+    totalUsers > 0 ? Math.round((adminUsers / totalUsers) * 100) : 0
+
+  const authorPct =
+    totalUsers > 0 ? Math.round((authorUsers / totalUsers) * 100) : 0
 
   return (
     <div className="space-y-6">
+      {isLoading && (
+        <p className="text-sm text-slate-500">
+          Loading dashboard statistics...
+        </p>
+      )}
+
+      {error && <p className="text-sm text-red-500">{error}</p>}
       {/* Eyebrow and Page Heading */}
       <div>
-
-
-        <h1 className="text-2xl md:text-3xl font-extrabold text-[#172033] dark:text-white  text-foreground tracking-tight">
+        <h1 className="text-2xl font-extrabold tracking-tight text-[#172033] text-foreground md:text-3xl dark:text-white">
           System Administration Overview
         </h1>
-
-
       </div>
 
       {/* 3 Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Card 1: Total Registered Users */}
-        <div className="flex flex-col justify-between rounded-2xl border border-[#DCE7F2] bg-white p-6 shadow-xs hover:shadow-sm transition-shadow dark:border-[#294564] dark:bg-[#17263D]">
+        <div className="flex flex-col justify-between rounded-2xl border border-[#DCE7F2] bg-white p-6 shadow-xs transition-shadow hover:shadow-sm dark:border-[#294564] dark:bg-[#17263D]">
           <div>
             <div className="flex items-start justify-between">
               <span className="text-xs font-semibold text-[#64748B] dark:text-slate-400">
@@ -55,7 +62,7 @@ export default function DashboardOverview() {
               </div>
             </div>
 
-            <h2 className="text-4xl font-extrabold text-[#172033] dark:text-white my-1">
+            <h2 className="my-1 text-4xl font-extrabold text-[#172033] dark:text-white">
               {totalUsers}
             </h2>
             <p className="text-11px text-[#64748B] dark:text-slate-400">
@@ -65,7 +72,7 @@ export default function DashboardOverview() {
         </div>
 
         {/* Card 2: Admin Accounts */}
-        <div className="flex flex-col justify-between rounded-2xl border border-[#DCE7F2] bg-white p-6 shadow-xs hover:shadow-sm transition-shadow dark:border-[#294564] dark:bg-[#17263D]">
+        <div className="flex flex-col justify-between rounded-2xl border border-[#DCE7F2] bg-white p-6 shadow-xs transition-shadow hover:shadow-sm dark:border-[#294564] dark:bg-[#17263D]">
           <div>
             <div className="flex items-start justify-between">
               <span className="text-xs font-semibold text-[#64748B] dark:text-slate-400">
@@ -76,7 +83,7 @@ export default function DashboardOverview() {
               </div>
             </div>
 
-            <h2 className="text-4xl font-extrabold text-[#172033] dark:text-white my-1">
+            <h2 className="my-1 text-4xl font-extrabold text-[#172033] dark:text-white">
               {adminUsers}
             </h2>
             <p className="text-11px text-[#64748B] dark:text-slate-400">
@@ -86,7 +93,7 @@ export default function DashboardOverview() {
         </div>
 
         {/* Card 3: Author Accounts */}
-        <div className="flex flex-col justify-between rounded-2xl border border-[#DCE7F2] bg-white p-6 shadow-xs hover:shadow-sm transition-shadow dark:border-[#294564] dark:bg-[#17263D]">
+        <div className="flex flex-col justify-between rounded-2xl border border-[#DCE7F2] bg-white p-6 shadow-xs transition-shadow hover:shadow-sm dark:border-[#294564] dark:bg-[#17263D]">
           <div>
             <div className="flex items-start justify-between">
               <span className="text-xs font-semibold text-[#64748B] dark:text-slate-400">
@@ -97,7 +104,7 @@ export default function DashboardOverview() {
               </div>
             </div>
 
-            <h2 className="text-4xl font-extrabold text-[#172033] dark:text-white my-1">
+            <h2 className="my-1 text-4xl font-extrabold text-[#172033] dark:text-white">
               {authorUsers}
             </h2>
             <p className="text-11px text-[#64748B] dark:text-slate-400">
@@ -108,18 +115,18 @@ export default function DashboardOverview() {
       </div>
 
       {/* User Role Distribution Card */}
-      <div className="rounded-2xl border border-[#DCE7F2] bg-white p-6 md:p-8 shadow-xs dark:border-[#294564] dark:bg-[#17263D]">
+      <div className="rounded-2xl border border-[#DCE7F2] bg-white p-6 shadow-xs md:p-8 dark:border-[#294564] dark:bg-[#17263D]">
         <div className="mb-6">
           <h3 className="text-lg font-bold text-[#172033] dark:text-white">
             User Role Distribution
           </h3>
-          <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">
+          <p className="mt-0.5 text-xs text-[#64748B] dark:text-slate-400">
             User access by role
           </p>
         </div>
 
         {/* Roles Progress Bars & Active/Inactive Box */}
-        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+        <div className="flex flex-col items-stretch gap-6 lg:flex-row">
           {/* Progress Rows Container */}
           <div className="flex-1 space-y-3">
             {/* Admins Row */}
@@ -132,16 +139,20 @@ export default function DashboardOverview() {
                 Admins
               </span>
 
-              <div className="flex-1 h-2 rounded-full bg-[#E2E8F0] dark:bg-slate-700 overflow-hidden">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-slate-700">
                 <div
                   className="h-full rounded-full bg-[#8ADFF3] transition-all duration-500"
                   style={{ width: `${adminPct}%` }}
                 />
               </div>
 
-              <div className="flex items-center gap-2 shrink-0 text-xs font-bold">
-                <span className="text-[#172033] dark:text-white">{adminUsers}</span>
-                <span className="text-[#CBD5E1] dark:text-slate-600 font-normal">|</span>
+              <div className="flex shrink-0 items-center gap-2 text-xs font-bold">
+                <span className="text-[#172033] dark:text-white">
+                  {adminUsers}
+                </span>
+                <span className="font-normal text-[#CBD5E1] dark:text-slate-600">
+                  |
+                </span>
                 <span className="text-[#38BDF8]">{adminPct}%</span>
               </div>
             </div>
@@ -156,22 +167,28 @@ export default function DashboardOverview() {
                 Authors
               </span>
 
-              <div className="flex-1 h-2 rounded-full bg-[#E2E8F0] dark:bg-slate-700 overflow-hidden">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-slate-700">
                 <div
-                  className="h-full rounded-full bg-[#BFDBFE] dark:bg-indigo-400 transition-all duration-500"
+                  className="h-full rounded-full bg-[#BFDBFE] transition-all duration-500 dark:bg-indigo-400"
                   style={{ width: `${authorPct}%` }}
                 />
               </div>
 
-              <div className="flex items-center gap-2 shrink-0 text-xs font-bold">
-                <span className="text-[#172033] dark:text-white">{authorUsers}</span>
-                <span className="text-[#CBD5E1] dark:text-slate-600 font-normal">|</span>
-                <span className="text-[#64748B] dark:text-slate-400">{authorPct}%</span>
+              <div className="flex shrink-0 items-center gap-2 text-xs font-bold">
+                <span className="text-[#172033] dark:text-white">
+                  {authorUsers}
+                </span>
+                <span className="font-normal text-[#CBD5E1] dark:text-slate-600">
+                  |
+                </span>
+                <span className="text-[#64748B] dark:text-slate-400">
+                  {authorPct}%
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
