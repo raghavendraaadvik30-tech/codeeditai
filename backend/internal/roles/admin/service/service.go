@@ -24,6 +24,12 @@ type AdminService interface {
 	AssignRole(ctx context.Context, actorID, targetID uuid.UUID, role string) error
 
 	ChangeUserPassword(ctx context.Context, actorID uuid.UUID, targetID uuid.UUID, newPassword string) error
+
+	DeleteUser(
+		ctx context.Context,
+		actorID uuid.UUID,
+		targetID uuid.UUID,
+	) error
 }
 
 type adminService struct {
@@ -262,4 +268,44 @@ func (s *adminService) ChangeUserPassword(
 	}
 
 	return nil
+}
+
+// -------------------------------------------------------
+// DeleteUser – Admin permanently deletes a user account
+// -------------------------------------------------------
+
+func (s *adminService) DeleteUser(
+    ctx context.Context,
+    actorID uuid.UUID,
+    targetID uuid.UUID,
+) error {
+
+    // Validate target user ID.
+    if targetID == uuid.Nil {
+        return errors.New("invalid user ID")
+    }
+
+    // Prevent an admin from deleting their own account.
+    if actorID != uuid.Nil && actorID == targetID {
+        return errors.New("you cannot delete your own account")
+    }
+
+    // Permanently delete user and associated records.
+    if err := s.repo.DeleteUser(ctx, targetID); err != nil {
+        return err
+    }
+
+    // Audit log.
+    // The audit foreign keys were removed so historical records can be preserved.
+    if actorID != uuid.Nil {
+        _ = s.repo.InsertAuditLog(
+            ctx,
+            actorID,
+            targetID,
+            "DELETE_USER",
+            "Admin permanently deleted the user account",
+        )
+    }
+
+    return nil
 }

@@ -28,6 +28,7 @@ import {
   ExternalLink,
   Share2,
   Loader2,
+  Trash2,
 } from "lucide-react"
 import { Card } from "@/shared/components/ui/card"
 import { Input } from "@/shared/components/ui/input"
@@ -92,6 +93,7 @@ export default function UsersManagement() {
     roleFilter,
     setRoleFilter,
     changeUserPassword,
+    deleteUser, // ADD THIS
   } = useUsersStore()
 
   /* LOAD USERS FROM BACKEND */
@@ -130,6 +132,9 @@ export default function UsersManagement() {
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordError, setPasswordError] = useState("")
 
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState("")
+
   /* ADD USER FORM */
   const {
     register: registerAdd,
@@ -146,6 +151,14 @@ export default function UsersManagement() {
       role: "Author",
     },
   })
+
+  const [userToDelete, setUserToDelete] = useState<
+    (typeof users)[number] | null
+  >(null)
+
+  const openDeleteModal = (user: (typeof users)[number]) => {
+    setUserToDelete(user)
+  }
 
   /* ADD USER */
   const onAddSubmit = async (data: AddUserFormInput) => {
@@ -307,6 +320,40 @@ export default function UsersManagement() {
       )
     } finally {
       setIsChangingPassword(false)
+    }
+  }
+
+  /* DELETE USER */
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return
+
+    setDeleteError("")
+    setIsDeleting(true)
+
+    try {
+      await deleteUser(userToDelete.id)
+
+      // Close modal after successful deletion
+      setUserToDelete(null)
+    } catch (err: unknown) {
+      const error = err as {
+        response?: {
+          data?: {
+            message?: string
+            detail?: string
+          }
+        }
+        message?: string
+      }
+
+      setDeleteError(
+        error.response?.data?.message ||
+          error.response?.data?.detail ||
+          error.message ||
+          "Failed to delete user. Please try again."
+      )
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -570,7 +617,8 @@ Please use the credentials above to access the secure portal.`
 
                     {/* Actions */}
                     <td className="px-3 py-2.5 text-center">
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-2">
+                        {/* View */}
                         <button
                           type="button"
                           onClick={() => openViewModal(user)}
@@ -579,6 +627,17 @@ Please use the credentials above to access the secure portal.`
                           aria-label={`View ${user.fullName}`}
                         >
                           <Eye className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                          type="button"
+                          onClick={() => openDeleteModal(user)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-secondary bg-card text-destructive transition-colors hover:bg-destructive/10"
+                          title="Delete user"
+                          aria-label={`Delete ${user.fullName}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>
@@ -789,32 +848,6 @@ Please use the credentials above to access the secure portal.`
               </span>
               <span className="inline-flex items-center rounded bg-primary/15 px-2 py-0.5 text-10px font-bold text-primary">
                 {selectedUser?.role}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between border-b border-muted pb-2">
-              <span className="font-semibold text-muted-foreground">
-                Status
-              </span>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-10px font-bold uppercase ${
-                  selectedUser?.status === "Active"
-                    ? "bg-success-50 text-success-700"
-                    : selectedUser?.status === "Inactive"
-                      ? "bg-muted text-secondary-foreground"
-                      : "bg-ember-50 text-ember-700"
-                }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    selectedUser?.status === "Active"
-                      ? "bg-success-500"
-                      : selectedUser?.status === "Inactive"
-                        ? "bg-muted-foreground"
-                        : "bg-ember-500"
-                  }`}
-                />
-                {selectedUser?.status || "Active"}
               </span>
             </div>
 
@@ -1220,6 +1253,100 @@ Please use the credentials above to access the secure portal.`
                     <Loader2 className="h-4 w-4 animate-spin" />
                   )}
                   {isChangingPassword ? "Updating..." : "Update Password"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE USER MODAL */}
+      <Dialog
+        open={!!userToDelete}
+        onOpenChange={(open) => {
+          if (isDeleting) return
+
+          if (!open) {
+            setUserToDelete(null)
+            setDeleteError("")
+          }
+        }}
+      >
+        <DialogContent className={dialogClass}>
+          <DialogHeader className="border-b border-muted pb-3">
+            <DialogTitle className="flex items-center gap-2 text-lg font-extrabold text-foreground">
+              <div className="rounded-lg bg-destructive/10 p-2 text-destructive">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              Delete User
+            </DialogTitle>
+          </DialogHeader>
+
+          {userToDelete && (
+            <div className="space-y-4 pt-3">
+              <p className="text-sm text-secondary-foreground">
+                Are you sure you want to permanently delete this user account?
+                This action cannot be undone.
+              </p>
+
+              <div className="rounded-lg border border-secondary bg-muted/50 p-3">
+                <p className="text-sm font-semibold text-foreground">
+                  {userToDelete.fullName}
+                </p>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {userToDelete.email}
+                </p>
+
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="rounded bg-primary/15 px-2 py-0.5 text-10px font-bold text-primary">
+                    {userToDelete.role}
+                  </span>
+
+                  <span className="font-mono text-10px text-muted-foreground">
+                    ID: {userToDelete.id}
+                  </span>
+                </div>
+              </div>
+
+              {/* DELETE ERROR */}
+              {deleteError && (
+                <p className="flex items-center gap-2 text-xs text-destructive">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  {deleteError}
+                </p>
+              )}
+
+              <DialogFooter className="border-t border-muted pt-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isDeleting}
+                  onClick={() => {
+                    setUserToDelete(null)
+                    setDeleteError("")
+                  }}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={handleDeleteUser}
+                  className="text-destructive-foreground gap-2 bg-destructive hover:bg-destructive/90"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4" />
+                      Delete User
+                    </>
+                  )}
                 </Button>
               </DialogFooter>
             </div>
