@@ -65,12 +65,17 @@ VITE_PUBLIC_APP_URL=https://app.your-domain.com
 ```bash
 cd editor
 npm install
-npm run build:mobile      # creates dist/
-npx cap add android       # creates android/
-npx cap add ios           # creates ios/ (run on a Mac to install pods)
 ```
 
-Commit the generated `android/` and `ios/` folders.
+That is all. `npm run android` (or `npm run ios` on a Mac) creates the native
+`android/` / `ios/` project the first time, builds the web app, syncs it and
+opens Android Studio / Xcode. Commit the generated `android/` and `ios/` folders.
+
+Requires JDK 21 for Android (Android Studio's bundled one works).
+
+If the app opens to an error screen, it shows the error text. Send that text
+along when asking for help. On Android you can also read the log with
+`adb logcat | findstr /i "chromium Capacitor"`.
 
 ## 3. Icons and splash screen
 

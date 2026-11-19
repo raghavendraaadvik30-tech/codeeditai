@@ -17,6 +17,29 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Last-resort error screen: if the app code fails before React starts
+      // (e.g. a missing file in the mobile build), show why instead of a blank
+      // page. Removed automatically once the app renders.
+      (function () {
+        function show(message) {
+          var root = document.getElementById("root")
+          if (!root || root.childElementCount > 0) return
+          root.innerHTML =
+            '<div style="font-family:system-ui,sans-serif;padding:24px;padding-top:max(24px,env(safe-area-inset-top));color:#172033">' +
+            '<h1 style="font-size:18px;margin:0 0 8px">The app could not start</h1>' +
+            '<pre style="white-space:pre-wrap;word-break:break-word;background:#F1F5F9;padding:12px;border-radius:8px;font-size:12px"></pre>' +
+            '<button onclick="location.reload()" style="margin-top:12px;height:44px;width:100%;border:0;border-radius:12px;background:#324480;color:#fff;font-size:14px">Reload</button></div>'
+          root.querySelector("pre").textContent = String(message || "Unknown error")
+        }
+        window.addEventListener("error", function (e) {
+          show(e.message || (e.target && e.target.src ? "Failed to load " + e.target.src : ""))
+        }, true)
+        window.addEventListener("unhandledrejection", function (e) {
+          show(e.reason && (e.reason.stack || e.reason.message || e.reason))
+        })
+      })()
+    </script>
     <script type="module" src="src/app/main.tsx"></script>
   </body>
 </html>

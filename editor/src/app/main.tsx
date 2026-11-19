@@ -53,9 +53,18 @@ import "../index.css";
 import { setupNativeApp } from "./native";
 // Long-press opens context menus on iPhone/iPad (iOS never fires contextmenu).
 import { installLongPressContextMenu } from "@/shared/platform/touch";
+// Shows the error instead of a blank screen if a page crashes.
+import { StartupErrorBoundary } from "./StartupErrorBoundary";
 
-void setupNativeApp();
-installLongPressContextMenu();
+// Native setup must never stop the app from rendering.
+void setupNativeApp().catch((error) =>
+  console.error("Native setup failed:", error)
+);
+try {
+  installLongPressContextMenu();
+} catch (error) {
+  console.error("Touch setup failed:", error);
+}
 
 // CREATE REACT ROOT   document.getElementById("root")
 // Finds the HTML element: <div id="root"></div> Usually this is present in index.html.
@@ -92,7 +101,9 @@ createRoot(
             ↓
         pages */}
 
-    <App />
+    <StartupErrorBoundary>
+      <App />
+    </StartupErrorBoundary>
 
 
   </StrictMode>
