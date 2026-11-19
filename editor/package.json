@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "build:mobile": "tsc -b && vite build --mode mobile",
-    "cap:sync": "npm run build:mobile && cap sync",
+    "cap:sync": "npm run build:mobile && cap sync && node scripts/patch-native.mjs",
     "android": "npm run cap:sync && cap open android",
     "ios": "npm run cap:sync && cap open ios",
     "android:run": "npm run cap:sync && cap run android",

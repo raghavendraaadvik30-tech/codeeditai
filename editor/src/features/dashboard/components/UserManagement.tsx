@@ -393,6 +393,21 @@ Please use the credentials above to access the secure portal.`
     : ""
 
   /* RENDER */
+  const openInviteModal = (user: User) => {
+    setInviteUser(user)
+    setInvitePassword(userPasswords[user.id] || "")
+    setCopiedField(null)
+    setIsInviteOpen(true)
+  }
+
+  const openPasswordModal = (user: User) => {
+    setPasswordUser(user)
+    setNewPassword("")
+    setConfirmPassword("")
+    setPasswordError("")
+    setIsPasswordOpen(true)
+  }
+
   return (
     <div className="space-y-6" id="users-module-container">
       {/* HEADER */}
@@ -508,8 +523,82 @@ Please use the credentials above to access the secure portal.`
         </div>
       </div>
 
-      {/* USERS TABLE */}
-      <Card className="overflow-hidden rounded-2xl border border-secondary bg-card shadow-sm shadow-muted/50">
+      {/* USERS LIST (phones): one card per user, same actions as the table */}
+      <div className="space-y-3 md:hidden" id="users-mobile-list">
+        {isLoading && users.length === 0 ? (
+          <Card className="flex items-center justify-center gap-2 rounded-2xl border border-secondary bg-card p-6 text-sm font-medium text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading users...
+          </Card>
+        ) : filteredUsers.length > 0 ? (
+          filteredUsers.map((user) => (
+            <Card
+              key={user.id}
+              className="gap-3 rounded-2xl border border-secondary bg-card p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-foreground">
+                    {user.fullName}
+                  </p>
+                  <p className="text-xs break-all text-secondary-foreground">
+                    {user.email}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-foreground">
+                  {user.role}
+                </span>
+              </div>
+
+              <p className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                {user.createdDate}
+              </p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => openInviteModal(user)}
+                  className="h-10 gap-1.5 rounded-xl border-primary/25 text-xs font-semibold text-primary"
+                >
+                  <Mail className="h-4 w-4" />
+                  Invite
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => openPasswordModal(user)}
+                  className="h-10 rounded-xl border-secondary text-xs"
+                >
+                  Change Password
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => openViewModal(user)}
+                  className="h-10 gap-1.5 rounded-xl border-secondary text-xs text-primary"
+                >
+                  <Eye className="h-4 w-4" />
+                  View
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => openDeleteModal(user)}
+                  className="h-10 gap-1.5 rounded-xl border-secondary text-xs text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <Card className="rounded-2xl border border-secondary bg-card p-6 text-center text-sm font-medium text-muted-foreground">
+            No users found matching your search or filter.
+          </Card>
+        )}
+      </div>
+
+      {/* USERS TABLE (tablet / desktop) */}
+      <Card className="hidden overflow-hidden rounded-2xl border border-secondary bg-card shadow-sm shadow-muted/50 md:block">
         <div className="overflow-x-auto">
           <table
             className="w-full min-w-[950px] table-auto border-collapse text-left"
@@ -601,12 +690,7 @@ Please use the credentials above to access the secure portal.`
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                          setInviteUser(user)
-                          setInvitePassword(userPasswords[user.id] || "")
-                          setCopiedField(null)
-                          setIsInviteOpen(true)
-                        }}
+                        onClick={() => openInviteModal(user)}
                         className="inline-flex h-7.5 items-center justify-center gap-1.5 rounded-full border border-primary/25 bg-[#F0F4F8] px-3 text-[11px] font-semibold whitespace-nowrap text-primary shadow-none transition-colors hover:bg-primary/10"
                         title="Prepare email invitation"
                         id={`invite-action-btn-${user.id}`}
@@ -620,13 +704,7 @@ Please use the credentials above to access the secure portal.`
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                          setPasswordUser(user)
-                          setNewPassword("")
-                          setConfirmPassword("")
-                          setPasswordError("")
-                          setIsPasswordOpen(true)
-                        }}
+                        onClick={() => openPasswordModal(user)}
                         className="h-7 rounded-full border-secondary px-3 text-[11px]"
                       >
                         Change Password

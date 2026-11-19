@@ -13,22 +13,45 @@ codebase produces the website, the Android app and the iOS app.
 
 ## 1. Point the app at your backend
 
-`localhost` on a phone means the phone itself. Create `editor/.env.mobile`:
+The backend URL is baked into the app when you build it. `localhost` on a
+phone means the phone itself, so the mobile build refuses to use it.
+
+Create `editor/.env.mobile` with ONE of these:
 
 ```
+# A deployed backend (required for Play Store / App Store builds)
 VITE_API_URL=https://api.your-domain.com
+
+# Your PC on the same Wi-Fi as the phone (testing). Find the IP with `ipconfig`
+# ("IPv4 Address"); Vite also prints it as "Network: http://<ip>:5173".
+VITE_API_URL=http://192.168.31.240:8088
+
+# Android emulator talking to your PC
+VITE_API_URL=http://10.0.2.2:8088
 ```
 
-The Go backend already sends `Access-Control-Allow-Origin: *`, which covers the
-app origins (`https://localhost` on Android, `capacitor://localhost` on iOS).
-Login uses a Bearer token in localStorage, so no cookie setup is needed.
+For an `http://` URL the build automatically:
+- allows mixed content in the Android WebView (`capacitor.config.ts`),
+- adds `android:usesCleartextTraffic="true"` to the Android manifest and an
+  ATS exception to the iOS `Info.plist` (`scripts/patch-native.mjs`, run by
+  `npm run cap:sync`). Switching to an `https://` URL removes them again.
 
-Testing against a dev machine over Wi-Fi: use its LAN IP, e.g.
-`http://192.168.1.20:8088`. Plain `http` needs two extra settings:
-- Android: add `android:usesCleartextTraffic="true"` to `<application>` in
-  `android/app/src/main/AndroidManifest.xml`.
-- iOS: add an `NSAppTransportSecurity` exception in `ios/App/App/Info.plist`.
-Remove both for release builds.
+The Go backend listens on all network interfaces and sends
+`Access-Control-Allow-Origin: *`, so it needs no changes. Login uses a Bearer
+token in localStorage, so no cookie setup is needed either.
+
+### Windows: let the phone reach the backend on your PC
+
+Run once in an **Administrator** PowerShell:
+
+```powershell
+netsh advfirewall firewall add rule name="DocuPilot API 8088" dir=in action=allow protocol=TCP localport=8088
+```
+
+Then, with the backend running, open `http://<your-ip>:8088/health` in the
+phone's browser. If you don't see `"API is running"`, the app can't connect
+either: check that the phone and PC are on the same Wi-Fi (not a guest network)
+and that the IP is current.
 
 ## 2. One-time setup
 
@@ -60,7 +83,25 @@ npm run android:run    # build, sync, run on a connected device/emulator
 npm run ios:run
 ```
 
-Re-run one of these after every web change (they rebuild and sync).
+Re-run one of these after every web change **and after every change to
+`.env.mobile`** (they rebuild and sync). Running the old APK will keep the old URL.
+
+## Troubleshooting "cannot connect"
+
+The login screen now shows the exact address the app tried, e.g.
+"Cannot reach the server at http://192.168.31.240:8088".
+
+| Symptom | Fix |
+|---------|-----|
+| Build stops with `[mobile] VITE_API_URL is ...` | Create/fix `editor/.env.mobile` (section 1). |
+| Address shown is `localhost` | You're running an old build. Run `npm run android` again. |
+| `/health` doesn't open in the phone browser | Firewall rule, same Wi-Fi, backend running, correct IP. |
+| `/health` works in phone browser but app fails | Run `npm run cap:sync` so the cleartext patch is applied, then rebuild in Android Studio. |
+| Works on emulator only | Emulator uses `10.0.2.2`; a real phone needs your PC's Wi-Fi IP. |
+
+Debug the app's network calls from Chrome on your PC: open
+`chrome://inspect`, pick the DocuPilot WebView, and check the Console and
+Network tabs. On iOS use Safari > Develop > [device].
 
 ## 5. Release
 
@@ -74,6 +115,10 @@ Re-run one of these after every web change (they rebuild and sync).
 - `index.html`: `viewport-fit=cover`, theme colour, no phone-number auto-linking.
 - `src/styles/mobile.css`: safe-area padding, `100dvh`, 16px inputs (stops iOS zoom), scroll strips.
 - `src/app/native.ts`: status bar, splash hide, Android back button, keyboard scroll. No-op in browsers.
-- Dashboard: drawer backdrop and smaller padding on phones.
+- Dashboard: drawer backdrop and smaller padding on phones; Users page shows
+  cards instead of the wide table below 768px; dialogs scroll when taller
+  than the screen.
+- Opening the dev server from a phone browser (`http://<ip>:5173`) rewrites a
+  `localhost` API URL to that same IP automatically (`src/app/config/env.ts`).
 - Editor (width < 768px): bottom tool bar replaces the left rail, tool and AI panels
   open full screen, ribbon and header scroll sideways, page zoom starts fit-to-width.

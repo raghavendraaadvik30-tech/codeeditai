@@ -156,7 +156,7 @@ function AdminProfileSecurity({ user, onClose }: AdminProfileSecurityProps) {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <div className="w-full max-w-90 overflow-hidden rounded-2xl border border-secondary bg-card shadow-2xl">
+      <div className="max-h-[calc(100dvh-2rem)] w-full max-w-90 overflow-y-auto rounded-2xl border border-secondary bg-card shadow-2xl">
         <div className="flex items-start justify-between border-b border-muted px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
