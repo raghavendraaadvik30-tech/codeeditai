@@ -1,5 +1,7 @@
 
 import axios from "axios";
+import { Capacitor } from "@capacitor/core";
+import { env } from "@/app/config/env";
 
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -29,7 +31,16 @@ export function getErrorMessage(error: unknown): string {
     }
 
     if (!error.response) {
-      return "Unable to connect to the server. Please check your internet connection.";
+      // No HTTP response at all: wrong address, server down, firewall,
+      // timeout, or the request was blocked (CORS / cleartext http).
+      const server = error.config?.baseURL || env.apiUrl;
+      if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
+        return `The server at ${server} took too long to respond. Please try again.`;
+      }
+      if (Capacitor.isNativePlatform()) {
+        return `Cannot reach the server at ${server}. Make sure the phone is online and this address is reachable from it (not "localhost").`;
+      }
+      return `Unable to connect to the server at ${server}. Please check your internet connection.`;
     }
 
     return backendMessage || "Something went wrong. Please try again.";

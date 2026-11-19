@@ -42,6 +42,18 @@ body {
   min-height: 100%;
 }
 
+/* iOS WebKit can refuse focus/typing in fields inside a "select-none"
+   container (the login page uses one). Fields and the document editor
+   must always allow text selection. */
+input,
+textarea,
+select,
+[contenteditable="true"],
+[contenteditable=""] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 @media (pointer: coarse) {
   button,
   [role="button"],
