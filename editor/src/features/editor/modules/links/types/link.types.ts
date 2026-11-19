@@ -91,7 +91,8 @@ export interface BookmarkItem {
 export interface CrossReferenceItem {
   id: string;
   targetId: string;
-  targetType: CrossReferenceTarget;
+  // "custom" marks references to arbitrary anchors (see HyperlinkService).
+  targetType: CrossReferenceTarget | 'custom';
   label: string;
   targetText: string;
   pageNumber?: number;
