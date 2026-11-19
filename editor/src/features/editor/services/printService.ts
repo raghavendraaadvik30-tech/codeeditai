@@ -3,11 +3,13 @@
  * Clones document pages, removes editor chrome, and invokes native print.
  */
 
+import { isNativeApp, printPage } from "@/shared/platform";
+
 export const printService = {
   async printDocument(): Promise<void> {
     const pageElements = Array.from(document.querySelectorAll<HTMLElement>("section[data-page-id]"));
     if (pageElements.length === 0) {
-      window.print();
+      await printPage();
       return;
     }
 
@@ -277,6 +279,7 @@ export const printService = {
       printRoot.remove();
       document.body.classList.remove("printing-active");
       window.removeEventListener("afterprint", cleanup);
+      document.removeEventListener("pointerdown", cleanup, true);
     };
     window.addEventListener("afterprint", cleanup);
 
@@ -292,10 +295,19 @@ export const printService = {
         try { await image.decode(); } catch { /* retain broken image placeholder */ }
       }));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      window.print();
+      await printPage();
     } finally {
-      // afterprint is not fired by every browser or print destination.
-      setTimeout(cleanup, 2000);
+      if (isNativeApp) {
+        // The native print preview keeps re-rendering this page while it is
+        // open (e.g. when the paper size changes), so keep the print copy
+        // until the user is back in the app and touches it. It sits below
+        // the visible area, so it is never seen on screen.
+        document.addEventListener("pointerdown", cleanup, { once: true, capture: true });
+        setTimeout(cleanup, 5 * 60 * 1000);
+      } else {
+        // afterprint is not fired by every browser or print destination.
+        setTimeout(cleanup, 2000);
+      }
     }
   },
 };

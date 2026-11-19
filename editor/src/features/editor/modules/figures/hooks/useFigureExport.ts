@@ -11,6 +11,7 @@
 import { useState } from "react";
 import type { FigureModel } from "../types";
 import { figureService } from "../services";
+import { copyText } from "@/shared/platform";
 
 export function useFigureExport() {
   const [exporting, setExporting] = useState(false);
@@ -19,7 +20,7 @@ export function useFigureExport() {
     try {
       setExporting(true);
       const html = figureService.exportToHTML(figure);
-      await navigator.clipboard.writeText(html);
+      await copyText(html);
       return true;
     } catch {
       return false;

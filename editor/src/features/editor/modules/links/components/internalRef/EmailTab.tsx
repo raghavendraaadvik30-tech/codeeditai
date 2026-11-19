@@ -14,6 +14,7 @@
 import { useState } from 'react';
 import { Mail, Send, AlertCircle, CheckCircle2, Type, FileText,ArrowRight  } from 'lucide-react';
 import { buildGmailWebUri } from '../../utils/emailParser';
+import { openExternal } from '@/shared/platform';
 
 interface EmailTabProps {
   onLinkInserted?: (item: {
@@ -59,7 +60,7 @@ export function EmailTab({ onLinkInserted }: EmailTabProps) {
       body: message.trim(),
     });
 
-    window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+    void openExternal(gmailUrl);
 
     setSuccess('Gmail compose opened in a new tab.');
 

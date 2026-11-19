@@ -39,6 +39,11 @@ function resolveApiUrl(): string {
 export const env = {
   apiUrl: resolveApiUrl(),
 
+  // Public URL of the web app, used in links sent to other people
+  // (e.g. invitation emails). Needed for the mobile app, whose own origin
+  // is https://localhost / capacitor://localhost.
+  publicAppUrl: (import.meta.env?.VITE_PUBLIC_APP_URL || "").replace(/\/$/, ""),
+
   // Google Fonts API key.
   googleFontsApiKey:
     import.meta.env?.VITE_GOOGLE_FONTS_API_KEY ||

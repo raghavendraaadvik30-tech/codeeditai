@@ -1451,7 +1451,7 @@ export function TableControlsOverlay({
           }}
         >
           <div className="h-full w-0.5 transition-colors bg-transparent group-hover:bg-brand/80" />
-          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
+          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm touch-visible opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
 
@@ -1484,7 +1484,7 @@ export function TableControlsOverlay({
             {/* Top guide indicator pill */}
             <div
               className={`absolute top-0 h-3 w-2 rounded-full border border-white bg-brand shadow-sm transition-opacity dark:border-secondary ${
-                activeColIndex === col.colIndex ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                activeColIndex === col.colIndex ? "opacity-100" : "touch-visible opacity-0 group-hover:opacity-100"
               }`}
             />
           </div>
@@ -1507,7 +1507,7 @@ export function TableControlsOverlay({
           }}
         >
           <div className="h-full w-0.5 transition-colors bg-transparent group-hover:bg-brand/80" />
-          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
+          <div className="absolute top-1/2 -translate-y-1/2 h-4 w-2 rounded-full border border-white bg-brand shadow-sm touch-visible opacity-0 group-hover:opacity-100 transition-opacity dark:border-secondary" />
         </div>
       )}
 
@@ -1540,7 +1540,7 @@ export function TableControlsOverlay({
             {/* Left guide indicator pill */}
             <div
               className={`absolute left-0 h-2 w-3 rounded-full border border-white bg-brand shadow-sm transition-opacity dark:border-secondary ${
-                activeRowIndex === row.rowIndex ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                activeRowIndex === row.rowIndex ? "opacity-100" : "touch-visible opacity-0 group-hover:opacity-100"
               }`}
             />
           </div>

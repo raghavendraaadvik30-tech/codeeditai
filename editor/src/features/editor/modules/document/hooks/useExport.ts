@@ -12,6 +12,7 @@ import { useState, useCallback } from "react";
 import { useDocumentModel, type PageModel } from "../../../store/documentModel";
 import { generateWordDocx } from "../../../services/docxGeneratorService";
 import { printService } from "../../../services/printService";
+import { saveFile } from "@/shared/platform";
 
 export type ExportFormat = "pdf" | "docx" | "html" | "txt";
 
@@ -62,36 +63,19 @@ export function useExport() {
           tableAutoFitMode: "fixed",
           exportMarkupMode: "markup",
         });
-        const url = URL.createObjectURL(blob);
-        const a = window.document.createElement("a");
-        a.href = url;
-        a.download = `${resolvedName}.docx`;
-        window.document.body.appendChild(a);
-        a.click();
-        window.document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        await saveFile(blob, `${resolvedName}.docx`);
       } else if (format === "html") {
         const editorElement = document.querySelector(".prose-doc") || document.body;
         const content = editorElement.innerHTML;
         const blob = new Blob([content], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
-        const a = window.document.createElement("a");
-        a.href = url;
-        a.download = `${resolvedName}.html`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        await saveFile(blob, `${resolvedName}.html`);
       } else if (format === "txt") {
         const editorElement = document.querySelector(".prose-doc") || document.body;
         const text = (editorElement as HTMLElement).innerText || "";
         const blob = new Blob([text], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = window.document.createElement("a");
-        a.href = url;
-        a.download = `${resolvedName}.txt`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        await saveFile(blob, `${resolvedName}.txt`);
       } else {
-        printService.printDocument();
+        await printService.printDocument();
       }
     } catch (err) {
       console.error("Export failed:", err);

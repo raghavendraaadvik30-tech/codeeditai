@@ -1,6 +1,7 @@
 import type { DocumentModel } from "../store/documentModel";
 
 import { generateWordDocx } from "./docxGeneratorService";
+import { saveFile } from "@/shared/platform";
 
 
 export interface DocumentMeta {
@@ -727,46 +728,10 @@ ${html}
   ========================================================== */
 
 
-  download(
-
-    blob: Blob,
-
-    filename: string
-
-  ) {
-
-
-    const url =
-
-      URL.createObjectURL(blob);
-
-
-    const link =
-
-      document.createElement("a");
-
-
-    link.href = url;
-
-
-    link.download = filename;
-
-
-    document.body.appendChild(link);
-
-
-    link.click();
-
-
-    document.body.removeChild(link);
-
-
-    setTimeout(() => {
-
-      URL.revokeObjectURL(url);
-
-    }, 1000);
-
+  download(blob: Blob, filename: string) {
+    void saveFile(blob, filename).catch((error) =>
+      console.error("Download failed:", error)
+    );
   },
 
   /* ==========================================================

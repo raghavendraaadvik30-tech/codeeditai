@@ -45,6 +45,7 @@ import AIPanel from "../components/ai/AIPanel";
 import EditorStatusBar from "../components/statusbar/EditorStatusBar";
 import MobileToolNav from "../components/sidebar/MobileToolNav";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BACK_BUTTON_EVENT } from "@/app/native";
 
 
 import { useEditor } from "../hooks/useEditor";
@@ -55,6 +56,7 @@ export default function EditorLayout() {
     leftPanelWidth,
     setLeftPanelWidth,
     aiPanelOpen,
+    setAiPanelOpen,
     setLeftPanelOpen,
     setZoom,
   } = useEditor();
@@ -67,7 +69,9 @@ export default function EditorLayout() {
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
 
-  const startResize = useCallback((e: React.MouseEvent) => {
+  // Pointer events cover mouse, touch (iPad) and pen alike.
+  const startResize = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
 
@@ -76,7 +80,7 @@ export default function EditorLayout() {
     startWidthRef.current = leftPanelWidth;
     setIsResizing(true);
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    const onPointerMove = (moveEvent: PointerEvent) => {
       if (!isDraggingRef.current) return;
       moveEvent.preventDefault();
       const deltaX = moveEvent.clientX - startXRef.current;
@@ -87,31 +91,49 @@ export default function EditorLayout() {
       setLeftPanelWidth(newWidth);
     };
 
-    const onMouseUp = () => {
+    const onPointerUp = () => {
       isDraggingRef.current = false;
       setIsResizing(false);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       document.body.style.removeProperty("cursor");
       document.body.style.removeProperty("user-select");
     };
 
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
   }, [leftPanelWidth, setLeftPanelWidth]);
 
   // On phones, start with the page scaled to fit the screen width.
   // 816px is the default page width (US Letter at 96 dpi).
+  // On tablets the full desktop layout leaves less than a page of width,
+  // so start zoomed out to fit there as well (rail + padding ~ 100px).
   useEffect(() => {
-    if (!isMobile) return;
-    const fit = Math.floor(((window.innerWidth - 16) / 816) * 100);
+    const chrome = isMobile ? 16 : 100;
+    if (!isMobile && window.innerWidth >= 1100) return;
+    const fit = Math.floor(((window.innerWidth - chrome) / 816) * 100);
     setZoom(Math.max(25, Math.min(100, fit)));
     // A saved "panel open" preference would cover the whole phone screen.
-    setLeftPanelOpen(false);
+    if (isMobile) setLeftPanelOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
+
+  // Android back button closes the full-screen panel before leaving the editor.
+  useEffect(() => {
+    if (!isMobile || (!leftPanelOpen && !aiPanelOpen)) return;
+    const onBack = (event: Event) => {
+      event.preventDefault();
+      if (aiPanelOpen) setAiPanelOpen(false);
+      else setLeftPanelOpen(false);
+    };
+    window.addEventListener(BACK_BUTTON_EVENT, onBack);
+    return () => window.removeEventListener(BACK_BUTTON_EVENT, onBack);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, leftPanelOpen, aiPanelOpen]);
 
   useEffect(() => {
     return () => {
@@ -208,7 +230,7 @@ export default function EditorLayout() {
                   aria-valuemax={760}
                   tabIndex={0}
                   title="Drag to resize sidebar (Double-click to reset)"
-                  onMouseDown={startResize}
+                  onPointerDown={startResize}
                   onDoubleClick={() => setLeftPanelWidth(336)}
                   onKeyDown={(e) => {
                     if (e.key === "ArrowLeft") {

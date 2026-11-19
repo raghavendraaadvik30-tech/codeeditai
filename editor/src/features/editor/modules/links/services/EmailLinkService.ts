@@ -12,6 +12,7 @@
 import type { EmailLinkData } from '../types';
 import { buildMailtoUri } from '../utils/emailParser';
 import { createHyperlinkHtml } from '../utils/parseHyperlink';
+import { saveFile } from '@/shared/platform';
 
 /**
  * Pure math fallback converter for oklch(L C H / A) -> sRGB HEX / RGBA.
@@ -237,14 +238,7 @@ export class EmailLinkService {
    */
   downloadPdfBlob(blob: Blob, documentTitle = 'Document'): void {
     const fileName = documentTitle.endsWith('.pdf') ? documentTitle : `${documentTitle}.pdf`;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    void saveFile(blob, fileName).catch((error) => console.error('PDF save failed:', error));
   }
 
   /**

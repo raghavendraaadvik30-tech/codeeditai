@@ -10,6 +10,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import type { OnlinePicturesDialogProps } from '../types';
 import { validateImageUrl } from '../utils';
+import { isNativeApp, openExternal } from '@/shared/platform';
 
 export type { OnlinePicturesDialogProps };
 
@@ -107,6 +108,13 @@ export const OnlinePicturesDialog: React.FC<OnlinePicturesDialogProps> = ({
     const googleImagesUrl = q
       ? `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}`
       : 'https://www.google.com/imghp?hl=en';
+
+    if (isNativeApp) {
+      // Opens the in-app browser; there is no popup to be blocked.
+      setPopupBlocked(false);
+      void openExternal(googleImagesUrl);
+      return;
+    }
 
     const newWindow = window.open(googleImagesUrl, '_blank', 'noopener,noreferrer');
     if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
