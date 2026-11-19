@@ -4,6 +4,7 @@ import {
   useContext,
   useState,
 } from "react";
+import { saveFile } from "@/shared/platform";
 
 type AuditAction =
   | "edit"
@@ -77,14 +78,9 @@ export function AuditProvider({
       { type: "application/json" }
     );
 
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-
-    anchor.href = url;
-    anchor.download = `audit-trail-${Date.now()}.json`;
-    anchor.click();
-
-    URL.revokeObjectURL(url);
+    void saveFile(blob, `audit-trail-${Date.now()}.json`).catch((error) =>
+      console.error("Audit export failed:", error)
+    );
   }, [entries]);
 
   return (

@@ -60,6 +60,44 @@ select,
   a {
     touch-action: manipulation;
   }
+
+  /* Drag / resize / rotate handles (figures, tables, ruler, panels) use
+     pointer events. Without touch-action:none the browser treats the finger
+     movement as a scroll and cancels the drag after a few pixels. */
+  .resize-handle,
+  .rotate-handle,
+  [class*="cursor-nwse-resize"],
+  [class*="cursor-nesw-resize"],
+  [class*="cursor-ns-resize"],
+  [class*="cursor-ew-resize"],
+  [class*="cursor-col-resize"],
+  [class*="cursor-row-resize"],
+  [class*="cursor-move"],
+  [class*="cursor-grab"] {
+    touch-action: none;
+  }
+
+  /* The handles are 10-12px dots; give fingers a ~36px invisible target. */
+  .resize-handle::after,
+  .rotate-handle::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+  }
+
+  /* A selected figure (it shows resize handles) is dragged, not scrolled. */
+  :has(> .resize-handle) {
+    touch-action: none;
+  }
+}
+
+/* Tailwind v4 only applies hover: / group-hover: styles on devices that can
+   hover, so controls that appear "on hover" would stay invisible forever on
+   phones and tablets. Elements marked touch-visible are always shown there. */
+@media (hover: none) {
+  .touch-visible {
+    opacity: 1 !important;
+  }
 }
 
 @media (max-width: 767px) {
@@ -91,5 +129,8 @@ select,
     position: fixed;
     top: auto;
     left: auto;
+    max-width: calc(100vw - 16px);
+    max-height: 60dvh;
+    overflow-y: auto;
   }
 }

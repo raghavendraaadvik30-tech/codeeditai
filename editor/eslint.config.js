@@ -69,6 +69,9 @@ export default defineConfig([
             'data-editor-table-container',
             'menu-item-btn',
             'cn-input-otp',
+            // mobile / touch helpers styled in src/styles/mobile.css
+            'mobile-scroll-x',
+            'touch-visible',
           ],
         },
       ],

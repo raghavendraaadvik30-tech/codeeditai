@@ -53,6 +53,13 @@ phone's browser. If you don't see `"API is running"`, the app can't connect
 either: check that the phone and PC are on the same Wi-Fi (not a guest network)
 and that the IP is current.
 
+Also set the public address of the web app in `.env.mobile`, so invitation
+emails sent from the phone contain a working link:
+
+```
+VITE_PUBLIC_APP_URL=https://app.your-domain.com
+```
+
 ## 2. One-time setup
 
 ```bash
@@ -122,3 +129,23 @@ Network tabs. On iOS use Safari > Develop > [device].
   `localhost` API URL to that same IP automatically (`src/app/config/env.ts`).
 - Editor (width < 768px): bottom tool bar replaces the left rail, tool and AI panels
   open full screen, ribbon and header scroll sideways, page zoom starts fit-to-width.
+
+## How app-only features work
+
+Several browser features don't exist inside the app WebView. The code goes
+through `src/shared/platform/` instead, which picks the right implementation:
+
+| Feature | Web | Android / iOS app |
+|---------|-----|-------------------|
+| Export Word / HTML / TXT / PDF email, Excel users, audit JSON | Browser download | Share sheet (Save to Files, Drive, Mail, WhatsApp...) via `@capacitor/filesystem` + `@capacitor/share` |
+| Print / Export PDF | `window.print()` | Native print dialog with "Save as PDF" via `@capgo/capacitor-printer` |
+| External links, Google Images, Gmail | New tab | In-app browser via `@capacitor/browser`; `mailto:`/`tel:` open the mail/phone app |
+| Copy to clipboard | Clipboard API | Clipboard API with a fallback |
+| Right-click menus (tables, charts, shapes, icons, SmartArt) | Right-click | Long-press (Android natively, iOS via `src/shared/platform/touch.ts`) |
+| Drag / resize / rotate figures, table columns, ruler, side panel | Mouse | Touch (larger hit areas, no accidental scrolling) |
+| Hover-only buttons (chart data delete, table resize grips) | On hover | Always visible |
+| Android back button | - | Closes the open panel or dialog first, then goes back |
+
+`window.open` and `window.print` are also redirected inside the app, so
+code that still calls them keeps working.
+

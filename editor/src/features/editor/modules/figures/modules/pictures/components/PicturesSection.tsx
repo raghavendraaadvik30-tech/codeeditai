@@ -14,6 +14,7 @@ import type { PictureInsertMode, PictureInsertEventDetail } from '../types';
 import { generatePictureHTML, generateTitleOnlyHTML } from '../utils';
 import { pictureService } from '../services';
 import { usePictureEvents } from '../hooks';
+import { openExternal } from '@/shared/platform';
 
 export type { PictureInsertMode };
 
@@ -30,18 +31,7 @@ export const PicturesSection: React.FC = () => {
   }, []);
 
   const handleOnlinePicturesClick = () => {
-    const googleUrl = 'https://www.google.com/search?tbm=isch';
-    const googleTab = window.open('', '_blank');
-    if (googleTab) {
-      try {
-        googleTab.opener = null;
-      } catch {
-        // ignore
-      }
-      googleTab.location.href = googleUrl;
-    } else {
-      window.open(googleUrl, '_blank');
-    }
+    void openExternal('https://www.google.com/search?tbm=isch');
   };
 
   // Listen for pf-insert-picture CustomEvents across the window using the pictures hook

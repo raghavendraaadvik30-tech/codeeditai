@@ -51,8 +51,11 @@ import "../index.css";
 
 // Native (Capacitor) start-up. No-op in a normal browser.
 import { setupNativeApp } from "./native";
+// Long-press opens context menus on iPhone/iPad (iOS never fires contextmenu).
+import { installLongPressContextMenu } from "@/shared/platform/touch";
 
 void setupNativeApp();
+installLongPressContextMenu();
 
 // CREATE REACT ROOT   document.getElementById("root")
 // Finds the HTML element: <div id="root"></div> Usually this is present in index.html.

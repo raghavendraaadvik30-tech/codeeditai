@@ -29,6 +29,7 @@ import { useEditor } from '@/features/editor/context/EditorContext';
 import { cn } from '@/lib/utils';
 import { BookmarkProvider } from '../context/BookmarkContext';
 import type { LinkHistoryType } from '../types';
+import { openExternal } from '@/shared/platform';
 
 export type MainSectionTab = 'navigation' | 'internal';
 
@@ -66,7 +67,7 @@ function LinksPageContent() {
       if (/^https?:\/\//i.test(href)) {
         e.preventDefault();
         e.stopPropagation();
-        window.open(href, '_blank', 'noopener,noreferrer');
+        void openExternal(href);
         return;
       }
 

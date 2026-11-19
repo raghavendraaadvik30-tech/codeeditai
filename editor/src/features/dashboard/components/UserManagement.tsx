@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import * as XLSX from "xlsx"
 import { useUsersStore } from "@/shared/stores/usersStore"
+import { copyText, publicAppUrl, saveFile } from "@/shared/platform"
 import type { User } from "@/shared/types/index"
 import {
   Plus,
@@ -254,13 +255,21 @@ export default function UsersManagement() {
     const worksheet = XLSX.utils.json_to_sheet(dataToExport)
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, "Users")
-    XLSX.writeFile(workbook, "system_users_directory.xlsx")
+    // XLSX.writeFile relies on a browser download, which the app WebView
+    // doesn't support; saveFile works on web, Android and iOS.
+    const data = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    const blob = new Blob([data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    })
+    void saveFile(blob, "system_users_directory.xlsx").catch((exportError) =>
+      console.error("Failed to export users:", exportError)
+    )
   }
 
   /* COPY HELPER */
   const handleCopy = async (value: string, field: string) => {
     try {
-      await navigator.clipboard.writeText(value)
+      await copyText(value)
       setCopiedField(field)
       setTimeout(() => setCopiedField(null), 2000)
     } catch (copyError) {
@@ -376,12 +385,14 @@ export default function UsersManagement() {
   }
 
   /* INVITATION CONTENT */
+  // Public web address (not the app's internal localhost origin).
+  const portalUrl = publicAppUrl()
   const invitationText = inviteUser
     ? `Dear ${inviteUser.fullName},
 
 You have been provisioned as a ${inviteUser.role} on our clinical platform.
 
-Secure Portal Link: ${window.location.origin}
+Secure Portal Link: ${portalUrl}
 
 Registered Email: ${inviteUser.email}
 
@@ -1062,15 +1073,15 @@ Please use the credentials above to access the secure portal.`
                         </span>
                         <span
                           className="block truncate font-mono text-primary"
-                          title={window.location.origin}
+                          title={portalUrl}
                         >
-                          {window.location.origin}
+                          {portalUrl}
                         </span>
                       </div>
                       <Button
                         type="button"
                         onClick={() =>
-                          handleCopy(window.location.origin, "link")
+                          handleCopy(portalUrl, "link")
                         }
                         size="icon"
                         variant="ghost"
