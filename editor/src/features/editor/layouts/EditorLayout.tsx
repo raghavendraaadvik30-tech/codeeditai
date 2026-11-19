@@ -43,6 +43,8 @@ import LeftOverlay from "../components/overlay/LeftOverlay";
 import Workspace from "../components/workspace/Workspace";
 import AIPanel from "../components/ai/AIPanel";
 import EditorStatusBar from "../components/statusbar/EditorStatusBar";
+import MobileToolNav from "../components/sidebar/MobileToolNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 import { useEditor } from "../hooks/useEditor";
@@ -53,7 +55,11 @@ export default function EditorLayout() {
     leftPanelWidth,
     setLeftPanelWidth,
     aiPanelOpen,
+    setLeftPanelOpen,
+    setZoom,
   } = useEditor();
+
+  const isMobile = useIsMobile();
 
   const [isResizing, setIsResizing] = useState(false);
 
@@ -96,12 +102,54 @@ export default function EditorLayout() {
     window.addEventListener("mouseup", onMouseUp);
   }, [leftPanelWidth, setLeftPanelWidth]);
 
+  // On phones, start with the page scaled to fit the screen width.
+  // 816px is the default page width (US Letter at 96 dpi).
+  useEffect(() => {
+    if (!isMobile) return;
+    const fit = Math.floor(((window.innerWidth - 16) / 816) * 100);
+    setZoom(Math.max(25, Math.min(100, fit)));
+    // A saved "panel open" preference would cover the whole phone screen.
+    setLeftPanelOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
+
   useEffect(() => {
     return () => {
       document.body.style.removeProperty("cursor");
       document.body.style.removeProperty("user-select");
     };
   }, []);
+
+  // PHONE LAYOUT: stacked header / ribbon / canvas, tools in a bottom bar,
+  // and the tool + AI panels shown as full-screen sheets.
+  if (isMobile) {
+    return (
+      <div className="h-full w-full min-h-0 flex flex-col overflow-hidden">
+        <header className="mobile-scroll-x shrink-0">
+          <EditorHeader />
+        </header>
+
+        <div className="mobile-scroll-x shrink-0">
+          <RibbonToolbar />
+        </div>
+
+        <main className="relative flex flex-1 min-h-0 min-w-0 overflow-hidden bg-[#F0F8FF] dark:bg-[#0B1528] p-1">
+          <section className="relative h-full min-h-0 min-w-0 flex-1 overflow-hidden">
+            <Workspace />
+          </section>
+        </main>
+
+        <EditorStatusBar />
+        <MobileToolNav />
+
+        {(leftPanelOpen || aiPanelOpen) && (
+          <div className="fixed inset-0 z-[60] flex flex-col bg-white dark:bg-[#0E1F36] pt-[var(--safe-top)] pb-[var(--safe-bottom)]">
+            {aiPanelOpen ? <AIPanel /> : <LeftOverlay />}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full min-h-0 flex flex-col overflow-hidden">

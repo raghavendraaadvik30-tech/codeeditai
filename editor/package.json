@@ -9,10 +9,24 @@
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:mobile": "tsc -b && vite build --mode mobile",
+    "cap:sync": "npm run build:mobile && cap sync",
+    "android": "npm run cap:sync && cap open android",
+    "ios": "npm run cap:sync && cap open ios",
+    "android:run": "npm run cap:sync && cap run android",
+    "ios:run": "npm run cap:sync && cap run ios",
+    "assets": "capacitor-assets generate --iconBackgroundColor #D3E3FD --splashBackgroundColor #D3E3FD"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@capacitor/keyboard": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",
     "@google/genai": "^2.28.0",
@@ -55,8 +69,9 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.0.0",
     "@eslint/js": "^10",
-    "@rolldown/binding-win32-x64-msvc": "^1.1.5",
     "@shadcn/lint": "^0.2.0",
     "@types/node": "^24",
     "@types/react": "^19",
@@ -72,5 +87,8 @@
     "typescript": "~6",
     "typescript-eslint": "^8",
     "vite": "^8"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-win32-x64-msvc": "^1.1.5"
   }
 }

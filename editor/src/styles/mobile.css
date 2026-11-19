@@ -1,0 +1,83 @@
+/* ==========================================================
+   MOBILE.CSS
+   Phone / tablet and native-app (Capacitor) adjustments.
+   ========================================================== */
+
+:root {
+  /* env() works on iOS and modern WebViews. Capacitor 8's SystemBars plugin
+     injects --safe-area-inset-* for older Android WebViews (< 140). */
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --safe-right: max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  --safe-left: max(env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+}
+
+html,
+body,
+#root {
+  /* dvh tracks the visible area as mobile browser bars show/hide. */
+  height: 100dvh;
+}
+
+body {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Keep content clear of the notch / home indicator. env() is 0 on desktop. */
+#root {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* #root already spans the visible viewport minus the safe areas, so
+   "screen"-sized utilities must fill #root instead of the raw viewport. */
+.h-screen {
+  height: 100%;
+}
+.min-h-screen {
+  min-height: 100%;
+}
+
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  a {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 767px) {
+  /* 16px stops iOS Safari / WKWebView from zooming into focused inputs. */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Native-feeling horizontal scroll strips (ribbon, toolbars). */
+  .mobile-scroll-x {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+  .mobile-scroll-x > * {
+    min-width: max-content;
+  }
+
+  /* Dropdown menus inside the horizontally scrolling ribbon/header would be
+     clipped by the scroll container. Fixed positioning with auto offsets
+     keeps them at their natural spot but lets them escape the clipping. */
+  .mobile-scroll-x .absolute.top-full {
+    position: fixed;
+    top: auto;
+    left: auto;
+  }
+}

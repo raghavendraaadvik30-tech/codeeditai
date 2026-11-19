@@ -49,6 +49,11 @@ import App from "./App";
 // - Base styles
 import "../index.css";
 
+// Native (Capacitor) start-up. No-op in a normal browser.
+import { setupNativeApp } from "./native";
+
+void setupNativeApp();
+
 // CREATE REACT ROOT   document.getElementById("root")
 // Finds the HTML element: <div id="root"></div> Usually this is present in index.html.
 // The "!" tells TypeScript: "I know this element exists, so don't treat it as null."
