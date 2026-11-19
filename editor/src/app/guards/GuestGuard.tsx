@@ -22,8 +22,11 @@ export const GuestGuard: React.FC<GuestGuardProps> = ({ children }) => {
 
   if (isAuthenticated) {
     const role = normalizeRole(user?.role);
+    // The Super Admin portal is currently disabled (its routes are commented
+    // out), so there is nowhere to send a Super Admin. Show the login page
+    // instead of redirecting, which would loop back here via "/".
     if (role === Role.SuperAdmin || isSuperAdmin(user?.role)) {
-      return <Navigate to={ROUTE_PATHS.SUPER_ADMIN_DASHBOARD} replace />;
+      return <>{children}</>;
     }
     if (role === Role.Admin) {
       return <Navigate to={ROUTE_PATHS.DASHBOARD} replace />;
