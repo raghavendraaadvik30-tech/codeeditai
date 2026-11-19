@@ -44,8 +44,11 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 0,
-      launchAutoHide: false, // hidden manually once React has mounted
+      // Hidden by native.ts as soon as the app has started. The auto-hide
+      // is a safety net: if start-up fails, the app shows the error screen
+      // instead of being stuck on the splash screen.
+      launchShowDuration: 3000,
+      launchAutoHide: true,
       backgroundColor: "#D3E3FD",
     },
     Keyboard: {

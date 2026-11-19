@@ -10,12 +10,12 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "build:mobile": "tsc -b && vite build --mode mobile",
+    "build:mobile": "vite build --mode mobile",
     "cap:sync": "npm run build:mobile && cap sync && node scripts/patch-native.mjs",
-    "android": "npm run cap:sync && cap open android",
-    "ios": "npm run cap:sync && cap open ios",
-    "android:run": "npm run cap:sync && cap run android",
-    "ios:run": "npm run cap:sync && cap run ios",
+    "android": "node scripts/ensure-platform.mjs android && npm run cap:sync && cap open android",
+    "ios": "node scripts/ensure-platform.mjs ios && npm run cap:sync && cap open ios",
+    "android:run": "node scripts/ensure-platform.mjs android && npm run cap:sync && cap run android",
+    "ios:run": "node scripts/ensure-platform.mjs ios && npm run cap:sync && cap run ios",
     "assets": "capacitor-assets generate --iconBackgroundColor #D3E3FD --splashBackgroundColor #D3E3FD"
   },
   "dependencies": {
