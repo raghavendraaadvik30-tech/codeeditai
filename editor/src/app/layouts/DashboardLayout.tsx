@@ -414,7 +414,7 @@ export const DashboardLayout: React.FC = () => {
     <div className="flex h-screen overflow-hidden bg-[#EEF7FF] font-sans text-[#172033] dark:bg-[#0B1426] dark:text-white">
       {/* SIDEBAR */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col justify-between overflow-hidden border-r border-[#DCE7F2] bg-[#D3E3FC] transition-all duration-300 dark:border-[#294564] dark:bg-[#0D213D] ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] justify-between overflow-hidden border-r border-[#DCE7F2] bg-[#D3E3FC] transition-all duration-300 dark:border-[#294564] dark:bg-[#0D213D] ${
           sidebarExpanded ? "w-[188px]" : "w-16"
         } ${
           mobileMenuOpen
@@ -515,6 +515,15 @@ export const DashboardLayout: React.FC = () => {
         </div>
       </aside>
 
+      {/* MOBILE DRAWER BACKDROP */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-foreground/40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* MAIN CONTAINER */}
       <div
         className={`flex h-screen min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
@@ -523,7 +532,7 @@ export const DashboardLayout: React.FC = () => {
       >
         {/* TOP HEADER */}
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between border-b border-[#DCE7F2] bg-[#D3E3FC] px-4 md:px-6 dark:border-[#294564] dark:bg-[#0D213D]">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={handleToggle}
@@ -533,7 +542,7 @@ export const DashboardLayout: React.FC = () => {
               <Menu className="h-4 w-4" />
             </button>
 
-            <h1 className="text-xs font-extrabold tracking-wider text-[#172033] uppercase md:text-sm dark:text-white">
+            <h1 className="truncate text-xs font-extrabold tracking-wider text-[#172033] uppercase md:text-sm dark:text-white">
               SYSTEM ADMIN PORTAL
             </h1>
           </div>
@@ -556,7 +565,7 @@ export const DashboardLayout: React.FC = () => {
         </header>
 
         {/* WORKSPACE CONTENT */}
-        <main className="min-h-0 flex-1 overflow-y-auto bg-[#EEF7FF] p-6 md:p-8 dark:bg-[#0B1426]">
+        <main className="min-h-0 flex-1 overflow-y-auto bg-[#EEF7FF] p-4 sm:p-6 md:p-8 dark:bg-[#0B1426]">
           <Outlet />
         </main>
       </div>

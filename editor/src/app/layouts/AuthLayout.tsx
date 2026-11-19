@@ -12,7 +12,7 @@ import { Outlet } from "react-router-dom";
 
 export const AuthLayout = () => {
   return (
-    <div className="min-h-screen w-full">
+    <div className="h-full w-full overflow-y-auto">
       <Outlet />
     </div>
   );
